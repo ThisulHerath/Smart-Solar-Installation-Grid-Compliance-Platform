@@ -1,0 +1,35 @@
+name: Frontend Web CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'frontend-web/**'
+      - '.github/workflows/web-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'frontend-web/**'
+      - '.github/workflows/web-ci.yml'
+
+jobs:
+  build-web:
+    name: Build React Web
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: frontend-web
+        run: npm ci
+
+      - name: Build production bundle
+        working-directory: frontend-web
+        run: npm run build

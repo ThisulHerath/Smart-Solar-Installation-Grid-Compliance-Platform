@@ -1,0 +1,36 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  build-and-test:
+    name: Build and Test .NET API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore backend/SolarPlatform.sln
+
+      - name: Build solution
+        run: dotnet build backend/SolarPlatform.sln --no-restore --configuration Release
+
+      - name: Run unit tests
+        run: dotnet test backend/SolarPlatform.sln --no-build --configuration Release --verbosity normal

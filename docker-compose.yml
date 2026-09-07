@@ -1,1 +1,32 @@
-j
+services:
+  agentic-ai:
+    build:
+      context: ./agentic-ai
+      dockerfile: Dockerfile
+    container_name: smartsolar-agentic-ai
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - AGENTIC_AI_INTERNAL_KEY=smart-solar-ai-internal-key-development
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend/SolarPlatform.Api
+      dockerfile: Dockerfile
+    container_name: smartsolar-backend-api
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - DATABASE_CONNECTION_STRING=${DATABASE_CONNECTION_STRING:-}
+      - JWT_KEY=${JWT_KEY:-SmartSolarSuperSecretKeyForDevelopmentAndJwtAuthentication2026!}
+      - JWT_ISSUER=${JWT_ISSUER:-SmartSolarPlatform}
+      - JWT_AUDIENCE=${JWT_AUDIENCE:-SmartSolarClients}
+      - AGENTIC_AI_BASE_URL=http://agentic-ai:8000
+      - AGENTIC_AI_INTERNAL_KEY=${AGENTIC_AI_INTERNAL_KEY:-smart-solar-ai-internal-key-development}
+    depends_on:
+      - agentic-ai
+    restart: unless-stopped
