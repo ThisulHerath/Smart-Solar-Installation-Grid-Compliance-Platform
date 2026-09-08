@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:io';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 import 'storage_service.dart';
 
@@ -65,14 +66,33 @@ class ApiService {
 
   Future<Map<String, dynamic>> submitSurvey(String id) async => Map<String, dynamic>.from(await post('/api/surveys/$id/submit', {}));
 
-  Future<dynamic> uploadSurveyImage(String id, File image, String imageType) async {
+  /// Upload an [XFile] as bytes so this works on Flutter Web as well as mobile.
+  /// `MultipartFile.fromPath` depends on dart:io and fails in a browser.
+  Future<dynamic> uploadSurveyImage(String id, XFile image, String imageType) async {
     final token = await _storageService.getToken();
     final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/surveys/$id/images'));
-    request.headers['Authorization'] = 'Bearer $token';
+    if (token != null) request.headers['Authorization'] = 'Bearer $token';
     request.fields['imageType'] = imageType;
-    request.files.add(await http.MultipartFile.fromPath('file', image.path));
+    final bytes = await image.readAsBytes();
+    final contentType = _imageContentType(image.name, image.mimeType);
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      bytes,
+      filename: image.name,
+      contentType: contentType,
+    ));
     final response = await http.Response.fromStream(await request.send());
     return _handleResponse(response);
+  }
+
+  MediaType _imageContentType(String fileName, String? mimeType) {
+    if (mimeType == 'image/jpeg' || mimeType == 'image/png') {
+      return MediaType.parse(mimeType!);
+    }
+    final name = fileName.toLowerCase();
+    return name.endsWith('.png')
+        ? MediaType('image', 'png')
+        : MediaType('image', 'jpeg');
   }
 
   dynamic _handleResponse(http.Response response) {

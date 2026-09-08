@@ -10,7 +10,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
         
         var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
-            ?? "Host=ep-steep-band-56603943.us-east-2.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=dummy;SSL Mode=Require;Trust Server Certificate=true";
+            ?? throw new InvalidOperationException("DATABASE_CONNECTION_STRING must be configured for migrations.");
 
         optionsBuilder.UseNpgsql(connectionString);
 

@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<SolarSurvey> SolarSurveys => Set<SolarSurvey>();
     public DbSet<SolarSurveyImage> SolarSurveyImages => Set<SolarSurveyImage>();
     public DbSet<AgentWorkflow> AgentWorkflows => Set<AgentWorkflow>();
+    public DbSet<AgentExecutionLog> AgentExecutionLogs => Set<AgentExecutionLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -100,6 +101,18 @@ public class AppDbContext : DbContext
             entity.Property(w => w.WorkflowId).IsRequired().HasMaxLength(100);
             entity.Property(w => w.Objective).IsRequired().HasMaxLength(500);
             entity.HasOne(w => w.SolarSurvey).WithMany(s => s.Workflows).HasForeignKey(w => w.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AgentExecutionLog>(entity =>
+        {
+            entity.HasKey(l => l.Id);
+            entity.HasIndex(l => new { l.AgentWorkflowId, l.StartedAt });
+            entity.Property(l => l.AgentName).IsRequired().HasMaxLength(100);
+            entity.Property(l => l.StepName).IsRequired().HasMaxLength(100);
+            entity.Property(l => l.Status).IsRequired().HasMaxLength(50);
+            entity.Property(l => l.OutputSummary).HasMaxLength(1000);
+            entity.Property(l => l.ErrorMessage).HasMaxLength(1000);
+            entity.HasOne(l => l.AgentWorkflow).WithMany(w => w.ExecutionLogs).HasForeignKey(l => l.AgentWorkflowId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // Seed Foundation Data

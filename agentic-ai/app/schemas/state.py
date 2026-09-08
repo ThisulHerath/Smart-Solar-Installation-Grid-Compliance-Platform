@@ -23,6 +23,7 @@ class SolarSizingResponse(BaseModel):
     recommendation: Optional[SolarSizingRecommendation] = None
     validation_results: Dict[str, Any] = Field(default_factory=dict)
     errors: List[str] = Field(default_factory=list)
+    execution_logs: List[Dict[str, Any]] = Field(default_factory=list)
 
 class WorkflowStateDict(TypedDict, total=False):
     workflow_id: str
@@ -39,6 +40,7 @@ class WorkflowStateDict(TypedDict, total=False):
     final_outcome: str
     execution_logs: List[str]
     final_result: Dict[str, Any]
+    candidate_recommendation: Dict[str, Any]
 
 class WorkflowExecutionRequest(BaseModel):
     objective: str = Field(..., description="Solar workflow objective or survey query")

@@ -8,7 +8,7 @@ services:
       - "8000:8000"
     environment:
       - PORT=8000
-      - AGENTIC_AI_INTERNAL_KEY=smart-solar-ai-internal-key-development
+      - AGENTIC_AI_INTERNAL_KEY=${AGENTIC_AI_INTERNAL_KEY:?AGENTIC_AI_INTERNAL_KEY is required}
     restart: unless-stopped
 
   backend:
@@ -21,12 +21,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5000
-      - DATABASE_CONNECTION_STRING=${DATABASE_CONNECTION_STRING:-}
-      - JWT_KEY=${JWT_KEY:-SmartSolarSuperSecretKeyForDevelopmentAndJwtAuthentication2026!}
-      - JWT_ISSUER=${JWT_ISSUER:-SmartSolarPlatform}
-      - JWT_AUDIENCE=${JWT_AUDIENCE:-SmartSolarClients}
+      - DATABASE_CONNECTION_STRING=${DATABASE_CONNECTION_STRING:?DATABASE_CONNECTION_STRING is required}
+      - JWT_KEY=${JWT_KEY:?JWT_KEY is required}
+      - JWT_ISSUER=${JWT_ISSUER:?JWT_ISSUER is required}
+      - JWT_AUDIENCE=${JWT_AUDIENCE:?JWT_AUDIENCE is required}
       - AGENTIC_AI_BASE_URL=http://agentic-ai:8000
-      - AGENTIC_AI_INTERNAL_KEY=${AGENTIC_AI_INTERNAL_KEY:-smart-solar-ai-internal-key-development}
+      - AGENTIC_AI_INTERNAL_KEY=${AGENTIC_AI_INTERNAL_KEY:?AGENTIC_AI_INTERNAL_KEY is required}
     depends_on:
       - agentic-ai
     restart: unless-stopped

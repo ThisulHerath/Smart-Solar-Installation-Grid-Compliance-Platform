@@ -52,10 +52,9 @@ class TestAgenticAI(unittest.TestCase):
 
         self.assertEqual(result["current_step"], "completed")
         self.assertEqual(result["approval_status"], "pending_engineer_review")
-        self.assertIn("grid_compliance", result["tool_results"])
-        self.assertIn("equipment_pricing", result["tool_results"])
-        self.assertIn("safety_guardrails", result["validation_results"])
-        self.assertGreaterEqual(len(result["execution_logs"]), 4)
+        self.assertTrue(result["validation_results"]["valid"])
+        self.assertEqual(result["final_result"]["recommended_kw"], 10.0)
+        self.assertEqual([log["agent_name"] for log in result["execution_logs"]], ["Planner", "SolarSizingAgent", "DeterministicValidator"])
 
     def test_pydantic_schema_validation(self):
         req = WorkflowExecutionRequest(objective="Test solar validation")

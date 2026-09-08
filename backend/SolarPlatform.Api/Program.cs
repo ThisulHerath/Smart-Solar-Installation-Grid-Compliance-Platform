@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json.Serialization;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +12,15 @@ using SolarPlatform.Api.Middleware;
 using SolarPlatform.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    var envFilePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", ".env"));
+    if (File.Exists(envFilePath))
+    {
+        Env.Load(envFilePath);
+    }
+}
 
 // 1. Database Configuration (Neon Managed PostgreSQL)
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
@@ -34,13 +45,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // 2. Authentication & Authorization
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
     ?? builder.Configuration["Jwt:Key"]
-    ?? "SmartSolarSuperSecretKeyForDevelopmentAndJwtAuthentication2026!";
+    ?? throw new InvalidOperationException("JWT_KEY must be configured.");
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
     ?? builder.Configuration["Jwt:Issuer"]
-    ?? "SmartSolarPlatform";
+    ?? throw new InvalidOperationException("JWT_ISSUER must be configured.");
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
     ?? builder.Configuration["Jwt:Audience"]
-    ?? "SmartSolarClients";
+    ?? throw new InvalidOperationException("JWT_AUDIENCE must be configured.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -98,7 +109,9 @@ builder.Services.AddCors(options =>
 });
 
 // 6. Controllers & Swagger/OpenAPI
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

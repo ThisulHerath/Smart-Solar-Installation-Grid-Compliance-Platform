@@ -42,11 +42,8 @@ public class AuthService : IAuthService
             throw new InvalidOperationException("A user with this email already exists.");
         }
 
-        var requestedRoleName = string.IsNullOrWhiteSpace(request.Role) 
-            ? RoleConstants.Homeowner 
-            : request.Role.Trim().ToUpperInvariant();
-
-        var role = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == requestedRoleName);
+        // Public registration is homeowner-only. Privileged role assignment is administrative.
+        var role = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RoleConstants.Homeowner);
         if (role == null)
         {
             role = await _dbContext.Roles.FirstOrDefaultAsync(r => r.Name == RoleConstants.Homeowner);

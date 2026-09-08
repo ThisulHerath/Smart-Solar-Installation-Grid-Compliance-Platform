@@ -24,13 +24,13 @@ public class JwtTokenService : IJwtTokenService
     {
         var secretKey = _configuration["Jwt:Key"] 
             ?? Environment.GetEnvironmentVariable("JWT_KEY") 
-            ?? "SmartSolarSuperSecretKeyForDevelopmentAndJwtAuthentication2026!";
+            ?? throw new InvalidOperationException("JWT_KEY must be configured.");
         var issuer = _configuration["Jwt:Issuer"] 
             ?? Environment.GetEnvironmentVariable("JWT_ISSUER") 
-            ?? "SmartSolarPlatform";
+            ?? throw new InvalidOperationException("JWT_ISSUER must be configured.");
         var audience = _configuration["Jwt:Audience"] 
             ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE") 
-            ?? "SmartSolarClients";
+            ?? throw new InvalidOperationException("JWT_AUDIENCE must be configured.");
         
         var expiryMinutesStr = _configuration["Jwt:ExpireMinutes"] ?? "60";
         if (!int.TryParse(expiryMinutesStr, out var expiryMinutes))

@@ -16,4 +16,5 @@ public class AgentWorkflow
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public SolarSurvey SolarSurvey { get; set; } = null!;
+    public ICollection<AgentExecutionLog> ExecutionLogs { get; set; } = new List<AgentExecutionLog>();
 }
