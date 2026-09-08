@@ -37,3 +37,22 @@ export interface WorkflowResult {
   final_outcome: string;
   execution_logs: string[];
 }
+
+export interface Survey {
+  id: string;
+  customerId: string;
+  monthlyKwh: number;
+  roofAreaSqm: number;
+  gridType: string;
+  roofOrientation: string;
+  roofTilt?: number;
+  propertyAddress: string;
+  latitude?: number;
+  longitude?: number;
+  surveyStatus: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  images: { id: string; imageType: string; fileUrl: string; fileName: string }[];
+  workflows: { workflowId: string; status: string; resultJson?: string; validationJson?: string; errorMessage?: string }[];
+}

@@ -178,6 +178,12 @@ flutter run
 ```bash
 cd backend/SolarPlatform.Api
 dotnet ef database update
+
+## 9. Phase 2 Customer Survey
+
+Phase 2 adds the first complete business vertical: homeowner profiles, solar surveys, validated image metadata, controlled survey status transitions, and persisted solar sizing workflows. Homeowners use Flutter to create and track surveys; authorized engineers and administrators inspect them at the protected React `/surveys` route. ASP.NET Core is the only service that calls the internal Agentic AI endpoint.
+
+The additive migration is `AddCustomerSurveyPhase2`. Apply it to Neon only through the normal deployment approval process; local validation uses the existing in-memory fallback when Neon credentials are not configured. The sizing rule is `recommended kW = round(monthly kWh / 120.0, 2)`, independently checked by the Python validator. See `docs/database/customer-survey-design.md`, `docs/api/customer-survey-api.md`, `docs/architecture/customer-survey-flow.md`, `docs/agentic-ai/solar-sizing-agent.md`, and `docs/testing/phase-2-test-plan.md`.
 ```
 
 ### Add New Migration

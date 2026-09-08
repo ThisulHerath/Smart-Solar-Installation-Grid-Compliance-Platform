@@ -3,8 +3,9 @@ from fastapi import FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from app.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse
+from app.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse, SolarSizingResponse
 from app.workflow.graph import run_solar_workflow
+from app.workflow.solar_sizing import run_solar_sizing
 
 load_dotenv()
 
@@ -75,3 +76,9 @@ def test_workflow(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Agentic workflow execution error: {str(e)}"
         )
+
+@app.post("/workflow/solar-sizing", response_model=SolarSizingResponse, tags=["Workflow"])
+def solar_sizing_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
+    if x_internal_key != INTERNAL_KEY:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
+    return run_solar_sizing(request)

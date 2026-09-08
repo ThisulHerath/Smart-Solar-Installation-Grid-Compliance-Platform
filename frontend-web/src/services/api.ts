@@ -1,4 +1,4 @@
-import { AuthResponse, HealthResponse, User, WorkflowResult } from '../types/auth';
+import { AuthResponse, HealthResponse, User, WorkflowResult, Survey } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -81,6 +81,18 @@ class ApiService {
       const errorData = await res.json().catch(() => ({}));
       throw new Error(errorData.message || `AI workflow invocation error: ${res.statusText}`);
     }
+    return res.json();
+  }
+
+  async getSurveys(): Promise<Survey[]> {
+    const res = await fetch(`${API_BASE_URL}/api/surveys`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error(`Unable to load surveys (${res.status}).`);
+    return res.json();
+  }
+
+  async getSurvey(id: string): Promise<Survey> {
+    const res = await fetch(`${API_BASE_URL}/api/surveys/${id}`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error(`Unable to load survey (${res.status}).`);
     return res.json();
   }
 }

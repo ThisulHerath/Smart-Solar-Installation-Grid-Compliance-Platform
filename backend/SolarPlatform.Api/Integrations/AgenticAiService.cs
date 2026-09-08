@@ -8,6 +8,7 @@ public interface IAgenticAiService
 {
     Task<(bool IsHealthy, string Message)> CheckHealthAsync(CancellationToken cancellationToken = default);
     Task<WorkflowTestResponseDto> ExecuteTestWorkflowAsync(WorkflowTestRequestDto request, CancellationToken cancellationToken = default);
+    Task<SolarSizingResponseDto> ExecuteSolarSizingAsync(object request, CancellationToken cancellationToken = default);
 }
 
 public class AgenticAiService : IAgenticAiService
@@ -105,6 +106,24 @@ public class AgenticAiService : IAgenticAiService
                     "Downstream call failed gracefully without platform crash." 
                 }
             };
+        }
+    }
+
+    public async Task<SolarSizingResponseDto> ExecuteSolarSizingAsync(object request, CancellationToken cancellationToken = default)
+    {
+        var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? "smart-solar-ai-internal-key-development";
+        using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/solar-sizing") { Content = JsonContent.Create(request) };
+        message.Headers.Add("X-Internal-Key", internalKey);
+        try
+        {
+            var response = await _httpClient.SendAsync(message, cancellationToken);
+            if (!response.IsSuccessStatusCode) return new SolarSizingResponseDto { Status = "failed", Errors = new List<string> { "Agentic AI service returned an error." } };
+            return await response.Content.ReadFromJsonAsync<SolarSizingResponseDto>(cancellationToken: cancellationToken) ?? new SolarSizingResponseDto { Status = "failed", Errors = new List<string> { "Empty AI response." } };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Solar sizing workflow failed.");
+            return new SolarSizingResponseDto { Status = "failed", Errors = new List<string> { "Agentic AI service is unavailable." } };
         }
     }
 }

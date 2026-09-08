@@ -12,6 +12,10 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<CustomerProfile> CustomerProfiles => Set<CustomerProfile>();
+    public DbSet<SolarSurvey> SolarSurveys => Set<SolarSurvey>();
+    public DbSet<SolarSurveyImage> SolarSurveyImages => Set<SolarSurveyImage>();
+    public DbSet<AgentWorkflow> AgentWorkflows => Set<AgentWorkflow>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,6 +59,47 @@ public class AppDbContext : DbContext
                   .WithMany(r => r.UserRoles)
                   .HasForeignKey(ur => ur.RoleId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CustomerProfile>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasIndex(p => p.UserId).IsUnique();
+            entity.Property(p => p.FullName).IsRequired().HasMaxLength(255);
+            entity.Property(p => p.PhoneNumber).HasMaxLength(50);
+            entity.Property(p => p.Address).HasMaxLength(500);
+            entity.HasOne(p => p.User).WithOne(u => u.CustomerProfile).HasForeignKey<CustomerProfile>(p => p.UserId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SolarSurvey>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+            entity.HasIndex(s => new { s.CustomerId, s.SurveyStatus });
+            entity.Property(s => s.MonthlyKwh).HasPrecision(12, 2).IsRequired();
+            entity.Property(s => s.RoofAreaSqm).HasPrecision(12, 2).IsRequired();
+            entity.Property(s => s.Latitude).HasPrecision(9, 6);
+            entity.Property(s => s.Longitude).HasPrecision(9, 6);
+            entity.Property(s => s.PropertyAddress).IsRequired().HasMaxLength(500);
+            entity.HasOne(s => s.Customer).WithMany(p => p.Surveys).HasForeignKey(s => s.CustomerId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SolarSurveyImage>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.HasIndex(i => i.SolarSurveyId);
+            entity.Property(i => i.FileUrl).IsRequired().HasMaxLength(1000);
+            entity.Property(i => i.FileName).IsRequired().HasMaxLength(255);
+            entity.HasOne(i => i.SolarSurvey).WithMany(s => s.Images).HasForeignKey(i => i.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AgentWorkflow>(entity =>
+        {
+            entity.HasKey(w => w.Id);
+            entity.HasIndex(w => w.WorkflowId).IsUnique();
+            entity.HasIndex(w => new { w.SolarSurveyId, w.Status });
+            entity.Property(w => w.WorkflowId).IsRequired().HasMaxLength(100);
+            entity.Property(w => w.Objective).IsRequired().HasMaxLength(500);
+            entity.HasOne(w => w.SolarSurvey).WithMany(s => s.Workflows).HasForeignKey(w => w.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // Seed Foundation Data

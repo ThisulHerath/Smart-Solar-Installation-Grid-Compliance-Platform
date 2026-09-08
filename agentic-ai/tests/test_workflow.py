@@ -11,6 +11,7 @@ from app.agents.grid_compliance_agent import GridComplianceAgent
 from app.agents.equipment_pricing_agent import EquipmentPricingAgent
 from app.agents.safety_guardrail_agent import SafetyGuardrailAgent
 from app.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse
+from app.workflow.solar_sizing import run_solar_sizing
 
 class TestAgenticAI(unittest.TestCase):
     def test_planner_agent(self):
@@ -64,6 +65,17 @@ class TestAgenticAI(unittest.TestCase):
         res = WorkflowExecutionResponse(objective=req.objective, plan=["Step 1"])
         self.assertEqual(res.objective, "Test solar validation")
         self.assertEqual(len(res.plan), 1)
+
+    def test_solar_sizing_uses_deterministic_rule(self):
+        result = run_solar_sizing({"workflow_id": "w1", "customer_id": "c1", "monthly_kwh": 1200, "roof_area_sqm": 80, "grid_type": "SinglePhase"})
+        self.assertEqual(result.status, "completed")
+        self.assertEqual(result.recommendation.recommended_kw, 10.0)
+        self.assertTrue(result.validation_results["valid"])
+
+    def test_solar_sizing_rejects_invalid_state(self):
+        result = run_solar_sizing({"workflow_id": "w1", "customer_id": "c1", "monthly_kwh": -1, "roof_area_sqm": 80, "grid_type": "SinglePhase"})
+        self.assertEqual(result.status, "failed")
+        self.assertIsNotNone(result.errors)
 
 if __name__ == '__main__':
     unittest.main()

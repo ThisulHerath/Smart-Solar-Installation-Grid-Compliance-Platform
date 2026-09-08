@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/status_badge.dart';
 import 'login_screen.dart';
+import 'survey_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -92,6 +93,8 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Foundation Phase 1 Card
+            FilledButton.icon(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SurveyScreen())), icon: const Icon(Icons.solar_power), label: const Text('Customer solar surveys')),
+            const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
