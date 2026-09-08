@@ -109,20 +109,23 @@ public class SurveyService : ISurveyService
         var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
         workflow.ResultJson = result.Recommendation?.GetRawText();
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
-        workflow.ErrorMessage = result.Errors.Count == 0 ? null : string.Join("; ", result.Errors);
+        workflow.ErrorMessage = result.Errors?.Count > 0 ? string.Join("; ", result.Errors) : null;
         var completedAt = DateTime.UtcNow;
-        foreach (var log in result.ExecutionLogs)
+        if (result.ExecutionLogs != null)
         {
-            var startedAt = log.StartedAt ?? workflow.StartedAt ?? completedAt;
-            var logCompletedAt = log.CompletedAt ?? completedAt;
-            _db.AgentExecutionLogs.Add(new AgentExecutionLog
+            foreach (var log in result.ExecutionLogs)
             {
-                AgentWorkflowId = workflow.Id, AgentName = log.AgentName, StepName = log.StepName,
-                Status = log.Status, StartedAt = startedAt, CompletedAt = logCompletedAt,
-                DurationMs = Math.Max(0, (long)(logCompletedAt - startedAt).TotalMilliseconds),
-                OutputSummary = log.OutputSummary, ValidationResult = log.ValidationResult?.GetRawText(),
-                ErrorMessage = log.ErrorMessage, RetryCount = log.RetryCount
-            });
+                var startedAt = log.StartedAt ?? workflow.StartedAt ?? completedAt;
+                var logCompletedAt = log.CompletedAt ?? completedAt;
+                _db.AgentExecutionLogs.Add(new AgentExecutionLog
+                {
+                    AgentWorkflowId = workflow.Id, AgentName = log.AgentName, StepName = log.StepName,
+                    Status = log.Status, StartedAt = startedAt, CompletedAt = logCompletedAt,
+                    DurationMs = Math.Max(0, (long)(logCompletedAt - startedAt).TotalMilliseconds),
+                    OutputSummary = log.OutputSummary, ValidationResult = log.ValidationResult?.GetRawText(),
+                    ErrorMessage = log.ErrorMessage, RetryCount = log.RetryCount
+                });
+            }
         }
         workflow.Status = result.Status == "completed" ? WorkflowStatus.Completed : WorkflowStatus.Failed;
         workflow.CompletedAt = completedAt;

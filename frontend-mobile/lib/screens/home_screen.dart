@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
                   Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: const Color(0xFF10B981).withOpacity(0.2),
+                        backgroundColor: const Color(0xFF10B981).withValues(alpha: 0.2),
                         child: const Icon(Icons.person, color: Color(0xFF10B981)),
                       ),
                       const SizedBox(width: 14),
@@ -102,10 +102,10 @@ class HomeScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0x1AFFFFFF)),
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 20),
                       SizedBox(width: 8),
@@ -119,18 +119,18 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
+                  SizedBox(height: 10),
+                  Text(
                     'Mobile client is securely configured to communicate strictly with the authoritative ASP.NET Core API using REST + JWT authentication.',
                     style: TextStyle(fontSize: 13, color: Color(0xFF94A3B8), height: 1.4),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
+                  SizedBox(height: 16),
+                  Text(
                     'Prepared for Phase 2 Telemetry:',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFF59E0B)),
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
+                  SizedBox(height: 6),
+                  Text(
                     '• Camera site photos\n• GPS site coordinates\n• Field inverter telemetry\n• CEB/LECO grid sync',
                     style: TextStyle(fontSize: 12, color: Color(0xFF64748B), height: 1.4),
                   ),

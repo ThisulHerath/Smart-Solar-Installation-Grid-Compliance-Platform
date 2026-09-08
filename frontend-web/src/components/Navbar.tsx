@@ -46,38 +46,47 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* User Status / Actions */}
+        {/* Navigation & User Status / Actions */}
         {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: 'rgba(255, 255, 255, 0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <UserIcon size={16} color="var(--text-secondary)" />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user.fullName}</span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{user.email}</span>
-              </div>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <nav style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', fontWeight: 600 }}>
+              <a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Dashboard</a>
+              {(user.roles?.includes('ADMINISTRATOR') || user.roles?.includes('SENIOR_ENGINEER')) && (
+                <a href="/surveys" style={{ color: 'var(--solar-emerald)', textDecoration: 'none' }}>Staff Surveys</a>
+              )}
+            </nav>
 
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {user.roles.map(r => (
-                <span key={r} className="badge badge-emerald">
-                  <Shield size={11} /> {r}
-                </span>
-              ))}
-            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <UserIcon size={16} color="var(--text-secondary)" />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{user.fullName}</span>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{user.email}</span>
+                </div>
+              </div>
 
-            <button onClick={logout} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
-              <LogOut size={14} /> Logout
-            </button>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {user.roles.map(r => (
+                  <span key={r} className="badge badge-emerald">
+                    <Shield size={11} /> {r}
+                  </span>
+                ))}
+              </div>
+
+              <button onClick={logout} className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>
+                <LogOut size={14} /> Logout
+              </button>
+            </div>
           </div>
         ) : (
           <div className="badge badge-amber">

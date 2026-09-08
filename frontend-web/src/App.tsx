@@ -21,8 +21,10 @@ export const App: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<DashboardPage />} />
-              <Route path="/surveys" element={<SurveysPage />} />
               <Route path="/dashboard" element={<Navigate to="/" replace />} />
+              <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATOR', 'SENIOR_ENGINEER']} />}>
+                <Route path="/surveys" element={<SurveysPage />} />
+              </Route>
             </Route>
           </Route>
 

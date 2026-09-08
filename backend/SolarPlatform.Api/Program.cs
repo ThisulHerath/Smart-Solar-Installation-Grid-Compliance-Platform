@@ -1,4 +1,6 @@
 using System.Text;
+using System.Text.Json.Serialization;
+using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,6 +12,15 @@ using SolarPlatform.Api.Middleware;
 using SolarPlatform.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    var envFilePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", ".env"));
+    if (File.Exists(envFilePath))
+    {
+        Env.Load(envFilePath);
+    }
+}
 
 // 1. Database Configuration (Neon Managed PostgreSQL)
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_CONNECTION_STRING")
@@ -98,7 +109,9 @@ builder.Services.AddCors(options =>
 });
 
 // 6. Controllers & Swagger/OpenAPI
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
