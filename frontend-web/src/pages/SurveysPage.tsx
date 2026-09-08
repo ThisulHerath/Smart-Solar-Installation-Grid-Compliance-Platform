@@ -8,7 +8,16 @@ export const SurveysPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => { api.getSurveys().then(setSurveys).catch(e => setError(e.message)).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    let active = true;
+    const load = () => api.getSurveys()
+      .then(data => { if (active) { setSurveys(data); setSelected(current => current ? data.find(s => s.id === current.id) ?? null : null); } })
+      .catch(e => active && setError(e.message))
+      .finally(() => active && setLoading(false));
+    load();
+    const timer = window.setInterval(() => { if (surveys.some(s => s.surveyStatus === 'Processing')) load(); }, 5000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [surveys.some(s => s.surveyStatus === 'Processing')]);
 
   if (loading) return <div className="glass-panel" style={{ padding: 28 }}>Loading customer surveys...</div>;
   if (error) return <div className="glass-panel" style={{ padding: 28, color: 'var(--solar-danger)' }}>{error}</div>;

@@ -25,7 +25,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
     final usage = double.tryParse(_usage.text); final roof = double.tryParse(_roof.text);
     if (usage == null || usage <= 0 || roof == null || roof <= 0 || _address.text.trim().isEmpty) { setState(() => _error = 'Enter positive usage, roof area, and property address.'); return; }
     setState(() { _loading = true; _error = null; });
-    try { final created = await _api.createSurvey(monthlyKwh: usage, roofAreaSqm: roof, gridType: _grid, propertyAddress: _address.text.trim()); if (_image != null) await _api.uploadSurveyImage(created['id'], File(_image!.path), 'RoofSite'); _image = null; _usage.clear(); _roof.clear(); _address.clear(); await _load(); } catch (e) { setState(() => _error = e.toString()); } finally { setState(() => _loading = false); }
+    try {
+      final created = await _api.createSurvey(monthlyKwh: usage, roofAreaSqm: roof, gridType: _grid, propertyAddress: _address.text.trim());
+      if (_image != null) await _api.uploadSurveyImage(created['id'], File(_image!.path), 'RoofSite');
+      final submitted = await _api.submitSurvey(created['id']);
+      _image = null; _usage.clear(); _roof.clear(); _address.clear(); await _load();
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Survey submitted: ${submitted['surveyStatus'] ?? 'processing'}')));
+    } catch (_) { if (mounted) setState(() => _error = 'Submission failed. Please try again.'); }
+    finally { if (mounted) setState(() => _loading = false); }
   }
   @override void initState() { super.initState(); _load(); }
   @override Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: const Text('Solar Surveys')), body: ListView(padding: const EdgeInsets.all(20), children: [
@@ -33,7 +40,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     TextField(controller: _roof, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Roof area (m²)')),
     DropdownButtonFormField(value: _grid, items: const [DropdownMenuItem(value: 'SinglePhase', child: Text('Single phase')), DropdownMenuItem(value: 'ThreePhase', child: Text('Three phase'))], onChanged: (v) => setState(() => _grid = v!), decoration: const InputDecoration(labelText: 'Grid type')),
     TextField(controller: _address, decoration: const InputDecoration(labelText: 'Property address')),
-    const SizedBox(height: 12), FilledButton.icon(onPressed: _loading ? null : _create, icon: const Icon(Icons.add_a_photo), label: Text(_loading ? 'Saving...' : 'Create survey')),
+    const SizedBox(height: 12), FilledButton.icon(onPressed: _loading ? null : _create, icon: const Icon(Icons.send), label: Text(_loading ? 'Submitting...' : 'Save and submit survey')),
     if (_error != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(_error!, style: const TextStyle(color: Colors.redAccent))),
     const SizedBox(height: 24), const Text('Survey history', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
     ..._surveys.map((s) => ListTile(title: Text(s.propertyAddress), subtitle: Text('${s.monthlyKwh} kWh · ${s.roofAreaSqm} m²'), trailing: Text(s.surveyStatus))),

@@ -34,13 +34,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // 2. Authentication & Authorization
 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY")
     ?? builder.Configuration["Jwt:Key"]
-    ?? "SmartSolarSuperSecretKeyForDevelopmentAndJwtAuthentication2026!";
+    ?? throw new InvalidOperationException("JWT_KEY must be configured.");
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
     ?? builder.Configuration["Jwt:Issuer"]
-    ?? "SmartSolarPlatform";
+    ?? throw new InvalidOperationException("JWT_ISSUER must be configured.");
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
     ?? builder.Configuration["Jwt:Audience"]
-    ?? "SmartSolarClients";
+    ?? throw new InvalidOperationException("JWT_AUDIENCE must be configured.");
 
 builder.Services.AddAuthentication(options =>
 {

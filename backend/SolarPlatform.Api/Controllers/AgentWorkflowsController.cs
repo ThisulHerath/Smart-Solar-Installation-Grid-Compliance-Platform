@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SolarPlatform.Api.DTOs;
 using SolarPlatform.Api.Integrations;
+using SolarPlatform.Api.Models;
 
 namespace SolarPlatform.Api.Controllers;
 
-[ApiController]
+[ApiController, Authorize(Roles = RoleConstants.Administrator + "," + RoleConstants.SeniorEngineer)]
 [Route("api/agent-workflows")]
 public class AgentWorkflowsController : ControllerBase
 {

@@ -59,6 +59,18 @@ public class AuthServiceTests
     }
 
     [Fact]
+    public async Task RegisterAsync_AlwaysAssignsHomeowner_WhenPrivilegedRoleIsRequested()
+    {
+        var result = await _authService.RegisterAsync(new RegisterRequestDto
+        {
+            Email = "public-admin-request@smartsolar.local", Password = "SecurePassword@123",
+            FullName = "Public User", Role = RoleConstants.Administrator
+        });
+
+        Assert.Equal(new[] { RoleConstants.Homeowner }, result.User.Roles);
+    }
+
+    [Fact]
     public async Task RegisterAsync_DuplicateEmail_ThrowsInvalidOperationException()
     {
         var request = new RegisterRequestDto

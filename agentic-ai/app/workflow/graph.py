@@ -1,138 +1,55 @@
-from typing import Dict, Any, List
+"""Phase 2 sizing graph: Planner -> SolarSizingAgent -> DeterministicValidator."""
+from typing import Any, Dict
+from datetime import datetime, timezone
 import uuid
-
 from app.agents.planner_agent import PlannerAgent
-from app.agents.grid_compliance_agent import GridComplianceAgent
-from app.agents.equipment_pricing_agent import EquipmentPricingAgent
-from app.agents.safety_guardrail_agent import SafetyGuardrailAgent
-from app.schemas.state import WorkflowStateDict
+from app.agents.solar_sizing_agent import SolarSizingAgent
+from app.schemas.state import SolarSizingInput, WorkflowStateDict
 
-# Agent instances
-planner = PlannerAgent()
-grid_agent = GridComplianceAgent()
-pricing_agent = EquipmentPricingAgent()
-safety_agent = SafetyGuardrailAgent()
+planner, sizing_agent = PlannerAgent(), SolarSizingAgent()
 
-def node_planning(state: Dict[str, Any]) -> Dict[str, Any]:
-    return planner.execute(state)
+def _event(state: Dict[str, Any], agent: str, step: str, status: str, summary: str, validation=None, error=None):
+    now = datetime.now(timezone.utc).isoformat()
+    return [entry for entry in state.get("execution_logs", []) if isinstance(entry, dict)] + [{"agent_name": agent, "step_name": step, "status": status, "started_at": now, "completed_at": now, "retry_count": 0, "output_summary": summary, "validation_result": validation, "error_message": error}]
 
-def node_delegation(state: Dict[str, Any]) -> Dict[str, Any]:
-    logs: List[str] = state.get("execution_logs", [])
-    completed: List[str] = state.get("completed_steps", [])
-    
-    logs.append("[Orchestrator] Delegating sub-tasks to GridComplianceAgent and EquipmentPricingAgent.")
-    completed.append("delegation")
+def node_planner(state: Dict[str, Any]) -> Dict[str, Any]:
+    output = planner.execute(state)
+    return {**output, "current_step": "SolarSizingAgent", "completed_steps": state.get("completed_steps", []) + ["Planner"], "execution_logs": _event(state, "Planner", "planning", "completed", "Sizing plan created.")}
 
-    # Delegate to sub-agents
-    grid_res = grid_agent.execute(state)
-    pricing_res = pricing_agent.execute(state)
+def node_sizing(state: Dict[str, Any]) -> Dict[str, Any]:
+    survey = SolarSizingInput.model_validate({"workflow_id": state["workflow_id"], "customer_id": state.get("customer_id") or "", **state["input_data"]})
+    candidate = sizing_agent.execute(survey).model_dump()
+    return {"candidate_recommendation": candidate, "current_step": "DeterministicValidator", "completed_steps": state.get("completed_steps", []) + ["SolarSizingAgent"], "execution_logs": _event(state, "SolarSizingAgent", "sizing", "completed", "Structured sizing candidate created.")}
 
-    tool_results = state.get("tool_results", {})
-    tool_results.update(grid_res.get("tool_results", {}))
-    tool_results.update(pricing_res.get("tool_results", {}))
-
-    return {
-        "tool_results": tool_results,
-        "completed_steps": completed,
-        "execution_logs": logs
-    }
-
-def node_execution_placeholder(state: Dict[str, Any]) -> Dict[str, Any]:
-    logs: List[str] = state.get("execution_logs", [])
-    completed: List[str] = state.get("completed_steps", [])
-
-    logs.append("[Orchestrator] Execution placeholder: Synthesized preliminary design options.")
-    completed.append("execution_placeholder")
-
-    return {
-        "completed_steps": completed,
-        "execution_logs": logs
-    }
-
-def node_validation_placeholder(state: Dict[str, Any]) -> Dict[str, Any]:
-    logs: List[str] = state.get("execution_logs", [])
-    completed: List[str] = state.get("completed_steps", [])
-
-    logs.append("[Orchestrator] Delegating safety checks to SafetyGuardrailAgent.")
-    completed.append("validation_placeholder")
-
-    safety_res = safety_agent.execute(state)
-    validation_results = state.get("validation_results", {})
-    validation_results.update(safety_res.get("validation_results", {}))
-
-    return {
-        "validation_results": validation_results,
-        "completed_steps": completed,
-        "execution_logs": logs
-    }
-
-def node_result(state: Dict[str, Any]) -> Dict[str, Any]:
-    logs: List[str] = state.get("execution_logs", [])
-    completed: List[str] = state.get("completed_steps", [])
-
-    logs.append("[Orchestrator] Workflow graph execution completed. Ready for Senior Engineer review.")
-    completed.append("result_aggregation")
-
-    return {
-        "current_step": "completed",
-        "approval_status": "pending_engineer_review",
-        "final_outcome": "Preliminary solar site plan generated successfully with CEB/LECO compliance validation and initial bill of materials.",
-        "completed_steps": completed,
-        "execution_logs": logs
-    }
+def node_validator(state: Dict[str, Any]) -> Dict[str, Any]:
+    data, candidate = state["input_data"], state.get("candidate_recommendation", {})
+    expected_kw = round(float(data["monthly_kwh"]) / 120.0, 2)
+    expected_panels = max(1, round(expected_kw * 1000 / 400))
+    checks = {"monthly_kwh_valid": float(data["monthly_kwh"]) > 0, "roof_area_valid": float(data["roof_area_sqm"]) > 0, "recommended_kw_consistent": candidate.get("recommended_kw") == expected_kw, "panel_count_reasonable": candidate.get("estimated_panel_count") == expected_panels, "inverter_size_consistent": candidate.get("estimated_inverter_kw") == expected_kw, "schema_valid": all(k in candidate for k in ("recommended_kw", "estimated_panel_count", "estimated_inverter_kw", "reason", "assumptions"))}
+    valid = all(checks.values())
+    errors = [] if valid else ["Deterministic solar sizing validation failed."]
+    return {"validation_results": {"valid": valid, "checks": checks}, "errors": errors, "final_result": candidate if valid else {}, "current_step": "COMPLETE" if valid else "FAILED", "final_outcome": "Preliminary solar sizing completed." if valid else "Solar sizing was rejected by deterministic validation.", "completed_steps": state.get("completed_steps", []) + ["DeterministicValidator"], "execution_logs": _event(state, "DeterministicValidator", "validation", "completed" if valid else "failed", "Independent sizing validation completed.", checks, errors[0] if errors else None)}
 
 def build_workflow():
-    """
-    Builds the workflow graph. Tries LangGraph StateGraph, with fallback to sequential execution.
-    """
-    try:
-        from langgraph.graph import StateGraph, END
-
-        graph = StateGraph(WorkflowStateDict)
-        graph.add_node("planning", node_planning)
-        graph.add_node("delegation", node_delegation)
-        graph.add_node("execution_placeholder", node_execution_placeholder)
-        graph.add_node("validation_placeholder", node_validation_placeholder)
-        graph.add_node("result", node_result)
-
-        graph.set_entry_point("planning")
-        graph.add_edge("planning", "delegation")
-        graph.add_edge("delegation", "execution_placeholder")
-        graph.add_edge("execution_placeholder", "validation_placeholder")
-        graph.add_edge("validation_placeholder", "result")
-        graph.add_edge("result", END)
-
-        return graph.compile()
-    except Exception:
-        # Fallback executor matching identical nodes
-        class FallbackGraph:
-            def invoke(self, initial_state: Dict[str, Any]) -> Dict[str, Any]:
-                s = dict(initial_state)
-                for node_fn in [node_planning, node_delegation, node_execution_placeholder, node_validation_placeholder, node_result]:
-                    out = node_fn(s)
-                    s.update(out)
-                return s
-
-        return FallbackGraph()
+    from langgraph.graph import StateGraph, END
+    graph = StateGraph(WorkflowStateDict)
+    graph.add_node("Planner", node_planner); graph.add_node("SolarSizingAgent", node_sizing); graph.add_node("DeterministicValidator", node_validator)
+    graph.set_entry_point("Planner"); graph.add_edge("Planner", "SolarSizingAgent"); graph.add_edge("SolarSizingAgent", "DeterministicValidator"); graph.add_edge("DeterministicValidator", END)
+    return graph.compile()
 
 compiled_workflow = build_workflow()
 
-def run_solar_workflow(objective: str, customer_id: str = None, input_data: Dict[str, Any] = None) -> Dict[str, Any]:
-    initial_state: Dict[str, Any] = {
-        "workflow_id": str(uuid.uuid4()),
-        "customer_id": customer_id,
-        "objective": objective,
-        "input_data": input_data or {},
-        "plan": [],
-        "current_step": "initialized",
-        "completed_steps": [],
-        "tool_results": {},
-        "validation_results": {},
-        "errors": [],
-        "approval_status": "in_progress",
-        "final_outcome": "",
-        "execution_logs": [f"Initiating solar workflow: {objective}"]
-    }
+def run_solar_sizing_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
+    state = {"workflow_id": payload.get("workflow_id", str(uuid.uuid4())), "customer_id": payload.get("customer_id"), "objective": "Preliminary solar system sizing", "input_data": payload, "plan": [], "current_step": "START", "completed_steps": [], "validation_results": {}, "errors": [], "final_outcome": "", "execution_logs": []}
+    try: return compiled_workflow.invoke(state)
+    except Exception:
+        state.update({"current_step": "FAILED", "errors": ["Solar sizing workflow could not be completed."], "final_outcome": "Solar sizing processing failed."})
+        return state
 
-    result = compiled_workflow.invoke(initial_state)
+def run_solar_workflow(objective: str, customer_id: str = None, input_data: Dict[str, Any] = None) -> Dict[str, Any]:
+    payload = {"workflow_id": str(uuid.uuid4()), "customer_id": customer_id or "test-customer", "monthly_kwh": 1200, "roof_area_sqm": 80, "grid_type": "SinglePhase", **(input_data or {})}
+    result = run_solar_sizing_workflow(payload)
+    # Retain the legacy test-workflow response convention while survey sizing uses COMPLETE/FAILED internally.
+    result["current_step"] = "completed" if result["current_step"] == "COMPLETE" else "failed"
+    result["approval_status"] = "pending_engineer_review"
     return result

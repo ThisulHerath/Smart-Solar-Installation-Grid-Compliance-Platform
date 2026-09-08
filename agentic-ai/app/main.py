@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-INTERNAL_KEY = os.getenv("AGENTIC_AI_INTERNAL_KEY", "smart-solar-ai-internal-key-development")
+INTERNAL_KEY = os.getenv("AGENTIC_AI_INTERNAL_KEY")
 
 @app.get("/health", tags=["Health"])
 def health_check():
@@ -44,7 +44,7 @@ def test_workflow(
     x_internal_key: str = Header(None, alias="X-Internal-Key")
 ):
     # Optional security check for internal communication
-    if x_internal_key and x_internal_key != INTERNAL_KEY:
+    if not INTERNAL_KEY or x_internal_key != INTERNAL_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid internal authorization key."
@@ -71,14 +71,14 @@ def test_workflow(
             final_outcome=raw_result.get("final_outcome", ""),
             execution_logs=raw_result.get("execution_logs", [])
         )
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Agentic workflow execution error: {str(e)}"
+            detail="Agentic workflow execution failed."
         )
 
 @app.post("/workflow/solar-sizing", response_model=SolarSizingResponse, tags=["Workflow"])
 def solar_sizing_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
-    if x_internal_key != INTERNAL_KEY:
+    if not INTERNAL_KEY or x_internal_key != INTERNAL_KEY:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
     return run_solar_sizing(request)

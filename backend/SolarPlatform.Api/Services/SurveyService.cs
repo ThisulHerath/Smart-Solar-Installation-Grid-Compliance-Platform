@@ -99,21 +99,35 @@ public class SurveyService : ISurveyService
         var survey = await _db.SolarSurveys.Include(s => s.Images).Include(s => s.Workflows).SingleOrDefaultAsync(s => s.Id == surveyId && s.CustomerId == profile.Id);
         if (survey == null) return null;
         if (survey.SurveyStatus != SurveyStatus.Draft) throw new InvalidOperationException("Only draft surveys can be submitted.");
-        survey.SurveyStatus = SurveyStatus.Submitted;
-        survey.UpdatedAt = DateTime.UtcNow;
+        SurveyStatusTransition.Move(survey, SurveyStatus.Submitted);
         var workflow = new AgentWorkflow { SolarSurveyId = survey.Id, Objective = "Preliminary solar system sizing", Status = WorkflowStatus.Processing, StartedAt = DateTime.UtcNow };
-        survey.Workflows.Add(workflow);
-        survey.SurveyStatus = SurveyStatus.Processing;
+        // Explicitly mark the independently keyed workflow as new. Adding a non-empty GUID
+        // through a tracked collection can otherwise be interpreted as an update by EF Core.
+        _db.AgentWorkflows.Add(workflow);
+        SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
         await _db.SaveChangesAsync();
         var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
         workflow.ResultJson = result.Recommendation?.GetRawText();
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
         workflow.ErrorMessage = result.Errors.Count == 0 ? null : string.Join("; ", result.Errors);
+        var completedAt = DateTime.UtcNow;
+        foreach (var log in result.ExecutionLogs)
+        {
+            var startedAt = log.StartedAt ?? workflow.StartedAt ?? completedAt;
+            var logCompletedAt = log.CompletedAt ?? completedAt;
+            _db.AgentExecutionLogs.Add(new AgentExecutionLog
+            {
+                AgentWorkflowId = workflow.Id, AgentName = log.AgentName, StepName = log.StepName,
+                Status = log.Status, StartedAt = startedAt, CompletedAt = logCompletedAt,
+                DurationMs = Math.Max(0, (long)(logCompletedAt - startedAt).TotalMilliseconds),
+                OutputSummary = log.OutputSummary, ValidationResult = log.ValidationResult?.GetRawText(),
+                ErrorMessage = log.ErrorMessage, RetryCount = log.RetryCount
+            });
+        }
         workflow.Status = result.Status == "completed" ? WorkflowStatus.Completed : WorkflowStatus.Failed;
-        workflow.CompletedAt = DateTime.UtcNow;
+        workflow.CompletedAt = completedAt;
         workflow.UpdatedAt = DateTime.UtcNow;
-        survey.SurveyStatus = result.Status == "completed" ? SurveyStatus.AnalysisComplete : SurveyStatus.Failed;
-        survey.UpdatedAt = DateTime.UtcNow;
+        SurveyStatusTransition.Move(survey, result.Status == "completed" ? SurveyStatus.AnalysisComplete : SurveyStatus.Failed);
         await _db.SaveChangesAsync();
         return ToDto(survey);
     }

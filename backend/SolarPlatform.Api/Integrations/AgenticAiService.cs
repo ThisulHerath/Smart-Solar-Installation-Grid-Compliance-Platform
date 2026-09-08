@@ -40,7 +40,7 @@ public class AgenticAiService : IAgenticAiService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Agentic AI health check probe failed.");
-            return (false, $"Agentic AI is currently unavailable: {ex.Message}");
+            return (false, "Agentic AI is currently unavailable.");
         }
     }
 
@@ -52,7 +52,7 @@ public class AgenticAiService : IAgenticAiService
 
             var internalKey = _configuration["AgenticAi:InternalKey"] 
                 ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") 
-                ?? "smart-solar-ai-internal-key-development";
+                ?? throw new InvalidOperationException("AGENTIC_AI_INTERNAL_KEY must be configured.");
 
             using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/test")
             {
@@ -64,8 +64,7 @@ public class AgenticAiService : IAgenticAiService
             
             if (!response.IsSuccessStatusCode)
             {
-                var errorBody = await response.Content.ReadAsStringAsync(cancellationToken);
-                _logger.LogError("Agentic AI service returned error {StatusCode}: {ErrorBody}", response.StatusCode, errorBody);
+                _logger.LogError("Agentic AI service returned error {StatusCode}", response.StatusCode);
 
                 return new WorkflowTestResponseDto
                 {
@@ -74,7 +73,7 @@ public class AgenticAiService : IAgenticAiService
                     CurrentStep = "failed",
                     ApprovalStatus = "error",
                     FinalOutcome = "Agentic AI execution failed with error status code from downstream service.",
-                    Errors = new List<string> { $"AI Service error ({response.StatusCode}): {errorBody}" },
+                    Errors = new List<string> { "Agentic AI processing failed." },
                     ExecutionLogs = new List<string> { "ASP.NET Core received non-200 response from Agentic AI service." }
                 };
             }
@@ -99,7 +98,7 @@ public class AgenticAiService : IAgenticAiService
                 CurrentStep = "failed",
                 ApprovalStatus = "unavailable",
                 FinalOutcome = "The Agentic AI service is currently unavailable or unreachable.",
-                Errors = new List<string> { ex.Message },
+                Errors = new List<string> { "Agentic AI service is unavailable." },
                 ExecutionLogs = new List<string> 
                 { 
                     "ASP.NET Core attempted internal connection to Agentic AI.", 
@@ -111,7 +110,7 @@ public class AgenticAiService : IAgenticAiService
 
     public async Task<SolarSizingResponseDto> ExecuteSolarSizingAsync(object request, CancellationToken cancellationToken = default)
     {
-        var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? "smart-solar-ai-internal-key-development";
+        var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? throw new InvalidOperationException("AGENTIC_AI_INTERNAL_KEY must be configured.");
         using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/solar-sizing") { Content = JsonContent.Create(request) };
         message.Headers.Add("X-Internal-Key", internalKey);
         try

@@ -67,9 +67,20 @@ public class SurveysController : ControllerBase
         var safeName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
         var uploadRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         Directory.CreateDirectory(uploadRoot);
-        await using (var stream = System.IO.File.Create(Path.Combine(uploadRoot, safeName))) await file.CopyToAsync(stream);
-        try { var survey = await _service.AddImageAsync(UserId(), id, imageType, $"/uploads/{safeName}", Path.GetFileName(file.FileName)); return survey == null ? NotFound() : Ok(survey); }
-        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+        // Authorize and check the draft status before creating any file, avoiding orphan uploads.
+        var existing = await _service.GetAsync(UserId(), id);
+        if (existing == null) return NotFound();
+        if (existing.SurveyStatus != SurveyStatus.Draft) return Conflict(new { message = "Images can only be attached to draft surveys." });
+        var target = Path.Combine(uploadRoot, safeName);
+        try
+        {
+            await using (var stream = System.IO.File.Create(target)) await file.CopyToAsync(stream);
+            var survey = await _service.AddImageAsync(UserId(), id, imageType, $"/uploads/{safeName}", Path.GetFileName(file.FileName));
+            if (survey == null) { System.IO.File.Delete(target); return NotFound(); }
+            return Ok(survey);
+        }
+        catch (InvalidOperationException ex) { if (System.IO.File.Exists(target)) System.IO.File.Delete(target); return Conflict(new { message = ex.Message }); }
+        catch { if (System.IO.File.Exists(target)) System.IO.File.Delete(target); throw; }
     }
 
     [HttpGet("{id:guid}/status")]
