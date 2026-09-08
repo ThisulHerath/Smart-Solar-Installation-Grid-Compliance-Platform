@@ -1,6 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { SurveysPage } from '../SurveysPage';
 import { api } from '../../services/api';
