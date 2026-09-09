@@ -1,4 +1,4 @@
-import { AuthResponse, HealthResponse, User, WorkflowResult, Survey } from '../types/auth';
+import { AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment } from '../types/auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
 
@@ -95,6 +95,49 @@ class ApiService {
     if (!res.ok) throw new Error(`Unable to load survey (${res.status}).`);
     return res.json();
   }
+
+  async getFieldJobs(status?: string): Promise<FieldJob[]> {
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+    const res = await fetch(`${API_BASE_URL}/api/field-jobs${query}`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error(`Unable to load field jobs (${res.status}).`);
+    return res.json();
+  }
+
+  async getFieldJob(id: string): Promise<FieldJob> {
+    const res = await fetch(`${API_BASE_URL}/api/field-jobs/${id}`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error(`Unable to load field job (${res.status}).`);
+    return res.json();
+  }
+
+  async createFieldJob(data: { solarSurveyId: string; technicianId: string; scheduledAt?: string; priority?: string }): Promise<FieldJob> {
+    const res = await fetch(`${API_BASE_URL}/api/field-jobs`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(`Unable to create field job (${res.status}).`);
+    return res.json();
+  }
+
+  async assignFieldJob(jobId: string, data: { technicianId: string; scheduledAt?: string; priority?: string }): Promise<FieldJob> {
+    const res = await fetch(`${API_BASE_URL}/api/field-jobs/${jobId}/assign`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error(`Unable to assign field job (${res.status}).`);
+    return res.json();
+  }
+
+  async evaluateJobCompliance(jobId: string): Promise<ComplianceAssessment> {
+    const res = await fetch(`${API_BASE_URL}/api/field-jobs/${jobId}/evaluate-compliance`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+    });
+    if (!res.ok) throw new Error(`Unable to evaluate compliance (${res.status}).`);
+    return res.json();
+  }
 }
 
 export const api = new ApiService();
+

@@ -52,7 +52,10 @@ export const Navbar: React.FC = () => {
             <nav style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', fontWeight: 600 }}>
               <a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Dashboard</a>
               {(user.roles?.includes('ADMINISTRATOR') || user.roles?.includes('SENIOR_ENGINEER')) && (
-                <a href="/surveys" style={{ color: 'var(--solar-emerald)', textDecoration: 'none' }}>Staff Surveys</a>
+                <>
+                  <a href="/surveys" style={{ color: 'var(--solar-emerald)', textDecoration: 'none' }}>Staff Surveys</a>
+                  <a href="/field-jobs" style={{ color: 'var(--solar-cyan)', textDecoration: 'none' }}>Field Operations</a>
+                </>
               )}
             </nav>
 

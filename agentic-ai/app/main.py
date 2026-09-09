@@ -4,8 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 from app.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse, SolarSizingResponse
+from app.schemas.compliance_schemas import ComplianceEvaluationResponse
 from app.workflow.graph import run_solar_workflow
 from app.workflow.solar_sizing import run_solar_sizing
+from app.workflow.compliance_workflow import run_compliance_evaluation
 
 load_dotenv()
 
@@ -44,7 +46,7 @@ def test_workflow(
     x_internal_key: str = Header(None, alias="X-Internal-Key")
 ):
     # Optional security check for internal communication
-    if not INTERNAL_KEY or x_internal_key != INTERNAL_KEY:
+    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid internal authorization key."
@@ -79,6 +81,14 @@ def test_workflow(
 
 @app.post("/workflow/solar-sizing", response_model=SolarSizingResponse, tags=["Workflow"])
 def solar_sizing_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
-    if not INTERNAL_KEY or x_internal_key != INTERNAL_KEY:
+    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
     return run_solar_sizing(request)
+
+@app.post("/workflow/compliance", response_model=ComplianceEvaluationResponse, tags=["Workflow"])
+@app.post("/api/v1/compliance/evaluate", response_model=ComplianceEvaluationResponse, tags=["Workflow"])
+def compliance_evaluation_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
+    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
+    return run_compliance_evaluation(request)
+
