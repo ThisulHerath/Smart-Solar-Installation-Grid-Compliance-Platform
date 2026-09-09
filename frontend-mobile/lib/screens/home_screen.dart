@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/status_badge.dart';
 import 'login_screen.dart';
 import 'survey_screen.dart';
+import 'technician_jobs_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -92,8 +93,26 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Foundation Phase 1 Card
-            FilledButton.icon(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SurveyScreen())), icon: const Icon(Icons.solar_power), label: const Text('Customer solar surveys')),
+            // Navigation Actions
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SurveyScreen())),
+              icon: const Icon(Icons.solar_power),
+              label: const Text('Customer Solar Surveys'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TechnicianJobsScreen())),
+              icon: const Icon(Icons.engineering),
+              label: const Text('Field Technician Site Jobs & Inspections'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF06B6D4),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(20),

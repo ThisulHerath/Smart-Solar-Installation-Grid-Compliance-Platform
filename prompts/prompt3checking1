@@ -1,0 +1,216 @@
+Verify Phase 3 of the existing SE3090 Smart Solar project.
+
+IMPORTANT:
+- Verification only.
+- DO NOT modify, create, delete, refactor, migrate, or fix anything.
+- Inspect and run tests only.
+- Report actual results, not assumptions.
+- Stop when verification is complete.
+
+PHASE 3:
+Field Technician + Site Testing + Grid Compliance.
+
+1. INSPECT
+Check existing Phase 1/2/3 implementation:
+- backend
+- Neon + EF Core
+- React
+- Flutter
+- agentic-ai
+- tests
+- migrations
+- docs
+
+2. BUILD/TEST
+Run where applicable:
+- dotnet build
+- dotnet test
+- pytest
+- flutter analyze
+- flutter test
+- React test/build command from package.json
+
+3. DATABASE
+Verify Phase 3 entities/tables exist:
+- FieldJob
+- SiteInspection
+- SiteTelemetry
+- SitePhoto
+- ComplianceAssessment
+
+Check:
+- relationships/FKs
+- migration exists
+- Neon PostgreSQL is used
+- no destructive migration/change
+
+4. API
+Verify these or equivalent endpoints:
+GET  /api/technician/jobs
+GET  /api/technician/jobs/{id}
+POST /api/technician/jobs/{id}/accept
+POST /api/technician/jobs/{id}/checkin
+POST /api/technician/jobs/{id}/inspection
+POST /api/technician/jobs/{id}/telemetry
+POST /api/technician/jobs/{id}/photos
+POST /api/technician/jobs/{id}/submit
+GET  /api/technician/jobs/{id}/compliance
+
+Check:
+- JWT
+- FIELD_TECHNICIAN role
+- technician ownership
+- DTO validation
+- status transitions
+- correct HTTP responses
+
+5. FLUTTER
+Verify:
+- technician login
+- assigned jobs
+- job details
+- accept job
+- GPS check-in
+- inspection form
+- telemetry
+- photo capture/selection
+- submit
+- compliance status
+
+6. REACT
+Verify:
+- field jobs
+- job details
+- inspection
+- telemetry
+- photos
+- compliance result
+- AI execution/validation result
+- loading/error states
+
+7. AGENTIC AI
+Verify GridComplianceAgent exists and is actually used.
+
+Check workflow:
+START
+→ load context
+→ GridComplianceAgent
+→ deterministic validator
+→ persist result
+→ COMPLETE/FAILED
+
+Check:
+- structured Pydantic output
+- LangGraph integration
+- workflow state persistence
+- execution logs
+- AI error handling
+
+8. BUSINESS RULE
+Verify:
+
+Single-Phase + system > 5 kW
+→ NON_COMPLIANT / REQUIRES_REVIEW
+
+Do not invent additional regulatory rules.
+
+9. CRITICAL VALIDATION TEST
+Test/inspect:
+
+Input:
+Single-Phase
+8 kW
+
+Expected:
+deterministic validator rejects any AI result saying compliant.
+
+10. GOLDEN CASES
+Verify:
+
+Case 1:
+600 kWh → 5.0 kW → Single-Phase
+Expected: COMPLIANT
+
+Case 2:
+960 kWh → 8.0 kW → Single-Phase
+Expected: NON_COMPLIANT / REQUIRES_REVIEW
+
+Case 3:
+AI says 8 kW Single-Phase is compliant
+Expected: validator rejects
+
+Case 4:
+Malformed AI output
+Expected: safe failure
+
+Case 5:
+AI unavailable/timeout
+Expected: controlled failure, no fake compliance result
+
+11. SECURITY
+Verify:
+- technician cannot access another technician's job
+- wrong roles blocked
+- invalid GPS rejected
+- invalid telemetry rejected
+- invalid files rejected
+- React cannot access Neon directly
+- Flutter cannot access Neon directly
+- React/Flutter cannot call FastAPI directly
+
+12. END-TO-END
+Verify as far as possible:
+
+Phase 2 Survey
+→ FieldJob
+→ Flutter Technician
+→ GPS/Inspection/Telemetry/Photo
+→ Submit
+→ ASP.NET Core
+→ Neon
+→ GridComplianceAgent
+→ deterministic validation
+→ ComplianceAssessment
+→ React result
+
+13. GIT
+Run:
+git status
+git branch
+git log --oneline -15
+
+Check for meaningful Phase 3 commits.
+Do not create commits.
+
+14. DOCUMENTATION
+Check relevant Phase 3 docs and README.
+
+FINAL RESPONSE ONLY:
+
+PHASE 3 VERIFICATION
+
+Overall:
+PASS / PASS WITH ISSUES / FAIL
+
+Database: PASS/FAIL
+Backend: PASS/FAIL
+Security: PASS/FAIL
+Flutter: PASS/FAIL
+React: PASS/FAIL
+Agentic AI: PASS/FAIL
+Deterministic validation: PASS/FAIL
+Golden cases: PASS/FAIL
+Failure handling: PASS/FAIL
+Testing: PASS/FAIL
+Git: PASS/FAIL
+Documentation: PASS/FAIL
+End-to-end: PASS/FAIL/PARTIAL
+
+Then list:
+1. Critical issues
+2. Non-critical issues
+3. Missing requirements
+4. Actual commands/results
+5. What must be fixed before Phase 4
+
+Do not fix anything.

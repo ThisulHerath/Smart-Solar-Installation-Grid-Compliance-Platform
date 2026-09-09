@@ -9,6 +9,7 @@ public interface IAgenticAiService
     Task<(bool IsHealthy, string Message)> CheckHealthAsync(CancellationToken cancellationToken = default);
     Task<WorkflowTestResponseDto> ExecuteTestWorkflowAsync(WorkflowTestRequestDto request, CancellationToken cancellationToken = default);
     Task<SolarSizingResponseDto> ExecuteSolarSizingAsync(object request, CancellationToken cancellationToken = default);
+    Task<EvaluateComplianceResponseDto?> ExecuteComplianceEvaluationAsync(object request, CancellationToken cancellationToken = default);
 }
 
 public class AgenticAiService : IAgenticAiService
@@ -123,6 +124,28 @@ public class AgenticAiService : IAgenticAiService
         {
             _logger.LogError(ex, "Solar sizing workflow failed.");
             return new SolarSizingResponseDto { Status = "failed", Errors = new List<string> { "Agentic AI service is unavailable or misconfigured." } };
+        }
+    }
+
+    public async Task<EvaluateComplianceResponseDto?> ExecuteComplianceEvaluationAsync(object request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? "smart-solar-dev-internal-key-2026";
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/compliance") { Content = JsonContent.Create(request) };
+            message.Headers.Add("X-Internal-Key", internalKey);
+            var response = await _httpClient.SendAsync(message, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Agentic AI compliance endpoint returned status {StatusCode}", response.StatusCode);
+                return null;
+            }
+            return await response.Content.ReadFromJsonAsync<EvaluateComplianceResponseDto>(cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Compliance evaluation workflow failed or AI service unavailable.");
+            return null;
         }
     }
 }

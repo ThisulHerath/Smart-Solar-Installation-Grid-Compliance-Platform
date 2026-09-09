@@ -56,3 +56,83 @@ export interface Survey {
   images: { id: string; imageType: string; fileUrl: string; fileName: string }[];
   workflows: { workflowId: string; status: string; resultJson?: string; validationJson?: string; errorMessage?: string }[];
 }
+
+export interface ComplianceAssessment {
+  id: string;
+  siteInspectionId: string;
+  workflowId?: string;
+  gridCompliant: boolean;
+  complianceStatus: string;
+  riskLevel: string;
+  complianceNotes?: string;
+  validationStatus?: string;
+  createdAt: string;
+  updatedAt: string;
+  violations?: string[];
+  recommendations?: string[];
+}
+
+export interface SiteTelemetry {
+  id: string;
+  siteInspectionId: string;
+  measurementType: string;
+  measurementValue: number;
+  unit: string;
+  recordedAt: string;
+}
+
+export interface SitePhoto {
+  id: string;
+  siteInspectionId: string;
+  photoType: string;
+  fileUrl: string;
+  fileName: string;
+  createdAt: string;
+}
+
+export interface SiteInspection {
+  id: string;
+  fieldJobId: string;
+  checkInLatitude?: number;
+  checkInLongitude?: number;
+  checkInAt?: string;
+  roofAreaMeasuredSqm?: number;
+  roofOrientation: string;
+  roofTilt?: number;
+  gridTypeObserved: string;
+  phaseCount?: number;
+  mainBreakerRating?: number;
+  inverterLocationSuitable?: boolean;
+  safetyNotes?: string;
+  technicianNotes?: string;
+  inspectionStatus: string;
+  createdAt: string;
+  updatedAt: string;
+  telemetry: SiteTelemetry[];
+  photos: SitePhoto[];
+  complianceAssessment?: ComplianceAssessment;
+}
+
+export interface FieldJob {
+  id: string;
+  solarSurveyId: string;
+  technicianId: string;
+  technicianName: string;
+  customerName: string;
+  customerPhone: string;
+  propertyAddress: string;
+  monthlyKwh: number;
+  roofAreaSqm: number;
+  latitude?: number;
+  longitude?: number;
+  status: string;
+  priority: string;
+  assignedAt: string;
+  scheduledAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  hasInspection: boolean;
+  inspectionStatus?: string;
+  compliance?: ComplianceAssessment;
+}
+

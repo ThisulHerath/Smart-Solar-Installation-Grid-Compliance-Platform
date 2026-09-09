@@ -17,6 +17,11 @@ public class AppDbContext : DbContext
     public DbSet<SolarSurveyImage> SolarSurveyImages => Set<SolarSurveyImage>();
     public DbSet<AgentWorkflow> AgentWorkflows => Set<AgentWorkflow>();
     public DbSet<AgentExecutionLog> AgentExecutionLogs => Set<AgentExecutionLog>();
+    public DbSet<FieldJob> FieldJobs => Set<FieldJob>();
+    public DbSet<SiteInspection> SiteInspections => Set<SiteInspection>();
+    public DbSet<SiteTelemetry> SiteTelemetry => Set<SiteTelemetry>();
+    public DbSet<SitePhoto> SitePhotos => Set<SitePhoto>();
+    public DbSet<ComplianceAssessment> ComplianceAssessments => Set<ComplianceAssessment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,6 +118,72 @@ public class AppDbContext : DbContext
             entity.Property(l => l.OutputSummary).HasMaxLength(1000);
             entity.Property(l => l.ErrorMessage).HasMaxLength(1000);
             entity.HasOne(l => l.AgentWorkflow).WithMany(w => w.ExecutionLogs).HasForeignKey(l => l.AgentWorkflowId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Field Job Configuration
+        modelBuilder.Entity<FieldJob>(entity =>
+        {
+            entity.HasKey(j => j.Id);
+            entity.HasIndex(j => j.SolarSurveyId);
+            entity.HasIndex(j => j.TechnicianId);
+            entity.HasIndex(j => j.Status);
+            entity.Property(j => j.Status).HasConversion<string>().HasMaxLength(50);
+            entity.Property(j => j.Priority).HasConversion<string>().HasMaxLength(50);
+            entity.HasOne(j => j.SolarSurvey).WithMany().HasForeignKey(j => j.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(j => j.Technician).WithMany().HasForeignKey(j => j.TechnicianId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Site Inspection Configuration
+        modelBuilder.Entity<SiteInspection>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.HasIndex(i => i.FieldJobId).IsUnique();
+            entity.Property(i => i.CheckInLatitude).HasPrecision(9, 6);
+            entity.Property(i => i.CheckInLongitude).HasPrecision(9, 6);
+            entity.Property(i => i.RoofAreaMeasuredSqm).HasPrecision(12, 2);
+            entity.Property(i => i.RoofTilt).HasPrecision(6, 2);
+            entity.Property(i => i.MainBreakerRating).HasPrecision(8, 2);
+            entity.Property(i => i.RoofOrientation).HasConversion<string>().HasMaxLength(50);
+            entity.Property(i => i.GridTypeObserved).HasConversion<string>().HasMaxLength(50);
+            entity.Property(i => i.InspectionStatus).HasConversion<string>().HasMaxLength(50);
+            entity.Property(i => i.SafetyNotes).HasMaxLength(2000);
+            entity.Property(i => i.TechnicianNotes).HasMaxLength(2000);
+            entity.HasOne(i => i.FieldJob).WithOne(j => j.Inspection).HasForeignKey<SiteInspection>(i => i.FieldJobId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Site Telemetry Configuration
+        modelBuilder.Entity<SiteTelemetry>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.HasIndex(t => new { t.SiteInspectionId, t.MeasurementType });
+            entity.Property(t => t.MeasurementType).HasConversion<string>().HasMaxLength(50);
+            entity.Property(t => t.MeasurementValue).HasPrecision(12, 4);
+            entity.Property(t => t.Unit).HasMaxLength(50);
+            entity.HasOne(t => t.SiteInspection).WithMany(i => i.Telemetry).HasForeignKey(t => t.SiteInspectionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Site Photo Configuration
+        modelBuilder.Entity<SitePhoto>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasIndex(p => p.SiteInspectionId);
+            entity.Property(p => p.PhotoType).HasConversion<string>().HasMaxLength(50);
+            entity.Property(p => p.FileUrl).IsRequired().HasMaxLength(1000);
+            entity.Property(p => p.FileName).IsRequired().HasMaxLength(255);
+            entity.HasOne(p => p.SiteInspection).WithMany(i => i.Photos).HasForeignKey(p => p.SiteInspectionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Compliance Assessment Configuration
+        modelBuilder.Entity<ComplianceAssessment>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.HasIndex(c => c.SiteInspectionId).IsUnique();
+            entity.Property(c => c.WorkflowId).HasMaxLength(100);
+            entity.Property(c => c.ComplianceStatus).IsRequired().HasMaxLength(50);
+            entity.Property(c => c.RiskLevel).IsRequired().HasMaxLength(50);
+            entity.Property(c => c.ValidationStatus).HasMaxLength(50);
+            entity.Property(c => c.ComplianceNotes).HasMaxLength(2000);
+            entity.HasOne(c => c.SiteInspection).WithOne(i => i.ComplianceAssessment).HasForeignKey<ComplianceAssessment>(c => c.SiteInspectionId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // Seed Foundation Data
