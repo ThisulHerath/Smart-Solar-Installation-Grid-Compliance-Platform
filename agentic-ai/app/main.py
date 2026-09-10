@@ -5,9 +5,11 @@ from dotenv import load_dotenv
 
 from app.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse, SolarSizingResponse
 from app.schemas.compliance_schemas import ComplianceEvaluationResponse
+from app.schemas.guardrail_schemas import GuardrailWorkflowResult
 from app.workflow.graph import run_solar_workflow
 from app.workflow.solar_sizing import run_solar_sizing
 from app.workflow.compliance_workflow import run_compliance_evaluation
+from app.workflow.proposal_workflow import run_guardrail_workflow
 
 load_dotenv()
 
@@ -92,3 +94,13 @@ def compliance_evaluation_workflow(request: dict, x_internal_key: str = Header(N
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
     return run_compliance_evaluation(request)
 
+@app.post("/workflow/guardrail", response_model=GuardrailWorkflowResult, tags=["Workflow"])
+def guardrail_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
+    """
+    Phase 4: SafetyGuardrailAgent + DeterministicProposalValidator pipeline.
+    Called by ASP.NET Core when creating an engineering proposal.
+    AI CANNOT approve a proposal — only the deterministic validator + human engineer can.
+    """
+    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
+    return run_guardrail_workflow(request)

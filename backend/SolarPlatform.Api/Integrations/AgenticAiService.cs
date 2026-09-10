@@ -10,6 +10,7 @@ public interface IAgenticAiService
     Task<WorkflowTestResponseDto> ExecuteTestWorkflowAsync(WorkflowTestRequestDto request, CancellationToken cancellationToken = default);
     Task<SolarSizingResponseDto> ExecuteSolarSizingAsync(object request, CancellationToken cancellationToken = default);
     Task<EvaluateComplianceResponseDto?> ExecuteComplianceEvaluationAsync(object request, CancellationToken cancellationToken = default);
+    Task<GuardrailResultDto?> EvaluateGuardrailAsync(object request, CancellationToken cancellationToken = default);
 }
 
 public class AgenticAiService : IAgenticAiService
@@ -146,6 +147,28 @@ public class AgenticAiService : IAgenticAiService
         {
             _logger.LogError(ex, "Compliance evaluation workflow failed or AI service unavailable.");
             return null;
+        }
+    }
+
+    public async Task<GuardrailResultDto?> EvaluateGuardrailAsync(object request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? "smart-solar-dev-internal-key-2026";
+            using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/guardrail") { Content = JsonContent.Create(request) };
+            message.Headers.Add("X-Internal-Key", internalKey);
+            var response = await _httpClient.SendAsync(message, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Agentic AI guardrail endpoint returned status {StatusCode} — defaulting to REQUIRES_APPROVAL.", response.StatusCode);
+                return GuardrailResultDto.SafeDefault();
+            }
+            return await response.Content.ReadFromJsonAsync<GuardrailResultDto>(cancellationToken: cancellationToken) ?? GuardrailResultDto.SafeDefault();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Guardrail evaluation failed or AI service unavailable — defaulting to REQUIRES_APPROVAL.");
+            return GuardrailResultDto.SafeDefault();
         }
     }
 }

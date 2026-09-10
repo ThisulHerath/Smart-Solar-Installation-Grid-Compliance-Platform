@@ -22,6 +22,8 @@ public class AppDbContext : DbContext
     public DbSet<SiteTelemetry> SiteTelemetry => Set<SiteTelemetry>();
     public DbSet<SitePhoto> SitePhotos => Set<SitePhoto>();
     public DbSet<ComplianceAssessment> ComplianceAssessments => Set<ComplianceAssessment>();
+    public DbSet<EngineeringProposal> EngineeringProposals => Set<EngineeringProposal>();
+    public DbSet<ApprovalAuditLog> ApprovalAuditLogs => Set<ApprovalAuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -184,6 +186,49 @@ public class AppDbContext : DbContext
             entity.Property(c => c.ValidationStatus).HasMaxLength(50);
             entity.Property(c => c.ComplianceNotes).HasMaxLength(2000);
             entity.HasOne(c => c.SiteInspection).WithOne(i => i.ComplianceAssessment).HasForeignKey<ComplianceAssessment>(c => c.SiteInspectionId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Engineering Proposal Configuration
+        modelBuilder.Entity<EngineeringProposal>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasIndex(p => p.SolarSurveyId);
+            entity.HasIndex(p => p.ProposalStatus);
+            entity.HasIndex(p => new { p.SolarSurveyId, p.ProposalStatus });
+            entity.Property(p => p.WorkflowId).HasMaxLength(100);
+            entity.Property(p => p.RecommendedKw).HasPrecision(10, 3).IsRequired();
+            entity.Property(p => p.InverterSizeKw).HasPrecision(10, 3).IsRequired();
+            entity.Property(p => p.EstimatedCostLkr).HasPrecision(14, 2).IsRequired();
+            entity.Property(p => p.GridComplianceStatus).IsRequired().HasMaxLength(50);
+            entity.Property(p => p.RiskLevel).IsRequired().HasMaxLength(50);
+            entity.Property(p => p.SafetyStatus).IsRequired().HasMaxLength(50);
+            entity.Property(p => p.ProposalStatus).HasConversion<string>().HasMaxLength(50);
+            entity.Property(p => p.RecommendationSummary).HasMaxLength(4000);
+            entity.Property(p => p.EngineerNotes).HasMaxLength(2000);
+            entity.HasOne(p => p.SolarSurvey)
+                  .WithMany()
+                  .HasForeignKey(p => p.SolarSurveyId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Approval Audit Log Configuration
+        modelBuilder.Entity<ApprovalAuditLog>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.HasIndex(a => a.EngineeringProposalId);
+            entity.HasIndex(a => a.UserId);
+            entity.HasIndex(a => a.Timestamp);
+            entity.Property(a => a.WorkflowId).HasMaxLength(100);
+            entity.Property(a => a.Decision).HasConversion<string>().HasMaxLength(50);
+            entity.Property(a => a.Comment).HasMaxLength(2000);
+            entity.HasOne(a => a.EngineeringProposal)
+                  .WithMany(p => p.AuditLogs)
+                  .HasForeignKey(a => a.EngineeringProposalId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(a => a.User)
+                  .WithMany()
+                  .HasForeignKey(a => a.UserId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Seed Foundation Data

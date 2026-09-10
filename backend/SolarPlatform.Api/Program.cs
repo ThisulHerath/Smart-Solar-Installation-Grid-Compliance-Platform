@@ -84,6 +84,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<IFieldJobService, FieldJobService>();
+builder.Services.AddScoped<IProposalService, ProposalService>();
 
 // 4. Agentic AI Service Client
 var agenticAiBaseUrl = Environment.GetEnvironmentVariable("AGENTIC_AI_BASE_URL")

@@ -10,6 +10,9 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { SurveysPage } from './pages/SurveysPage';
 import { FieldJobsPage } from './pages/FieldJobsPage';
 import { FieldJobDetailPage } from './pages/FieldJobDetailPage';
+import { ProposalsPage } from './pages/ProposalsPage';
+import { PendingApprovalsPage } from './pages/PendingApprovalsPage';
+import { ProposalDetailPage } from './pages/ProposalDetailPage';
 
 export const App: React.FC = () => {
   return (
@@ -28,7 +31,11 @@ export const App: React.FC = () => {
                 <Route path="/surveys" element={<SurveysPage />} />
                 <Route path="/field-jobs" element={<FieldJobsPage />} />
                 <Route path="/field-jobs/:jobId" element={<FieldJobDetailPage />} />
+                <Route path="/proposals" element={<ProposalsPage />} />
+                <Route path="/proposals/pending" element={<PendingApprovalsPage />} />
               </Route>
+              {/* Proposal detail accessible to any authenticated user (homeowner, engineer) */}
+              <Route path="/proposals/:id" element={<ProposalDetailPage />} />
             </Route>
           </Route>
 

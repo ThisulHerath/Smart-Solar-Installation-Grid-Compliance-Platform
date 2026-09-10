@@ -79,6 +79,19 @@ class ApiService {
 
   Future<Map<String, dynamic>> submitSurvey(String id) async => Map<String, dynamic>.from(await post('/api/surveys/$id/submit', {}));
 
+  // Proposal endpoints
+  Future<Map<String, dynamic>> createProposal(String surveyId) async =>
+      Map<String, dynamic>.from(await post('/api/proposals', {'solarSurveyId': surveyId}));
+
+  Future<Map<String, dynamic>> getProposal(String proposalId) async =>
+      Map<String, dynamic>.from(await get('/api/proposals/$proposalId'));
+
+  Future<Map<String, dynamic>?> getProposalForSurvey(String surveyId) async {
+    final response = await get('/api/proposals/survey/$surveyId');
+    if (response == null) return null;
+    return Map<String, dynamic>.from(response);
+  }
+
   // Technician endpoints
   Future<List<dynamic>> getTechnicianJobs({String? status}) async {
     final query = status != null ? '?status=$status' : '';
