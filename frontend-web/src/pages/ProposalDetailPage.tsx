@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { WorkflowSummary } from '../components/WorkflowSummary';
+import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   getProposal,
@@ -143,7 +145,8 @@ export const ProposalDetailPage: React.FC = () => {
   const validationResult = parseJson<ValidationResult>(proposal?.validationResultJson);
   const guardrailResult = parseJson<GuardrailResult>(proposal?.guardrailResultJson);
 
-  const isPending = proposal?.proposalStatus === 'PendingApproval';
+  const { user } = useAuth();
+  const isPending = proposal?.proposalStatus === 'PendingApproval' && user?.roles.some(role => ['SENIOR_ENGINEER', 'ADMINISTRATOR'].includes(role));
   const validationPassed = validationResult ? validationResult.valid || validationResult.requiresApproval : true;
   const approvalBlocked = !validationPassed;
 
@@ -223,6 +226,7 @@ export const ProposalDetailPage: React.FC = () => {
         </div>
 
         {/* Technical Specs */}
+        <WorkflowSummary surveyId={proposal.solarSurveyId} />
         <div className="detail-card">
           <h2 className="detail-card__title">⚡ Technical Specifications</h2>
           <div className="detail-row"><span>Recommended System</span><strong>{proposal.recommendedKw.toFixed(2)} kW</strong></div>

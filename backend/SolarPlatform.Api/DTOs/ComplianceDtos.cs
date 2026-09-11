@@ -18,25 +18,25 @@ public record ComplianceAssessmentDto(
 );
 
 public record EvaluateComplianceRequestDto(
-    Guid InspectionId,
-    Guid FieldJobId,
-    string GridType,
-    int? PhaseCount,
-    decimal? MainBreakerRating,
-    bool? InverterLocationSuitable,
-    decimal? RoofAreaSqm,
-    decimal? RoofTilt,
-    string? RoofOrientation,
-    decimal? Voc,
-    decimal? Isc,
-    decimal? Vmp,
-    decimal? Imp,
-    decimal? Irradiance,
-    decimal? Temperature,
-    decimal? GridVoltage,
-    decimal? GridFrequency,
-    string? SafetyNotes,
-    string? TechnicianNotes
+    [property: JsonPropertyName("inspection_id")] Guid InspectionId,
+    [property: JsonPropertyName("field_job_id")] Guid FieldJobId,
+    [property: JsonPropertyName("grid_type")] string GridType,
+    [property: JsonPropertyName("phase_count")] int? PhaseCount,
+    [property: JsonPropertyName("main_breaker_rating")] decimal? MainBreakerRating,
+    [property: JsonPropertyName("inverter_location_suitable")] bool? InverterLocationSuitable,
+    [property: JsonPropertyName("roof_area_sqm")] decimal? RoofAreaSqm,
+    [property: JsonPropertyName("roof_tilt")] decimal? RoofTilt,
+    [property: JsonPropertyName("roof_orientation")] string? RoofOrientation,
+    [property: JsonPropertyName("voc")] decimal? Voc,
+    [property: JsonPropertyName("isc")] decimal? Isc,
+    [property: JsonPropertyName("vmp")] decimal? Vmp,
+    [property: JsonPropertyName("imp")] decimal? Imp,
+    [property: JsonPropertyName("irradiance")] decimal? Irradiance,
+    [property: JsonPropertyName("temperature")] decimal? Temperature,
+    [property: JsonPropertyName("grid_voltage")] decimal? GridVoltage,
+    [property: JsonPropertyName("grid_frequency")] decimal? GridFrequency,
+    [property: JsonPropertyName("safety_notes")] string? SafetyNotes,
+    [property: JsonPropertyName("technician_notes")] string? TechnicianNotes
 );
 
 public record EvaluateComplianceResponseDto(

@@ -16,7 +16,7 @@ export const Layout: React.FC = () => {
         fontSize: '0.8rem',
         color: 'var(--text-muted)'
       }}>
-        SE3090 Software Engineering Frameworks &bull; Smart Solar Installation & Grid Compliance Platform &bull; Phase 1 Architecture
+        Smart Solar &bull; Sri Lanka &bull; SE3090 &bull; Group 2026-AI-17
       </footer>
     </div>
   );

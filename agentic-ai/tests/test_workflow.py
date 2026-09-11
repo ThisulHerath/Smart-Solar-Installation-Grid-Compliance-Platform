@@ -29,7 +29,7 @@ class TestAgenticAI(unittest.TestCase):
         result = agent.execute(state)
 
         self.assertIn("grid_compliance", result["tool_results"])
-        self.assertEqual(result["tool_results"]["grid_compliance"]["compliance_status"], "COMPLIANT_PROVISIONAL")
+        self.assertEqual(result["tool_results"]["grid_compliance"]["compliance_status"], "INPUT_REQUIRED")
 
     def test_equipment_pricing_agent(self):
         agent = EquipmentPricingAgent()
@@ -37,7 +37,7 @@ class TestAgenticAI(unittest.TestCase):
         result = agent.execute(state)
 
         self.assertIn("equipment_pricing", result["tool_results"])
-        self.assertGreater(result["tool_results"]["equipment_pricing"]["estimated_hardware_cost_lkr"], 0)
+        self.assertEqual(result["tool_results"]["equipment_pricing"]["status"], "INPUT_REQUIRED")
 
     def test_safety_guardrail_agent(self):
         agent = SafetyGuardrailAgent()
@@ -45,7 +45,7 @@ class TestAgenticAI(unittest.TestCase):
         result = agent.execute(state)
 
         self.assertIn("safety_guardrails", result["validation_results"])
-        self.assertTrue(result["validation_results"]["safety_guardrails"]["roof_setback_met"])
+        self.assertIsNone(result["validation_results"]["safety_guardrails"]["roof_setback_met"])
 
     def test_full_workflow_execution(self):
         result = run_solar_workflow(objective="Design 10kW residential solar array with CEB grid export")

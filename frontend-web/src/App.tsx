@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
+import { OperationsDashboard } from './pages/OperationsDashboard';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { SurveysPage } from './pages/SurveysPage';
@@ -13,6 +13,7 @@ import { FieldJobDetailPage } from './pages/FieldJobDetailPage';
 import { ProposalsPage } from './pages/ProposalsPage';
 import { PendingApprovalsPage } from './pages/PendingApprovalsPage';
 import { ProposalDetailPage } from './pages/ProposalDetailPage';
+import { InventoryPage } from './pages/InventoryPage';
 
 export const App: React.FC = () => {
   return (
@@ -25,7 +26,10 @@ export const App: React.FC = () => {
           {/* Protected Routes Layout */}
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route path="/" element={<DashboardPage />} />
+              <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATOR', 'INVENTORY_OFFICER', 'SENIOR_ENGINEER']} />}>
+                <Route path="/inventory" element={<InventoryPage />} />
+              </Route>
+              <Route path="/" element={<OperationsDashboard />} />
               <Route path="/dashboard" element={<Navigate to="/" replace />} />
               <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATOR', 'SENIOR_ENGINEER']} />}>
                 <Route path="/surveys" element={<SurveysPage />} />

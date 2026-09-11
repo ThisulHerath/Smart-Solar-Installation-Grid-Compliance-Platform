@@ -16,6 +16,20 @@ jobs:
   build-and-test:
     name: Build and Test .NET API
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: solar_test
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: solar_tests
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U solar_test -d solar_tests"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      TEST_DATABASE_CONNECTION_STRING: Host=localhost;Port=5432;Database=solar_tests;Username=solar_test;Password=ci-only-password
 
     steps:
       - name: Checkout code

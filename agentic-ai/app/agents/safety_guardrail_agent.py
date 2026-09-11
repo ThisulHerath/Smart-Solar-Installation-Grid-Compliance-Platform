@@ -36,13 +36,11 @@ class SafetyGuardrailAgent:
         """Backward compatibility for generic state execution in test_workflow.py."""
         val = dict(state.get("validation_results", {}))
         val["safety_guardrails"] = {
-            "roof_setback_met": True,
-            "clearance_met": True,
-            "safety_status": "SAFE"
+            "roof_setback_met": None,
+            "clearance_met": None,
+            "safety_status": "INPUT_REQUIRED"
         }
         state["validation_results"] = val
-        if "completed_steps" in state and isinstance(state["completed_steps"], list):
-            state["completed_steps"].append("safety_guardrails")
         return state
 
     def evaluate(self, data: GuardrailInput) -> GuardrailResult:

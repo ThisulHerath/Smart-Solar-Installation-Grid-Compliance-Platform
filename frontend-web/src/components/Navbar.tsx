@@ -20,7 +20,9 @@ export const Navbar: React.FC = () => {
         padding: '14px 24px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '16px'
       }}>
         {/* Brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -41,15 +43,16 @@ export const Navbar: React.FC = () => {
               SMART SOLAR <span style={{ color: 'var(--solar-emerald)' }}>PLATFORM</span>
             </div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-              Grid Compliance & Architecture Suite
+              Solar planning and field operations
             </div>
           </div>
         </div>
 
         {/* Navigation & User Status / Actions */}
         {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <nav style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', fontWeight: 600 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
+            <nav style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', fontWeight: 600, flexWrap: 'wrap' }}>
+              {user.roles.some(role => ['ADMINISTRATOR', 'INVENTORY_OFFICER', 'SENIOR_ENGINEER'].includes(role)) && <a href="/inventory" style={{ color: 'var(--solar-emerald)' }}>Inventory</a>}
               <a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Dashboard</a>
               {(user.roles?.includes('ADMINISTRATOR') || user.roles?.includes('SENIOR_ENGINEER')) && (
                 <>
@@ -61,7 +64,7 @@ export const Navbar: React.FC = () => {
               )}
             </nav>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', maxWidth: '100%' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{
                   width: '32px',
@@ -95,7 +98,7 @@ export const Navbar: React.FC = () => {
           </div>
         ) : (
           <div className="badge badge-amber">
-            Phase 1 Foundation
+            Smart Solar · Sri Lanka
           </div>
         )}
       </div>

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/field_job.dart';
 import '../services/api_service.dart';
 import '../widgets/status_badge.dart';
@@ -35,9 +36,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   final _vocController = TextEditingController();
   final _iscController = TextEditingController();
 
-  final String _roofOrientation = 'South';
-  final String _gridType = 'SinglePhase';
-  final int _phaseCount = 1;
+  String _roofOrientation = 'Unknown';
+  String _gridType = 'SinglePhase';
   bool _inverterLocationSuitable = true;
 
   @override
@@ -83,11 +83,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   Future<void> _handleGpsCheckIn() async {
     setState(() => _saving = true);
     try {
-      // Simulate/submit GPS check-in (e.g. 6.9271, 79.8612 for Colombo site)
-      final lat = _job?.latitude ?? 6.9271;
-      final lng = _job?.longitude ?? 79.8612;
-
-      await _api.checkInJob(widget.jobId, lat, lng);
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        throw Exception('Enable location services to record your arrival.');
+      }
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        throw Exception('Location permission is needed for check-in. Enable it in your device settings.');
+      }
+      final position = await Geolocator.getCurrentPosition(locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 20)));
+      await _api.checkInJob(widget.jobId, position.latitude, position.longitude);
       setState(() => _successMessage = 'GPS Check-in recorded successfully.');
       await _loadJobDetails();
     } catch (e) {
@@ -97,7 +103,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
   }
 
-  Future<void> _handleSaveInspection() async {
+  Future<bool> _handleSaveInspection() async {
     setState(() => _saving = true);
     try {
       final roofArea = double.tryParse(_roofAreaController.text.trim());
@@ -109,7 +115,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
         'roofOrientation': _roofOrientation,
         'roofTilt': roofTilt,
         'gridTypeObserved': _gridType,
-        'phaseCount': _phaseCount,
+        'phaseCount': _gridType == 'ThreePhase' ? 3 : 1,
         'mainBreakerRating': mainBreaker,
         'inverterLocationSuitable': _inverterLocationSuitable,
         'safetyNotes': _safetyNotesController.text.trim(),
@@ -136,8 +142,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
       setState(() => _successMessage = 'Site inspection draft & telemetry saved.');
       await _loadJobDetails();
+      return true;
     } catch (e) {
       setState(() => _error = 'Failed to save: ${e.toString().replaceAll('Exception: ', '')}');
+      return false;
     } finally {
       setState(() => _saving = false);
     }
@@ -145,7 +153,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   Future<void> _handleUploadPhoto(String photoType) async {
     try {
-      final picked = await _picker.pickImage(source: ImageSource.gallery);
+      final source = await showModalBottomSheet<ImageSource>(context: context, builder: (sheetContext) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(leading: const Icon(Icons.camera_alt), title: const Text('Take a site photo'),
+            onTap: () => Navigator.pop(sheetContext, ImageSource.camera)),
+          ListTile(leading: const Icon(Icons.photo_library), title: const Text('Choose a photo'),
+            onTap: () => Navigator.pop(sheetContext, ImageSource.gallery)),
+        ])));
+      if (source == null) return;
+      final picked = await _picker.pickImage(source: source, maxWidth: 1920, imageQuality: 85);
       if (picked == null) return;
 
       setState(() => _saving = true);
@@ -162,7 +178,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   Future<void> _handleSubmitInspection() async {
     setState(() => _saving = true);
     try {
-      await _handleSaveInspection();
+      if (!await _handleSaveInspection()) return;
       await _api.submitInspection(widget.jobId);
       setState(() => _successMessage = 'Inspection submitted! Compliance analysis completed.');
       await _loadJobDetails();
@@ -308,6 +324,17 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                     decoration: const InputDecoration(labelText: 'Main Breaker Rating (Amps)', border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(initialValue: _gridType,
+                    decoration: const InputDecoration(labelText: 'Observed grid connection'),
+                    items: const [DropdownMenuItem(value: 'SinglePhase', child: Text('Single phase')),
+                      DropdownMenuItem(value: 'ThreePhase', child: Text('Three phase'))],
+                    onChanged: (value) { if (value != null) setState(() => _gridType = value); }),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(initialValue: _roofOrientation,
+                    decoration: const InputDecoration(labelText: 'Roof orientation'),
+                    items: ['Unknown', 'North', 'South', 'East', 'West', 'NorthEast', 'NorthWest', 'SouthEast', 'SouthWest']
+                      .map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(),
+                    onChanged: (value) { if (value != null) setState(() => _roofOrientation = value); }),
                   SwitchListTile(
                     title: const Text('Inverter Location Suitable', style: TextStyle(color: Colors.white, fontSize: 14)),
                     subtitle: const Text('Adequate airflow, sheltered, fire safety compliant', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
@@ -331,7 +358,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('3. Real-Time Electrical Telemetry', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFF59E0B))),
+                  const Text('3. Measured electrical readings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFF59E0B))),
                   const SizedBox(height: 12),
                   Row(
                     children: [

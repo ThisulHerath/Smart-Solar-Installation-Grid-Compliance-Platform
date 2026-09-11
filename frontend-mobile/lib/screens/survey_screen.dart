@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
 import '../models/solar_survey.dart';
+import 'proposal_screen.dart';
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
@@ -18,6 +19,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
   final _api = ApiService();
 
   List<SolarSurvey> _surveys = [];
+  String _search = '';
+  String _statusFilter = '';
   String _gridType = 'SinglePhase';
   String? _error;
   bool _loading = false;
@@ -327,6 +330,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
             const SizedBox(height: 24),
 
             // Survey History List
+            TextField(decoration: const InputDecoration(labelText: 'Search surveys by address'), onChanged: (value) => setState(() => _search = value.toLowerCase())),
+            DropdownButton<String>(value: _statusFilter, isExpanded: true, onChanged: (value) => setState(() => _statusFilter = value ?? ''), items: [
+              const DropdownMenuItem(value: '', child: Text('All statuses')),
+              ..._surveys.map((s) => s.surveyStatus).toSet().map((status) => DropdownMenuItem(value: status, child: Text(status))),
+            ]),
             const Text(
               'Your Submitted Surveys & AI Results',
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
@@ -345,7 +353,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 child: const Text('No surveys submitted yet.', style: TextStyle(color: Color(0xFF94A3B8))),
               )
             else
-              ..._surveys.map((survey) => _buildSurveyItemCard(survey)),
+              ..._surveys.where((survey) => survey.propertyAddress.toLowerCase().contains(_search) && (_statusFilter.isEmpty || survey.surveyStatus == _statusFilter)).map((survey) => _buildSurveyItemCard(survey)),
           ],
         ),
       ),
@@ -419,8 +427,9 @@ class _SurveyScreenState extends State<SurveyScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
                     children: [
                       Text('Array: ${survey.recommendedKw} kW', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       Text('Panels: ${survey.panelCount ?? "-"} x 400W', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -451,7 +460,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      survey.errorMessage ?? 'Workflow execution encountered an error. No fake recommendations were emitted.',
+                      survey.errorMessage ?? 'Sizing could not be completed. Please try again later.',
                       style: const TextStyle(fontSize: 12, color: Colors.redAccent),
                     ),
                   ),
@@ -459,6 +468,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
               ),
             ),
           ],
+          if (['ANALYSISCOMPLETE', 'COMPLETED'].contains(survey.surveyStatus.toUpperCase()))
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => ProposalScreen(surveyId: survey.id))),
+              icon: const Icon(Icons.description_outlined),
+              label: const Text('Proposal and equipment'),
+            ),
         ],
       ),
     );

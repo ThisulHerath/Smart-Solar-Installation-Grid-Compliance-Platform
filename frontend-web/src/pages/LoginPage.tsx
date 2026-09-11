@@ -151,7 +151,7 @@ export const LoginPage: React.FC = () => {
         <div style={{ marginTop: '28px', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
             <ShieldCheck size={14} color="var(--solar-emerald)" />
-            <span>QUICK-SELECT PHASE 1 DEV ACCOUNTS</span>
+            <span>DEMONSTRATION ACCOUNTS</span>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {DEMO_ACCOUNTS.map((acc) => (

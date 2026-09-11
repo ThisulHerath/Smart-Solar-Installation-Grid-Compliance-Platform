@@ -1,34 +1,19 @@
-from typing import Dict, Any, List
+"""Equipment pricing specialist. It has no database or reservation capabilities."""
+from decimal import Decimal, ROUND_HALF_UP
+from app.schemas.pricing_schemas import PricingRequest, ExchangeRate, PriceLine
 
 class EquipmentPricingAgent:
-    """
-    Responsible for estimating inverter, solar panel, and mounting hardware costs
-    using current inventory catalogs and standard pricing metrics.
-    """
-    def __init__(self, name: str = "EquipmentPricingAgent"):
-        self.name = name
+    def evaluate(self, request: PricingRequest, rate: ExchangeRate) -> list[PriceLine]:
+        lines = []
+        for item in request.items:
+            unit = (item.unitPriceUsd * rate.rate).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            lines.append(PriceLine(inventoryItemId=item.inventoryItemId, name=item.name, category=item.category,
+                quantity=item.quantity, unitPriceUsd=item.unitPriceUsd, unitPriceLkr=unit, totalPriceLkr=unit * item.quantity))
+        return lines
 
-    def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        logs: List[str] = state.get("execution_logs", [])
-        tool_results: Dict[str, Any] = state.get("tool_results", {})
-        completed: List[str] = state.get("completed_steps", [])
-
-        logs.append(f"[{self.name}] Calculating bill of materials and initial equipment pricing.")
-
-        pricing_eval = {
-            "estimated_capacity_kw": 5.0,
-            "panel_model": "Tier 1 Monocrystalline 550W",
-            "panel_count": 10,
-            "inverter_model": "Hybrid Inverter 5kW Grid-Tied",
-            "estimated_hardware_cost_lkr": 1450000.00,
-            "currency": "LKR"
-        }
-
-        tool_results["equipment_pricing"] = pricing_eval
-        completed.append("equipment_pricing_estimation")
-
-        return {
-            "tool_results": tool_results,
-            "completed_steps": completed,
-            "execution_logs": logs
-        }
+    def execute(self, state):
+        # Legacy callers without validated catalog inputs must not receive invented prices.
+        return {"tool_results": {**state.get("tool_results", {}), "equipment_pricing": {
+            "status": "INPUT_REQUIRED", "message": "Use the validated equipment-pricing workflow with approved proposal and catalog inputs."}},
+            "completed_steps": state.get("completed_steps", []),
+            "execution_logs": state.get("execution_logs", []) + ["EquipmentPricingAgent: catalog input required"]}

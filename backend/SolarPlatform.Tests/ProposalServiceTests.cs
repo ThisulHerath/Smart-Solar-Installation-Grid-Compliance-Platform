@@ -54,6 +54,7 @@ public class ProposalServiceTests
         var survey = new SolarSurvey
         {
             Id = _surveyId,
+            SurveyStatus = SurveyStatus.AnalysisComplete,
             CustomerId = homeowner.CustomerProfile.Id,
             MonthlyKwh = 1500,
             RoofAreaSqm = 100,
@@ -63,6 +64,10 @@ public class ProposalServiceTests
 
         _db.Users.AddRange(engineer, homeowner);
         _db.SolarSurveys.Add(survey);
+        var job = new FieldJob { SolarSurveyId = survey.Id, TechnicianId = _engineerId };
+        var inspection = new SiteInspection { FieldJobId = job.Id };
+        _db.AddRange(job, inspection, new ComplianceAssessment {
+            SiteInspectionId = inspection.Id, ComplianceStatus = "COMPLIANT", RiskLevel = "LOW", GridCompliant = true });
         _db.SaveChanges();
 
         // Setup AI mock default response
@@ -82,6 +87,27 @@ public class ProposalServiceTests
 
     private ProposalService CreateService() =>
         new(_db, _aiMock.Object, _loggerMock.Object);
+
+    [Fact]
+    public async Task Approval_RequiresComplianceEvidence()
+    {
+        _db.ComplianceAssessments.RemoveRange(_db.ComplianceAssessments);
+        await _db.SaveChangesAsync();
+        var service = CreateService();
+        var proposal = await service.CreateAsync(_surveyId, _homeownerId, null);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.ApproveAsync(proposal.Id, _engineerId, "Review"));
+        Assert.Equal(ProposalStatus.PendingApproval, (await _db.EngineeringProposals.FindAsync(proposal.Id))!.ProposalStatus);
+        Assert.Empty(await _db.ApprovalAuditLogs.ToListAsync());
+    }
+
+    [Fact]
+    public async Task DraftSurvey_CannotGenerateProposal()
+    {
+        (await _db.SolarSurveys.FindAsync(_surveyId))!.SurveyStatus = SurveyStatus.Draft;
+        await _db.SaveChangesAsync();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => CreateService().CreateAsync(_surveyId, _homeownerId, null));
+        Assert.Empty(await _db.EngineeringProposals.ToListAsync());
+    }
 
     [Fact]
     public async Task CreateProposal_CalculatesSpecsAndSetsStatusToPendingApproval()
