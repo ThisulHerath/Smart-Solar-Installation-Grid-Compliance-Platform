@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SolarPlatform.Api.Data;
@@ -11,9 +12,11 @@ using SolarPlatform.Api.Data;
 namespace SolarPlatform.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910110348_AddPhase4EngineeringProposal")]
+    partial class AddPhase4EngineeringProposal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -380,40 +383,6 @@ namespace SolarPlatform.Api.Migrations
                     b.HasIndex("TechnicianId");
 
                     b.ToTable("FieldJobs");
-                });
-
-            modelBuilder.Entity("SolarPlatform.Api.Models.ProposalLifecycleAuditEvent", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Details")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<Guid>("EngineeringProposalId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Event")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("WorkflowId")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EngineeringProposalId");
-
-                    b.HasIndex("Timestamp");
-
-                    b.ToTable("ProposalLifecycleAuditEvents");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.Role", b =>
@@ -960,17 +929,6 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("Technician");
                 });
 
-            modelBuilder.Entity("SolarPlatform.Api.Models.ProposalLifecycleAuditEvent", b =>
-                {
-                    b.HasOne("SolarPlatform.Api.Models.EngineeringProposal", "EngineeringProposal")
-                        .WithMany("LifecycleEvents")
-                        .HasForeignKey("EngineeringProposalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EngineeringProposal");
-                });
-
             modelBuilder.Entity("SolarPlatform.Api.Models.SiteInspection", b =>
                 {
                     b.HasOne("SolarPlatform.Api.Models.FieldJob", "FieldJob")
@@ -1058,8 +1016,6 @@ namespace SolarPlatform.Api.Migrations
             modelBuilder.Entity("SolarPlatform.Api.Models.EngineeringProposal", b =>
                 {
                     b.Navigation("AuditLogs");
-
-                    b.Navigation("LifecycleEvents");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.FieldJob", b =>

@@ -55,6 +55,8 @@ export const Navbar: React.FC = () => {
                 <>
                   <a href="/surveys" style={{ color: 'var(--solar-emerald)', textDecoration: 'none' }}>Staff Surveys</a>
                   <a href="/field-jobs" style={{ color: 'var(--solar-cyan)', textDecoration: 'none' }}>Field Operations</a>
+                  <a href="/proposals" style={{ color: '#8b5cf6', textDecoration: 'none' }}>Proposals</a>
+                  <a href="/proposals/pending" style={{ color: '#f59e0b', textDecoration: 'none' }}>Pending Approvals</a>
                 </>
               )}
             </nav>

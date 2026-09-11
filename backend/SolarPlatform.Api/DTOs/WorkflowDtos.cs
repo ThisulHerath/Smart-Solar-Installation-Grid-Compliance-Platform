@@ -54,3 +54,45 @@ public class WorkflowTestResponseDto
     [JsonPropertyName("validation_results")]
     public Dictionary<string, object> ValidationResults { get; set; } = new();
 }
+
+/// <summary>
+/// Structured output from the SafetyGuardrailAgent.
+/// Never trusted as the final approval decision — deterministic validation runs after this.
+/// </summary>
+public class GuardrailResultDto
+{
+    [JsonPropertyName("safety_status")]
+    public string SafetyStatus { get; set; } = "REQUIRES_APPROVAL";
+
+    [JsonPropertyName("risk_level")]
+    public string RiskLevel { get; set; } = "HIGH";
+
+    [JsonPropertyName("requires_approval")]
+    public bool RequiresApproval { get; set; } = true;
+
+    [JsonPropertyName("issues")]
+    public List<string> Issues { get; set; } = new();
+
+    [JsonPropertyName("recommendations")]
+    public List<string> Recommendations { get; set; } = new();
+
+    [JsonPropertyName("recommendation_summary")]
+    public string? RecommendationSummary { get; set; }
+
+    [JsonPropertyName("workflow_id")]
+    public string? WorkflowId { get; set; }
+
+    [JsonPropertyName("execution_logs")]
+    public List<Dictionary<string, object>> ExecutionLogs { get; set; } = new();
+
+    /// <summary>Fail-safe default — always requires approval when AI is unavailable.</summary>
+    public static GuardrailResultDto SafeDefault() => new()
+    {
+        SafetyStatus = "REQUIRES_APPROVAL",
+        RiskLevel = "HIGH",
+        RequiresApproval = true,
+        Issues = new List<string> { "Safety guardrail evaluation unavailable — approval required by default." },
+        Recommendations = new List<string> { "Retry after AI service is restored." },
+        RecommendationSummary = "AI guardrail could not be evaluated. Manual review required."
+    };
+}

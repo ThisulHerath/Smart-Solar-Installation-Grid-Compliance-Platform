@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/status_badge.dart';
 import 'login_screen.dart';
+import 'proposal_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
 
@@ -100,6 +101,16 @@ class HomeScreen extends StatelessWidget {
               label: const Text('Customer Solar Surveys'),
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF10B981),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+            ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProposalScreen())),
+              icon: const Icon(Icons.description),
+              label: const Text('Engineering Proposal Status'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF8B5CF6),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
