@@ -28,6 +28,16 @@ app.add_middleware(
 )
 
 INTERNAL_KEY = os.getenv("AGENTIC_AI_INTERNAL_KEY")
+if not INTERNAL_KEY:
+    raise RuntimeError("AGENTIC_AI_INTERNAL_KEY must be configured.")
+
+
+def _require_internal_key(x_internal_key: str | None) -> None:
+    if x_internal_key != INTERNAL_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid internal authorization key."
+        )
 
 @app.get("/health", tags=["Health"])
 def health_check():
@@ -47,12 +57,7 @@ def test_workflow(
     request: WorkflowExecutionRequest,
     x_internal_key: str = Header(None, alias="X-Internal-Key")
 ):
-    # Optional security check for internal communication
-    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid internal authorization key."
-        )
+    _require_internal_key(x_internal_key)
 
     try:
         raw_result = run_solar_workflow(
@@ -83,15 +88,13 @@ def test_workflow(
 
 @app.post("/workflow/solar-sizing", response_model=SolarSizingResponse, tags=["Workflow"])
 def solar_sizing_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
-    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
+    _require_internal_key(x_internal_key)
     return run_solar_sizing(request)
 
 @app.post("/workflow/compliance", response_model=ComplianceEvaluationResponse, tags=["Workflow"])
 @app.post("/api/v1/compliance/evaluate", response_model=ComplianceEvaluationResponse, tags=["Workflow"])
 def compliance_evaluation_workflow(request: dict, x_internal_key: str = Header(None, alias="X-Internal-Key")):
-    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
+    _require_internal_key(x_internal_key)
     return run_compliance_evaluation(request)
 
 @app.post("/workflow/guardrail", response_model=GuardrailWorkflowResult, tags=["Workflow"])
@@ -101,6 +104,5 @@ def guardrail_workflow(request: dict, x_internal_key: str = Header(None, alias="
     Called by ASP.NET Core when creating an engineering proposal.
     AI CANNOT approve a proposal — only the deterministic validator + human engineer can.
     """
-    if INTERNAL_KEY and x_internal_key != INTERNAL_KEY:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid internal authorization key.")
+    _require_internal_key(x_internal_key)
     return run_guardrail_workflow(request)

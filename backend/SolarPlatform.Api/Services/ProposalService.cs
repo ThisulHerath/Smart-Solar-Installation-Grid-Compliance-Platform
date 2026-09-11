@@ -119,6 +119,7 @@ public class ProposalService : IProposalService
 
         _db.EngineeringProposals.Add(proposal);
         await _db.SaveChangesAsync(ct);
+        AddLifecycleEvent(proposal, ProposalLifecycleEvent.PROPOSAL_CREATED, "Proposal created from completed survey.");
 
         // 5. Transition to Processing → call SafetyGuardrailAgent
         ProposalStatusTransition.ValidateTransition(proposal.ProposalStatus, ProposalStatus.Processing);
@@ -127,6 +128,7 @@ public class ProposalService : IProposalService
         await _db.SaveChangesAsync(ct);
 
         // 6. Call SafetyGuardrailAgent (fail-safe: defaults to REQUIRES_APPROVAL if AI unavailable)
+        AddLifecycleEvent(proposal, ProposalLifecycleEvent.GUARDRAIL_STARTED, "Guardrail evaluation started.");
         var guardrailRequest = new
         {
             proposal_id = proposal.Id.ToString(),
@@ -158,6 +160,11 @@ public class ProposalService : IProposalService
 
         proposal.RequiresApproval = validationResult.RequiresApproval;
         proposal.ValidationResultJson = JsonSerializer.Serialize(validationResult);
+        AddLifecycleEvent(proposal, ProposalLifecycleEvent.VALIDATION_COMPLETED, validationResult.Valid ? "Deterministic validation passed." : "Deterministic validation failed.");
+        if (validationResult.RequiresApproval)
+            AddLifecycleEvent(proposal, ProposalLifecycleEvent.APPROVAL_REQUIRED, "Senior staff approval is required.");
+        else if (!validationResult.Valid)
+            AddLifecycleEvent(proposal, ProposalLifecycleEvent.APPROVAL_BLOCKED, "Proposal validation blocked approval.");
         proposal.RecommendationSummary = guardrailResult?.RecommendationSummary
             ?? $"Solar system of {recommendedKw}kW ({panelCount} panels) proposed for {survey.PropertyAddress}.";
 
@@ -171,7 +178,7 @@ public class ProposalService : IProposalService
             "Engineering proposal {ProposalId} created for survey {SurveyId}. Status: {Status}, RequiresApproval: {Req}",
             proposal.Id, surveyId, proposal.ProposalStatus, proposal.RequiresApproval);
 
-        return await BuildDtoAsync(proposal.Id, ct) ?? throw new InvalidOperationException("Proposal not found after creation.");
+        return await BuildDtoAsync(proposal.Id, null, true, ct) ?? throw new InvalidOperationException("Proposal not found after creation.");
     }
 
     // ─── Deterministic Validator (authoritative — overrides AI) ──────────────
@@ -268,14 +275,15 @@ public class ProposalService : IProposalService
             .ToListAsync(ct);
     }
 
-    public async Task<EngineeringProposalDto?> GetAsync(Guid proposalId, CancellationToken ct = default)
-        => await BuildDtoAsync(proposalId, ct);
+    public async Task<EngineeringProposalDto?> GetAsync(Guid proposalId, Guid requestingUserId, bool isStaff, CancellationToken ct = default)
+        => await BuildDtoAsync(proposalId, requestingUserId, isStaff, ct);
 
     // ─── Approve (transactional) ──────────────────────────────────────────────
 
     public async Task<EngineeringProposalDto> ApproveAsync(
         Guid proposalId, Guid engineerUserId, string? comment, CancellationToken ct = default)
     {
+        var approvalBlocked = false;
         await using var transaction = await _db.Database.BeginTransactionAsync(ct);
         try
         {
@@ -295,8 +303,11 @@ public class ProposalService : IProposalService
                 proposal.EstimatedCostLkr, proposal.GridComplianceStatus, proposal.RequiresApproval);
 
             if (!reValidation.Valid)
+            {
+                approvalBlocked = true;
                 throw new InvalidOperationException(
                     $"Approval blocked: deterministic validation failed. Violations: {string.Join("; ", reValidation.Violations)}");
+            }
 
             // Step 3: Validate state transition
             ProposalStatusTransition.ValidateTransition(proposal.ProposalStatus, ProposalStatus.Approved);
@@ -317,17 +328,35 @@ public class ProposalService : IProposalService
                 Timestamp = DateTime.UtcNow
             };
             _db.ApprovalAuditLogs.Add(auditLog);
+            AddLifecycleEvent(proposal, ProposalLifecycleEvent.APPROVED, comment);
 
             // Step 6: Commit
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation("Proposal {ProposalId} APPROVED by engineer {UserId}.", proposalId, engineerUserId);
-            return await BuildDtoAsync(proposalId, ct) ?? throw new InvalidOperationException("Proposal not found after approval.");
+            return await BuildDtoAsync(proposalId, null, true, ct) ?? throw new InvalidOperationException("Proposal not found after approval.");
         }
         catch
         {
             await transaction.RollbackAsync(ct);
+            if (approvalBlocked)
+            {
+                // Persist a blocked approval after the decision transaction is rolled back.
+                var blockedProposal = await _db.EngineeringProposals.FirstOrDefaultAsync(p => p.Id == proposalId, ct);
+                if (blockedProposal != null)
+                {
+                    _db.ProposalLifecycleAuditEvents.Add(new ProposalLifecycleAuditEvent
+                    {
+                        EngineeringProposalId = proposalId,
+                        WorkflowId = blockedProposal.WorkflowId,
+                        Event = ProposalLifecycleEvent.APPROVAL_BLOCKED,
+                        Details = "Approval blocked by deterministic validation.",
+                        Timestamp = DateTime.UtcNow
+                    });
+                    await _db.SaveChangesAsync(ct);
+                }
+            }
             throw;
         }
     }
@@ -361,12 +390,13 @@ public class ProposalService : IProposalService
                 Comment = comment,
                 Timestamp = DateTime.UtcNow
             });
+            AddLifecycleEvent(proposal, ProposalLifecycleEvent.REJECTED, comment);
 
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation("Proposal {ProposalId} REJECTED by engineer {UserId}.", proposalId, engineerUserId);
-            return await BuildDtoAsync(proposalId, ct) ?? throw new InvalidOperationException("Proposal not found after rejection.");
+            return await BuildDtoAsync(proposalId, null, true, ct) ?? throw new InvalidOperationException("Proposal not found after rejection.");
         }
         catch
         {
@@ -404,12 +434,13 @@ public class ProposalService : IProposalService
                 Comment = comment,
                 Timestamp = DateTime.UtcNow
             });
+            AddLifecycleEvent(proposal, ProposalLifecycleEvent.REVISION_REQUESTED, comment);
 
             await _db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation("Proposal {ProposalId} REVISION REQUESTED by engineer {UserId}.", proposalId, engineerUserId);
-            return await BuildDtoAsync(proposalId, ct) ?? throw new InvalidOperationException("Proposal not found after revision request.");
+            return await BuildDtoAsync(proposalId, null, true, ct) ?? throw new InvalidOperationException("Proposal not found after revision request.");
         }
         catch
         {
@@ -420,10 +451,19 @@ public class ProposalService : IProposalService
 
     // ─── DTO Mapping ──────────────────────────────────────────────────────────
 
-    private async Task<EngineeringProposalDto?> BuildDtoAsync(Guid proposalId, CancellationToken ct)
+    private async Task<EngineeringProposalDto?> BuildDtoAsync(Guid proposalId, Guid? requestingUserId, bool isStaff, CancellationToken ct)
     {
-        var p = await _db.EngineeringProposals
+        var query = _db.EngineeringProposals
             .Include(x => x.AuditLogs)
+            .Include(x => x.SolarSurvey)
+                .ThenInclude(s => s.Customer)
+            .AsQueryable();
+
+        if (!isStaff && requestingUserId.HasValue)
+            query = query.Where(x => x.SolarSurvey.Customer.UserId == requestingUserId.Value);
+
+        var p = await query
+            .Include(x => x.LifecycleEvents)
             .Include(x => x.SolarSurvey)
                 .ThenInclude(s => s.Customer)
             .FirstOrDefaultAsync(x => x.Id == proposalId, ct);
@@ -449,7 +489,22 @@ public class ProposalService : IProposalService
         p.AuditLogs.OrderBy(a => a.Timestamp).Select(a => new ApprovalAuditLogDto(
             a.Id, a.Decision.ToString(), a.Comment, a.UserId, a.WorkflowId, a.Timestamp
         )).ToList(),
+        p.LifecycleEvents.OrderBy(a => a.Timestamp).Select(a => new ProposalLifecycleAuditEventDto(
+            a.Id, a.Event.ToString(), a.Details, a.WorkflowId, a.Timestamp
+        )).ToList(),
         p.SolarSurvey?.Customer?.FullName,
         p.SolarSurvey?.PropertyAddress
     );
+
+    private void AddLifecycleEvent(EngineeringProposal proposal, ProposalLifecycleEvent eventType, string? details)
+    {
+        _db.ProposalLifecycleAuditEvents.Add(new ProposalLifecycleAuditEvent
+        {
+            EngineeringProposalId = proposal.Id,
+            WorkflowId = proposal.WorkflowId,
+            Event = eventType,
+            Details = details,
+            Timestamp = DateTime.UtcNow
+        });
+    }
 }

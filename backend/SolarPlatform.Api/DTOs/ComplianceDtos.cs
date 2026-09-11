@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace SolarPlatform.Api.DTOs;
 
 public record ComplianceAssessmentDto(
@@ -38,22 +40,22 @@ public record EvaluateComplianceRequestDto(
 );
 
 public record EvaluateComplianceResponseDto(
-    string WorkflowId,
-    bool GridCompliant,
-    string ComplianceStatus,
-    string RiskLevel,
-    List<string> Violations,
-    List<string> Recommendations,
-    string ValidationStatus,
-    string? Notes,
-    List<ComplianceExecutionLogDto> ExecutionLogs
+    [property: JsonPropertyName("workflow_id")] string WorkflowId,
+    [property: JsonPropertyName("grid_compliant")] bool GridCompliant,
+    [property: JsonPropertyName("compliance_status")] string ComplianceStatus,
+    [property: JsonPropertyName("risk_level")] string RiskLevel,
+    [property: JsonPropertyName("violations")] List<string> Violations,
+    [property: JsonPropertyName("recommendations")] List<string> Recommendations,
+    [property: JsonPropertyName("validation_status")] string ValidationStatus,
+    [property: JsonPropertyName("notes")] string? Notes,
+    [property: JsonPropertyName("execution_logs")] List<ComplianceExecutionLogDto> ExecutionLogs
 );
 
 public record ComplianceExecutionLogDto(
-    string AgentName,
-    string StepName,
-    string Status,
-    string? OutputSummary,
-    string? ErrorMessage,
-    long DurationMs
+    [property: JsonPropertyName("agent_name")] string AgentName,
+    [property: JsonPropertyName("step_name")] string StepName,
+    [property: JsonPropertyName("status")] string Status,
+    [property: JsonPropertyName("output_summary")] string? OutputSummary,
+    [property: JsonPropertyName("error_message")] string? ErrorMessage,
+    [property: JsonPropertyName("duration_ms")] long DurationMs
 );

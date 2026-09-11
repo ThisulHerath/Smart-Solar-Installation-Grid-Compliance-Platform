@@ -54,3 +54,11 @@ class EngineeringProposalModel {
         auditLogs: json['auditLogs'] ?? [],
       );
 }
+
+List<Map<String, dynamic>> parseProposalList(dynamic response) {
+  if (response is! List) return <Map<String, dynamic>>[];
+  return response
+      .whereType<Map>()
+      .map((item) => Map<String, dynamic>.from(item))
+      .toList();
+}

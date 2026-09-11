@@ -174,4 +174,32 @@ public class ProposalServiceTests
         var pendingAfter = await service.GetPendingAsync();
         Assert.Empty(pendingAfter);
     }
+
+    [Fact]
+    public async Task GetProposalDetail_IsolatedFromOtherHomeowners()
+    {
+        var service = CreateService();
+        var proposal = await service.CreateAsync(_surveyId, _homeownerId, null);
+
+        var visible = await service.GetAsync(proposal.Id, _homeownerId, false);
+        var hidden = await service.GetAsync(proposal.Id, Guid.NewGuid(), false);
+
+        Assert.NotNull(visible);
+        Assert.Null(hidden);
+    }
+
+    [Fact]
+    public async Task ApproveProposal_WhenStatusIsInvalid_RollsBackDecision()
+    {
+        var service = CreateService();
+        var proposal = await service.CreateAsync(_surveyId, _homeownerId, null);
+        await service.RejectAsync(proposal.Id, _engineerId, "Rejected for rollback test");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.ApproveAsync(proposal.Id, _engineerId, "Invalid approval"));
+
+        var reloaded = await service.GetAsync(proposal.Id, _engineerId, true);
+        Assert.Equal(ProposalStatus.Rejected.ToString(), reloaded!.ProposalStatus);
+        Assert.Single(reloaded.AuditLogs);
+    }
 }

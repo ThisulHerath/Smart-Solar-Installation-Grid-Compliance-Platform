@@ -19,3 +19,15 @@ public enum ApprovalDecision
     Rejected,
     RevisionRequested
 }
+
+public enum ProposalLifecycleEvent
+{
+    PROPOSAL_CREATED,
+    GUARDRAIL_STARTED,
+    VALIDATION_COMPLETED,
+    APPROVAL_REQUIRED,
+    APPROVAL_BLOCKED,
+    APPROVED,
+    REJECTED,
+    REVISION_REQUESTED
+}

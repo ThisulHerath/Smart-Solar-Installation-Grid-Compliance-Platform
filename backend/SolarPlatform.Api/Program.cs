@@ -30,10 +30,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     if (!string.IsNullOrWhiteSpace(connectionString) && !connectionString.Contains("YOUR_NEON_PASSWORD"))
     {
-        options.UseNpgsql(connectionString, npgsqlOptions =>
-        {
-            npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-        });
+        options.UseNpgsql(connectionString);
     }
     else
     {

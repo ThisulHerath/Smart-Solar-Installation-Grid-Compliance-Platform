@@ -11,6 +11,14 @@ public record ApprovalAuditLogDto(
     DateTime Timestamp
 );
 
+public record ProposalLifecycleAuditEventDto(
+    Guid Id,
+    string Event,
+    string? Details,
+    string? WorkflowId,
+    DateTime Timestamp
+);
+
 public record EngineeringProposalSummaryDto(
     Guid Id,
     Guid SolarSurveyId,
@@ -48,6 +56,7 @@ public record EngineeringProposalDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     List<ApprovalAuditLogDto> AuditLogs,
+    List<ProposalLifecycleAuditEventDto> LifecycleEvents,
     // Customer/survey summary fields
     string? CustomerName,
     string? PropertyAddress

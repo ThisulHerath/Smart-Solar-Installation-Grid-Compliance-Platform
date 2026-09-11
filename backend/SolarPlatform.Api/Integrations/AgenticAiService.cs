@@ -132,7 +132,8 @@ public class AgenticAiService : IAgenticAiService
     {
         try
         {
-            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? "smart-solar-dev-internal-key-2026";
+            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY")
+                ?? throw new InvalidOperationException("AGENTIC_AI_INTERNAL_KEY must be configured.");
             using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/compliance") { Content = JsonContent.Create(request) };
             message.Headers.Add("X-Internal-Key", internalKey);
             var response = await _httpClient.SendAsync(message, cancellationToken);
@@ -154,7 +155,8 @@ public class AgenticAiService : IAgenticAiService
     {
         try
         {
-            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY") ?? "smart-solar-dev-internal-key-2026";
+            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY")
+                ?? throw new InvalidOperationException("AGENTIC_AI_INTERNAL_KEY must be configured.");
             using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/guardrail") { Content = JsonContent.Create(request) };
             message.Headers.Add("X-Internal-Key", internalKey);
             var response = await _httpClient.SendAsync(message, cancellationToken);

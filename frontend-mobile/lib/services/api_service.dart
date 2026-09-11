@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
+import '../models/proposal.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -86,10 +87,9 @@ class ApiService {
   Future<Map<String, dynamic>> getProposal(String proposalId) async =>
       Map<String, dynamic>.from(await get('/api/proposals/$proposalId'));
 
-  Future<Map<String, dynamic>?> getProposalForSurvey(String surveyId) async {
+  Future<List<Map<String, dynamic>>> getProposalForSurvey(String surveyId) async {
     final response = await get('/api/proposals/survey/$surveyId');
-    if (response == null) return null;
-    return Map<String, dynamic>.from(response);
+    return parseProposalList(response);
   }
 
   // Technician endpoints

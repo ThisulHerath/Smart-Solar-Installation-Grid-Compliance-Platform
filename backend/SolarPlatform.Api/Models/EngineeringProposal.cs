@@ -49,4 +49,5 @@ public class EngineeringProposal
     // ── Navigation Properties ──────────────────────────────────────────────────
     public SolarSurvey SolarSurvey { get; set; } = null!;
     public ICollection<ApprovalAuditLog> AuditLogs { get; set; } = new List<ApprovalAuditLog>();
+    public ICollection<ProposalLifecycleAuditEvent> LifecycleEvents { get; set; } = new List<ProposalLifecycleAuditEvent>();
 }

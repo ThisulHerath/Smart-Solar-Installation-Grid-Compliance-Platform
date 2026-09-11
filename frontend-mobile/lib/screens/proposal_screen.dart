@@ -32,8 +32,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
     try {
       if (widget.surveyId != null && widget.surveyId!.isNotEmpty) {
         final data = await _apiService.getProposalForSurvey(widget.surveyId!);
-        if (data != null) {
-          _proposal = EngineeringProposalModel.fromJson(data);
+        if (data.isNotEmpty) {
+          _proposal = EngineeringProposalModel.fromJson(data.first);
         } else {
           _proposal = null;
         }
@@ -44,8 +44,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
           final firstSurveyId = surveys.first['id']?.toString();
           if (firstSurveyId != null) {
             final data = await _apiService.getProposalForSurvey(firstSurveyId);
-            if (data != null) {
-              _proposal = EngineeringProposalModel.fromJson(data);
+            if (data.isNotEmpty) {
+              _proposal = EngineeringProposalModel.fromJson(data.first);
             }
           }
         }
@@ -102,18 +102,18 @@ class _ProposalScreenState extends State<ProposalScreen> {
                   ),
                 )
               : _proposal == null
-                  ? Center(
+                    ? const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.description_outlined, color: Color(0xFF94A3B8), size: 56),
-                          const SizedBox(height: 16),
-                          const Text(
+                          Icon(Icons.description_outlined, color: Color(0xFF94A3B8), size: 56),
+                          SizedBox(height: 16),
+                          Text(
                             'No Engineering Proposal Found',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
-                          const SizedBox(height: 8),
-                          const Padding(
+                          SizedBox(height: 8),
+                          Padding(
                             padding: EdgeInsets.symmetric(horizontal: 32),
                             child: Text(
                               'Complete your solar survey and request an engineering assessment to generate a formal proposal.',

@@ -24,3 +24,15 @@ public class ApprovalAuditLog
     public EngineeringProposal EngineeringProposal { get; set; } = null!;
     public User User { get; set; } = null!;
 }
+
+public class ProposalLifecycleAuditEvent
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid EngineeringProposalId { get; set; }
+    public string? WorkflowId { get; set; }
+    public ProposalLifecycleEvent Event { get; set; }
+    public string? Details { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+    public EngineeringProposal EngineeringProposal { get; set; } = null!;
+}

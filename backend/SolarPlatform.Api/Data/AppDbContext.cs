@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     public DbSet<ComplianceAssessment> ComplianceAssessments => Set<ComplianceAssessment>();
     public DbSet<EngineeringProposal> EngineeringProposals => Set<EngineeringProposal>();
     public DbSet<ApprovalAuditLog> ApprovalAuditLogs => Set<ApprovalAuditLog>();
+    public DbSet<ProposalLifecycleAuditEvent> ProposalLifecycleAuditEvents => Set<ProposalLifecycleAuditEvent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -229,6 +230,20 @@ public class AppDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(a => a.UserId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ProposalLifecycleAuditEvent>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.HasIndex(a => a.EngineeringProposalId);
+            entity.HasIndex(a => a.Timestamp);
+            entity.Property(a => a.WorkflowId).HasMaxLength(100);
+            entity.Property(a => a.Event).HasConversion<string>().HasMaxLength(50);
+            entity.Property(a => a.Details).HasMaxLength(2000);
+            entity.HasOne(a => a.EngineeringProposal)
+                .WithMany(p => p.LifecycleEvents)
+                  .HasForeignKey(a => a.EngineeringProposalId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Seed Foundation Data

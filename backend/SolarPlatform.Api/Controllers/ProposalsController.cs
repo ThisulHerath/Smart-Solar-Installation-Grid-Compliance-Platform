@@ -43,7 +43,8 @@ public class ProposalsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken ct)
     {
-        var proposal = await _service.GetAsync(id, ct);
+        var isStaff = User.IsInRole(RoleConstants.SeniorEngineer) || User.IsInRole(RoleConstants.Administrator);
+        var proposal = await _service.GetAsync(id, UserId(), isStaff, ct);
         return proposal == null ? NotFound() : Ok(proposal);
     }
 
@@ -62,7 +63,7 @@ public class ProposalsController : ControllerBase
     }
 
     // POST /api/proposals/{id}/approve
-    [HttpPost("{id:guid}/approve"), Authorize(Roles = RoleConstants.SeniorEngineer)]
+    [HttpPost("{id:guid}/approve"), Authorize(Roles = $"{RoleConstants.SeniorEngineer},{RoleConstants.Administrator}")]
     public async Task<IActionResult> Approve(Guid id, [FromBody] ApproveProposalRequestDto request, CancellationToken ct)
     {
         try
@@ -75,7 +76,7 @@ public class ProposalsController : ControllerBase
     }
 
     // POST /api/proposals/{id}/reject
-    [HttpPost("{id:guid}/reject"), Authorize(Roles = RoleConstants.SeniorEngineer)]
+    [HttpPost("{id:guid}/reject"), Authorize(Roles = $"{RoleConstants.SeniorEngineer},{RoleConstants.Administrator}")]
     public async Task<IActionResult> Reject(Guid id, [FromBody] RejectProposalRequestDto request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Comment))
@@ -90,7 +91,7 @@ public class ProposalsController : ControllerBase
     }
 
     // POST /api/proposals/{id}/revise
-    [HttpPost("{id:guid}/revise"), Authorize(Roles = RoleConstants.SeniorEngineer)]
+    [HttpPost("{id:guid}/revise"), Authorize(Roles = $"{RoleConstants.SeniorEngineer},{RoleConstants.Administrator}")]
     public async Task<IActionResult> Revise(Guid id, [FromBody] ReviseProposalRequestDto request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Comment))
