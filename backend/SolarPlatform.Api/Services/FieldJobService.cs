@@ -340,14 +340,14 @@ public class FieldJobService : IFieldJobService
         await _db.SaveChangesAsync();
 
         // Extract telemetry
-        var voc = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.Voc)?.MeasurementValue;
-        var isc = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.Isc)?.MeasurementValue;
-        var vmp = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.Vmp)?.MeasurementValue;
-        var imp = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.Imp)?.MeasurementValue;
-        var irradiance = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.Irradiance)?.MeasurementValue;
-        var temperature = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.Temperature)?.MeasurementValue;
-        var gridVoltage = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.GridVoltage)?.MeasurementValue;
-        var gridFrequency = inspection.Telemetry.FirstOrDefault(t => t.MeasurementType == MeasurementType.GridFrequency)?.MeasurementValue;
+        var voc = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.Voc)?.MeasurementValue;
+        var isc = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.Isc)?.MeasurementValue;
+        var vmp = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.Vmp)?.MeasurementValue;
+        var imp = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.Imp)?.MeasurementValue;
+        var irradiance = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.Irradiance)?.MeasurementValue;
+        var temperature = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.Temperature)?.MeasurementValue;
+        var gridVoltage = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.GridVoltage)?.MeasurementValue;
+        var gridFrequency = inspection.Telemetry.OrderByDescending(t => t.RecordedAt).FirstOrDefault(t => t.MeasurementType == MeasurementType.GridFrequency)?.MeasurementValue;
 
         var complianceRequest = new EvaluateComplianceRequestDto(
             InspectionId: inspection.Id,
@@ -408,6 +408,8 @@ public class FieldJobService : IFieldJobService
         {
             // Deterministic local compliance evaluation fallback
             var violations = new List<string>();
+            if (!gridVoltage.HasValue || !gridFrequency.HasValue || !inspection.MainBreakerRating.HasValue || !inspection.InverterLocationSuitable.HasValue)
+                violations.Add("Required inspection measurements are missing.");
             var recommendations = new List<string>();
 
             // Voltage check (230V +/- 6% for single phase, 400V +/- 6% for three phase)
@@ -442,12 +444,12 @@ public class FieldJobService : IFieldJobService
 
             assessment.WorkflowId = $"local-comp-{Guid.NewGuid().ToString()[..8]}";
             assessment.GridCompliant = compliant;
-            assessment.ComplianceStatus = compliant ? "Compliant" : "Non-Compliant";
+            assessment.ComplianceStatus = compliant ? "COMPLIANT" : "NON_COMPLIANT";
             assessment.RiskLevel = risk;
             assessment.ValidationStatus = "DeterministicValidated";
             assessment.ComplianceNotes = violations.Count > 0
                 ? $"Violations: {string.Join("; ", violations)}"
-                : "All electrical telemetry and physical site parameters comply with grid standards.";
+                : "Local project screening passed while the AI service was unavailable. Separate utility and engineering approval is required.";
             assessment.UpdatedAt = DateTime.UtcNow;
 
             job.Status = compliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;

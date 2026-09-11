@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/proposal.dart';
 import '../services/api_service.dart';
 import '../widgets/status_badge.dart';
+import '../widgets/equipment_summary.dart';
 
 class ProposalScreen extends StatefulWidget {
   final String? surveyId;
@@ -16,6 +17,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
   bool _loading = true;
   String? _error;
   EngineeringProposalModel? _proposal;
+  int _refresh = 0;
 
   @override
   void initState() {
@@ -33,7 +35,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
       if (widget.surveyId != null && widget.surveyId!.isNotEmpty) {
         final data = await _apiService.getProposalForSurvey(widget.surveyId!);
         if (data.isNotEmpty) {
-          _proposal = EngineeringProposalModel.fromJson(data.first);
+          _proposal = EngineeringProposalModel.fromJson(await _apiService.getProposal(data.first['id'].toString()));
         } else {
           _proposal = null;
         }
@@ -45,7 +47,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
           if (firstSurveyId != null) {
             final data = await _apiService.getProposalForSurvey(firstSurveyId);
             if (data.isNotEmpty) {
-              _proposal = EngineeringProposalModel.fromJson(data.first);
+              _proposal = EngineeringProposalModel.fromJson(await _apiService.getProposal(data.first['id'].toString()));
             }
           }
         }
@@ -56,8 +58,21 @@ class _ProposalScreenState extends State<ProposalScreen> {
       if (mounted) {
         setState(() {
           _loading = false;
+          _refresh++;
         });
       }
+    }
+  }
+
+  Future<void> _requestProposal() async {
+    final surveyId = widget.surveyId;
+    if (surveyId == null) return;
+    setState(() { _loading = true; _error = null; });
+    try {
+      await _apiService.createProposal(surveyId);
+      if (mounted) await _loadProposal();
+    } catch (e) {
+      if (mounted) setState(() { _error = e.toString().replaceAll('Exception: ', ''); _loading = false; });
     }
   }
 
@@ -102,18 +117,18 @@ class _ProposalScreenState extends State<ProposalScreen> {
                   ),
                 )
               : _proposal == null
-                    ? const Center(
+                    ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.description_outlined, color: Color(0xFF94A3B8), size: 56),
-                          SizedBox(height: 16),
-                          Text(
+                          const Icon(Icons.description_outlined, color: Color(0xFF94A3B8), size: 56),
+                          const SizedBox(height: 16),
+                          const Text(
                             'No Engineering Proposal Found',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
-                          SizedBox(height: 8),
-                          Padding(
+                          const SizedBox(height: 8),
+                          const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 32),
                             child: Text(
                               'Complete your solar survey and request an engineering assessment to generate a formal proposal.',
@@ -121,6 +136,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
                               textAlign: TextAlign.center,
                             ),
                           ),
+                          if (widget.surveyId != null)
+                            FilledButton(onPressed: _requestProposal, child: const Text('Request engineering proposal')),
                         ],
                       ),
                     )
@@ -175,6 +192,10 @@ class _ProposalScreenState extends State<ProposalScreen> {
                           const SizedBox(height: 16),
 
                           // Technical Specs Grid
+                          EquipmentSummary(key: ValueKey('${_proposal!.id}-$_refresh'), proposalId: _proposal!.id),
+                          if (['RevisionRequested', 'Rejected', 'Failed'].contains(_proposal!.proposalStatus))
+                            FilledButton(onPressed: _requestProposal, child: const Text('Request updated proposal')),
+                          const SizedBox(height: 16),
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
@@ -254,7 +275,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                                 SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'This engineering proposal is under review by certified Senior Grid Engineers. Final approval status will automatically update here.',
+                                    'An engineer reviews this proposal before equipment reservation. Refresh to see the latest decision. Utility approval is a separate process.',
                                     style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.4),
                                   ),
                                 ),

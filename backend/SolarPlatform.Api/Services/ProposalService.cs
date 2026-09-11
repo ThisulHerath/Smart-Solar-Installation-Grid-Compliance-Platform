@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Data;
 using Microsoft.EntityFrameworkCore;
 using SolarPlatform.Api.Data;
 using SolarPlatform.Api.DTOs;
@@ -49,6 +50,9 @@ public class ProposalService : IProposalService
             if (customerProfile == null || customerProfile.Id != survey.CustomerId)
                 throw new UnauthorizedAccessException("You do not have permission to create a proposal for this survey.");
         }
+
+        if (survey.SurveyStatus != SurveyStatus.AnalysisComplete)
+            throw new InvalidOperationException("Complete the survey analysis before requesting a proposal.");
 
         // 2. Find the latest compliance assessment via site inspection ← field job ← survey
         var compliance = await _db.ComplianceAssessments
@@ -204,6 +208,12 @@ public class ProposalService : IProposalService
         if (estimatedCostLkr <= 0) { violations.Add("estimatedCostLkr must be > 0."); checks.Add("FAIL:cost_positive"); }
         else checks.Add("PASS:cost_positive");
 
+        if (!new[] { "COMPLIANT", "CONDITIONAL", "NON_COMPLIANT" }.Contains(complianceStatus, StringComparer.OrdinalIgnoreCase))
+        {
+            violations.Add("A completed site compliance assessment is required before approval. Request a new proposal after the inspection.");
+            checks.Add("FAIL:compliance_assessment_required");
+        }
+
         // High-impact approval rules (deterministic, cannot be overridden by AI)
         bool requiresApprovalByRule = false;
         var approvalReasons = new List<string>();
@@ -284,7 +294,7 @@ public class ProposalService : IProposalService
         Guid proposalId, Guid engineerUserId, string? comment, CancellationToken ct = default)
     {
         var approvalBlocked = false;
-        await using var transaction = await _db.Database.BeginTransactionAsync(ct);
+        await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         try
         {
             var proposal = await _db.EngineeringProposals
@@ -298,6 +308,11 @@ public class ProposalService : IProposalService
                     $"Proposal cannot be approved from status '{proposal.ProposalStatus}'. Only PENDING_APPROVAL proposals can be approved.");
 
             // Step 2: Re-run deterministic validation
+            if (proposal.SafetyStatus.Equals("BLOCKED", StringComparison.OrdinalIgnoreCase))
+            {
+                approvalBlocked = true;
+                throw new InvalidOperationException("The safety assessment blocks approval. Request a revision and resolve the safety issues.");
+            }
             var reValidation = RunDeterministicValidation(
                 proposal.RecommendedKw, proposal.PanelCount, proposal.InverterSizeKw,
                 proposal.EstimatedCostLkr, proposal.GridComplianceStatus, proposal.RequiresApproval);
@@ -369,7 +384,7 @@ public class ProposalService : IProposalService
         if (string.IsNullOrWhiteSpace(comment))
             throw new ArgumentException("A comment is required when rejecting a proposal.");
 
-        await using var transaction = await _db.Database.BeginTransactionAsync(ct);
+        await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         try
         {
             var proposal = await _db.EngineeringProposals
@@ -413,7 +428,7 @@ public class ProposalService : IProposalService
         if (string.IsNullOrWhiteSpace(comment))
             throw new ArgumentException("A comment is required when requesting a revision.");
 
-        await using var transaction = await _db.Database.BeginTransactionAsync(ct);
+        await using var transaction = await _db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         try
         {
             var proposal = await _db.EngineeringProposals

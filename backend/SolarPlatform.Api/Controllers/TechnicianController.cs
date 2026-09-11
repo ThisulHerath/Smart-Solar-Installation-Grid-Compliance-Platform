@@ -118,9 +118,9 @@ public class TechnicianController : ControllerBase
         IFormFile file,
         [FromForm] SitePhotoType photoType)
     {
-        if (file == null || file.Length == 0)
+        if (file == null || file.Length == 0 || file.Length > 5 * 1024 * 1024)
         {
-            return BadRequest(new { message = "Photo file is required." });
+            return BadRequest(new { message = "A photo of at most 5 MB is required." });
         }
 
         // Validate content type / extension
@@ -157,6 +157,8 @@ public class TechnicianController : ControllerBase
     [HttpGet("{jobId:guid}/compliance")]
     public async Task<ActionResult<ComplianceAssessmentDto>> GetCompliance(Guid jobId)
     {
+        var job = await _fieldJobService.GetJobByIdAsync(jobId, IsAdminOrEngineer() ? null : GetUserId());
+        if (job == null) return NotFound(new { message = "Job not found." });
         var assessment = await _fieldJobService.GetComplianceAssessmentAsync(jobId);
         if (assessment == null) return NotFound(new { message = "Compliance assessment not found for this job." });
         return Ok(assessment);

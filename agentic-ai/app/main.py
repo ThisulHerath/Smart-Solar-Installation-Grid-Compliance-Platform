@@ -10,6 +10,8 @@ from app.workflow.graph import run_solar_workflow
 from app.workflow.solar_sizing import run_solar_sizing
 from app.workflow.compliance_workflow import run_compliance_evaluation
 from app.workflow.proposal_workflow import run_guardrail_workflow
+from app.schemas.pricing_schemas import PricingRequest, PricingResponse
+from app.workflow.pricing_workflow import run_pricing_workflow
 
 load_dotenv()
 
@@ -51,6 +53,16 @@ def health_check():
             "SafetyGuardrailAgent"
         ]
     }
+
+@app.post("/workflow/equipment-pricing", response_model=PricingResponse, tags=["Workflow"])
+def equipment_pricing(request: PricingRequest, x_internal_key: str = Header(None, alias="X-Internal-Key")):
+    _require_internal_key(x_internal_key)
+    try:
+        return run_pricing_workflow(request)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Equipment pricing validation failed.")
+    except Exception:
+        raise HTTPException(status_code=503, detail="Exchange rate or pricing service unavailable. No inventory reserved.")
 
 @app.post("/workflow/test", response_model=WorkflowExecutionResponse, tags=["Workflow"])
 def test_workflow(

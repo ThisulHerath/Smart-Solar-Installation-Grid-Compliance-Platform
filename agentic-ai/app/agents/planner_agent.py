@@ -17,10 +17,14 @@ class PlannerAgent:
         logs.append(f"[{self.name}] Formulating execution plan for objective: '{objective}'")
         
         plan = [
-            "Step 1: Evaluate Grid Compliance (CEB / LECO constraints)",
-            "Step 2: Estimate Equipment and Solar Panel Pricing",
-            "Step 3: Verify Safety Guardrails and Structural Clearances",
-            "Step 4: Consolidate Proposal for Senior Engineer Approval"
+            "1. SolarSizingAgent: derive preliminary capacity from monthly electricity use; validate sizing",
+            "2. FieldTechnician: collect physical inspection and electrical measurements",
+            "3. GridComplianceAgent: evaluate project-defined grid rules; validate compliance",
+            "4. SafetyGuardrailAgent: review proposal and flag technical risks; validate safety",
+            "5. SeniorEngineer: pause for authorized approval, rejection or revision",
+            "6. EquipmentPricingAgent: select compatible catalog equipment and call the USD/LKR tool; validate pricing",
+            "7. InventoryOfficer: review the validated quote and reserve stock transactionally",
+            "8. Homeowner: receive proposal decision and equipment status through the shared API"
         ]
 
         completed.append("planning")

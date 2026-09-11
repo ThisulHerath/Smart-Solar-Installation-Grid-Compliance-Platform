@@ -34,6 +34,18 @@ public class ExceptionHandlingMiddleware
 
         switch (exception)
         {
+            case Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException:
+                statusCode = HttpStatusCode.Conflict;
+                message = "The inventory changed during this request. Refresh and retry.";
+                break;
+            case Microsoft.EntityFrameworkCore.DbUpdateException:
+                statusCode = HttpStatusCode.Conflict;
+                message = "The change conflicts with an existing record or stock constraint. Refresh and retry.";
+                break;
+            case Npgsql.PostgresException pg when pg.SqlState is "40001" or "40P01":
+                statusCode = HttpStatusCode.Conflict;
+                message = "A concurrent inventory update occurred. Refresh and retry.";
+                break;
             case UnauthorizedAccessException:
                 statusCode = HttpStatusCode.Unauthorized;
                 message = exception.Message;

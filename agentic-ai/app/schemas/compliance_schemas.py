@@ -1,8 +1,10 @@
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
 class ComplianceEvaluationInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    workflow_id: Optional[str] = None
     inspection_id: Optional[str] = None
     field_job_id: Optional[str] = None
     grid_type: str = "SinglePhase"

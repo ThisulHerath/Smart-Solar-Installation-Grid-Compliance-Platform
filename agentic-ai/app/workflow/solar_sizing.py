@@ -9,6 +9,7 @@ def run_solar_sizing(payload: Dict[str, Any]) -> SolarSizingResponse:
         return SolarSizingResponse(
             workflow_id=result["workflow_id"],
             status="completed" if valid else "failed",
+            plan=result.get("plan", []),
             recommendation=SolarSizingRecommendation.model_validate(result["final_result"]) if valid else None,
             validation_results=result.get("validation_results", {}),
             errors=result.get("errors", []),

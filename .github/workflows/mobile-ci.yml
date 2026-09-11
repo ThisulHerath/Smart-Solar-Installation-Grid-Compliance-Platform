@@ -1,0 +1,27 @@
+name: Mobile CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+        working-directory: frontend-mobile
+      - run: flutter analyze
+        working-directory: frontend-mobile
+      - run: flutter test
+        working-directory: frontend-mobile
+      - run: flutter build apk --debug
+        working-directory: frontend-mobile
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SE3090_2026-AI-17_android-debug
+          path: frontend-mobile/build/app/outputs/flutter-apk/app-debug.apk

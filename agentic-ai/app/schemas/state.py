@@ -20,6 +20,7 @@ class SolarSizingRecommendation(BaseModel):
 class SolarSizingResponse(BaseModel):
     workflow_id: str
     status: str
+    plan: List[str] = Field(default_factory=list)
     recommendation: Optional[SolarSizingRecommendation] = None
     validation_results: Dict[str, Any] = Field(default_factory=dict)
     errors: List[str] = Field(default_factory=list)

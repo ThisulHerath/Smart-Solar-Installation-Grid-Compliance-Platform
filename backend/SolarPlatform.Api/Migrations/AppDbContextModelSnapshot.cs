@@ -337,6 +337,41 @@ namespace SolarPlatform.Api.Migrations
                     b.ToTable("EngineeringProposals");
                 });
 
+            modelBuilder.Entity("SolarPlatform.Api.Models.EquipmentQuote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("EngineeringProposalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ResultJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EngineeringProposalId", "CreatedAt");
+
+                    b.ToTable("EquipmentQuote");
+                });
+
             modelBuilder.Entity("SolarPlatform.Api.Models.FieldJob", b =>
                 {
                     b.Property<Guid>("Id")
@@ -380,6 +415,191 @@ namespace SolarPlatform.Api.Migrations
                     b.HasIndex("TechnicianId");
 
                     b.ToTable("FieldJobs");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.InventoryItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("CapacityWatts")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Model")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("QuantityInStock")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReorderLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReservedQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SKU")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<Guid?>("SupplierId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitPriceUsd")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SKU")
+                        .IsUnique();
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("InventoryItems", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Inventory_Price", "\"UnitPriceUsd\" > 0 AND \"CapacityWatts\" > 0");
+
+                            t.HasCheckConstraint("CK_Inventory_Stock", "\"QuantityInStock\" >= 0 AND \"ReservedQuantity\" >= 0 AND \"ReservedQuantity\" <= \"QuantityInStock\" AND \"ReorderLevel\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.InventoryReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("EngineeringProposalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EquipmentQuoteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)");
+
+                    b.Property<Guid>("InventoryItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ReleasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ReservedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal>("TotalPriceLkr")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("UnitPriceLkr")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("UnitPriceUsd")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InventoryItemId");
+
+                    b.HasIndex("EngineeringProposalId", "InventoryItemId")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 'RESERVED'");
+
+                    b.HasIndex("EquipmentQuoteId", "InventoryItemId")
+                        .IsUnique();
+
+                    b.ToTable("InventoryReservations", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Reservation_Quantity", "\"Quantity\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.InventoryTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InventoryItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("ReferenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InventoryItemId", "CreatedAt");
+
+                    b.ToTable("InventoryTransaction");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.ProposalLifecycleAuditEvent", b =>
@@ -723,6 +943,36 @@ namespace SolarPlatform.Api.Migrations
                     b.ToTable("SolarSurveyImages");
                 });
 
+            modelBuilder.Entity("SolarPlatform.Api.Models.Supplier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Supplier");
+                });
+
             modelBuilder.Entity("SolarPlatform.Api.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -941,6 +1191,17 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("SolarSurvey");
                 });
 
+            modelBuilder.Entity("SolarPlatform.Api.Models.EquipmentQuote", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.EngineeringProposal", "EngineeringProposal")
+                        .WithMany()
+                        .HasForeignKey("EngineeringProposalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EngineeringProposal");
+                });
+
             modelBuilder.Entity("SolarPlatform.Api.Models.FieldJob", b =>
                 {
                     b.HasOne("SolarPlatform.Api.Models.SolarSurvey", "SolarSurvey")
@@ -958,6 +1219,54 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("SolarSurvey");
 
                     b.Navigation("Technician");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.InventoryItem", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.InventoryReservation", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.EngineeringProposal", "EngineeringProposal")
+                        .WithMany()
+                        .HasForeignKey("EngineeringProposalId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SolarPlatform.Api.Models.EquipmentQuote", "EquipmentQuote")
+                        .WithMany("Reservations")
+                        .HasForeignKey("EquipmentQuoteId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SolarPlatform.Api.Models.InventoryItem", "InventoryItem")
+                        .WithMany()
+                        .HasForeignKey("InventoryItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("EngineeringProposal");
+
+                    b.Navigation("EquipmentQuote");
+
+                    b.Navigation("InventoryItem");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.InventoryTransaction", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.InventoryItem", "InventoryItem")
+                        .WithMany()
+                        .HasForeignKey("InventoryItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("InventoryItem");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.ProposalLifecycleAuditEvent", b =>
@@ -1060,6 +1369,11 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("AuditLogs");
 
                     b.Navigation("LifecycleEvents");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.EquipmentQuote", b =>
+                {
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.FieldJob", b =>

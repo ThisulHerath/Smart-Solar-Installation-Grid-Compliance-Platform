@@ -100,7 +100,7 @@ public class SurveyService : ISurveyService
         if (survey == null) return null;
         if (survey.SurveyStatus != SurveyStatus.Draft) throw new InvalidOperationException("Only draft surveys can be submitted.");
         SurveyStatusTransition.Move(survey, SurveyStatus.Submitted);
-        var workflow = new AgentWorkflow { SolarSurveyId = survey.Id, Objective = "Preliminary solar system sizing", Status = WorkflowStatus.Processing, StartedAt = DateTime.UtcNow };
+        var workflow = new AgentWorkflow { SolarSurveyId = survey.Id, Objective = "Assess rooftop solar suitability and prepare an approved equipment plan", Status = WorkflowStatus.Processing, StartedAt = DateTime.UtcNow };
         // Explicitly mark the independently keyed workflow as new. Adding a non-empty GUID
         // through a tracked collection can otherwise be interpreted as an update by EF Core.
         _db.AgentWorkflows.Add(workflow);
@@ -108,6 +108,7 @@ public class SurveyService : ISurveyService
         await _db.SaveChangesAsync();
         var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
         workflow.ResultJson = result.Recommendation?.GetRawText();
+        workflow.PlanJson = JsonSerializer.Serialize(result.Plan);
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
         workflow.ErrorMessage = result.Errors?.Count > 0 ? string.Join("; ", result.Errors) : null;
         var completedAt = DateTime.UtcNow;
@@ -115,8 +116,8 @@ public class SurveyService : ISurveyService
         {
             foreach (var log in result.ExecutionLogs)
             {
-                var startedAt = log.StartedAt ?? workflow.StartedAt ?? completedAt;
-                var logCompletedAt = log.CompletedAt ?? completedAt;
+                var startedAt = (log.StartedAt ?? workflow.StartedAt ?? completedAt).ToUniversalTime();
+                var logCompletedAt = (log.CompletedAt ?? completedAt).ToUniversalTime();
                 _db.AgentExecutionLogs.Add(new AgentExecutionLog
                 {
                     AgentWorkflowId = workflow.Id, AgentName = log.AgentName, StepName = log.StepName,

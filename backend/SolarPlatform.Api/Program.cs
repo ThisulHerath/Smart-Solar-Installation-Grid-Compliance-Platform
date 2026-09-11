@@ -34,6 +34,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     }
     else
     {
+        if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
+            throw new InvalidOperationException("Configure PostgreSQL before starting a production API.");
         // Safe in-memory fallback for initial local development/testing when Neon credentials are not yet set in environment
         options.UseInMemoryDatabase("SmartSolarDevDb");
     }
@@ -82,11 +84,17 @@ builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<IFieldJobService, FieldJobService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
+builder.Services.AddScoped<InventoryService>();
 
 // 4. Agentic AI Service Client
 var agenticAiBaseUrl = Environment.GetEnvironmentVariable("AGENTIC_AI_BASE_URL")
     ?? builder.Configuration["AgenticAi:BaseUrl"]
     ?? "http://localhost:8000";
+builder.Services.AddHttpClient<IEquipmentPricingClient, EquipmentPricingClient>(client =>
+{
+    client.BaseAddress = new Uri(agenticAiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
 
 builder.Services.AddHttpClient<IAgenticAiService, AgenticAiService>(client =>
 {
@@ -99,9 +107,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-          policy.SetIsOriginAllowed(origin =>
+          var configuredOrigins = (Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS") ?? "")
+              .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+          policy.SetIsOriginAllowed(origin => configuredOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase)
+              || (builder.Environment.IsDevelopment() &&
               Uri.TryCreate(origin, UriKind.Absolute, out var uri)
-              && (uri.Host == "localhost" || uri.Host == "127.0.0.1"))
+              && (uri.Host == "localhost" || uri.Host == "127.0.0.1")))
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -163,7 +174,7 @@ using (var scope = app.Services.CreateScope())
 // Pipeline Configuration
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment() || true)
+if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ENABLE_SWAGGER") == "true")
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>

@@ -4,6 +4,13 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ProposalDetailPage } from '../ProposalDetailPage';
 import { approveProposal, getProposal } from '../../services/proposalService';
 
+vi.mock('../../context/AuthContext', () => ({
+  useAuth: () => ({ user: { roles: ['SENIOR_ENGINEER'] } }),
+}));
+vi.mock('../../components/WorkflowSummary', () => ({
+  WorkflowSummary: () => <div>Workflow history</div>,
+}));
+
 vi.mock('../../services/proposalService', () => ({
   getProposal: vi.fn(),
   approveProposal: vi.fn(),
