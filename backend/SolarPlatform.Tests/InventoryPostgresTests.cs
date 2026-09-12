@@ -3,6 +3,8 @@ using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
+using Microsoft.Extensions.Configuration;
+using SolarPlatform.Api.Authentication;
 using Npgsql;
 using SolarPlatform.Api.Data;
 using SolarPlatform.Api.DTOs;
@@ -46,6 +48,7 @@ public class InventoryPostgresTests
                 await db.Database.MigrateAsync();
                 Assert.Equal(0, await db.CustomerProfiles.CountAsync());
             }
+            await VerifyEmailReplayConcurrency(options);
             var actor = Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee");
             var panel = new InventoryItem { SKU = "TEST-P", Name = "Panel", CapacityWatts = 500, UnitPriceUsd = 450, QuantityInStock = 15 };
             var inverter = new InventoryItem { SKU = "TEST-I", Name = "Inverter", Category = EquipmentCategory.INVERTER, CapacityWatts = 5000, UnitPriceUsd = 900, QuantityInStock = 3 };
@@ -102,6 +105,35 @@ public class InventoryPostgresTests
                 throw new InvalidOperationException("Injected persistence failure");
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
+    }
+
+    private sealed class TestMailbox : IOtpEmailSender
+    {
+        public string Code = "";
+        public Task SendAsync(string email, string code, string purpose) { Code = code; return Task.CompletedTask; }
+    }
+    private static async Task VerifyEmailReplayConcurrency(DbContextOptions<AppDbContext> options)
+    {
+        var mailbox = new TestMailbox();
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+            ["Jwt:Key"] = "postgres-otp-test-secret-with-at-least-32-characters", ["Jwt:Issuer"] = "tests", ["Jwt:Audience"] = "tests" }).Build();
+        EmailVerificationService Service(AppDbContext db) => new(db, new PasswordHasher(), new JwtTokenService(config), mailbox, config, TimeProvider.System);
+        EmailChallengeResponse challenge;
+        await using (var db = new AppDbContext(options)) challenge = await Service(db).RequestRegistrationAsync(new RegisterRequestDto {
+            Email = "postgres-otp@example.invalid", FullName = "Concurrency test", Password = "A secure test passphrase" });
+        var code = mailbox.Code;
+        async Task<bool> Confirm()
+        {
+            await using var db = new AppDbContext(options);
+            try { await Service(db).VerifyRegistrationAsync(new VerifyEmailCodeDto { ChallengeId = challenge.ChallengeId, Code = code }); return true; }
+            catch (Exception ex) when (ex is InvalidOperationException or DbUpdateException or PostgresException) { return false; }
+        }
+        var results = await Task.WhenAll(Confirm(), Confirm());
+        Assert.Single(results.Where(x => x));
+        await using var final = new AppDbContext(options);
+        Assert.Equal(1, await final.Users.CountAsync(u => u.Email == "postgres-otp@example.invalid"));
+        Assert.NotNull((await final.EmailChallenges.SingleAsync()).ConsumedAt);
+        Assert.Null((await final.EmailChallenges.SingleAsync()).PasswordHash);
     }
 
     private sealed class SchemaSession(string schema) : DbConnectionInterceptor

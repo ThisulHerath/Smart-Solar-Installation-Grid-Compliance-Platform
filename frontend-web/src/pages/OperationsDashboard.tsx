@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { HomeownerWorkspace } from './HomeownerWorkspace';
 
 type Report = { surveyCount: number; pendingApprovals: number; approvedProposals: number; lowStockItems: number; reservedEquipmentValueLkr: number; proposalStatuses: { status: string; count: number }[] };
 export function OperationsDashboard() {
@@ -15,6 +16,7 @@ export function OperationsDashboard() {
   return <main style={{ display: 'grid', gap: 24 }}>
     <section className="glass-panel" style={{ padding: 32 }}><p style={{ color: '#34d399', letterSpacing: 2 }}>SMART SOLAR · SRI LANKA</p><h1>Welcome, {user?.fullName}</h1><p>Coordinate rooftop solar surveys, field inspections, engineering review, and equipment preparation.</p></section>
     {error && <p role="alert">{error}</p>}
+    {user?.roles.includes('HOMEOWNER') && <HomeownerWorkspace />}
     {staff && !report && !error && <p>Loading your dashboard…</p>}
     {report && <><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 16 }}>
       {([['Solar surveys', report.surveyCount], ['Awaiting approval', report.pendingApprovals], ['Approved proposals', report.approvedProposals], ['Low stock items', report.lowStockItems]] as const).map(([name, count]) => <section className="glass-panel" style={{ padding: 24 }} key={name}><p>{name}</p><strong style={{ fontSize: 34 }}>{count}</strong></section>)}
@@ -22,7 +24,8 @@ export function OperationsDashboard() {
     <section className="glass-panel" style={{ padding: 24 }}><h2>Your workspace</h2><nav style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
       {user?.roles.some(role => ['ADMINISTRATOR', 'SENIOR_ENGINEER'].includes(role)) && <><Link to="/surveys">Customer surveys</Link><Link to="/field-jobs">Field operations</Link><Link to="/proposals/pending">Review proposals</Link></>}
       {staff && <Link to="/inventory">Equipment and pricing</Link>}
-      {!staff && <p>Use the Smart Solar mobile app to submit surveys, complete assigned inspections, and track your proposals.</p>}
+      <Link to="/account">Account & security</Link>
+      {!staff && !user?.roles.includes('HOMEOWNER') && <p>Use the Smart Solar mobile app to complete your assigned site inspections.</p>}
       </nav></section><p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Assessments use documented project rules. Final grid connection and installation approval remain with the authorized engineers and utility.</p>
   </main>;
 }

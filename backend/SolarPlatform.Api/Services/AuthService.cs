@@ -144,7 +144,7 @@ public class AuthService : IAuthService
         var user = await _dbContext.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Id == userId);
+            .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
 
         if (user == null)
             return null;

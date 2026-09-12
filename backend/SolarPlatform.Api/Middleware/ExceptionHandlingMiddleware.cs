@@ -34,6 +34,15 @@ public class ExceptionHandlingMiddleware
 
         switch (exception)
         {
+            case SolarPlatform.Api.Services.EmailDeliveryException:
+                statusCode = HttpStatusCode.ServiceUnavailable;
+                message = exception.Message;
+                break;
+            case SolarPlatform.Api.Services.OtpLimitException:
+                statusCode = HttpStatusCode.TooManyRequests;
+                message = exception.Message;
+                context.Response.Headers.RetryAfter = "60";
+                break;
             case Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException:
                 statusCode = HttpStatusCode.Conflict;
                 message = "The inventory changed during this request. Refresh and retry.";

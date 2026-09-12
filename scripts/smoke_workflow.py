@@ -36,12 +36,11 @@ def call(role, method, path, body=None, expected=(200, 201, 204)):
 
 evidence = {'startedAt': datetime.now(timezone.utc).isoformat(), 'tag': tag, 'events': events}
 try:
-    for role in ('engineer', 'technician', 'inventory'):
+    for role in ('engineer', 'technician', 'inventory', 'homeowner'):
         auth = call(None, 'POST', '/api/auth/login', {'email': role+'@smartsolar.local', 'password': 'Password@123'})
         tokens[role] = auth['token']
-    auth = call(None, 'POST', '/api/auth/register', {'email': tag.lower()+'@example.test',
-        'password': uuid.uuid4().hex+'!Aa1', 'fullName': tag+' Synthetic Homeowner', 'phoneNumber': '+94770000000'})
-    tokens['homeowner'] = auth['token']
+    # Registration is exercised separately through an injected test mailbox in the API tests.
+    # This live workflow uses an existing local test identity and never bypasses OTP verification.
     survey = call('homeowner', 'POST', '/api/surveys', {'monthlyKwh': 600, 'roofAreaSqm': 80,
         'gridType': 'ThreePhase', 'roofOrientation': 'South', 'roofTilt': 20,
         'propertyAddress': tag+' Synthetic demonstration site, Colombo', 'notes': 'Synthetic demonstration only.'})

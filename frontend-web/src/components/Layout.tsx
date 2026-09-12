@@ -16,7 +16,7 @@ export const Layout: React.FC = () => {
         fontSize: '0.8rem',
         color: 'var(--text-muted)'
       }}>
-        Smart Solar &bull; Sri Lanka &bull; SE3090 &bull; Group 2026-AI-17
+        Smart Solar &bull; Sri Lanka &bull; Rooftop solar planning
       </footer>
     </div>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sun, LogOut, Shield, User as UserIcon } from './Icons';
 
@@ -52,14 +53,15 @@ export const Navbar: React.FC = () => {
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
             <nav style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', fontWeight: 600, flexWrap: 'wrap' }}>
-              {user.roles.some(role => ['ADMINISTRATOR', 'INVENTORY_OFFICER', 'SENIOR_ENGINEER'].includes(role)) && <a href="/inventory" style={{ color: 'var(--solar-emerald)' }}>Inventory</a>}
-              <a href="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Dashboard</a>
+              {user.roles.some(role => ['ADMINISTRATOR', 'INVENTORY_OFFICER', 'SENIOR_ENGINEER'].includes(role)) && <Link to="/inventory" style={{ color: 'var(--solar-emerald)' }}>Inventory</Link>}
+              <Link to="/" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Dashboard</Link>
+              <Link to="/account" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>Account & security</Link>
               {(user.roles?.includes('ADMINISTRATOR') || user.roles?.includes('SENIOR_ENGINEER')) && (
                 <>
-                  <a href="/surveys" style={{ color: 'var(--solar-emerald)', textDecoration: 'none' }}>Staff Surveys</a>
-                  <a href="/field-jobs" style={{ color: 'var(--solar-cyan)', textDecoration: 'none' }}>Field Operations</a>
-                  <a href="/proposals" style={{ color: '#8b5cf6', textDecoration: 'none' }}>Proposals</a>
-                  <a href="/proposals/pending" style={{ color: '#f59e0b', textDecoration: 'none' }}>Pending Approvals</a>
+                  <Link to="/surveys" style={{ color: 'var(--solar-emerald)', textDecoration: 'none' }}>Staff Surveys</Link>
+                  <Link to="/field-jobs" style={{ color: 'var(--solar-cyan)', textDecoration: 'none' }}>Field Operations</Link>
+                  <Link to="/proposals" style={{ color: '#8b5cf6', textDecoration: 'none' }}>Proposals</Link>
+                  <Link to="/proposals/pending" style={{ color: '#f59e0b', textDecoration: 'none' }}>Pending Approvals</Link>
                 </>
               )}
             </nav>

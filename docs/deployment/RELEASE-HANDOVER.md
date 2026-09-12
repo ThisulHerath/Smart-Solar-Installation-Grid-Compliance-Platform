@@ -4,6 +4,8 @@ The local release includes ASP.NET API, React staff portal, Flutter Android app,
 
 ## Run locally
 
+September 12 account update: apply `AddEmailVerification`, configure Gmail App Password delivery as described in [email verification setup](../EMAIL-VERIFICATION.md), and use `/register` for new verified homeowner accounts. Both clients now provide account security actions. The latest account-update test evidence is in `docs/testing/account-security-verification.md`.
+
 Keep the repository .env private. Start the internal Python service, then the API, then React. See the root README for exact commands. Demo credentials are listed there. Open http://localhost:5173 and http://localhost:5116/swagger.
 
 The supplied debug APK targets the Android emulator's http://10.0.2.2:5116. For a phone on the same trusted local network, rebuild with --dart-define=API_BASE_URL=http://YOUR_PC_LAN_IP:5116. The API must listen on 0.0.0.0 and the device must be able to reach it. Do not silently disable the firewall. Android asks for location access only when a technician requests check-in. Camera/gallery are user-selected.

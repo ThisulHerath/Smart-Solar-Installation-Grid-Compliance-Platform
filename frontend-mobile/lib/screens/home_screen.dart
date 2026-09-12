@@ -6,6 +6,7 @@ import '../widgets/status_badge.dart';
 import 'login_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
+import 'account_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -25,7 +26,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF0A0D14),
       appBar: AppBar(
         title: const Text('Smart Solar'),
-        actions: [IconButton(
+        actions: [IconButton(tooltip: 'Account & security', icon: const Icon(Icons.manage_accounts), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen()))), IconButton(
           tooltip: 'Sign out', icon: const Icon(Icons.logout),
           onPressed: () async {
             await auth.logout();
