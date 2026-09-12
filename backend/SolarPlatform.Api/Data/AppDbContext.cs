@@ -10,6 +10,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<EmailChallenge> EmailChallenges => Set<EmailChallenge>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<CustomerProfile> CustomerProfiles => Set<CustomerProfile>();
@@ -30,11 +31,21 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ConfigureInventory();
+        modelBuilder.Entity<EmailChallenge>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.HasIndex(c => new { c.Email, c.CreatedAt });
+            entity.Property(c => c.Email).HasMaxLength(255);
+            entity.Property(c => c.Purpose).HasMaxLength(40);
+            entity.Property(c => c.CodeHash).HasMaxLength(64);
+            entity.Property(c => c.Revision).IsConcurrencyToken();
+        });
 
         // User Configuration
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(u => u.Id);
+            entity.Property(u => u.SecurityVersion).IsConcurrencyToken();
             entity.HasIndex(u => u.Email).IsUnique();
             entity.Property(u => u.Email).IsRequired().HasMaxLength(255);
             entity.Property(u => u.PasswordHash).IsRequired();

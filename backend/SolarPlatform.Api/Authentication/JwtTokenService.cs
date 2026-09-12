@@ -22,14 +22,14 @@ public class JwtTokenService : IJwtTokenService
 
     public (string Token, int ExpiresIn) GenerateToken(User user, IEnumerable<string> roles)
     {
-        var secretKey = _configuration["Jwt:Key"] 
-            ?? Environment.GetEnvironmentVariable("JWT_KEY") 
+        var secretKey = Environment.GetEnvironmentVariable("JWT_KEY")
+            ?? _configuration["Jwt:Key"]
             ?? throw new InvalidOperationException("JWT_KEY must be configured.");
-        var issuer = _configuration["Jwt:Issuer"] 
-            ?? Environment.GetEnvironmentVariable("JWT_ISSUER") 
+        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER")
+            ?? _configuration["Jwt:Issuer"]
             ?? throw new InvalidOperationException("JWT_ISSUER must be configured.");
-        var audience = _configuration["Jwt:Audience"] 
-            ?? Environment.GetEnvironmentVariable("JWT_AUDIENCE") 
+        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+            ?? _configuration["Jwt:Audience"]
             ?? throw new InvalidOperationException("JWT_AUDIENCE must be configured.");
         
         var expiryMinutesStr = _configuration["Jwt:ExpireMinutes"] ?? "60";
@@ -46,6 +46,7 @@ public class JwtTokenService : IJwtTokenService
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new("sv", user.SecurityVersion.ToString()),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.FullName),
             new(ClaimTypes.Email, user.Email)

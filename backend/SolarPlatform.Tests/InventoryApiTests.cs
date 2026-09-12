@@ -44,7 +44,10 @@ public class InventoryApiTests
             if (role != null)
             {
                 using var scope = Services.CreateScope();
-                var token = scope.ServiceProvider.GetRequiredService<IJwtTokenService>().GenerateToken(new User { Id = userId ?? Guid.NewGuid(), Email = "test@example.invalid", FullName = "Test" }, new List<string> { role }).Token;
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var user = new User { Id = userId ?? Guid.NewGuid(), Email = $"{Guid.NewGuid()}@example.invalid", FullName = "Test" };
+                db.Users.Add(user); db.SaveChanges();
+                var token = scope.ServiceProvider.GetRequiredService<IJwtTokenService>().GenerateToken(user, new List<string> { role }).Token;
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             return client;

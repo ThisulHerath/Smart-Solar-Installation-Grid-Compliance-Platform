@@ -20,9 +20,17 @@ The ASP.NET Core API provides the authoritative REST endpoints for Web and Mobil
     ```
 
 ### 2. Authentication
+- **`POST /api/auth/register/request-otp`**
+  - Requests email verification; does not create a user.
+  - Body: `{ "email", "password", "fullName", "phoneNumber" }`
 - **`POST /api/auth/register`**
-  - Registers a new user.
-  - Body: `{ "email", "password", "fullName", "phoneNumber", "role" }`
+  - Verifies a one-time email code and creates a HOMEOWNER account.
+  - Body: `{ "challengeId", "code" }`
+- **`POST /api/auth/password/request-otp`** and **`POST /api/auth/password/confirm`**
+  - Authenticated password change with email verification; invalidates previous sessions.
+- **`POST /api/auth/account-deletion/request-otp`** and **`POST /api/auth/account-deletion/confirm`**
+  - Authenticated deletion with email verification; removes account access and profile contacts while preserving project audit records.
+  - See [email verification](../EMAIL-VERIFICATION.md) for Gmail setup, bodies and limits.
 - **`POST /api/auth/login`**
   - Authenticates credentials and returns JWT bearer token.
   - Body: `{ "email", "password" }`

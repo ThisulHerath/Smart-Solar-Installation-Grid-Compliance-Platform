@@ -4,6 +4,8 @@ import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { AccountPage } from './pages/AccountPage';
 import { OperationsDashboard } from './pages/OperationsDashboard';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -22,6 +24,7 @@ export const App: React.FC = () => {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
           {/* Protected Routes Layout */}
           <Route element={<ProtectedRoute />}>
@@ -30,6 +33,7 @@ export const App: React.FC = () => {
                 <Route path="/inventory" element={<InventoryPage />} />
               </Route>
               <Route path="/" element={<OperationsDashboard />} />
+              <Route path="/account" element={<AccountPage />} />
               <Route path="/dashboard" element={<Navigate to="/" replace />} />
               <Route element={<ProtectedRoute allowedRoles={['ADMINISTRATOR', 'SENIOR_ENGINEER']} />}>
                 <Route path="/surveys" element={<SurveysPage />} />

@@ -4,6 +4,8 @@ SE3090 university project, group **2026-AI-17**. A working Sri Lankan solar-plan
 
 ## What works
 
+Web and mobile registration now require email OTP verification. Account & security provides OTP-protected password changes and account deletion, with session revocation. The web login has no demo-account shortcuts. Homeowners can create assessments, submit solar analysis and follow proposals from the web portal. Configure Gmail SMTP using [email verification setup](docs/EMAIL-VERIFICATION.md) before accepting registrations.
+
 Flutter homeowners register, submit surveys and photos, request proposals and view equipment estimates. Technicians use device location, camera/gallery, inspection forms and measured readings. React staff review surveys, assign jobs, approve/reject/request revisions, manage suppliers and stock, calculate LKR prices and reserve/release equipment.
 
 ASP.NET Core 8 is the only client gateway and owns JWT roles, EF Core/PostgreSQL persistence and transactions. Internal FastAPI/LangGraph specialists perform planning, sizing, compliance screening, safety checks and equipment pricing. These specialists use deterministic rules, not a hosted language model. The pricing workflow uses a real allowlisted exchange-rate API.

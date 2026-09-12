@@ -1,4 +1,7 @@
 using System.Text;
+using System.Security.Claims;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Text.Json.Serialization;
 using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -61,6 +64,18 @@ builder.Services.AddAuthentication(options =>
 {
     options.RequireHttpsMetadata = false; // Allow local dev HTTP
     options.SaveToken = true;
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var id = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var version = context.Principal?.FindFirstValue("sv");
+            var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+            if (!Guid.TryParse(id, out var userId) || !int.TryParse(version, out var securityVersion) ||
+                !await db.Users.AsNoTracking().AnyAsync(u => u.Id == userId && u.IsActive && u.SecurityVersion == securityVersion))
+                context.Fail("This session has ended. Please sign in again.");
+        }
+    };
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -75,11 +90,22 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 20, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+});
 
 // 3. Application Services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddScoped<IOtpEmailSender, OtpEmailSender>();
+builder.Services.AddScoped<EmailVerificationService>();
+builder.Services.AddHostedService<EmailChallengeCleanup>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<IFieldJobService, FieldJobService>();
@@ -188,6 +214,7 @@ app.UseCors("AllowAll");
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 
 app.Run();
