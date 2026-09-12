@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import '../lib/providers/auth_provider.dart';
-import '../lib/screens/register_screen.dart';
-import '../lib/services/api_service.dart';
+import 'package:smart_solar_mobile/providers/auth_provider.dart';
+import 'package:smart_solar_mobile/screens/register_screen.dart';
+import 'package:smart_solar_mobile/services/api_service.dart';
 
 class MailApi extends ApiService {
   final calls = <String>[];
