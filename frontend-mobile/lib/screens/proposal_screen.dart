@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/proposal.dart';
 import '../services/api_service.dart';
@@ -79,38 +80,38 @@ class _ProposalScreenState extends State<ProposalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: SolarColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF111726),
+        backgroundColor: SolarColors.surface,
         title: const Text(
           'Engineering Proposal Status',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: SolarColors.text),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white70),
+            icon: const Icon(Icons.refresh, color: SolarColors.muted),
             onPressed: _loadProposal,
           ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
+          ? const Center(child: CircularProgressIndicator(color: SolarColors.primary))
           : _error != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                      const Icon(Icons.error_outline, color: SolarColors.error, size: 48),
                       const SizedBox(height: 12),
                       Text(
                         _error!,
-                        style: const TextStyle(color: Colors.white70),
+                        style: const TextStyle(color: SolarColors.muted),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadProposal,
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+                        style: ElevatedButton.styleFrom(backgroundColor: SolarColors.primary),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -121,18 +122,18 @@ class _ProposalScreenState extends State<ProposalScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.description_outlined, color: Color(0xFF94A3B8), size: 56),
+                          const Icon(Icons.description_outlined, color: SolarColors.muted, size: 56),
                           const SizedBox(height: 16),
                           const Text(
                             'No Engineering Proposal Found',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: SolarColors.text),
                           ),
                           const SizedBox(height: 8),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 32),
                             child: Text(
                               'Complete your solar survey and request an engineering assessment to generate a formal proposal.',
-                              style: TextStyle(color: Color(0xFF94A3B8), height: 1.4),
+                              style: TextStyle(color: SolarColors.muted, height: 1.4),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -150,9 +151,9 @@ class _ProposalScreenState extends State<ProposalScreen> {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF111726),
+                              color: SolarColors.surface,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0x1AFFFFFF)),
+                              border: Border.all(color: SolarColors.border),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +166,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Color(0xFF94A3B8),
+                                        color: SolarColors.muted,
                                         letterSpacing: 1.2,
                                       ),
                                     ),
@@ -178,13 +179,13 @@ class _ProposalScreenState extends State<ProposalScreen> {
                                   style: const TextStyle(
                                     fontSize: 28,
                                     fontWeight: FontWeight.w900,
-                                    color: Color(0xFF10B981),
+                                    color: SolarColors.primary,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 const Text(
                                   'Estimated System Cost',
-                                  style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                                  style: TextStyle(fontSize: 12, color: SolarColors.muted),
                                 ),
                               ],
                             ),
@@ -199,16 +200,16 @@ class _ProposalScreenState extends State<ProposalScreen> {
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF111726),
+                              color: SolarColors.surface,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0x1AFFFFFF)),
+                              border: Border.all(color: SolarColors.border),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
                                   'Technical Specifications',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SolarColors.text),
                                 ),
                                 const SizedBox(height: 16),
                                 Row(
@@ -234,27 +235,27 @@ class _ProposalScreenState extends State<ProposalScreen> {
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF111726),
+                                color: SolarColors.surface,
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: const Color(0x1AFFFFFF)),
+                                border: Border.all(color: SolarColors.border),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Row(
                                     children: [
-                                      Icon(Icons.smart_toy, color: Color(0xFF8B5CF6), size: 20),
+                                      Icon(Icons.smart_toy, color: SolarColors.purple, size: 20),
                                       SizedBox(width: 8),
                                       Text(
                                         'AI Safety & Engineering Analysis',
-                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: SolarColors.text),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
                                     _proposal!.recommendationSummary!,
-                                    style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8), height: 1.5),
+                                    style: const TextStyle(fontSize: 13, color: SolarColors.muted, height: 1.5),
                                   ),
                                 ],
                               ),
@@ -265,18 +266,18 @@ class _ProposalScreenState extends State<ProposalScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B).withValues(alpha: 0.5),
+                              color: SolarColors.surfaceSoft.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(color: const Color(0x3338BDF8)),
                             ),
                             child: const Row(
                               children: [
-                                Icon(Icons.info_outline, color: Color(0xFF38BDF8), size: 20),
+                                Icon(Icons.info_outline, color: SolarColors.info, size: 20),
                                 SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     'An engineer reviews this proposal before equipment reservation. Refresh to see the latest decision. Utility approval is a separate process.',
-                                    style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8), height: 1.4),
+                                    style: TextStyle(fontSize: 12, color: SolarColors.muted, height: 1.4),
                                   ),
                                 ),
                               ],
@@ -294,21 +295,21 @@ class _ProposalScreenState extends State<ProposalScreen> {
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFF0A0D14),
+          color: SolarColors.background,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0x0FFFFFFF)),
+          border: Border.all(color: SolarColors.border),
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFF10B981), size: 20),
+            Icon(icon, color: SolarColors.primary, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                  Text(title, style: const TextStyle(fontSize: 11, color: SolarColors.muted)),
                   const SizedBox(height: 2),
-                  Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: SolarColors.text)),
                 ],
               ),
             ),

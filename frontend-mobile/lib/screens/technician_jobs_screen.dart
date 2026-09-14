@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/field_job.dart';
 import '../services/api_service.dart';
@@ -50,34 +51,34 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
     switch (status.toUpperCase()) {
       case 'COMPLIANCECOMPLETE':
       case 'COMPLIANCE_COMPLETE':
-        return const Color(0xFF10B981);
+        return SolarColors.primary;
       case 'COMPLIANCEPROCESSING':
       case 'COMPLIANCE_PROCESSING':
       case 'INPROGRESS':
       case 'IN_PROGRESS':
-        return const Color(0xFFF59E0B);
+        return SolarColors.warning;
       case 'SUBMITTED':
-        return const Color(0xFF06B6D4);
+        return SolarColors.info;
       case 'FAILED':
-        return const Color(0xFFEF4444);
+        return SolarColors.error;
       default:
-        return const Color(0xFF60A5FA);
+        return SolarColors.info;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: SolarColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF111726),
+        backgroundColor: SolarColors.surface,
         title: const Text(
           'Field Technician Jobs',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: SolarColors.text),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white70),
+            icon: const Icon(Icons.refresh, color: SolarColors.muted),
             onPressed: _loadJobs,
           ),
         ],
@@ -99,7 +100,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        color: isSelected ? Colors.white : Colors.white70,
+                        color: isSelected ? SolarColors.text : SolarColors.muted,
                       ),
                     ),
                     selected: isSelected,
@@ -107,13 +108,13 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                       setState(() => _selectedStatus = status);
                       _loadJobs();
                     },
-                    backgroundColor: const Color(0xFF111726),
-                    selectedColor: const Color(0xFF10B981),
-                    checkmarkColor: Colors.white,
+                    backgroundColor: SolarColors.surface,
+                    selectedColor: SolarColors.primary,
+                    checkmarkColor: SolarColors.text,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: isSelected ? const Color(0xFF10B981) : const Color(0x1AFFFFFF),
+                        color: isSelected ? SolarColors.primary : SolarColors.border,
                       ),
                     ),
                   ),
@@ -125,7 +126,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
           // Content
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
+                ? const Center(child: CircularProgressIndicator(color: SolarColors.primary))
                 : _error != null
                     ? Center(
                         child: Padding(
@@ -133,9 +134,9 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 40),
+                              const Icon(Icons.error_outline, color: SolarColors.error, size: 40),
                               const SizedBox(height: 12),
-                              Text(_error!, style: const TextStyle(color: Colors.white70), textAlign: TextAlign.center),
+                              Text(_error!, style: const TextStyle(color: SolarColors.muted), textAlign: TextAlign.center),
                               const SizedBox(height: 16),
                               ElevatedButton(onPressed: _loadJobs, child: const Text('Retry')),
                             ],
@@ -146,22 +147,22 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                         ? const Center(
                             child: Text(
                               'No assigned jobs found.',
-                              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                              style: TextStyle(color: SolarColors.muted, fontSize: 14),
                             ),
                           )
                         : RefreshIndicator(
                             onRefresh: _loadJobs,
-                            color: const Color(0xFF10B981),
+                            color: SolarColors.primary,
                             child: ListView.builder(
                               padding: const EdgeInsets.all(16),
                               itemCount: _jobs.length,
                               itemBuilder: (context, idx) {
                                 final job = _jobs[idx];
                                 return Card(
-                                  color: const Color(0xFF111726),
+                                  color: SolarColors.surface,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
-                                    side: const BorderSide(color: Color(0x1AFFFFFF)),
+                                    side: const BorderSide(color: SolarColors.border),
                                   ),
                                   margin: const EdgeInsets.only(bottom: 14),
                                   child: InkWell(
@@ -188,7 +189,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                                   style: const TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
+                                                    color: SolarColors.text,
                                                   ),
                                                 ),
                                               ),
@@ -201,12 +202,12 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                           const SizedBox(height: 8),
                                           Row(
                                             children: [
-                                              const Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF06B6D4)),
+                                              const Icon(Icons.location_on_outlined, size: 14, color: SolarColors.info),
                                               const SizedBox(width: 4),
                                               Expanded(
                                                 child: Text(
                                                   job.propertyAddress,
-                                                  style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                                                  style: const TextStyle(fontSize: 13, color: SolarColors.muted),
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
                                               ),
@@ -218,11 +219,11 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                             children: [
                                               Text(
                                                 'Priority: ${job.priority}',
-                                                style: const TextStyle(fontSize: 12, color: Color(0xFFF59E0B), fontWeight: FontWeight.w600),
+                                                style: const TextStyle(fontSize: 12, color: SolarColors.warning, fontWeight: FontWeight.w600),
                                               ),
                                               Text(
                                                 '${job.monthlyKwh.toStringAsFixed(0)} kWh/mo',
-                                                style: const TextStyle(fontSize: 12, color: Colors.white70),
+                                                style: const TextStyle(fontSize: 12, color: SolarColors.muted),
                                               ),
                                             ],
                                           ),

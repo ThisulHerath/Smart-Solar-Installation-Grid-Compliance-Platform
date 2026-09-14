@@ -134,7 +134,7 @@ export const DashboardPage: React.FC = () => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(58, 85, 49, 0.03)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Database size={18} color="var(--solar-cyan)" />
                   <div>
@@ -147,7 +147,7 @@ export const DashboardPage: React.FC = () => {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', background: 'rgba(58, 85, 49, 0.03)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <Cpu size={18} color="var(--solar-amber)" />
                   <div>
@@ -271,7 +271,7 @@ export const DashboardPage: React.FC = () => {
             border: '1px solid rgba(239, 68, 68, 0.3)',
             borderRadius: 'var(--radius-md)',
             padding: '12px 16px',
-            color: '#f87171',
+            color: '#b33838',
             fontSize: '0.85rem',
             marginBottom: '16px'
           }}>
@@ -283,7 +283,7 @@ export const DashboardPage: React.FC = () => {
         {aiResult && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
             {/* Plan & Steps */}
-            <div style={{ background: 'rgba(10, 13, 20, 0.7)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: '#edf0e3', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Layers size={16} color="var(--solar-emerald)" /> Multi-Agent Plan & Steps
               </div>
@@ -301,11 +301,11 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Live Execution Logs */}
-            <div style={{ background: 'rgba(10, 13, 20, 0.7)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ background: '#edf0e3', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontFamily: 'var(--font-mono)' }}>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-sans)' }}>
                 <Terminal size={16} color="var(--solar-cyan)" /> LangGraph Execution Trace
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#38bdf8', display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '180px', overflowY: 'auto' }}>
+              <div style={{ fontSize: '0.75rem', color: '#246a79', display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '180px', overflowY: 'auto' }}>
                 {aiResult.execution_logs.map((log, idx) => (
                   <div key={idx}>&gt; {log}</div>
                 ))}

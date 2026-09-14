@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -66,7 +67,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const Text('Your sign-in access and profile contact details will be removed permanently. Installation, survey, safety and approval records remain in the audit history. Deletion does not cancel an installation or erase information already in those records.'),
           CheckboxListTile(value: _acknowledged, onChanged: _busy ? null : (v) => setState(() { _acknowledged = v ?? false; }), title: const Text('I understand this cannot be undone.')),
         ],
-        if (_error != null) Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+        if (_error != null) Text(_error!, style: const TextStyle(color: SolarColors.error)),
         FilledButton(onPressed: _busy || (_action == 'account-deletion' && !_acknowledged) ? null : _challenge == null ? _request : _verify, child: Text(_busy ? 'Please wait…' : _challenge == null ? 'Send verification code' : _action == 'password' ? 'Verify & change password' : 'Verify & delete my account')),
         TextButton(onPressed: _busy ? null : () => setState(() { _action = null; _challenge = null; _error = null; _acknowledged = false; _password.clear(); _confirm.clear(); _code.clear(); }), child: const Text('Cancel')),
       ],

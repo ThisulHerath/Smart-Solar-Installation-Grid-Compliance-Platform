@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
@@ -64,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         TextButton(onPressed: _busy || _resendSeconds > 0 ? null : _requestCode, child: Text(_resendSeconds > 0 ? 'Resend in ${_resendSeconds}s' : 'Send a new code')),
         TextButton(onPressed: _busy ? null : () => setState(() { _challengeId = null; _error = null; }), child: const Text('Edit details')),
       ],
-      const SizedBox(height: 24), if (_error != null) Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+      const SizedBox(height: 24), if (_error != null) Text(_error!, style: const TextStyle(color: SolarColors.error)),
       ElevatedButton(onPressed: _busy ? null : _challengeId == null ? _requestCode : _register, child: Text(_busy ? 'Please wait…' : _challengeId == null ? 'Send verification code' : 'Verify & create account')),
     ])),
   ));

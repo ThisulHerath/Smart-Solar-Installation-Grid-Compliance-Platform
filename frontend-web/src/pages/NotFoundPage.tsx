@@ -22,7 +22,7 @@ export const NotFoundPage: React.FC = () => {
           justifyContent: 'center',
           marginBottom: '16px'
         }}>
-          <HelpCircle size={28} color="#f59e0b" />
+          <HelpCircle size={28} color="#8b580b" />
         </div>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>404 - Page Not Found</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '24px' }}>

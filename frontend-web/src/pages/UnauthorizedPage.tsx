@@ -22,7 +22,7 @@ export const UnauthorizedPage: React.FC = () => {
           justifyContent: 'center',
           marginBottom: '16px'
         }}>
-          <ShieldAlert size={28} color="#ef4444" />
+          <ShieldAlert size={28} color="#b33838" />
         </div>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '8px' }}>403 - Access Denied</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '24px' }}>

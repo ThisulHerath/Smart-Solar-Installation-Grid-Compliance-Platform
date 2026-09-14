@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 
 class StatusBadge extends StatelessWidget {
@@ -9,7 +10,7 @@ class StatusBadge extends StatelessWidget {
     super.key,
     required this.label,
     this.color = const Color(0x2610B981),
-    this.textColor = const Color(0xFF34D399),
+    this.textColor = SolarColors.success,
   });
 
   @override

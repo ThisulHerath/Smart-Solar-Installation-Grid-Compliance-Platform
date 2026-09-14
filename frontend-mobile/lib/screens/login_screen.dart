@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -15,24 +16,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  final List<Map<String, String>> _demoAccounts = [
-    {'role': 'ADMINISTRATOR', 'email': 'admin@smartsolar.local', 'pass': 'Password@123', 'label': 'Admin'},
-    {'role': 'SENIOR_ENGINEER', 'email': 'engineer@smartsolar.local', 'pass': 'Password@123', 'label': 'Engineer'},
-    {'role': 'FIELD_TECHNICIAN', 'email': 'technician@smartsolar.local', 'pass': 'Password@123', 'label': 'Technician'},
-    {'role': 'HOMEOWNER', 'email': 'homeowner@smartsolar.local', 'pass': 'Password@123', 'label': 'Homeowner'},
-    {'role': 'INVENTORY_OFFICER', 'email': 'inventory@smartsolar.local', 'pass': 'Password@123', 'label': 'Inventory'},
-  ];
-
-  void _fillAccount(String email, String pass) {
-    setState(() {
-      _emailController.text = email;
-      _passwordController.text = pass;
-    });
-  }
-
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
-    final pass = _passwordController.text.trim();
+    final pass = _passwordController.text;
     if (email.isEmpty || pass.isEmpty) return;
 
     final auth = Provider.of<AuthProvider>(context, listen: false);
@@ -45,11 +31,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: SolarColors.background,
+      appBar: AppBar(title: const Text('Log in')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -64,25 +58,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 56,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF10B981), Color(0xFFF59E0B)],
+                      colors: [SolarColors.lime, Color(0xFFE3ECCF)],
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.wb_sunny_rounded, color: Colors.white, size: 32),
+                  child: const Icon(Icons.wb_sunny_rounded, color: SolarColors.text, size: 32),
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Smart Solar Platform',
+                  'Welcome back.',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: SolarColors.text,
                   ),
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  'Sign in to access field telemetry and grid validation',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
+                  'Your solar journey, all in one place. Sign in to continue.',
+                  style: TextStyle(fontSize: 14, color: SolarColors.muted),
                 ),
                 const SizedBox(height: 28),
 
@@ -97,31 +91,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Text(
                       auth.errorMessage!,
-                      style: const TextStyle(color: Color(0xFFF87171), fontSize: 13),
+                      style: const TextStyle(color: SolarColors.error, fontSize: 13),
                     ),
                   ),
 
                 // Email
                 TextField(
                   controller: _emailController,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: SolarColors.text),
                   decoration: InputDecoration(
                     labelText: 'Email Address',
-                    labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                    prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF64748B)),
+                    labelStyle: const TextStyle(color: SolarColors.muted),
+                    prefixIcon: const Icon(Icons.email_outlined, color: SolarColors.muted),
                     filled: true,
-                    fillColor: const Color(0xFF111726),
+                    fillColor: SolarColors.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+                      borderSide: const BorderSide(color: SolarColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+                      borderSide: const BorderSide(color: SolarColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF10B981)),
+                      borderSide: const BorderSide(color: SolarColors.primary),
                     ),
                   ),
                 ),
@@ -131,24 +125,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: SolarColors.text),
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
-                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF64748B)),
+                    labelStyle: const TextStyle(color: SolarColors.muted),
+                    prefixIcon: const Icon(Icons.lock_outline, color: SolarColors.muted),
                     filled: true,
-                    fillColor: const Color(0xFF111726),
+                    fillColor: SolarColors.surface,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+                      borderSide: const BorderSide(color: SolarColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+                      borderSide: const BorderSide(color: SolarColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF10B981)),
+                      borderSide: const BorderSide(color: SolarColors.primary),
                     ),
                   ),
                 ),
@@ -158,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ElevatedButton(
                   onPressed: auth.status == AuthStatus.authenticating ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF10B981),
+                    backgroundColor: SolarColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -166,39 +160,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(color: SolarColors.text, strokeWidth: 2),
                         )
                       : const Text(
                           'Sign In',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SolarColors.text),
                         ),
                 ),
                 const SizedBox(height: 32),
 
-                // Demo Accounts
                 TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const RegisterScreen())), child: const Text('New homeowner? Create an account')),
-                const Text(
-                  'QUICK-SELECT PHASE 1 DEV ACCOUNTS',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF64748B),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _demoAccounts.map((acc) {
-                    return ActionChip(
-                      backgroundColor: const Color(0xFF111726),
-                      side: const BorderSide(color: Color(0x1AFFFFFF)),
-                      label: Text(acc['label']!, style: const TextStyle(color: Colors.white, fontSize: 12)),
-                      onPressed: () => _fillAccount(acc['email']!, acc['pass']!),
-                    );
-                  }).toList(),
-                ),
               ],
             ),
           ),

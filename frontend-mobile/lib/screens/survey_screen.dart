@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:image_picker/image_picker.dart';
@@ -150,7 +151,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Survey submitted successfully! Current status: $status'),
-            backgroundColor: const Color(0xFF10B981),
+            backgroundColor: SolarColors.primary,
           ),
         );
       }
@@ -160,7 +161,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(_error!),
-            backgroundColor: Colors.redAccent,
+            backgroundColor: SolarColors.error,
           ),
         );
       }
@@ -174,27 +175,27 @@ class _SurveyScreenState extends State<SurveyScreen> {
       case 'ANALYSISCOMPLETE':
       case 'ANALYSIS_COMPLETE':
       case 'COMPLETED':
-        return const Color(0xFF10B981);
+        return SolarColors.primary;
       case 'PROCESSING':
       case 'SUBMITTED':
-        return const Color(0xFFF59E0B);
+        return SolarColors.warning;
       case 'FAILED':
-        return Colors.redAccent;
+        return SolarColors.error;
       default:
-        return const Color(0xFF94A3B8);
+        return SolarColors.muted;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: SolarColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF111726),
-        title: const Text('Homeowner Solar Assessment', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        backgroundColor: SolarColors.surface,
+        title: const Text('Homeowner Solar Assessment', style: TextStyle(fontWeight: FontWeight.bold, color: SolarColors.text)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white70),
+            icon: const Icon(Icons.refresh, color: SolarColors.muted),
             onPressed: () => _loadSurveys(),
           ),
         ],
@@ -208,20 +209,20 @@ class _SurveyScreenState extends State<SurveyScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: const Color(0xFF111726),
+                color: SolarColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0x1AFFFFFF)),
+                border: Border.all(color: SolarColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.add_location_alt, color: Color(0xFF10B981), size: 22),
+                      Icon(Icons.add_location_alt, color: SolarColors.primary, size: 22),
                       SizedBox(width: 8),
                       Text(
                         'Create & Submit Solar Survey',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SolarColors.text),
                       ),
                     ],
                   ),
@@ -230,13 +231,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   TextField(
                     controller: _usageController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(
                       labelText: 'Monthly Consumption (kWh)',
-                      labelStyle: TextStyle(color: Color(0xFF94A3B8)),
-                      prefixIcon: Icon(Icons.bolt, color: Color(0xFFF59E0B)),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x33FFFFFF))),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
+                      labelStyle: TextStyle(color: SolarColors.muted),
+                      prefixIcon: Icon(Icons.bolt, color: SolarColors.warning),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -244,27 +245,27 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   TextField(
                     controller: _roofController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(
                       labelText: 'Roof Surface Area (m²)',
-                      labelStyle: TextStyle(color: Color(0xFF94A3B8)),
-                      prefixIcon: Icon(Icons.square_foot, color: Color(0xFF38BDF8)),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x33FFFFFF))),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
+                      labelStyle: TextStyle(color: SolarColors.muted),
+                      prefixIcon: Icon(Icons.square_foot, color: SolarColors.info),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
                     ),
                   ),
                   const SizedBox(height: 14),
 
                   DropdownButtonFormField<String>(
                     initialValue: _gridType,
-                    dropdownColor: const Color(0xFF1E293B),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: SolarColors.surfaceSoft,
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(
                       labelText: 'Grid Connection Type',
-                      labelStyle: TextStyle(color: Color(0xFF94A3B8)),
-                      prefixIcon: Icon(Icons.power, color: Color(0xFF10B981)),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x33FFFFFF))),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
+                      labelStyle: TextStyle(color: SolarColors.muted),
+                      prefixIcon: Icon(Icons.power, color: SolarColors.primary),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
                     ),
                     items: const [
                       DropdownMenuItem(value: 'SinglePhase', child: Text('Single Phase (230V)')),
@@ -278,13 +279,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
                   TextField(
                     controller: _addressController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(
                       labelText: 'Property Address',
-                      labelStyle: TextStyle(color: Color(0xFF94A3B8)),
-                      prefixIcon: Icon(Icons.home, color: Colors.white70),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x33FFFFFF))),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF10B981))),
+                      labelStyle: TextStyle(color: SolarColors.muted),
+                      prefixIcon: Icon(Icons.home, color: SolarColors.muted),
+                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
+                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -292,10 +293,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   // Image picker button
                   OutlinedButton.icon(
                     onPressed: _loading ? null : _pickImage,
-                    icon: Icon(_attachedImage == null ? Icons.camera_alt : Icons.check_circle, color: const Color(0xFF38BDF8)),
+                    icon: Icon(_attachedImage == null ? Icons.camera_alt : Icons.check_circle, color: SolarColors.info),
                     label: Text(
                       _attachedImage == null ? 'Attach Site Photo (Optional)' : 'Photo Attached (${_attachedImage!.name})',
-                      style: const TextStyle(color: Color(0xFF38BDF8)),
+                      style: const TextStyle(color: SolarColors.info),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0x3338BDF8)),
@@ -308,12 +309,12 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   ElevatedButton.icon(
                     onPressed: _loading ? null : _createAndSubmitSurvey,
                     icon: _loading
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: SolarColors.onPrimary))
                         : const Icon(Icons.send_rounded),
                     label: Text(_loading ? 'Submitting to AI Agent...' : 'Submit Survey for AI Sizing'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
-                      foregroundColor: Colors.white,
+                      backgroundColor: SolarColors.primary,
+                      foregroundColor: SolarColors.onPrimary,
                       minimumSize: const Size(double.infinity, 48),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
@@ -322,7 +323,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   if (_error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 14),
-                      child: Text(_error!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                      child: Text(_error!, style: const TextStyle(color: SolarColors.error, fontSize: 13)),
                     ),
                 ],
               ),
@@ -337,7 +338,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
             ]),
             const Text(
               'Your Submitted Surveys & AI Results',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: SolarColors.text),
             ),
             const SizedBox(height: 12),
 
@@ -347,10 +348,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF111726),
+                  color: SolarColors.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text('No surveys submitted yet.', style: TextStyle(color: Color(0xFF94A3B8))),
+                child: const Text('No surveys submitted yet.', style: TextStyle(color: SolarColors.muted)),
               )
             else
               ..._surveys.where((survey) => survey.propertyAddress.toLowerCase().contains(_search) && (_statusFilter.isEmpty || survey.surveyStatus == _statusFilter)).map((survey) => _buildSurveyItemCard(survey)),
@@ -368,7 +369,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF111726),
+        color: SolarColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
@@ -381,7 +382,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
               Expanded(
                 child: Text(
                   survey.propertyAddress.isNotEmpty ? survey.propertyAddress : 'Solar Survey',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: SolarColors.text),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -403,7 +404,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
           Text(
             '${survey.monthlyKwh} kWh/mo · ${survey.roofAreaSqm} m² · ${survey.gridType}',
-            style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+            style: const TextStyle(fontSize: 13, color: SolarColors.muted),
           ),
           const SizedBox(height: 12),
 
@@ -421,9 +422,9 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.wb_sunny, color: Color(0xFF10B981), size: 16),
+                      Icon(Icons.wb_sunny, color: SolarColors.primary, size: 16),
                       SizedBox(width: 6),
-                      Text('Recommended System Size', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF10B981))),
+                      Text('Recommended System Size', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: SolarColors.primary)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -431,16 +432,16 @@ class _SurveyScreenState extends State<SurveyScreen> {
                     spacing: 12,
                     runSpacing: 8,
                     children: [
-                      Text('Array: ${survey.recommendedKw} kW', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      Text('Panels: ${survey.panelCount ?? "-"} x 400W', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      Text('Inverter: ${survey.inverterKw} kW', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text('Array: ${survey.recommendedKw} kW', style: const TextStyle(color: SolarColors.text, fontWeight: FontWeight.bold)),
+                      Text('Panels: ${survey.panelCount ?? "-"} x 400W', style: const TextStyle(color: SolarColors.text, fontWeight: FontWeight.bold)),
+                      Text('Inverter: ${survey.inverterKw} kW', style: const TextStyle(color: SolarColors.text, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   if (survey.isValid != null) ...[
                     const SizedBox(height: 6),
                     Text(
                       'Deterministic Validation: ${survey.isValid == true ? "PASSED" : "FAILED"}',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: survey.isValid == true ? const Color(0xFF10B981) : Colors.redAccent),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: survey.isValid == true ? SolarColors.primary : SolarColors.error),
                     ),
                   ],
                 ],
@@ -450,18 +451,18 @@ class _SurveyScreenState extends State<SurveyScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.redAccent.withValues(alpha: 0.1),
+                color: SolarColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+                border: Border.all(color: SolarColors.error.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 18),
+                  const Icon(Icons.warning_amber_rounded, color: SolarColors.error, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       survey.errorMessage ?? 'Sizing could not be completed. Please try again later.',
-                      style: const TextStyle(fontSize: 12, color: Colors.redAccent),
+                      style: const TextStyle(fontSize: 12, color: SolarColors.error),
                     ),
                   ),
                 ],

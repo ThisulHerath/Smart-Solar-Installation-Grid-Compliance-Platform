@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
@@ -193,28 +194,28 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF0A0D14),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF10B981))),
+        backgroundColor: SolarColors.background,
+        body: Center(child: CircularProgressIndicator(color: SolarColors.primary)),
       );
     }
 
     if (_job == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0A0D14),
-        appBar: AppBar(backgroundColor: const Color(0xFF111726), title: const Text('Job Details')),
-        body: const Center(child: Text('Job not found.', style: TextStyle(color: Colors.white70))),
+        backgroundColor: SolarColors.background,
+        appBar: AppBar(backgroundColor: SolarColors.surface, title: const Text('Job Details')),
+        body: const Center(child: Text('Job not found.', style: TextStyle(color: SolarColors.muted))),
       );
     }
 
     final job = _job!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: SolarColors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF111726),
+        backgroundColor: SolarColors.surface,
         title: Text(
           job.propertyAddress,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: SolarColors.text),
         ),
       ),
       body: SingleChildScrollView(
@@ -226,9 +227,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF111726),
+                color: SolarColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0x1AFFFFFF)),
+                border: Border.all(color: SolarColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,13 +237,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(job.customerName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(job.customerName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SolarColors.text)),
                       StatusBadge(label: job.status),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text('Phone: ${job.customerPhone}', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
-                  Text('System Size: ${job.monthlyKwh} kWh/mo', style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text('Phone: ${job.customerPhone}', style: const TextStyle(color: SolarColors.muted, fontSize: 13)),
+                  Text('System Size: ${job.monthlyKwh} kWh/mo', style: const TextStyle(color: SolarColors.warning, fontSize: 13, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -252,38 +253,38 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: const Color(0x2010B981), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFF10B981))),
-                child: Text(_successMessage!, style: const TextStyle(color: Color(0xFF10B981), fontSize: 13)),
+                decoration: BoxDecoration(color: const Color(0x2010B981), borderRadius: BorderRadius.circular(8), border: Border.all(color: SolarColors.primary)),
+                child: Text(_successMessage!, style: const TextStyle(color: SolarColors.primary, fontSize: 13)),
               ),
 
             if (_error != null)
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: const Color(0x20EF4444), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFEF4444))),
-                child: Text(_error!, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 13)),
+                decoration: BoxDecoration(color: const Color(0x20EF4444), borderRadius: BorderRadius.circular(8), border: Border.all(color: SolarColors.error)),
+                child: Text(_error!, style: const TextStyle(color: SolarColors.error, fontSize: 13)),
               ),
 
             // Step 1: GPS Check-In
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF111726),
+                color: SolarColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0x1AFFFFFF)),
+                border: Border.all(color: SolarColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('1. GPS Check-in (Site Arrival)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF06B6D4))),
+                  const Text('1. GPS Check-in (Site Arrival)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: SolarColors.info)),
                   const SizedBox(height: 8),
-                  const Text('Confirm physical presence at survey site using device GPS coordinates.', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                  const Text('Confirm physical presence at survey site using device GPS coordinates.', style: TextStyle(fontSize: 12, color: SolarColors.muted)),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: _saving ? null : _handleGpsCheckIn,
                     icon: const Icon(Icons.location_on, size: 16),
                     label: const Text('Record GPS Check-in'),
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF06B6D4), foregroundColor: Colors.white),
+                    style: ElevatedButton.styleFrom(backgroundColor: SolarColors.info, foregroundColor: SolarColors.onPrimary),
                   ),
                 ],
               ),
@@ -294,33 +295,33 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF111726),
+                color: SolarColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0x1AFFFFFF)),
+                border: Border.all(color: SolarColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('2. Roof & Electrical Inspection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF10B981))),
+                  const Text('2. Roof & Electrical Inspection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: SolarColors.primary)),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _roofAreaController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(labelText: 'Measured Roof Area (m²)', border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _roofTiltController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(labelText: 'Roof Tilt Angle (degrees)', border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _mainBreakerController,
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: SolarColors.text),
                     decoration: const InputDecoration(labelText: 'Main Breaker Rating (Amps)', border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 12),
@@ -336,10 +337,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       .map((value) => DropdownMenuItem(value: value, child: Text(value))).toList(),
                     onChanged: (value) { if (value != null) setState(() => _roofOrientation = value); }),
                   SwitchListTile(
-                    title: const Text('Inverter Location Suitable', style: TextStyle(color: Colors.white, fontSize: 14)),
-                    subtitle: const Text('Adequate airflow, sheltered, fire safety compliant', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                    title: const Text('Inverter Location Suitable', style: TextStyle(color: SolarColors.text, fontSize: 14)),
+                    subtitle: const Text('Adequate airflow, sheltered, fire safety compliant', style: TextStyle(color: SolarColors.muted, fontSize: 12)),
                     value: _inverterLocationSuitable,
-                    activeThumbColor: const Color(0xFF10B981),
+                    activeThumbColor: SolarColors.primary,
                     onChanged: (val) => setState(() => _inverterLocationSuitable = val),
                   ),
                 ],
@@ -351,14 +352,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF111726),
+                color: SolarColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0x1AFFFFFF)),
+                border: Border.all(color: SolarColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('3. Measured electrical readings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFF59E0B))),
+                  const Text('3. Measured electrical readings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: SolarColors.warning)),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -366,7 +367,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         child: TextField(
                           controller: _voltageController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: SolarColors.text),
                           decoration: const InputDecoration(labelText: 'Grid Voltage (V)', border: OutlineInputBorder()),
                         ),
                       ),
@@ -375,7 +376,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         child: TextField(
                           controller: _frequencyController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: SolarColors.text),
                           decoration: const InputDecoration(labelText: 'Grid Freq (Hz)', border: OutlineInputBorder()),
                         ),
                       ),
@@ -388,7 +389,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         child: TextField(
                           controller: _vocController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: SolarColors.text),
                           decoration: const InputDecoration(labelText: 'Voc (V)', border: OutlineInputBorder()),
                         ),
                       ),
@@ -397,7 +398,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         child: TextField(
                           controller: _iscController,
                           keyboardType: TextInputType.number,
-                          style: const TextStyle(color: Colors.white),
+                          style: const TextStyle(color: SolarColors.text),
                           decoration: const InputDecoration(labelText: 'Isc (A)', border: OutlineInputBorder()),
                         ),
                       ),
@@ -412,14 +413,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF111726),
+                color: SolarColors.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0x1AFFFFFF)),
+                border: Border.all(color: SolarColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('4. Site Evidence Photographs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
+                  const Text('4. Site Evidence Photographs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: SolarColors.text)),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -429,7 +430,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         onPressed: _saving ? null : () => _handleUploadPhoto(type),
                         icon: const Icon(Icons.camera_alt, size: 14),
                         label: Text(type),
-                        style: OutlinedButton.styleFrom(foregroundColor: Colors.white70),
+                        style: OutlinedButton.styleFrom(foregroundColor: SolarColors.muted),
                       );
                     }).toList(),
                   ),
@@ -442,8 +443,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             ElevatedButton(
               onPressed: _saving ? null : _handleSaveInspection,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E293B),
-                foregroundColor: Colors.white,
+                backgroundColor: SolarColors.surfaceSoft,
+                foregroundColor: SolarColors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: const Text('Save Inspection Draft'),
@@ -454,7 +455,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               icon: const Icon(Icons.check_circle),
               label: const Text('Submit Inspection for Grid Compliance Evaluation'),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF10B981),
+                backgroundColor: SolarColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
@@ -467,7 +468,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                 decoration: BoxDecoration(
                   color: job.compliance!.gridCompliant ? const Color(0x1510B981) : const Color(0x15EF4444),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: job.compliance!.gridCompliant ? const Color(0xFF10B981) : const Color(0xFFEF4444)),
+                  border: Border.all(color: job.compliance!.gridCompliant ? SolarColors.primary : SolarColors.error),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,15 +476,15 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Grid Compliance Assessment', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                        StatusBadge(label: job.compliance!.complianceStatus, color: job.compliance!.gridCompliant ? const Color(0xFF10B981) : const Color(0xFFEF4444)),
+                        const Text('Grid Compliance Assessment', style: TextStyle(fontWeight: FontWeight.bold, color: SolarColors.text)),
+                        StatusBadge(label: job.compliance!.complianceStatus, color: job.compliance!.gridCompliant ? SolarColors.primary : SolarColors.error),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('Risk Level: ${job.compliance!.riskLevel}', style: const TextStyle(color: Color(0xFFF59E0B), fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('Risk Level: ${job.compliance!.riskLevel}', style: const TextStyle(color: SolarColors.warning, fontSize: 12, fontWeight: FontWeight.bold)),
                     if (job.compliance!.complianceNotes != null) ...[
                       const SizedBox(height: 6),
-                      Text(job.compliance!.complianceNotes!, style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.4)),
+                      Text(job.compliance!.complianceNotes!, style: const TextStyle(color: SolarColors.muted, fontSize: 12, height: 1.4)),
                     ],
                   ],
                 ),

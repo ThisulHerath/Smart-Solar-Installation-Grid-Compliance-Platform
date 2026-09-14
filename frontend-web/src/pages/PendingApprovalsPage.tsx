@@ -30,7 +30,7 @@ export const PendingApprovalsPage: React.FC = () => {
     <div className="page-container">
       <div className="page-header">
         <div>
-          <h1 className="page-title" style={{ color: '#F59E0B' }}>⚠ Pending Approvals</h1>
+          <h1 className="page-title" style={{ color: '#8b580b' }}>⚠ Pending Approvals</h1>
           <p className="page-subtitle">Engineering proposals awaiting your decision</p>
         </div>
         <button onClick={load} className="btn btn-secondary" disabled={loading}>
@@ -49,8 +49,8 @@ export const PendingApprovalsPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <p style={{ color: '#94A3B8', marginBottom: '20px' }}>
-            <strong style={{ color: '#F59E0B' }}>{proposals.length}</strong> proposal{proposals.length !== 1 ? 's' : ''} awaiting engineer decision.
+          <p style={{ color: '#5f705a', marginBottom: '20px' }}>
+            <strong style={{ color: '#8b580b' }}>{proposals.length}</strong> proposal{proposals.length !== 1 ? 's' : ''} awaiting engineer decision.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {proposals.map(p => (
@@ -65,7 +65,7 @@ export const PendingApprovalsPage: React.FC = () => {
                       Risk: {p.riskLevel}
                     </span>
                   </div>
-                  <span style={{ color: '#64748B', fontSize: '13px' }}>
+                  <span style={{ color: '#60715e', fontSize: '13px' }}>
                     {new Date(p.createdAt).toLocaleDateString()} {new Date(p.createdAt).toLocaleTimeString()}
                   </span>
                 </div>

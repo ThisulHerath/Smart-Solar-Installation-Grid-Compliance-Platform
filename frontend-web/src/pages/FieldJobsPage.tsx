@@ -57,11 +57,11 @@ export const FieldJobsPage: React.FC = () => {
       case 'IN_PROGRESS':
         return <span className="badge badge-amber"><Clock size={12} /> In Progress (On Site)</span>;
       case 'ACCEPTED':
-        return <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}>Accepted</span>;
+        return <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#246a79' }}>Accepted</span>;
       case 'FAILED':
         return <span className="badge badge-danger"><XCircle size={12} /> Non-Compliant / Failed</span>;
       default:
-        return <span className="badge" style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>Assigned</span>;
+        return <span className="badge" style={{ background: 'rgba(58, 85, 49, 0.08)', color: 'var(--text-secondary)' }}>Assigned</span>;
     }
   };
 
@@ -113,7 +113,7 @@ export const FieldJobsPage: React.FC = () => {
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           style={{
-            background: 'rgba(255,255,255,0.05)',
+            background: 'rgba(58, 85, 49, 0.05)',
             border: '1px solid var(--border-color)',
             borderRadius: 'var(--radius-sm)',
             padding: '8px 14px',
@@ -170,7 +170,7 @@ export const FieldJobsPage: React.FC = () => {
                   <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.propertyAddress}</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', margin: '14px 0', background: 'rgba(255,255,255,0.02)', padding: '10px 12px', borderRadius: 'var(--radius-sm)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', margin: '14px 0', background: 'rgba(58, 85, 49, 0.02)', padding: '10px 12px', borderRadius: 'var(--radius-sm)' }}>
                   <div>
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Assigned Technician</div>
                     <div style={{ fontSize: '0.85rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
@@ -197,7 +197,7 @@ export const FieldJobsPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between'
                   }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: job.compliance.gridCompliant ? 'var(--solar-emerald)' : '#f87171' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 600, color: job.compliance.gridCompliant ? 'var(--solar-emerald)' : '#b33838' }}>
                       <ShieldCheck size={14} /> {job.compliance.complianceStatus}
                     </span>
                     <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Risk: {job.compliance.riskLevel}</span>

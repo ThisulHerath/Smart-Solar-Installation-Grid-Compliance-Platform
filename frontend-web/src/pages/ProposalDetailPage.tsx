@@ -13,13 +13,13 @@ import { EngineeringProposal, ValidationResult, GuardrailResult, ApprovalAuditLo
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const STATUS_COLORS: Record<string, string> = {
-  Draft:             '#64748B',
+  Draft:             '#60715e',
   Processing:        '#3B82F6',
-  PendingApproval:   '#F59E0B',
-  Approved:          '#10B981',
-  Rejected:          '#EF4444',
-  RevisionRequested: '#8B5CF6',
-  Failed:            '#EF4444',
+  PendingApproval:   '#8b580b',
+  Approved:          '#287247',
+  Rejected:          '#b33838',
+  RevisionRequested: '#705193',
+  Failed:            '#b33838',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -28,7 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const DECISION_COLORS: Record<string, string> = {
-  Approved: '#10B981', Rejected: '#EF4444', RevisionRequested: '#8B5CF6',
+  Approved: '#287247', Rejected: '#b33838', RevisionRequested: '#705193',
 };
 
 function fmtLkr(v: number) {
@@ -70,7 +70,7 @@ const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm
         {needsComment && (
           <div className="form-group">
             <label className="form-label">
-              Comment <span style={{ color: '#EF4444' }}>*</span>
+              Comment <span style={{ color: '#b33838' }}>*</span>
             </label>
             <textarea
               id={`comment-${action}`}
@@ -175,7 +175,7 @@ export const ProposalDetailPage: React.FC = () => {
   if (error) return <div className="page-container"><div className="alert alert--error">{error}</div></div>;
   if (!proposal) return <div className="page-container"><div className="alert alert--error">Proposal not found.</div></div>;
 
-  const statusColor = STATUS_COLORS[proposal.proposalStatus] || '#64748B';
+  const statusColor = STATUS_COLORS[proposal.proposalStatus] || '#60715e';
 
   return (
     <div className="page-container">
@@ -232,7 +232,7 @@ export const ProposalDetailPage: React.FC = () => {
           <div className="detail-row"><span>Recommended System</span><strong>{proposal.recommendedKw.toFixed(2)} kW</strong></div>
           <div className="detail-row"><span>Panel Count</span><strong>{proposal.panelCount} panels</strong></div>
           <div className="detail-row"><span>Inverter Size</span><strong>{proposal.inverterSizeKw.toFixed(2)} kW</strong></div>
-          <div className="detail-row"><span>Estimated Cost</span><strong style={{ color: '#10B981' }}>{fmtLkr(proposal.estimatedCostLkr)}</strong></div>
+          <div className="detail-row"><span>Estimated Cost</span><strong style={{ color: '#287247' }}>{fmtLkr(proposal.estimatedCostLkr)}</strong></div>
         </div>
 
         {/* Compliance & Safety */}
@@ -269,20 +269,20 @@ export const ProposalDetailPage: React.FC = () => {
           <div className="detail-card detail-card--wide">
             <h2 className="detail-card__title">🤖 AI Recommendation Summary</h2>
             {proposal.recommendationSummary && (
-              <p style={{ color: '#CBD5E1', marginBottom: '12px', lineHeight: 1.6 }}>{proposal.recommendationSummary}</p>
+              <p style={{ color: '#4f6352', marginBottom: '12px', lineHeight: 1.6 }}>{proposal.recommendationSummary}</p>
             )}
             {guardrailResult?.issues && guardrailResult.issues.length > 0 && (
               <>
-                <p style={{ color: '#F59E0B', fontWeight: 600, marginBottom: '6px', fontSize: '13px' }}>Detected Issues:</p>
-                <ul style={{ color: '#94A3B8', fontSize: '13px', paddingLeft: '20px' }}>
+                <p style={{ color: '#8b580b', fontWeight: 600, marginBottom: '6px', fontSize: '13px' }}>Detected Issues:</p>
+                <ul style={{ color: '#5f705a', fontSize: '13px', paddingLeft: '20px' }}>
                   {guardrailResult.issues.map((issue, i) => <li key={i} style={{ marginBottom: '4px' }}>{issue}</li>)}
                 </ul>
               </>
             )}
             {guardrailResult?.recommendations && guardrailResult.recommendations.length > 0 && (
               <>
-                <p style={{ color: '#10B981', fontWeight: 600, marginBottom: '6px', marginTop: '12px', fontSize: '13px' }}>Recommendations:</p>
-                <ul style={{ color: '#94A3B8', fontSize: '13px', paddingLeft: '20px' }}>
+                <p style={{ color: '#287247', fontWeight: 600, marginBottom: '6px', marginTop: '12px', fontSize: '13px' }}>Recommendations:</p>
+                <ul style={{ color: '#5f705a', fontSize: '13px', paddingLeft: '20px' }}>
                   {guardrailResult.recommendations.map((rec, i) => <li key={i} style={{ marginBottom: '4px' }}>{rec}</li>)}
                 </ul>
               </>
@@ -314,7 +314,7 @@ export const ProposalDetailPage: React.FC = () => {
       {/* Approval Actions */}
       {isPending && (
         <div className="action-bar" id="approval-actions">
-          <h2 style={{ color: '#F59E0B', fontWeight: 700, marginBottom: '12px' }}>Engineer Decision</h2>
+          <h2 style={{ color: '#8b580b', fontWeight: 700, marginBottom: '12px' }}>Engineer Decision</h2>
 
           {approvalBlocked ? (
             <div className="alert alert--error">
@@ -360,22 +360,22 @@ export const ProposalDetailPage: React.FC = () => {
               <div key={log.id} className="audit-entry" id={`audit-${log.id}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <span className="badge" style={{
-                    backgroundColor: (DECISION_COLORS[log.decision] || '#64748B') + '22',
-                    color: DECISION_COLORS[log.decision] || '#64748B',
-                    border: `1px solid ${(DECISION_COLORS[log.decision] || '#64748B')}44`
+                    backgroundColor: (DECISION_COLORS[log.decision] || '#60715e') + '22',
+                    color: DECISION_COLORS[log.decision] || '#60715e',
+                    border: `1px solid ${(DECISION_COLORS[log.decision] || '#60715e')}44`
                   }}>
                     {log.decision === 'RevisionRequested' ? 'Revision Requested' : log.decision}
                   </span>
-                  <span style={{ color: '#64748B', fontSize: '12px' }}>
+                  <span style={{ color: '#60715e', fontSize: '12px' }}>
                     {new Date(log.timestamp).toLocaleString()}
                   </span>
                 </div>
                 {log.comment && (
-                  <p style={{ color: '#94A3B8', fontSize: '13px', marginTop: '8px', fontStyle: 'italic' }}>
+                  <p style={{ color: '#5f705a', fontSize: '13px', marginTop: '8px', fontStyle: 'italic' }}>
                     "{log.comment}"
                   </p>
                 )}
-                <p style={{ color: '#64748B', fontSize: '11px', marginTop: '4px' }}>
+                <p style={{ color: '#60715e', fontSize: '11px', marginTop: '4px' }}>
                   Engineer: {log.userId.slice(0, 8)}…
                 </p>
               </div>

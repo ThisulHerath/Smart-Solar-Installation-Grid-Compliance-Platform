@@ -1,3 +1,4 @@
+import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -6,7 +7,8 @@ import '../widgets/status_badge.dart';
 import 'login_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
-import 'account_screen.dart';
+import 'profile_screen.dart';
+import 'welcome_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,7 +17,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
-    final roles = user?.roles ?? [];
+    if (user == null) return const LoginScreen();
+    final roles = user.roles;
     final homeowner = roles.contains(AppConstants.roleHomeowner);
     final fieldStaff = roles.any([
       AppConstants.roleFieldTechnician,
@@ -23,36 +26,36 @@ class HomeScreen extends StatelessWidget {
       AppConstants.roleAdministrator,
     ].contains);
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0D14),
+      backgroundColor: SolarColors.background,
       appBar: AppBar(
         title: const Text('Smart Solar'),
-        actions: [IconButton(tooltip: 'Account & security', icon: const Icon(Icons.manage_accounts), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen()))), IconButton(
+        actions: [IconButton(tooltip: 'My profile', icon: const Icon(Icons.manage_accounts), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileScreen()))), IconButton(
           tooltip: 'Sign out', icon: const Icon(Icons.logout),
           onPressed: () async {
             await auth.logout();
             if (context.mounted) {
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
+                MaterialPageRoute(builder: (_) => const WelcomeScreen()), (_) => false);
             }
           },
         )],
       ),
       body: ListView(padding: const EdgeInsets.all(20), children: [
-        const Icon(Icons.solar_power, color: Color(0xFF10B981), size: 56),
+        const Icon(Icons.solar_power, color: SolarColors.primary, size: 56),
         const SizedBox(height: 20),
-        Text('Welcome, ${user?.fullName ?? 'there'}',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('Welcome, ${user.fullName}',
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: SolarColors.text)),
         const SizedBox(height: 8),
-        Text(user?.email ?? '', style: const TextStyle(color: Colors.white70)),
+        Text(user.email, style: const TextStyle(color: SolarColors.muted)),
         const SizedBox(height: 16),
         Wrap(spacing: 8, runSpacing: 8,
           children: roles.map((r) => StatusBadge(label: r)).toList()),
         const SizedBox(height: 28),
         if (homeowner) ...[
-          const Text('Plan solar for your home', style: TextStyle(fontSize: 20, color: Colors.white)),
+          const Text('Plan solar for your home', style: TextStyle(fontSize: 20, color: SolarColors.text)),
           const SizedBox(height: 12),
           const Text('Create a survey, add roof photos, and follow your engineering proposal and equipment estimate.',
-            style: TextStyle(color: Colors.white70, height: 1.5)),
+            style: TextStyle(color: SolarColors.muted, height: 1.5)),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SurveyScreen())),

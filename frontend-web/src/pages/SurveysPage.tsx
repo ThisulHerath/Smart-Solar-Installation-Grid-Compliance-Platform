@@ -88,7 +88,7 @@ export const SurveysPage: React.FC = () => {
       case 'FAILED':
         return <span className="badge badge-danger"><XCircle size={12} /> Workflow Failed</span>;
       default:
-        return <span className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-secondary)' }}>Draft</span>;
+        return <span className="badge" style={{ background: 'rgba(58, 85, 49, 0.1)', color: 'var(--text-secondary)' }}>Draft</span>;
     }
   };
 
@@ -169,7 +169,7 @@ export const SurveysPage: React.FC = () => {
                   style={{
                     padding: '14px',
                     borderRadius: 'var(--radius-md)',
-                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                    background: isSelected ? 'rgba(16, 185, 129, 0.12)' : 'rgba(58, 85, 49, 0.03)',
                     border: `1px solid ${isSelected ? 'var(--solar-emerald)' : 'var(--border-color)'}`,
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
@@ -208,28 +208,28 @@ export const SurveysPage: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginTop: '16px' }}>
-                  <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Monthly Consumption</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--solar-amber)', marginTop: '4px' }}>
                       {selectedSurvey.monthlyKwh} <span style={{ fontSize: '0.8rem', fontWeight: 400 }}>kWh</span>
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Roof Surface Area</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--solar-cyan)', marginTop: '4px' }}>
                       {selectedSurvey.roofAreaSqm} <span style={{ fontSize: '0.8rem', fontWeight: 400 }}>m²</span>
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Grid Phase Type</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--solar-emerald)', marginTop: '4px' }}>
                       {selectedSurvey.gridType}
                     </div>
                   </div>
 
-                  <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '12px 16px', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Roof Orientation & Tilt</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 600, marginTop: '4px' }}>
                       {selectedSurvey.roofOrientation || 'Unknown'} {selectedSurvey.roofTilt ? `(${selectedSurvey.roofTilt}°)` : ''}
@@ -245,7 +245,7 @@ export const SurveysPage: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                       {selectedSurvey.images.map((img) => (
-                        <div key={img.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }}>
+                        <div key={img.id} style={{ background: '#edf0e3', padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', fontSize: '0.8rem' }}>
                           <span className="badge badge-emerald" style={{ marginRight: '8px' }}>{img.imageType}</span>
                           {img.fileName}
                         </div>
@@ -276,7 +276,7 @@ export const SurveysPage: React.FC = () => {
 
                       {/* Error Display (Safe failure message) */}
                       {isFailed && (
-                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '14px 18px', borderRadius: 'var(--radius-md)', color: '#f87171', marginBottom: '20px', fontSize: '0.88rem' }}>
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '14px 18px', borderRadius: 'var(--radius-md)', color: '#b33838', marginBottom: '20px', fontSize: '0.88rem' }}>
                           <div style={{ fontWeight: 700, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <AlertTriangle size={16} /> Workflow Execution Notice
                           </div>
@@ -311,7 +311,7 @@ export const SurveysPage: React.FC = () => {
                             </div>
                           </div>
                           {sizing.reason && (
-                            <div style={{ marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-secondary)', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px' }}>
+                            <div style={{ marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-secondary)', borderTop: '1px solid rgba(58, 85, 49, 0.06)', paddingTop: '10px' }}>
                               <strong>Sizing Rationale:</strong> {sizing.reason}
                             </div>
                           )}
@@ -320,7 +320,7 @@ export const SurveysPage: React.FC = () => {
 
                       {/* Deterministic Validation Results */}
                       {valData && valData.checks && (
-                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: 'var(--radius-md)', marginBottom: '20px' }}>
+                        <div style={{ background: 'rgba(58, 85, 49, 0.02)', border: '1px solid var(--border-color)', padding: '18px', borderRadius: 'var(--radius-md)', marginBottom: '20px' }}>
                           <div style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <ShieldCheck size={16} color="var(--solar-cyan)" /> Deterministic Validation Checks
@@ -331,7 +331,7 @@ export const SurveysPage: React.FC = () => {
                           </div>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
                             {Object.entries(valData.checks).map(([checkKey, isPassed]) => (
-                              <div key={checkKey} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(0,0,0,0.2)', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem' }}>
+                              <div key={checkKey} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: '#edf0e3', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem' }}>
                                 <span style={{ color: 'var(--text-secondary)' }}>{checkKey}</span>
                                 {isPassed ? (
                                   <span style={{ color: 'var(--solar-emerald)', fontWeight: 600 }}>✓ Pass</span>
@@ -345,7 +345,7 @@ export const SurveysPage: React.FC = () => {
                       )}
 
                       {/* Execution Steps Trace */}
-                      <div style={{ background: 'rgba(10, 13, 20, 0.6)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                      <div style={{ background: '#edf0e3', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                         <div style={{ fontSize: '0.82rem', fontWeight: 700, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <Layers size={14} color="var(--solar-emerald)" /> Workflow Execution Pipeline
                         </div>

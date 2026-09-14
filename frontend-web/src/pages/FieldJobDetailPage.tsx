@@ -72,11 +72,11 @@ export const FieldJobDetailPage: React.FC = () => {
       case 'IN_PROGRESS':
         return <span className="badge badge-amber"><Clock size={12} /> In Progress (On Site)</span>;
       case 'ACCEPTED':
-        return <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}>Accepted</span>;
+        return <span className="badge" style={{ background: 'rgba(59, 130, 246, 0.15)', color: '#246a79' }}>Accepted</span>;
       case 'FAILED':
         return <span className="badge badge-danger"><XCircle size={12} /> Non-Compliant / Failed</span>;
       default:
-        return <span className="badge" style={{ background: 'rgba(255,255,255,0.08)', color: 'var(--text-secondary)' }}>Assigned</span>;
+        return <span className="badge" style={{ background: 'rgba(58, 85, 49, 0.08)', color: 'var(--text-secondary)' }}>Assigned</span>;
     }
   };
 
@@ -153,7 +153,7 @@ export const FieldJobDetailPage: React.FC = () => {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '14px 16px', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '14px 16px', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Customer Details</div>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff', marginTop: '4px' }}>
               {job.customerName}
@@ -163,7 +163,7 @@ export const FieldJobDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '14px 16px', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '14px 16px', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Assigned Field Technician</div>
             <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--solar-emerald)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <UserIcon size={16} /> {job.technicianName}
@@ -173,7 +173,7 @@ export const FieldJobDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '14px 16px', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ background: 'rgba(58, 85, 49, 0.03)', padding: '14px 16px', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>System Usage & Roof Area</div>
             <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--solar-amber)', marginTop: '4px' }}>
               {job.monthlyKwh} <span style={{ fontSize: '0.8rem', fontWeight: 400 }}>kWh/mo</span>
@@ -187,41 +187,41 @@ export const FieldJobDetailPage: React.FC = () => {
 
       {/* Compliance Assessment Section */}
       {job.compliance ? (
-        <div className="glass-panel" style={{ padding: '24px 28px', borderLeft: `4px solid ${job.compliance.gridCompliant ? 'var(--solar-emerald)' : '#ef4444'}` }}>
+        <div className="glass-panel" style={{ padding: '24px 28px', borderLeft: `4px solid ${job.compliance.gridCompliant ? 'var(--solar-emerald)' : '#b33838'}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <ShieldCheck size={22} color={job.compliance.gridCompliant ? 'var(--solar-emerald)' : '#ef4444'} />
+              <ShieldCheck size={22} color={job.compliance.gridCompliant ? 'var(--solar-emerald)' : '#b33838'} />
               <h2 style={{ fontSize: '1.25rem' }}>CEB / LECO Grid Compliance Assessment</h2>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <span className={`badge ${job.compliance.gridCompliant ? 'badge-emerald' : 'badge-danger'}`}>
                 {job.compliance.complianceStatus}
               </span>
-              <span className="badge" style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <span className="badge" style={{ background: 'rgba(58, 85, 49, 0.08)' }}>
                 Risk: {job.compliance.riskLevel}
               </span>
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '16px' }}>
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ background: '#edf0e3', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Workflow ID</div>
               <div style={{ fontSize: '0.88rem', fontWeight: 600, marginTop: '2px' }}>{job.compliance.workflowId || 'N/A'}</div>
             </div>
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ background: '#edf0e3', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Validation Status</div>
               <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--solar-cyan)', marginTop: '2px' }}>
                 {job.compliance.validationStatus || 'PASSED'}
               </div>
             </div>
-            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ background: '#edf0e3', padding: '12px 14px', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Evaluated Timestamp</div>
               <div style={{ fontSize: '0.88rem', marginTop: '2px' }}>{new Date(job.compliance.updatedAt).toLocaleString()}</div>
             </div>
           </div>
 
           {job.compliance.complianceNotes && (
-            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '14px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+            <div style={{ background: 'rgba(58, 85, 49, 0.02)', padding: '14px 16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '6px' }}>
                 Compliance Engineering Findings & Directives
               </div>
