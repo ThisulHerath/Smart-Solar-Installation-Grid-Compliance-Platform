@@ -17,6 +17,7 @@ class FieldJob {
   final bool hasInspection;
   final String? inspectionStatus;
   final ComplianceAssessmentModel? compliance;
+  final List<SitePhotoModel> photos;
 
   FieldJob({
     required this.id,
@@ -37,6 +38,7 @@ class FieldJob {
     required this.hasInspection,
     this.inspectionStatus,
     this.compliance,
+    this.photos = const [],
   });
 
   factory FieldJob.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,39 @@ class FieldJob {
       compliance: json['compliance'] != null
           ? ComplianceAssessmentModel.fromJson(json['compliance'] as Map<String, dynamic>)
           : null,
+      photos: (json['photos'] as List<dynamic>?)
+          ?.map((e) => SitePhotoModel.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList() ??
+          const [],
+    );
+  }
+}
+
+class SitePhotoModel {
+  final String id;
+  final String siteInspectionId;
+  final String photoType;
+  final String fileUrl;
+  final String fileName;
+  final DateTime? createdAt;
+
+  SitePhotoModel({
+    required this.id,
+    required this.siteInspectionId,
+    required this.photoType,
+    required this.fileUrl,
+    required this.fileName,
+    this.createdAt,
+  });
+
+  factory SitePhotoModel.fromJson(Map<String, dynamic> json) {
+    return SitePhotoModel(
+      id: json['id'] as String? ?? '',
+      siteInspectionId: json['siteInspectionId'] as String? ?? '',
+      photoType: json['photoType'] as String? ?? '',
+      fileUrl: json['fileUrl'] as String? ?? '',
+      fileName: json['fileName'] as String? ?? '',
+      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
     );
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { WorkflowSummary } from '../components/WorkflowSummary';
+import { InspectionPhotoGallery } from '../components/InspectionPhotoGallery';
 import { useAuth } from '../context/AuthContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -87,8 +88,16 @@ const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm
 
   return (
     <div className="modal-overlay" id={`modal-${action}`}>
-      <div className="modal">
-        <h3 className="modal__title">{title}</h3>
+      <div className="modal proposal-decision" role="dialog" aria-modal="true" aria-labelledby="decision-title" aria-describedby="decision-description">
+        <div className="proposal-decision__heading">
+          <p className="proposal-decision__eyebrow">SMARTSOLAR · ENGINEERING REVIEW</p>
+          <h3 className="modal__title" id="decision-title">{title}</h3>
+          <p className="proposal-decision__description" id="decision-description">
+            {action === 'revise' ? 'Tell the homeowner what needs to change before this solar proposal can move forward.' :
+              action === 'reject' ? 'Explain why this solar proposal cannot proceed. Your reason will be saved in the review history.' :
+              'Confirm your review of the system design, site inspection and grid compliance results.'}
+          </p>
+        </div>
 
         {action === 'approve' && (
           <div className="alert alert--warning" style={{ marginBottom: '16px' }}>
@@ -99,21 +108,24 @@ const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm
 
         {needsComment && (
           <div className="form-group">
-            <label className="form-label">
-              Comment <span style={{ color: '#b33838' }}>*</span>
+            <label className="form-label" htmlFor={`comment-${action}`}>
+              {action === 'revise' ? 'What needs to be revised?' : 'Reason for rejection'} <span className="proposal-decision__required">Required</span>
             </label>
             <textarea
               id={`comment-${action}`}
               className="form-textarea"
+              autoFocus
+              required
               value={comment}
               onChange={e => setComment(e.target.value)}
               placeholder={
                 action === 'reject'
                   ? 'Reason for rejection (required)…'
-                  : 'Revision instructions for the team (required)…'
+                  : 'For example: Update the proposal using the completed site compliance assessment.'
               }
               rows={4}
             />
+            <p className="proposal-decision__hint">{action === 'revise' ? 'The homeowner can request an updated proposal after your revision request.' : 'This explanation will help the homeowner understand your decision.'}</p>
           </div>
         )}
 
@@ -176,7 +188,9 @@ export const ProposalDetailPage: React.FC = () => {
   const guardrailResult = parseGuardrailResult(proposal?.guardrailResultJson);
 
   const { user } = useAuth();
-  const isPending = proposal?.proposalStatus === 'PendingApproval' && user?.roles.some(role => ['SENIOR_ENGINEER', 'ADMINISTRATOR'].includes(role));
+  const isEngineeringStaff = Boolean(user?.roles.some(role => ['SENIOR_ENGINEER', 'ADMINISTRATOR'].includes(role)));
+  const isPending = proposal?.proposalStatus === 'PendingApproval' && isEngineeringStaff;
+  const missingCompliance = !proposal?.gridComplianceStatus || proposal.gridComplianceStatus.toUpperCase() === 'UNKNOWN';
   const validationPassed = validationResult ? validationResult.valid || validationResult.requiresApproval : true;
   const approvalBlocked = !validationPassed;
 
@@ -217,7 +231,7 @@ export const ProposalDetailPage: React.FC = () => {
           </button>
           <h1 className="page-title">Engineering Proposal</h1>
           <p className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
-            ID: {proposal.id}
+            Proposal reference: {proposal.id.slice(0, 8).toUpperCase()}
           </p>
         </div>
         <span className="status-badge" style={{ backgroundColor: statusColor + '22', color: statusColor, border: `1px solid ${statusColor}44`, padding: '8px 16px', fontSize: '14px', fontWeight: 700 }}>
@@ -234,14 +248,14 @@ export const ProposalDetailPage: React.FC = () => {
       {/* Validation Block */}
       {approvalBlocked && (
         <div className="alert alert--error" id="approval-blocked-notice">
-          <strong>🚫 Approval blocked because validation failed.</strong>
+          <strong>This proposal needs an update before approval.</strong>
           {validationResult?.violations?.map((v, i) => <div key={i} style={{ marginTop: '4px', fontSize: '13px' }}>• {v}</div>)}
         </div>
       )}
 
       {validationResult?.overrideReason && (
         <div className="alert alert--warning" id="ai-override-notice">
-          <strong>⚡ AI Override:</strong> {validationResult.overrideReason}
+          <strong>Additional review required:</strong> {validationResult.overrideReason}
         </div>
       )}
 
@@ -251,12 +265,11 @@ export const ProposalDetailPage: React.FC = () => {
           <h2 className="detail-card__title">📍 Customer & Site</h2>
           <div className="detail-row"><span>Customer</span><strong>{proposal.customerName || '—'}</strong></div>
           <div className="detail-row"><span>Property</span><strong>{proposal.propertyAddress || '—'}</strong></div>
-          <div className="detail-row"><span>Survey ID</span><code>{proposal.solarSurveyId}</code></div>
-          <div className="detail-row"><span>Workflow</span><code>{proposal.workflowId || '—'}</code></div>
+
         </div>
 
         {/* Technical Specs */}
-        <WorkflowSummary surveyId={proposal.solarSurveyId} />
+
         <div className="detail-card">
           <h2 className="detail-card__title">⚡ Technical Specifications</h2>
           <div className="detail-row"><span>Recommended System</span><strong>{proposal.recommendedKw.toFixed(2)} kW</strong></div>
@@ -282,14 +295,14 @@ export const ProposalDetailPage: React.FC = () => {
           </div>
           <div className="detail-row">
             <span>Safety Status</span>
-            <span className={`badge ${proposal.safetyStatus === 'SAFE' ? 'badge--green' : 'badge--yellow'}`}>
-              {proposal.safetyStatus}
+            <span className={`badge ${!missingCompliance && proposal.safetyStatus === 'SAFE' ? 'badge--green' : 'badge--yellow'}`}>
+              {missingCompliance ? 'Awaiting assessment' : proposal.safetyStatus}
             </span>
           </div>
           <div className="detail-row">
-            <span>Requires Approval</span>
-            <span className={`badge ${proposal.requiresApproval ? 'badge--red' : 'badge--green'}`}>
-              {proposal.requiresApproval ? 'Yes (Mandatory)' : 'No'}
+            <span>Engineer review</span>
+            <span className="badge badge--yellow">
+              {STATUS_LABELS[proposal.proposalStatus] ?? proposal.proposalStatus}
             </span>
           </div>
         </div>
@@ -297,11 +310,13 @@ export const ProposalDetailPage: React.FC = () => {
         {/* AI Recommendation Summary */}
         {(proposal.recommendationSummary || guardrailResult) && (
           <div className="detail-card detail-card--wide">
-            <h2 className="detail-card__title">🤖 AI Recommendation Summary</h2>
-            {proposal.recommendationSummary && (
-              <p style={{ color: '#4f6352', marginBottom: '12px', lineHeight: 1.6 }}>{proposal.recommendationSummary}</p>
+            <h2 className="detail-card__title">Proposal guidance</h2>
+            {(proposal.recommendationSummary || missingCompliance) && (
+              <p style={{ color: '#4f6352', marginBottom: '12px', lineHeight: 1.6 }}>{missingCompliance ? 'This proposal was prepared without a confirmed site compliance result. Request an updated proposal after the inspection is complete.' : proposal.recommendationSummary}</p>
             )}
-            {guardrailResult?.issues && guardrailResult.issues.length > 0 && (
+            <p className="proposal-guidance-note">Prepared with automated sizing and safety checks. An authorized engineer reviews the proposal before it can proceed.</p>
+
+            {!missingCompliance && guardrailResult?.issues && guardrailResult.issues.length > 0 && (
               <>
                 <p style={{ color: '#8b580b', fontWeight: 600, marginBottom: '6px', fontSize: '13px' }}>Detected Issues:</p>
                 <ul style={{ color: '#5f705a', fontSize: '13px', paddingLeft: '20px' }}>
@@ -309,7 +324,7 @@ export const ProposalDetailPage: React.FC = () => {
                 </ul>
               </>
             )}
-            {guardrailResult?.recommendations && guardrailResult.recommendations.length > 0 && (
+            {!missingCompliance && guardrailResult?.recommendations && guardrailResult.recommendations.length > 0 && (
               <>
                 <p style={{ color: '#287247', fontWeight: 600, marginBottom: '6px', marginTop: '12px', fontSize: '13px' }}>Recommendations:</p>
                 <ul style={{ color: '#5f705a', fontSize: '13px', paddingLeft: '20px' }}>
@@ -320,37 +335,43 @@ export const ProposalDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Deterministic Validation */}
-        {validationResult && (
-          <div className="detail-card detail-card--wide">
-            <h2 className="detail-card__title">🔒 Deterministic Validation Result</h2>
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-              <span className={`badge ${validationResult.valid ? 'badge--green' : 'badge--red'}`}>
-                {validationResult.valid ? '✓ Valid' : '✕ Invalid'}
-              </span>
-              <span className={`badge ${validationResult.requiresApproval ? 'badge--yellow' : 'badge--green'}`}>
-                {validationResult.requiresApproval ? 'Requires Approval' : 'No Approval Required'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {(validationResult.checks ?? []).map((c, i) => (
-                <span key={i} className={`chip ${c.startsWith('PASS') ? 'chip--green' : 'chip--red'}`}>{c}</span>
-              ))}
-            </div>
-          </div>
+        {/* Detailed evidence remains available to engineering staff without dominating the proposal. */}
+        {isEngineeringStaff && (
+          <details className="detail-card detail-card--wide proposal-review-details">
+            <summary>Engineering review details</summary>
+            <p className="proposal-guidance-note">Supporting checks and workflow records for the engineering team. These automated results do not grant approval.</p>
+            {validationResult && <>
+              <h3>Automated checks</h3>
+              <p>{validationResult.valid ? 'Checks passed. The engineer’s decision is recorded separately.' : 'Some checks need attention before approval.'}</p>
+              <ul className="proposal-check-list">{(validationResult.checks ?? []).map((check, i) => {
+                const [result, name] = check.split(':');
+                const labels: Record<string, string> = {
+                  recommended_kw_positive: 'System capacity provided', panel_count_positive: 'Panel quantity provided',
+                  inverter_size_positive: 'Inverter capacity provided', cost_positive: 'Cost estimate provided',
+                  compliance_assessment_required: 'Completed site compliance assessment', kw_threshold: 'System capacity review threshold',
+                  compliance_status: 'Grid compliance review',
+                };
+                return <li key={i}><span>{labels[name] || (name || check).replace(/_/g, ' ')}</span><strong>{result === 'PASS' ? 'Passed' : result === 'FAIL' ? 'Needs attention' : 'Review required'}</strong></li>;
+              })}</ul>
+              <details className="proposal-technical-record"><summary>Technical check codes</summary><ul>{(validationResult.checks ?? []).map((check, i) => <li key={i}><code>{check}</code></li>)}</ul></details>
+            </>}
+            <WorkflowSummary surveyId={proposal.solarSurveyId} />
+            <p className="proposal-guidance-note">Proposal record: {proposal.id} · Survey record: {proposal.solarSurveyId}</p>
+          </details>
         )}
       </div>
 
       {/* Approval Actions */}
+      {isEngineeringStaff && <InspectionPhotoGallery surveyId={proposal.solarSurveyId} />}
       {isPending && (
         <div className="action-bar" id="approval-actions">
           <h2 style={{ color: '#8b580b', fontWeight: 700, marginBottom: '12px' }}>Engineer Decision</h2>
 
-          {approvalBlocked ? (
+          {approvalBlocked && (
             <div className="alert alert--error">
-              🚫 Approval blocked because validation failed. Resolve validation issues before approving.
+              Approval is blocked. Request revision so the homeowner can generate an updated proposal using the completed inspection, or reject this proposal.
             </div>
-          ) : (
+          )}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button
                 className="btn btn-success"
@@ -377,14 +398,14 @@ export const ProposalDetailPage: React.FC = () => {
                 ↻ Request Revision
               </button>
             </div>
-          )}
         </div>
       )}
 
       {/* Audit History */}
       {(proposal.auditLogs ?? []).length > 0 && (
         <div className="detail-card detail-card--wide" style={{ marginTop: '24px' }}>
-          <h2 className="detail-card__title">📜 Approval Audit History</h2>
+          <h2 className="detail-card__title">Review history</h2>
+          <p className="proposal-guidance-note">Decisions and feedback recorded during the review of this proposal.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {(proposal.auditLogs ?? []).map((log: ApprovalAuditLog) => (
               <div key={log.id} className="audit-entry" id={`audit-${log.id}`}>
@@ -406,7 +427,7 @@ export const ProposalDetailPage: React.FC = () => {
                   </p>
                 )}
                 <p style={{ color: '#60715e', fontSize: '11px', marginTop: '4px' }}>
-                  Engineer: {log.userId?.slice?.(0, 8) || '—'}…
+                  Recorded by an authorized reviewer
                 </p>
               </div>
             ))}

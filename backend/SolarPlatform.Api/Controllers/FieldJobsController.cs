@@ -23,6 +23,12 @@ public class FieldJobsController : ControllerBase
     [HttpGet("technicians")]
     public async Task<IActionResult> GetTechnicians() => Ok(await _fieldJobService.GetAvailableTechniciansAsync());
 
+    [HttpGet("{jobId:guid}/photos")]
+    public async Task<IActionResult> GetJobPhotos(Guid jobId) => Ok(await _fieldJobService.GetInspectionPhotosAsync(null, jobId));
+
+    [HttpGet("surveys/{surveyId:guid}/photos")]
+    public async Task<IActionResult> GetSurveyPhotos(Guid surveyId) => Ok(await _fieldJobService.GetInspectionPhotosAsync(surveyId, null));
+
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<FieldJobResponseDto>>> GetAllJobs([FromQuery] FieldJobStatus? status)
     {

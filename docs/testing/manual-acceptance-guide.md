@@ -91,7 +91,7 @@ Enter the inspection form:
 - Voc: `48`
 - Isc: `12`
 
-Under **Site Evidence Photographs**, choose Roof/Meter/ElectricalPanel/InverterLocation and upload clearly labelled test images. Expect a success message. Test both photo selection and, separately on a real device, camera capture and permission denial.
+Under **Site Evidence Photographs**, choose Roof/Meter/ElectricalPanel/ and upload clearly labelled test images. Expect a success message. Test both photo selection and, separately on a real device, camera capture and permission denial.
 
 Choose **Save Inspection Draft**. Expect `Site inspection draft & telemetry saved.` Then choose **Submit Inspection for Grid Compliance Evaluation**. Submission also saves the form. Expect a compliance result of **COMPLIANT**, `gridCompliant: true` in API evidence, and completed compliance/job status. Exact badge spacing can differ between clients.
 

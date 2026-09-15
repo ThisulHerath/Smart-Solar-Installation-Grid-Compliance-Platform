@@ -8,6 +8,14 @@ from app.workflow.proposal_workflow import run_guardrail_workflow
 from app.agents.proposal_validator import DeterministicProposalValidator
 
 class TestProposalWorkflow(unittest.TestCase):
+    def test_unknown_compliance_is_not_reported_as_safe(self):
+        result = run_guardrail_workflow({"recommended_kw": 5, "panel_count": 12,
+            "inverter_size_kw": 5, "estimated_cost_lkr": 1710000,
+            "grid_compliance_status": "UNKNOWN", "risk_level": "UNKNOWN"})
+        self.assertNotEqual(result.safety_status, "SAFE")
+        self.assertTrue(result.requires_approval)
+        self.assertFalse(any("is acceptable" in text for text in result.recommendations))
+
     def setUp(self):
         self.validator = DeterministicProposalValidator()
 

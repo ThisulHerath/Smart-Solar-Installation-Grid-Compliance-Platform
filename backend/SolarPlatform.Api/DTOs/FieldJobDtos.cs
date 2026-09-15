@@ -3,6 +3,7 @@ using SolarPlatform.Api.Models;
 namespace SolarPlatform.Api.DTOs;
 
 public record TechnicianOptionDto(Guid Id, string FullName, string Email);
+public record InspectionPhotoDto(Guid Id, Guid FieldJobId, string TechnicianName, string PhotoType, string FileUrl, string FileName, DateTime CreatedAt);
 
 public record FieldJobResponseDto(
     Guid Id,

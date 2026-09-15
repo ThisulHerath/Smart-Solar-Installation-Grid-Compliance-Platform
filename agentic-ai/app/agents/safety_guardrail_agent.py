@@ -107,7 +107,11 @@ class SafetyGuardrailAgent:
 
         # ── Check 2: Grid Compliance Status ───────────────────────────────────
         compliance_upper = data.grid_compliance_status.upper()
-        if compliance_upper in NON_COMPLIANT_STATUSES:
+        if compliance_upper not in {"COMPLIANT", *NON_COMPLIANT_STATUSES}:
+            requires_approval = True
+            issues.append("A confirmed grid compliance result is missing. Safety cannot be confirmed.")
+            recommendations.append("Complete site compliance assessment and generate an updated proposal before approval.")
+        elif compliance_upper in NON_COMPLIANT_STATUSES:
             requires_approval = True
             issues.append(
                 f"Grid compliance status '{data.grid_compliance_status}' indicates non-conformance "

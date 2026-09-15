@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { InspectionPhotoGallery } from '../components/InspectionPhotoGallery';
 import { FieldJob } from '../types/auth';
 import {
   ArrowLeft,
@@ -237,6 +238,7 @@ export const FieldJobDetailPage: React.FC = () => {
           <div>No compliance evaluation run yet. The technician must submit on-site telemetry or staff can trigger evaluation above.</div>
         </div>
       )}
+      <InspectionPhotoGallery jobId={jobId} />
     </div>
   );
 };

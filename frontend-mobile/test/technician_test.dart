@@ -80,6 +80,48 @@ void main() {
       expect(job.compliance!.riskLevel, 'HIGH');
     });
 
+    test('FieldJob parses photos correctly', () {
+      final json = {
+        'id': 'job-003',
+        'solarSurveyId': 'survey-300',
+        'technicianId': 'tech-100',
+        'technicianName': 'Lead Field Technician',
+        'customerName': 'Saman Kumara',
+        'customerPhone': '+94771122334',
+        'propertyAddress': '100 Negombo Road',
+        'monthlyKwh': 500.0,
+        'roofAreaSqm': 40.0,
+        'status': 'Assigned',
+        'priority': 'Low',
+        'assignedAt': '2026-09-09T08:00:00Z',
+        'hasInspection': true,
+        'photos': [
+          {
+            'id': 'photo-1',
+            'siteInspectionId': 'insp-1',
+            'photoType': 'Roof',
+            'fileUrl': '/uploads/site-photos/roof1.jpg',
+            'fileName': 'roof1.jpg',
+            'createdAt': '2026-09-09T09:00:00Z',
+          },
+          {
+            'id': 'photo-2',
+            'siteInspectionId': 'insp-1',
+            'photoType': 'Meter',
+            'fileUrl': '/uploads/site-photos/meter1.jpg',
+            'fileName': 'meter1.jpg',
+            'createdAt': '2026-09-09T09:05:00Z',
+          }
+        ],
+      };
+
+      final job = FieldJob.fromJson(json);
+      expect(job.photos.length, 2);
+      expect(job.photos[0].photoType, 'Roof');
+      expect(job.photos[0].fileUrl, '/uploads/site-photos/roof1.jpg');
+      expect(job.photos[1].photoType, 'Meter');
+    });
+
     test('Field Technician role is identified properly', () {
       final userJson = {
         'id': 'tech-user-1',

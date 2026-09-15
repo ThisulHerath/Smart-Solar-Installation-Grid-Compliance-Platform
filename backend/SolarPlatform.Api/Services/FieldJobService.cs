@@ -39,6 +39,17 @@ public class FieldJobService : IFieldJobService
             throw new ArgumentException("Select an active field technician.");
     }
 
+    public async Task<IReadOnlyList<InspectionPhotoDto>> GetInspectionPhotosAsync(Guid? surveyId, Guid? jobId)
+    {
+        if (!surveyId.HasValue && !jobId.HasValue) throw new ArgumentException("A survey or field job is required.");
+        var query = _db.SitePhotos.AsNoTracking().AsQueryable();
+        if (surveyId.HasValue) query = query.Where(p => p.SiteInspection.FieldJob.SolarSurveyId == surveyId.Value);
+        if (jobId.HasValue) query = query.Where(p => p.SiteInspection.FieldJobId == jobId.Value);
+        return await query.OrderByDescending(p => p.CreatedAt).Select(p => new InspectionPhotoDto(
+            p.Id, p.SiteInspection.FieldJobId, p.SiteInspection.FieldJob.Technician.FullName,
+            p.PhotoType.ToString(), p.FileUrl, p.FileName, p.CreatedAt)).ToListAsync();
+    }
+
     public async Task<IReadOnlyList<FieldJobResponseDto>> GetJobsForTechnicianAsync(Guid technicianId, FieldJobStatus? status = null)
     {
         var query = _db.FieldJobs

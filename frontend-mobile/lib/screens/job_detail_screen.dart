@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +24,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   bool _saving = false;
   String? _error;
   String? _successMessage;
+
+  final Map<String, Uint8List> _photoBytes = {};
+  final Map<String, String> _photoUrls = {};
 
   // Controllers for site inspection
   final _roofAreaController = TextEditingController();
@@ -71,6 +75,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       final data = await _api.getTechnicianJob(widget.jobId);
       setState(() {
         _job = FieldJob.fromJson(data);
+        for (final p in _job!.photos) {
+          if (p.fileUrl.isNotEmpty) {
+            _photoUrls[p.photoType] = p.fileUrl;
+          }
+        }
         _loading = false;
       });
     } catch (e) {
@@ -165,8 +174,16 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       final picked = await _picker.pickImage(source: source, maxWidth: 1920, imageQuality: 85);
       if (picked == null) return;
 
-      setState(() => _saving = true);
-      await _api.uploadInspectionPhoto(widget.jobId, picked, photoType);
+      final bytes = await picked.readAsBytes();
+      setState(() {
+        _photoBytes[photoType] = bytes;
+        _saving = true;
+      });
+
+      final result = await _api.uploadInspectionPhoto(widget.jobId, picked, photoType);
+      if (result is Map && result['fileUrl'] != null) {
+        _photoUrls[photoType] = result['fileUrl'] as String;
+      }
       setState(() => _successMessage = 'Photo ($photoType) uploaded successfully.');
       await _loadJobDetails();
     } catch (e) {
@@ -174,6 +191,87 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     } finally {
       setState(() => _saving = false);
     }
+  }
+
+  bool _hasPhoto(String type) {
+    if (_photoBytes.containsKey(type)) return true;
+    if (_photoUrls.containsKey(type)) return true;
+    return _job?.photos.any((p) => p.photoType.toLowerCase() == type.toLowerCase()) ?? false;
+  }
+
+  Widget? _buildPreviewImage(String type) {
+    if (_photoBytes.containsKey(type)) {
+      return Image.memory(
+        _photoBytes[type]!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    }
+    final url = _photoUrls[type] ??
+        (_job?.photos.where((p) => p.photoType.toLowerCase() == type.toLowerCase()).isNotEmpty == true
+            ? _job!.photos.firstWhere((p) => p.photoType.toLowerCase() == type.toLowerCase()).fileUrl
+            : null);
+    if (url != null && url.isNotEmpty) {
+      final fullUrl = url.startsWith('http') ? url : '${_api.baseUrl}$url';
+      return Image.network(
+        fullUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(Icons.broken_image, color: SolarColors.muted),
+        ),
+        loadingBuilder: (_, child, progress) => progress == null
+            ? child
+            : const Center(child: CircularProgressIndicator(strokeWidth: 2, color: SolarColors.primary)),
+      );
+    }
+    return null;
+  }
+
+  void _viewFullPhoto(String type) {
+    final previewWidget = _buildPreviewImage(type);
+    if (previewWidget == null) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                onPressed: () => Navigator.of(ctx).pop(),
+              ),
+            ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                color: Colors.black,
+                constraints: const BoxConstraints(maxHeight: 480),
+                child: previewWidget,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '$type Evidence Photo',
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _handleSubmitInspection() async {
@@ -409,7 +507,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Step 4: Photo Capture
+            // Step 4: Photo Capture & Previews
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -420,20 +518,167 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('4. Site Evidence Photographs', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: SolarColors.text)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '4. Site Evidence Photographs',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: SolarColors.text),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0x18287247),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0x33287247)),
+                        ),
+                        child: Text(
+                          '${['Roof', 'Meter', 'ElectricalPanel', 'InverterLocation'].where(_hasPhoto).length}/4 Attached',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: SolarColors.success),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
+
+                  // Action Buttons with completion ticks
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: ['Roof', 'Meter', 'ElectricalPanel', 'InverterLocation'].map((type) {
+                      final uploaded = _hasPhoto(type);
                       return OutlinedButton.icon(
                         onPressed: _saving ? null : () => _handleUploadPhoto(type),
-                        icon: const Icon(Icons.camera_alt, size: 14),
-                        label: Text(type),
-                        style: OutlinedButton.styleFrom(foregroundColor: SolarColors.muted),
+                        icon: Icon(
+                          uploaded ? Icons.check_circle_rounded : Icons.camera_alt,
+                          size: 15,
+                          color: uploaded ? SolarColors.success : SolarColors.muted,
+                        ),
+                        label: Text(
+                          uploaded ? '$type ✓' : type,
+                          style: TextStyle(
+                            color: uploaded ? SolarColors.success : SolarColors.text,
+                            fontWeight: uploaded ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: uploaded ? const Color(0x14287247) : Colors.transparent,
+                          side: BorderSide(
+                            color: uploaded ? SolarColors.success : SolarColors.border,
+                            width: uploaded ? 1.5 : 1,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
                       );
                     }).toList(),
                   ),
+
+                  // Previews section
+                  if (['Roof', 'Meter', 'ElectricalPanel', 'InverterLocation'].any(_hasPhoto)) ...[
+                    const SizedBox(height: 16),
+                    const Divider(height: 1, color: SolarColors.border),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Attached Photo Previews',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: SolarColors.text),
+                    ),
+                    const SizedBox(height: 10),
+                    GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      childAspectRatio: 1.15,
+                      children: ['Roof', 'Meter', 'ElectricalPanel', 'InverterLocation'].map((type) {
+                        final hasPhoto = _hasPhoto(type);
+                        final previewWidget = _buildPreviewImage(type);
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: SolarColors.background,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: hasPhoto ? SolarColors.success.withOpacity(0.4) : SolarColors.border,
+                            ),
+                          ),
+                          child: hasPhoto && previewWidget != null
+                              ? Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(11),
+                                      child: GestureDetector(
+                                        onTap: () => _viewFullPhoto(type),
+                                        child: previewWidget,
+                                      ),
+                                    ),
+                                    // Gradient overlay & badges
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.7),
+                                          borderRadius: const BorderRadius.only(
+                                            bottomLeft: Radius.circular(11),
+                                            bottomRight: Radius.circular(11),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                type,
+                                                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const Icon(Icons.check_circle, color: Color(0xFFD4EF83), size: 14),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    // Retake button
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: InkWell(
+                                        onTap: _saving ? null : () => _handleUploadPhoto(type),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.65),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.edit, color: Colors.white, size: 13),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : InkWell(
+                                  onTap: _saving ? null : () => _handleUploadPhoto(type),
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.add_a_photo_outlined, color: SolarColors.muted, size: 22),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Add $type',
+                                          style: const TextStyle(color: SolarColors.muted, fontSize: 11),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ],
               ),
             ),

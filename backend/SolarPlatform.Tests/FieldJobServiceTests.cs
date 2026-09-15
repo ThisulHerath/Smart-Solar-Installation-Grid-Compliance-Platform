@@ -116,6 +116,23 @@ public class FieldJobServiceTests
         new(_db, _aiMock.Object, _fileStorageMock.Object, _loggerMock.Object);
 
     [Fact]
+    public async Task InspectionGallery_ReturnsUploadedPhotoOnlyForMatchingSurveyAndJob()
+    {
+        var service = CreateService();
+        var job = await service.CreateOrAssignJobAsync(new(_surveyId, _techId, null));
+        using var stream = new MemoryStream(new byte[] { 1, 2, 3 });
+        await service.UploadPhotoAsync(job.Id, _techId, SitePhotoType.Roof, stream, "roof.jpg");
+        var bySurvey = Assert.Single(await service.GetInspectionPhotosAsync(_surveyId, null));
+        Assert.Equal("Roof", bySurvey.PhotoType);
+        Assert.Equal("Technician One", bySurvey.TechnicianName);
+        Assert.Equal(job.Id, bySurvey.FieldJobId);
+        Assert.Equal(bySurvey.Id, Assert.Single(await service.GetInspectionPhotosAsync(null, job.Id)).Id);
+        Assert.Empty(await service.GetInspectionPhotosAsync(Guid.NewGuid(), null));
+        Assert.Empty(await service.GetInspectionPhotosAsync(null, Guid.NewGuid()));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.GetInspectionPhotosAsync(null, null));
+    }
+
+    [Fact]
     public async Task CreateOrAssignJob_CreatesJobWithAssignedStatus()
     {
         var service = CreateService();

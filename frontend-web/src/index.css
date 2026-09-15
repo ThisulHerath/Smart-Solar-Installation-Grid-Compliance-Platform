@@ -298,6 +298,53 @@ h1, h2, h3, h4 {
 .modal { background: #161d2e; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 28px; max-width: 480px; width: 90%; box-shadow: 0 24px 64px rgba(0,0,0,.5); }
 .modal__title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px; }
 .modal__actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+.inspection-gallery { margin: 24px 0; }
+.inspection-gallery__heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.inspection-gallery__heading h2 { font-size: 21px; color: #193e30; margin-bottom: 8px; }
+.inspection-gallery__heading p, .inspection-gallery__empty { color: #596b51; font-size: 14px; line-height: 1.6; }
+.inspection-gallery__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
+.inspection-gallery__photo { margin: 0; border: 1px solid #dce4d2; border-radius: 14px; overflow: hidden; background: #fafbf3; }
+.inspection-gallery__photo img { display: block; width: 100%; height: 190px; object-fit: contain; background: #edf1e5; }
+.inspection-gallery__photo figcaption { padding: 16px; display: flex; flex-direction: column; gap: 6px; overflow-wrap: anywhere; }
+.inspection-gallery__photo strong { color: #254733; }
+.inspection-gallery__photo span, .inspection-gallery__photo time, .inspection-gallery__photo small { color: #596b51; font-size: 12px; }
+.inspection-gallery__photo a { color: #245d3e; font-size: 13px; }
+.inspection-gallery__photo a:focus-visible { outline: 3px solid #638746; outline-offset: -3px; }
+.inspection-gallery__unavailable { padding: 24px; min-height: 190px; color: #80522b; background: #f5efdf; }
+.proposal-guidance-note { color: #596b51; font-size: 13px; line-height: 1.7; margin: 12px 0 18px; overflow-wrap: anywhere; }
+.proposal-review-details > summary { cursor: pointer; color: #244d36; font-size: 17px; font-weight: 650; padding: 4px 0; }
+.proposal-review-details > summary:focus-visible { outline: 2px solid #376c4d; outline-offset: 5px; }
+.proposal-review-details[open] > summary { padding-bottom: 14px; border-bottom: 1px solid #dce4d2; }
+.proposal-check-list { list-style: none; padding: 0; margin: 16px 0; }
+.proposal-check-list li { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid #e3e9da; color: #344b37; font-size: 14px; }
+.proposal-check-list strong { font-size: 12px; color: #405735; }
+.proposal-technical-record { margin: 16px 0 24px; color: #526548; }
+.proposal-technical-record summary { cursor: pointer; font-size: 13px; }
+
+/* Engineering decisions share the cream and forest-green workspace palette. */
+.modal-overlay:has(.proposal-decision) { background: rgba(23, 52, 40, .42); padding: 20px; overflow-y: auto; }
+.modal.proposal-decision { background: #fafbf3; color: #193e30; border: 1px solid #d4dfc6; border-radius: 24px; width: 100%; max-width: 560px; max-height: calc(100dvh - 40px); overflow-y: auto; padding: 30px; box-shadow: 0 24px 64px rgba(23, 52, 40, .2); }
+.proposal-decision__heading { border-bottom: 1px solid #dce4d2; padding-bottom: 22px; margin-bottom: 22px; }
+.proposal-decision__eyebrow { color: #536c42; font-size: 11px; font-weight: 700; letter-spacing: .12em; margin: 0 0 12px; }
+.proposal-decision .modal__title { color: #193e30; font-size: clamp(22px, 4vw, 28px); line-height: 1.2; letter-spacing: -.035em; margin-bottom: 12px; }
+.proposal-decision__description { color: #536450; font-size: 14px; line-height: 1.65; margin: 0; }
+.proposal-decision .form-label { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #254733; font-size: 14px; font-weight: 600; margin-bottom: 10px; }
+.proposal-decision__required { color: #6a5940; background: #eee9d9; border-radius: 6px; padding: 3px 7px; font-size: 11px; font-weight: 500; }
+.proposal-decision .form-textarea { background: #fffef9; color: #193e30; border: 1px solid #a9bda0; border-radius: 12px; min-height: 130px; padding: 14px 16px; font-size: 15px; line-height: 1.6; }
+.proposal-decision .form-textarea::placeholder { color: #68755f; }
+.proposal-decision .form-textarea:focus { border-color: #376c4d; outline: 3px solid #dbe9c8; outline-offset: 2px; }
+.proposal-decision__hint { color: #59694f; font-size: 12px; line-height: 1.6; margin: 10px 0 0; }
+.proposal-decision .modal__actions { padding-top: 20px; border-top: 1px solid #dce4d2; margin-top: 24px; }
+.proposal-decision .btn { min-height: 44px; border-radius: 10px; font-weight: 600; }
+.proposal-decision .btn-warning, .proposal-decision .btn-success { background: #204e39; color: #fffef8; border: 1px solid #204e39; }
+.proposal-decision .btn-warning:hover:not(:disabled), .proposal-decision .btn-success:hover:not(:disabled) { background: #163c2b; }
+.proposal-decision .btn-secondary { background: transparent; color: #254733; border: 1px solid #b9c8ab; }
+.proposal-decision .btn:disabled { opacity: 1; color: #53604a; background: #e3e8d9; border-color: #d2dbc6; cursor: not-allowed; box-shadow: none; }
+@media (max-width: 540px) {
+  .modal.proposal-decision { padding: 22px; border-radius: 18px; }
+  .proposal-decision .modal__actions { flex-direction: column-reverse; }
+  .proposal-decision .modal__actions .btn { width: 100%; }
+}
 
 /* Forms */
 .form-group { margin-bottom: 16px; }

@@ -1,11 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ProposalDetailPage } from '../ProposalDetailPage';
-import { approveProposal, getProposal } from '../../services/proposalService';
+import { approveProposal, getProposal, reviseProposal } from '../../services/proposalService';
 
+const viewer = vi.hoisted(() => ({ roles: ['SENIOR_ENGINEER'] }));
 vi.mock('../../context/AuthContext', () => ({
-  useAuth: () => ({ user: { roles: ['SENIOR_ENGINEER'] } }),
+  useAuth: () => ({ user: viewer }),
 }));
 vi.mock('../../components/WorkflowSummary', () => ({
   WorkflowSummary: () => <div>Workflow history</div>,
@@ -24,7 +25,7 @@ const pendingProposal = {
   gridComplianceStatus: 'COMPLIANT', riskLevel: 'LOW', safetyStatus: 'SAFE',
   proposalStatus: 'PendingApproval' as const, requiresApproval: true,
   recommendationSummary: 'Ready for engineering review.',
-  guardrailResultJson: null, validationResultJson: JSON.stringify({
+  guardrailResultJson: undefined, validationResultJson: JSON.stringify({
     valid: true, requiresApproval: true, checks: ['PASS:recommended_kw_positive'],
     violations: [], overrideReason: '',
   }), auditLogs: [], customerName: 'Homeowner', propertyAddress: 'Solar Road',
@@ -32,6 +33,32 @@ const pendingProposal = {
 };
 
 describe('Proposal approval flow', () => {
+  beforeEach(() => { viewer.roles = ['SENIOR_ENGINEER']; });
+  it('shows homeowner guidance without staff diagnostics or misleading stale safety advice', async () => {
+    viewer.roles = ['HOMEOWNER'];
+    vi.mocked(getProposal).mockResolvedValue({ ...pendingProposal, gridComplianceStatus: 'UNKNOWN',
+      recommendationSummary: 'Grid UNKNOWN is acceptable.',
+      validationResultJson: JSON.stringify({ valid: false, requiresApproval: false, checks: ['FAIL:compliance_assessment_required'] }) });
+    render(<MemoryRouter initialEntries={['/proposals/proposal-1']}><Routes><Route path="/proposals/:id" element={<ProposalDetailPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByText('Proposal guidance')).toBeInTheDocument();
+    expect(screen.getByText(/prepared without a confirmed site compliance result/i)).toBeInTheDocument();
+    expect(screen.queryByText('Grid UNKNOWN is acceptable.')).not.toBeInTheDocument();
+    expect(screen.queryByText('Engineering review details')).not.toBeInTheDocument();
+    expect(screen.queryByText('FAIL:compliance_assessment_required')).not.toBeInTheDocument();
+  });
+  it('allows revision of a blocked proposal without allowing approval', async () => {
+    const blocked = { ...pendingProposal, validationResultJson: JSON.stringify({ valid: false, requiresApproval: false, checks: [], violations: ['Inspection required'] }) };
+    vi.mocked(getProposal).mockResolvedValue(blocked);
+    vi.mocked(reviseProposal).mockResolvedValue({ ...blocked, proposalStatus: 'RevisionRequested' });
+    render(<MemoryRouter initialEntries={['/proposals/proposal-1']}><Routes><Route path="/proposals/:id" element={<ProposalDetailPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('button', { name: /Approve Proposal/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Reject Proposal/i })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: /Request Revision/i }));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Regenerate using completed inspection.' } });
+    fireEvent.click(document.getElementById('confirm-revise')!);
+    await waitFor(() => expect(reviseProposal).toHaveBeenCalledWith('proposal-1', { comment: 'Regenerate using completed inspection.' }));
+    expect((await screen.findAllByText('Revision Requested')).length).toBeGreaterThan(0);
+  });
   it('opens confirmation and submits approval with the API result', async () => {
     (getProposal as any).mockResolvedValue(pendingProposal);
     (approveProposal as any).mockResolvedValue({ ...pendingProposal, proposalStatus: 'Approved' });
@@ -49,7 +76,7 @@ describe('Proposal approval flow', () => {
     fireEvent.click(screen.getByRole('button', { name: /Confirm Approval/i }));
 
     await waitFor(() => expect(approveProposal).toHaveBeenCalledWith('proposal-1', { comment: '' }));
-    await waitFor(() => expect(screen.getByText('Approved')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getAllByText('Approved').length).toBeGreaterThan(0));
   });
 
   it('renders correctly when validationResultJson has PascalCase fields or partial data', async () => {
