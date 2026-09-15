@@ -51,4 +51,38 @@ describe('Proposal approval flow', () => {
     await waitFor(() => expect(approveProposal).toHaveBeenCalledWith('proposal-1', { comment: '' }));
     await waitFor(() => expect(screen.getByText('Approved')).toBeInTheDocument());
   });
+
+  it('renders correctly when validationResultJson has PascalCase fields or partial data', async () => {
+    const proposalWithPascalCase = {
+      ...pendingProposal,
+      id: 'proposal-pascal',
+      validationResultJson: JSON.stringify({
+        Valid: true,
+        RequiresApproval: false,
+        Checks: ['PASS:kw_threshold'],
+        Violations: [],
+        OverrideReason: '',
+      }),
+      guardrailResultJson: JSON.stringify({
+        safety_status: 'SAFE',
+        risk_level: 'LOW',
+        requires_approval: false,
+        issues: [],
+        recommendations: ['Check mounting clamps'],
+      }),
+    };
+
+    (getProposal as any).mockResolvedValue(proposalWithPascalCase);
+
+    render(
+      <MemoryRouter initialEntries={['/proposals/proposal-pascal']}>
+        <Routes>
+          <Route path="/proposals/:id" element={<ProposalDetailPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(screen.getByText('PASS:kw_threshold')).toBeInTheDocument());
+    expect(screen.getByText('Check mounting clamps')).toBeInTheDocument();
+  });
 });

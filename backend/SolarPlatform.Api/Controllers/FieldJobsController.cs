@@ -20,6 +20,9 @@ public class FieldJobsController : ControllerBase
         _logger = logger;
     }
 
+    [HttpGet("technicians")]
+    public async Task<IActionResult> GetTechnicians() => Ok(await _fieldJobService.GetAvailableTechniciansAsync());
+
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<FieldJobResponseDto>>> GetAllJobs([FromQuery] FieldJobStatus? status)
     {

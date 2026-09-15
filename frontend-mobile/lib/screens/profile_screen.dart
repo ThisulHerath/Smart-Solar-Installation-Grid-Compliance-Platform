@@ -27,8 +27,50 @@ class ProfileScreen extends StatelessWidget {
         ListTile(leading: const Icon(Icons.calendar_today_outlined), title: const Text('Member since'), subtitle: Text('${user.createdAt.day}/${user.createdAt.month}/${user.createdAt.year}')),
       ]))),
       const SizedBox(height: 20),
-      Card(child: ListTile(contentPadding: const EdgeInsets.all(20), leading: const Icon(Icons.shield_outlined, color: SolarColors.primary), title: const Text('Account & security'), subtitle: const Text('Manage your password and account access.'), trailing: const Icon(Icons.chevron_right), onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen())))),
-      const SizedBox(height: 20), OutlinedButton.icon(onPressed: () async { await auth.logout(); if (context.mounted) { Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const WelcomeScreen()), (_) => false); } }, icon: const Icon(Icons.logout), label: const Text('Sign out')),
+      Card(
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(20),
+          leading: const Icon(Icons.shield_outlined, color: SolarColors.primary),
+          title: const Text('Account & security'),
+          subtitle: const Text('Manage your password and account access.'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen())),
+        ),
+      ),
+      const SizedBox(height: 20),
+      OutlinedButton.icon(
+        onPressed: () async {
+          final shouldLogout = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Sign out'),
+              content: const Text('Are you sure you want to sign out of Smart Solar?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(backgroundColor: SolarColors.error),
+                  onPressed: () => Navigator.of(ctx).pop(true),
+                  child: const Text('Sign out'),
+                ),
+              ],
+            ),
+          );
+          if (shouldLogout == true && context.mounted) {
+            await auth.logout();
+            if (context.mounted) {
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                (_) => false,
+              );
+            }
+          }
+        },
+        icon: const Icon(Icons.logout),
+        label: const Text('Sign out'),
+      ),
     ]))));
   }
 }

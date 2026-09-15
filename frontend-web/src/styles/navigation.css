@@ -1,1 +1,74 @@
 .app-header{position:sticky;top:0;z-index:50;background:#f7f8f0f5;backdrop-filter:blur(16px);border-bottom:1px solid #d6dfca}.app-header-inner{max-width:1280px;margin:auto;padding:0 24px}.app-header-top{display:flex;justify-content:space-between;align-items:center;gap:22px;min-height:87px}.app-brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:#183c30;font-size:25px;font-weight:750;letter-spacing:-1px;line-height:1}.app-brand:visited{color:#183c30}.app-brand-light{font-weight:400;color:#587a3c}.app-brand-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;background:#d4ef83;color:#173b2e}.app-brand small{display:block;font-size:8px;letter-spacing:1.8px;color:#5f705a;margin-top:9px;font-weight:500}.app-account{display:flex;align-items:center;gap:20px;min-width:0}.app-user{display:flex;align-items:center;gap:11px;text-decoration:none;min-width:0;color:#183c30;border-radius:10px}.app-user:visited{color:#183c30}.app-user-avatar{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:50%;font-size:12px;font-weight:700;color:#294b32;background:#e6eed9;border:1px solid #c7d7b7}.app-user-details{display:flex;flex-direction:column;gap:4px}.app-user-details strong{font-size:12px;font-weight:600}.app-user-details small{font-size:10px;color:#5f705a;text-transform:capitalize}.app-account-divider{width:1px;height:28px;background:#d6dfca}.app-logout{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:9px;border:1px solid #cbd8c1;background:transparent;color:#304f3c;font:inherit;font-size:11px;cursor:pointer}.app-logout:hover{background:#e3eccf;color:#183c30;border-color:#8da278}.app-navigation{display:flex;gap:5px;border-top:1px solid #d6dfca;padding:10px 0;align-items:center;flex-wrap:wrap}.app-nav-link{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:8px;color:#53684e;font-size:12px;font-weight:550;text-decoration:none;transition:background .2s,color .2s}.app-nav-link:visited{color:#53684e}.app-nav-link:hover{background:#edf0e3;color:#183c30}.app-nav-link.active{background:#e3eccf;color:#183c30;box-shadow:inset 0 -2px #7b9850}.app-profile-link{margin-left:auto}.app-menu-toggle{display:none}.app-header a:focus-visible,.app-header button:focus-visible{outline:2px solid #d4ef83;outline-offset:4px}@media(max-width:850px){.app-header-inner{padding:0 18px}.app-account{gap:12px}.app-nav-link{padding:10px;font-size:11px}.app-profile-link{margin-left:0}.app-user-details{max-width:150px}.app-user-details strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}@media(max-width:600px){.app-header-top{min-height:76px;gap:12px}.app-brand{font-size:21px;gap:9px}.app-brand-icon{width:35px;height:35px}.app-brand small{font-size:6px;letter-spacing:1.3px}.app-user-details,.app-account-divider,.app-logout span{display:none}.app-account{gap:9px}.app-logout{padding:9px}.app-menu-toggle{display:grid;place-items:center;background:none;color:#183c30;border:1px solid #cbd8c1;width:35px;height:35px;border-radius:8px;cursor:pointer}.app-navigation{display:none}.app-navigation.expanded{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));padding-block:12px}.app-nav-link{font-size:12px;padding:12px}.app-user-avatar{width:30px;height:30px;font-size:10px}}
+
+.logout-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 60, 48, 0.45);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.logout-modal-card {
+  background: #fefff9;
+  border: 1px solid #d6dfca;
+  border-radius: 18px;
+  padding: 26px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 20px 48px rgba(24, 60, 48, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logout-modal-header {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.logout-modal-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #b91c1c;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.logout-modal-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #183c30;
+  margin: 0 0 6px 0;
+}
+
+.logout-modal-header p {
+  font-size: 13px;
+  color: #5f705a;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.logout-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

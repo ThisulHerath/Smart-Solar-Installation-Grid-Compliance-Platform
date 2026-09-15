@@ -26,6 +26,19 @@ public class FieldJobService : IFieldJobService
         _logger = logger;
     }
 
+    public async Task<IReadOnlyList<TechnicianOptionDto>> GetAvailableTechniciansAsync() =>
+        await _db.Users.AsNoTracking()
+            .Where(u => u.IsActive && u.UserRoles.Any(r => r.Role.Name == RoleConstants.FieldTechnician))
+            .OrderBy(u => u.FullName)
+            .Select(u => new TechnicianOptionDto(u.Id, u.FullName, u.Email)).ToListAsync();
+
+    private async Task ValidateTechnicianAsync(Guid id)
+    {
+        if (!await _db.Users.AnyAsync(u => u.Id == id && u.IsActive &&
+            u.UserRoles.Any(r => r.Role.Name == RoleConstants.FieldTechnician)))
+            throw new ArgumentException("Select an active field technician.");
+    }
+
     public async Task<IReadOnlyList<FieldJobResponseDto>> GetJobsForTechnicianAsync(Guid technicianId, FieldJobStatus? status = null)
     {
         var query = _db.FieldJobs
@@ -86,8 +99,7 @@ public class FieldJobService : IFieldJobService
             .FirstOrDefaultAsync(s => s.Id == dto.SolarSurveyId)
             ?? throw new KeyNotFoundException($"Solar survey {dto.SolarSurveyId} not found.");
 
-        var tech = await _db.Users.FindAsync(dto.TechnicianId)
-            ?? throw new KeyNotFoundException($"Technician user {dto.TechnicianId} not found.");
+        await ValidateTechnicianAsync(dto.TechnicianId);
 
         var job = new FieldJob
         {
@@ -110,8 +122,7 @@ public class FieldJobService : IFieldJobService
         var job = await _db.FieldJobs.FindAsync(jobId);
         if (job == null) return null;
 
-        var tech = await _db.Users.FindAsync(dto.TechnicianId)
-            ?? throw new KeyNotFoundException($"Technician user {dto.TechnicianId} not found.");
+        await ValidateTechnicianAsync(dto.TechnicianId);
 
         job.TechnicianId = dto.TechnicianId;
         job.ScheduledAt = dto.ScheduledAt;

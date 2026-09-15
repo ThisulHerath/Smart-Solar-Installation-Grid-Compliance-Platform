@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _form = GlobalKey<FormState>();
   final _name = TextEditingController(), _email = TextEditingController(), _phone = TextEditingController(), _password = TextEditingController();
   bool _busy = false;
+  bool _obscurePassword = true;
   String? _error;
   final _code = TextEditingController();
   String? _challengeId, _maskedEmail;
@@ -58,7 +59,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       TextFormField(controller: _name, decoration: const InputDecoration(labelText: 'Full name'), validator: (v) => v == null || v.trim().isEmpty ? 'Enter your name' : null),
       TextFormField(controller: _email, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email'), validator: (v) => v == null || !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(v.trim()) ? 'Enter a valid email' : null),
       TextFormField(controller: _phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Phone (optional)', hintText: '+94 77 123 4567')),
-      TextFormField(controller: _password, obscureText: true, maxLength: 64, decoration: const InputDecoration(labelText: 'Password'), validator: (v) => v == null || v.length < 12 ? 'Use at least 12 characters' : null),
+      TextFormField(
+        controller: _password,
+        obscureText: _obscurePassword,
+        maxLength: 64,
+        decoration: InputDecoration(
+          labelText: 'Password',
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              color: SolarColors.muted,
+            ),
+            tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+          ),
+        ),
+        validator: (v) => v == null || v.length < 12 ? 'Use at least 12 characters' : null,
+      ),
       ] else ...[
         Text('Enter the six-digit code sent to $_maskedEmail. It expires in 10 minutes. Check your spam folder too.'),
         TextFormField(controller: _code, keyboardType: TextInputType.number, autofillHints: const [AutofillHints.oneTimeCode], maxLength: 6, decoration: const InputDecoration(labelText: 'Email verification code'), validator: (v) => v == null || !RegExp(r'^\d{6}$').hasMatch(v) ? 'Enter the six-digit code' : null),

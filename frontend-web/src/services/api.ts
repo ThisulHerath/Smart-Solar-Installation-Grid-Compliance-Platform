@@ -96,6 +96,12 @@ class ApiService {
     return res.json();
   }
 
+  async getTechnicians(): Promise<{ id: string; fullName: string; email: string }[]> {
+    const res = await fetch(`${API_BASE_URL}/api/field-jobs/technicians`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to load technicians. Please try again.');
+    return res.json();
+  }
+
   async getFieldJobs(status?: string): Promise<FieldJob[]> {
     const query = status ? `?status=${encodeURIComponent(status)}` : '';
     const res = await fetch(`${API_BASE_URL}/api/field-jobs${query}`, { headers: this.getHeaders() });
@@ -115,7 +121,10 @@ class ApiService {
       headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error(`Unable to create field job (${res.status}).`);
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || `Unable to create field job (${res.status}).`);
+    }
     return res.json();
   }
 

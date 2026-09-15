@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { AssignTechnicianForm } from '../components/AssignTechnicianForm';
 import { FieldJob } from '../types/auth';
 import {
   CheckCircle2,
@@ -23,6 +24,8 @@ export const FieldJobsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+  const [notice, setNotice] = useState('');
 
   const fetchJobs = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsRefreshing(true);
@@ -93,6 +96,15 @@ export const FieldJobsPage: React.FC = () => {
       </div>
 
       {/* Filters and Search */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <button className="btn btn-primary" onClick={() => { setAssigning(true); setNotice(''); }} disabled={assigning}>Assign technician</button>
+        {notice && <p role="status">{notice}</p>}
+      </div>
+      {assigning && <AssignTechnicianForm onCancel={() => setAssigning(false)} onAssigned={job => {
+        setAssigning(false); setStatusFilter('ALL'); setSearchQuery('');
+        setNotice(`Site visit assigned to ${job.technicianName} for ${job.propertyAddress}.`);
+        setJobs(current => [job, ...current.filter(existing => existing.id !== job.id)]);
+      }} />}
       <div className="glass-panel" style={{ padding: '16px 20px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {['ALL', 'Assigned', 'InProgress', 'Submitted', 'ComplianceComplete', 'Failed'].map(status => (

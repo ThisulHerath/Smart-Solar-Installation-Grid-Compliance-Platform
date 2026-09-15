@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace SolarPlatform.Api.DTOs;
 
 // ─── Response DTOs ────────────────────────────────────────────────────────────
@@ -84,9 +86,9 @@ public record ReviseProposalRequestDto(
 // ─── Validation Result ────────────────────────────────────────────────────────
 
 public record ProposalValidationResultDto(
-    bool Valid,
-    bool RequiresApproval,
-    List<string> Checks,
-    List<string> Violations,
-    string OverrideReason
+    [property: JsonPropertyName("valid")] bool Valid,
+    [property: JsonPropertyName("requiresApproval")] bool RequiresApproval,
+    [property: JsonPropertyName("checks")] List<string> Checks,
+    [property: JsonPropertyName("violations")] List<string> Violations,
+    [property: JsonPropertyName("overrideReason")] string OverrideReason
 );

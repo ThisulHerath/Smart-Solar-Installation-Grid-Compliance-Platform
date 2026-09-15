@@ -2,6 +2,8 @@ using SolarPlatform.Api.Models;
 
 namespace SolarPlatform.Api.DTOs;
 
+public record TechnicianOptionDto(Guid Id, string FullName, string Email);
+
 public record FieldJobResponseDto(
     Guid Id,
     Guid SolarSurveyId,

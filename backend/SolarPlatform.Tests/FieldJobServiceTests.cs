@@ -67,6 +67,9 @@ public class FieldJobServiceTests
             PropertyAddress = "45 Lake Road, Colombo"
         };
 
+        var technicianRole = new Role { Name = RoleConstants.FieldTechnician };
+        tech.UserRoles.Add(new UserRole { UserId = tech.Id, Role = technicianRole });
+        otherTech.UserRoles.Add(new UserRole { UserId = otherTech.Id, Role = technicianRole });
         _db.Users.AddRange(tech, otherTech, customer);
         _db.SolarSurveys.Add(survey);
         _db.SaveChanges();
@@ -90,6 +93,23 @@ public class FieldJobServiceTests
                 Notes: "Passed all checks",
                 ExecutionLogs: new List<ComplianceExecutionLogDto>()
             ));
+    }
+
+    [Fact]
+    public async Task TechnicianOptions_ExcludeInactiveAndNonTechnicians_AndAssignmentRejectsThem()
+    {
+        var inactive = await _db.Users.FindAsync(_otherTechId);
+        inactive!.IsActive = false;
+        await _db.SaveChangesAsync();
+        var service = CreateService();
+        var options = await service.GetAvailableTechniciansAsync();
+        Assert.Equal(_techId, Assert.Single(options).Id);
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateOrAssignJobAsync(new(_surveyId, _customerId, null)));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateOrAssignJobAsync(new(_surveyId, _otherTechId, null)));
+        Assert.Empty(_db.FieldJobs);
+        var job = await service.CreateOrAssignJobAsync(new(_surveyId, _techId, null));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.AssignJobAsync(job.Id, new(_customerId, null)));
+        Assert.Equal(_techId, (await service.GetJobByIdAsync(job.Id))!.TechnicianId);
     }
 
     private FieldJobService CreateService() =>

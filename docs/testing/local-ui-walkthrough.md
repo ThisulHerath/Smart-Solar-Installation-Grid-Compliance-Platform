@@ -1,5 +1,7 @@
 # Local UI walkthrough
 
+For exact inputs, expected results and all five roles, follow the [complete manual acceptance guide](manual-acceptance-guide.md). Engineers and administrators can now assign a technician from **Field Operations → Assign technician**, using survey/technician dropdowns, priority and an optional visit time.
+
 ## Open the applications
 
 - Web portal: http://localhost:5173

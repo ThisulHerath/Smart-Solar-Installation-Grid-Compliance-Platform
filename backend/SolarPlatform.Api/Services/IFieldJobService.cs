@@ -5,6 +5,7 @@ namespace SolarPlatform.Api.Services;
 
 public interface IFieldJobService
 {
+    Task<IReadOnlyList<TechnicianOptionDto>> GetAvailableTechniciansAsync();
     Task<IReadOnlyList<FieldJobResponseDto>> GetJobsForTechnicianAsync(Guid technicianId, FieldJobStatus? status = null);
     Task<IReadOnlyList<FieldJobResponseDto>> GetAllJobsAsync(FieldJobStatus? status = null);
     Task<FieldJobResponseDto?> GetJobByIdAsync(Guid jobId, Guid? technicianId = null);

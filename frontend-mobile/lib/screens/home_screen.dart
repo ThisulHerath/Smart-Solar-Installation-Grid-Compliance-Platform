@@ -29,16 +29,46 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: SolarColors.background,
       appBar: AppBar(
         title: const Text('Smart Solar'),
-        actions: [IconButton(tooltip: 'My profile', icon: const Icon(Icons.manage_accounts), onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileScreen()))), IconButton(
-          tooltip: 'Sign out', icon: const Icon(Icons.logout),
-          onPressed: () async {
-            await auth.logout();
-            if (context.mounted) {
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const WelcomeScreen()), (_) => false);
-            }
-          },
-        )],
+        actions: [
+          IconButton(
+            tooltip: 'My profile',
+            icon: const Icon(Icons.manage_accounts),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+          ),
+          IconButton(
+            tooltip: 'Sign out',
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              final shouldLogout = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Sign out'),
+                  content: const Text('Are you sure you want to sign out of Smart Solar?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: const Text('Cancel'),
+                    ),
+                    FilledButton(
+                      style: FilledButton.styleFrom(backgroundColor: SolarColors.error),
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      child: const Text('Sign out'),
+                    ),
+                  ],
+                ),
+              );
+              if (shouldLogout == true && context.mounted) {
+                await auth.logout();
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                    (_) => false,
+                  );
+                }
+              }
+            },
+          ),
+        ],
       ),
       body: ListView(padding: const EdgeInsets.all(20), children: [
         const Icon(Icons.solar_power, color: SolarColors.primary, size: 56),

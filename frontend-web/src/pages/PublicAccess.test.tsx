@@ -31,6 +31,8 @@ it('loads the signed-in profile and links to separate security settings', async 
   expect(screen.getByText('+94770000000')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: /Account & security/ })).toHaveAttribute('href', '/account');
   fireEvent.click(screen.getByRole('button', { name: /Logout/ }));
+  expect(screen.getByText('Are you sure you want to log out?')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
   expect(await screen.findByRole('heading', { name: 'Sign in to Smart Solar' })).toBeInTheDocument();
   expect(localStorage.getItem('smartsolar_token')).toBeNull();
 });

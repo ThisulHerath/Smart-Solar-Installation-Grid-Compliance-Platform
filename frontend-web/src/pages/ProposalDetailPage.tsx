@@ -35,9 +35,39 @@ function fmtLkr(v: number) {
   return `LKR ${v.toLocaleString('en-LK', { maximumFractionDigits: 0 })}`;
 }
 
-function parseJson<T>(raw?: string | null): T | null {
+function parseValidationResult(raw?: string | null): ValidationResult | null {
   if (!raw) return null;
-  try { return JSON.parse(raw) as T; } catch { return null; }
+  try {
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!data || typeof data !== 'object') return null;
+    return {
+      valid: Boolean(data.valid ?? data.Valid ?? false),
+      requiresApproval: Boolean(data.requiresApproval ?? data.RequiresApproval ?? false),
+      checks: Array.isArray(data.checks) ? data.checks : (Array.isArray(data.Checks) ? data.Checks : []),
+      violations: Array.isArray(data.violations) ? data.violations : (Array.isArray(data.Violations) ? data.Violations : []),
+      overrideReason: String(data.overrideReason ?? data.OverrideReason ?? ''),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function parseGuardrailResult(raw?: string | null): GuardrailResult | null {
+  if (!raw) return null;
+  try {
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!data || typeof data !== 'object') return null;
+    return {
+      safetyStatus: String(data.safetyStatus ?? data.safety_status ?? data.SafetyStatus ?? ''),
+      riskLevel: String(data.riskLevel ?? data.risk_level ?? data.RiskLevel ?? ''),
+      requiresApproval: Boolean(data.requiresApproval ?? data.requires_approval ?? data.RequiresApproval ?? false),
+      issues: Array.isArray(data.issues) ? data.issues : (Array.isArray(data.Issues) ? data.Issues : []),
+      recommendations: Array.isArray(data.recommendations) ? data.recommendations : (Array.isArray(data.Recommendations) ? data.Recommendations : []),
+      recommendationSummary: data.recommendationSummary ?? data.recommendation_summary ?? data.RecommendationSummary,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
@@ -142,8 +172,8 @@ export const ProposalDetailPage: React.FC = () => {
 
   useEffect(() => { load(); }, [load]);
 
-  const validationResult = parseJson<ValidationResult>(proposal?.validationResultJson);
-  const guardrailResult = parseJson<GuardrailResult>(proposal?.guardrailResultJson);
+  const validationResult = parseValidationResult(proposal?.validationResultJson);
+  const guardrailResult = parseGuardrailResult(proposal?.guardrailResultJson);
 
   const { user } = useAuth();
   const isPending = proposal?.proposalStatus === 'PendingApproval' && user?.roles.some(role => ['SENIOR_ENGINEER', 'ADMINISTRATOR'].includes(role));
@@ -303,7 +333,7 @@ export const ProposalDetailPage: React.FC = () => {
               </span>
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {validationResult.checks.map((c, i) => (
+              {(validationResult.checks ?? []).map((c, i) => (
                 <span key={i} className={`chip ${c.startsWith('PASS') ? 'chip--green' : 'chip--red'}`}>{c}</span>
               ))}
             </div>
@@ -352,11 +382,11 @@ export const ProposalDetailPage: React.FC = () => {
       )}
 
       {/* Audit History */}
-      {proposal.auditLogs.length > 0 && (
+      {(proposal.auditLogs ?? []).length > 0 && (
         <div className="detail-card detail-card--wide" style={{ marginTop: '24px' }}>
           <h2 className="detail-card__title">📜 Approval Audit History</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {proposal.auditLogs.map((log: ApprovalAuditLog) => (
+            {(proposal.auditLogs ?? []).map((log: ApprovalAuditLog) => (
               <div key={log.id} className="audit-entry" id={`audit-${log.id}`}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <span className="badge" style={{
@@ -376,7 +406,7 @@ export const ProposalDetailPage: React.FC = () => {
                   </p>
                 )}
                 <p style={{ color: '#60715e', fontSize: '11px', marginTop: '4px' }}>
-                  Engineer: {log.userId.slice(0, 8)}…
+                  Engineer: {log.userId?.slice?.(0, 8) || '—'}…
                 </p>
               </div>
             ))}
