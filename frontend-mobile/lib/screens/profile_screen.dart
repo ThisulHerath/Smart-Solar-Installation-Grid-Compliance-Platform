@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/solar_theme.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'account_screen.dart';
@@ -26,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
         ListTile(leading: const Icon(Icons.calendar_today_outlined), title: const Text('Member since'), subtitle: Text('${user.createdAt.day}/${user.createdAt.month}/${user.createdAt.year}')),
       ]))),
       const SizedBox(height: 20),
-      Card(child: ListTile(contentPadding: const EdgeInsets.all(20), leading: const Icon(Icons.shield_outlined, color: solarLime), title: const Text('Account & security'), subtitle: const Text('Manage your password and account access.'), trailing: const Icon(Icons.chevron_right), onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen())))),
+      Card(child: ListTile(contentPadding: const EdgeInsets.all(20), leading: const Icon(Icons.shield_outlined, color: SolarColors.primary), title: const Text('Account & security'), subtitle: const Text('Manage your password and account access.'), trailing: const Icon(Icons.chevron_right), onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AccountScreen())))),
       const SizedBox(height: 20), OutlinedButton.icon(onPressed: () async { await auth.logout(); if (context.mounted) { Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const WelcomeScreen()), (_) => false); } }, icon: const Icon(Icons.logout), label: const Text('Sign out')),
     ]))));
   }

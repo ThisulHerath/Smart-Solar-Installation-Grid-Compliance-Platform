@@ -15,17 +15,18 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = color.a == 1 ? color : textColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: color.a == 1 ? color.withValues(alpha: 0.10) : color,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: textColor.withValues(alpha: 0.3)),
+        border: Border.all(color: foreground.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: textColor,
+          color: foreground,
           fontSize: 11,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,

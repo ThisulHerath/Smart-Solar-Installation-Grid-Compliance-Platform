@@ -1,4 +1,5 @@
 import os
+import json
 from fastapi import FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -48,6 +49,7 @@ def health_check():
         "service": "agentic-ai",
         "agents": [
             "PlannerAgent",
+            "SolarSizingAgent",
             "GridComplianceAgent",
             "EquipmentPricingAgent",
             "SafetyGuardrailAgent"
@@ -90,7 +92,9 @@ def test_workflow(
             errors=raw_result.get("errors", []),
             approval_status=raw_result.get("approval_status", "pending_engineer_review"),
             final_outcome=raw_result.get("final_outcome", ""),
-            execution_logs=raw_result.get("execution_logs", [])
+            # The legacy public test contract uses strings; sizing retains structured events.
+            execution_logs=[json.dumps(entry) if isinstance(entry, dict) else str(entry)
+                            for entry in raw_result.get("execution_logs", [])]
         )
     except Exception:
         raise HTTPException(

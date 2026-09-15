@@ -1,4 +1,4 @@
-"""Run against the local demo API. Creates labelled demo records; never alters existing records.
+"""Run against the local demo API. Creates labelled records and reserves/releases compatible demo stock.
 Run: .venv/Scripts/python scripts/smoke_workflow.py --output <evidence.json>
 Requires the standard seeded demo staff accounts and running API + Python service.
 """
@@ -39,6 +39,15 @@ try:
     for role in ('engineer', 'technician', 'inventory', 'homeowner'):
         auth = call(None, 'POST', '/api/auth/login', {'email': role+'@smartsolar.local', 'password': 'Password@123'})
         tokens[role] = auth['token']
+    contract = call('engineer', 'POST', '/api/agent-workflows/test', {
+        'objective': 'Assess the synthetic audit rooftop', 'customerId': tag,
+        'inputData': {'monthly_kwh': 600, 'roof_area_sqm': 80, 'grid_type': 'ThreePhase'}})
+    assert contract['current_step'] == 'completed', contract
+    assert contract['objective'] == 'Assess the synthetic audit rooftop'
+    assert contract['customer_id'] == tag
+    assert contract['validation_results']['valid'] is True
+    assert len(contract['execution_logs']) == 3
+    evidence['workflowContract'] = contract
     # Registration is exercised separately through an injected test mailbox in the API tests.
     # This live workflow uses an existing local test identity and never bypasses OTP verification.
     survey = call('homeowner', 'POST', '/api/surveys', {'monthlyKwh': 600, 'roofAreaSqm': 80,

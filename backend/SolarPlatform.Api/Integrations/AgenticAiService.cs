@@ -58,7 +58,12 @@ public class AgenticAiService : IAgenticAiService
 
             using var message = new HttpRequestMessage(HttpMethod.Post, "/workflow/test")
             {
-                Content = JsonContent.Create(request)
+                Content = JsonContent.Create(new
+                {
+                    objective = request.Objective,
+                    customer_id = request.CustomerId,
+                    input_data = request.InputData ?? new Dictionary<string, object>()
+                })
             };
             message.Headers.Add("X-Internal-Key", internalKey);
 
@@ -85,7 +90,9 @@ public class AgenticAiService : IAgenticAiService
             {
                 WorkflowId = Guid.NewGuid().ToString(),
                 Objective = request.Objective,
-                CurrentStep = "completed",
+                CurrentStep = "failed",
+                ApprovalStatus = "error",
+                Errors = new List<string> { "Empty AI response." },
                 FinalOutcome = "Empty response received from Agentic AI."
             };
         }

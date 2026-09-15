@@ -56,6 +56,12 @@ class TestAgenticAI(unittest.TestCase):
         self.assertEqual(result["final_result"]["recommended_kw"], 10.0)
         self.assertEqual([log["agent_name"] for log in result["execution_logs"]], ["Planner", "SolarSizingAgent", "DeterministicValidator"])
 
+    def test_workflow_uses_supplied_objective_and_consumption(self):
+        result = run_solar_workflow("Assess rooftop", "c42", {"monthly_kwh": 600})
+        self.assertEqual(result["objective"], "Assess rooftop")
+        self.assertEqual(result["customer_id"], "c42")
+        self.assertEqual(result["final_result"]["recommended_kw"], 5.0)
+
     def test_pydantic_schema_validation(self):
         req = WorkflowExecutionRequest(objective="Test solar validation")
         self.assertEqual(req.objective, "Test solar validation")

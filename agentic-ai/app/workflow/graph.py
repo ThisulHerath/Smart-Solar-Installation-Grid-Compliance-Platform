@@ -40,7 +40,7 @@ def build_workflow():
 compiled_workflow = build_workflow()
 
 def run_solar_sizing_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
-    state = {"workflow_id": payload.get("workflow_id", str(uuid.uuid4())), "customer_id": payload.get("customer_id"), "objective": "Preliminary solar system sizing", "input_data": payload, "plan": [], "current_step": "START", "completed_steps": [], "validation_results": {}, "errors": [], "final_outcome": "", "execution_logs": []}
+    state = {"workflow_id": payload.get("workflow_id", str(uuid.uuid4())), "customer_id": payload.get("customer_id"), "objective": payload.get("objective", "Preliminary solar system sizing"), "input_data": payload, "plan": [], "current_step": "START", "completed_steps": [], "validation_results": {}, "errors": [], "final_outcome": "", "execution_logs": []}
     try: return compiled_workflow.invoke(state)
     except Exception:
         state.update({"current_step": "FAILED", "errors": ["Solar sizing workflow could not be completed."], "final_outcome": "Solar sizing processing failed."})
@@ -48,6 +48,7 @@ def run_solar_sizing_workflow(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 def run_solar_workflow(objective: str, customer_id: str = None, input_data: Dict[str, Any] = None) -> Dict[str, Any]:
     payload = {"workflow_id": str(uuid.uuid4()), "customer_id": customer_id or "test-customer", "monthly_kwh": 1200, "roof_area_sqm": 80, "grid_type": "SinglePhase", **(input_data or {})}
+    payload.update(objective=objective, customer_id=customer_id or "test-customer")
     result = run_solar_sizing_workflow(payload)
     # Retain the legacy test-workflow response convention while survey sizing uses COMPLETE/FAILED internally.
     result["current_step"] = "completed" if result["current_step"] == "COMPLETE" else "failed"

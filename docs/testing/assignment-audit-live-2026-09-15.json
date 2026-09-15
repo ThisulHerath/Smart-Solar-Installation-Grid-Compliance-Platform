@@ -1,0 +1,578 @@
+{
+  "startedAt": "2026-09-15T05:38:29.774945+00:00",
+  "tag": "DEMO-8B847A00",
+  "events": [
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "durationMs": 1332.89
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "durationMs": 335.51
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "durationMs": 316.95
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 200,
+      "durationMs": 340.03
+    },
+    {
+      "method": "POST",
+      "path": "/api/agent-workflows/test",
+      "status": 200,
+      "durationMs": 193.04
+    },
+    {
+      "method": "POST",
+      "path": "/api/surveys",
+      "status": 201,
+      "durationMs": 436.88
+    },
+    {
+      "method": "POST",
+      "path": "/api/surveys/684d6557-5a69-493f-911e-55f42f95dfb9/submit",
+      "status": 200,
+      "durationMs": 588.64
+    },
+    {
+      "method": "POST",
+      "path": "/api/field-jobs",
+      "status": 201,
+      "durationMs": 436.03
+    },
+    {
+      "method": "POST",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/check-in",
+      "status": 200,
+      "durationMs": 391.49
+    },
+    {
+      "method": "PUT",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/inspection",
+      "status": 200,
+      "durationMs": 262.28
+    },
+    {
+      "method": "POST",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/telemetry",
+      "status": 200,
+      "durationMs": 216.61
+    },
+    {
+      "method": "POST",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/telemetry",
+      "status": 200,
+      "durationMs": 204.35
+    },
+    {
+      "method": "POST",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/telemetry",
+      "status": 200,
+      "durationMs": 169.99
+    },
+    {
+      "method": "POST",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/telemetry",
+      "status": 200,
+      "durationMs": 165.02
+    },
+    {
+      "method": "POST",
+      "path": "/api/technician/jobs/71b07b1b-3e81-4915-9aa9-52208edbae06/submit",
+      "status": 200,
+      "durationMs": 600.69
+    },
+    {
+      "method": "POST",
+      "path": "/api/proposals",
+      "status": 201,
+      "durationMs": 800.18
+    },
+    {
+      "method": "POST",
+      "path": "/api/proposals/5ef010c2-5acc-4ec2-bb5e-21e5ad472bfb/approve",
+      "status": 403,
+      "durationMs": 70.02
+    },
+    {
+      "method": "POST",
+      "path": "/api/proposals/5ef010c2-5acc-4ec2-bb5e-21e5ad472bfb/approve",
+      "status": 200,
+      "durationMs": 442.22
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory",
+      "status": 201,
+      "durationMs": 304.4
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory",
+      "status": 201,
+      "durationMs": 267.66
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/proposals/5ef010c2-5acc-4ec2-bb5e-21e5ad472bfb/price",
+      "status": 200,
+      "durationMs": 848.21
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/reserve",
+      "status": 200,
+      "durationMs": 473.83
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/reserve",
+      "status": 200,
+      "durationMs": 186.01
+    },
+    {
+      "method": "GET",
+      "path": "/api/inventory/proposals/5ef010c2-5acc-4ec2-bb5e-21e5ad472bfb/equipment",
+      "status": 200,
+      "durationMs": 220.55
+    },
+    {
+      "method": "GET",
+      "path": "/api/workflows/surveys/684d6557-5a69-493f-911e-55f42f95dfb9",
+      "status": 200,
+      "durationMs": 376.95
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/9e7685fc-6ce4-42af-9800-99ef7a0cbd47/release",
+      "status": 200,
+      "durationMs": 653.67
+    },
+    {
+      "method": "POST",
+      "path": "/api/inventory/reserve",
+      "status": 400,
+      "durationMs": 194.37
+    }
+  ],
+  "workflowContract": {
+    "workflow_id": "aaf033b3-c64f-4049-966f-e524fed71577",
+    "customer_id": "DEMO-8B847A00",
+    "objective": "Assess the synthetic audit rooftop",
+    "current_step": "completed",
+    "completed_steps": [
+      "planning",
+      "Planner",
+      "SolarSizingAgent",
+      "DeterministicValidator"
+    ],
+    "approval_status": "pending_engineer_review",
+    "final_outcome": "Preliminary solar sizing completed.",
+    "plan": [
+      "1. SolarSizingAgent: derive preliminary capacity from monthly electricity use; validate sizing",
+      "2. FieldTechnician: collect physical inspection and electrical measurements",
+      "3. GridComplianceAgent: evaluate project-defined grid rules; validate compliance",
+      "4. SafetyGuardrailAgent: review proposal and flag technical risks; validate safety",
+      "5. SeniorEngineer: pause for authorized approval, rejection or revision",
+      "6. EquipmentPricingAgent: select compatible catalog equipment and call the USD/LKR tool; validate pricing",
+      "7. InventoryOfficer: review the validated quote and reserve stock transactionally",
+      "8. Homeowner: receive proposal decision and equipment status through the shared API"
+    ],
+    "execution_logs": [
+      "{\"agent_name\": \"Planner\", \"step_name\": \"planning\", \"status\": \"completed\", \"started_at\": \"2026-09-15T05:38:32.270688+00:00\", \"completed_at\": \"2026-09-15T05:38:32.270688+00:00\", \"retry_count\": 0, \"output_summary\": \"Sizing plan created.\", \"validation_result\": null, \"error_message\": null}",
+      "{\"agent_name\": \"SolarSizingAgent\", \"step_name\": \"sizing\", \"status\": \"completed\", \"started_at\": \"2026-09-15T05:38:32.271558+00:00\", \"completed_at\": \"2026-09-15T05:38:32.271558+00:00\", \"retry_count\": 0, \"output_summary\": \"Structured sizing candidate created.\", \"validation_result\": null, \"error_message\": null}",
+      "{\"agent_name\": \"DeterministicValidator\", \"step_name\": \"validation\", \"status\": \"completed\", \"started_at\": \"2026-09-15T05:38:32.272097+00:00\", \"completed_at\": \"2026-09-15T05:38:32.272097+00:00\", \"retry_count\": 0, \"output_summary\": \"Independent sizing validation completed.\", \"validation_result\": {\"monthly_kwh_valid\": true, \"roof_area_valid\": true, \"recommended_kw_consistent\": true, \"panel_count_reasonable\": true, \"inverter_size_consistent\": true, \"schema_valid\": true}, \"error_message\": null}"
+    ],
+    "errors": [],
+    "tool_results": {},
+    "validation_results": {
+      "valid": true,
+      "checks": {
+        "monthly_kwh_valid": true,
+        "roof_area_valid": true,
+        "recommended_kw_consistent": true,
+        "panel_count_reasonable": true,
+        "inverter_size_consistent": true,
+        "schema_valid": true
+      }
+    }
+  },
+  "surveyId": "684d6557-5a69-493f-911e-55f42f95dfb9",
+  "jobId": "71b07b1b-3e81-4915-9aa9-52208edbae06",
+  "proposalId": "5ef010c2-5acc-4ec2-bb5e-21e5ad472bfb",
+  "quoteId": "9e7685fc-6ce4-42af-9800-99ef7a0cbd47",
+  "pricing": {
+    "status": "VALIDATED",
+    "exchangeRate": 328.578935,
+    "rateTimestamp": "2026-09-15T00:02:31Z",
+    "baseCurrency": "USD",
+    "targetCurrency": "LKR",
+    "totalPriceLkr": 492868.37,
+    "lines": [
+      {
+        "inventoryItemId": "0e85b3b0-7313-4915-b085-9e5054871a8d",
+        "name": "DEMO-069AFB00 PANEL",
+        "category": "PANEL",
+        "quantity": 10,
+        "unitPriceUsd": 100.0,
+        "unitPriceLkr": 32857.89,
+        "totalPriceLkr": 328578.9
+      },
+      {
+        "inventoryItemId": "2b60f096-5a3e-474e-a1bf-bfe55673368a",
+        "name": "DEMO-2D1C9197 INVERTER",
+        "category": "INVERTER",
+        "quantity": 1,
+        "unitPriceUsd": 500.0,
+        "unitPriceLkr": 164289.47,
+        "totalPriceLkr": 164289.47
+      }
+    ],
+    "executionLogs": [
+      "EquipmentRequirements: validated 500 W panel policy and inverter capacity",
+      "ExchangeRateTool: validated USD/LKR provider response",
+      "EquipmentPricingAgent: computed structured equipment estimate",
+      "PricingValidator: independently verified catalog and arithmetic",
+      "InventoryAvailabilityValidator: snapshot sufficient; backend must recheck on reservation",
+      "FormatResult: return to backend for persistence and staff review"
+    ]
+  },
+  "overview": {
+    "workflowId": "684d6557-5a69-493f-911e-55f42f95dfb9",
+    "objective": "Assess rooftop solar suitability and prepare an approved equipment plan",
+    "plan": [
+      "1. SolarSizingAgent: derive preliminary capacity from monthly electricity use; validate sizing",
+      "2. FieldTechnician: collect physical inspection and electrical measurements",
+      "3. GridComplianceAgent: evaluate project-defined grid rules; validate compliance",
+      "4. SafetyGuardrailAgent: review proposal and flag technical risks; validate safety",
+      "5. SeniorEngineer: pause for authorized approval, rejection or revision",
+      "6. EquipmentPricingAgent: select compatible catalog equipment and call the USD/LKR tool; validate pricing",
+      "7. InventoryOfficer: review the validated quote and reserve stock transactionally",
+      "8. Homeowner: receive proposal decision and equipment status through the shared API"
+    ],
+    "completedSteps": [
+      "SolarSizingAgent",
+      "GridComplianceAgent",
+      "SafetyGuardrailAgent",
+      "HumanApproval",
+      "EquipmentPricingAgent",
+      "InventoryReservation"
+    ],
+    "status": "COMPLETE",
+    "approvalStatus": "Approved",
+    "finalOutcome": "Approved equipment reserved; ready for installation planning.",
+    "sizing": {
+      "recommended_kw": 5.0,
+      "reason": "Monthly consumption of 600.0 kWh maps to the project sizing rule.",
+      "estimated_panel_count": 12,
+      "estimated_inverter_kw": 5.0,
+      "assumptions": [
+        "400 W panels",
+        "Inverter size follows recommended system size"
+      ]
+    },
+    "sizingValidation": {
+      "valid": true,
+      "checks": {
+        "monthly_kwh_valid": true,
+        "roof_area_valid": true,
+        "recommended_kw_consistent": true,
+        "panel_count_reasonable": true,
+        "inverter_size_consistent": true,
+        "schema_valid": true
+      }
+    },
+    "compliance": {
+      "complianceStatus": "COMPLIANT",
+      "riskLevel": "LOW",
+      "validationStatus": "PASSED",
+      "complianceNotes": "Grid voltage 400.0V passes the project screening threshold.; Grid frequency 50.0Hz is within synchronous operating tolerances."
+    },
+    "safety": {
+      "safety_status": "SAFE",
+      "risk_level": "LOW",
+      "requires_approval": false,
+      "issues": [],
+      "recommendations": [
+        "System size 5.00kW is within routine installation limits (<= 10.0kW).",
+        "Grid compliance status 'COMPLIANT' is acceptable."
+      ],
+      "recommendation_summary": "System of 5.00kW (12 panels) passed all routine safety checks. Grid: COMPLIANT.",
+      "workflow_id": "wf-prop-3735e67f",
+      "execution_logs": [
+        {
+          "agent_name": "GuardrailPlanner",
+          "step_name": "ingestion",
+          "status": "completed",
+          "started_at": "2026-09-15T05:38:36.344313+00:00",
+          "completed_at": "2026-09-15T05:38:36.344313+00:00",
+          "duration_ms": 0,
+          "output_summary": "Proposal 5ef010c2-5acc-4ec2-bb5e-21e5ad472bfb \u2014 5.00kW ingested.",
+          "error_message": null,
+          "retry_count": 0
+        },
+        {
+          "agent_name": "SafetyGuardrailAgent",
+          "step_name": "evaluation",
+          "status": "completed",
+          "started_at": "2026-09-15T05:38:36.344364+00:00",
+          "completed_at": "2026-09-15T05:38:36.344364+00:00",
+          "duration_ms": 0,
+          "output_summary": "Safety: SAFE, AI requires_approval: False.",
+          "error_message": null,
+          "retry_count": 0
+        },
+        {
+          "agent_name": "DeterministicProposalValidator",
+          "step_name": "validation",
+          "status": "completed",
+          "started_at": "2026-09-15T05:38:36.344694+00:00",
+          "completed_at": "2026-09-15T05:38:36.344694+00:00",
+          "duration_ms": 0,
+          "output_summary": "Final requires_approval: False. Override: False.",
+          "error_message": null,
+          "retry_count": 0
+        },
+        {
+          "agent_name": "ApprovalRequirementSetter",
+          "step_name": "persist_format",
+          "status": "completed",
+          "started_at": "2026-09-15T05:38:36.344940+00:00",
+          "completed_at": "2026-09-15T05:38:36.344940+00:00",
+          "duration_ms": 0,
+          "output_summary": "Final decision: SAFE, requires_approval=False.",
+          "error_message": null,
+          "retry_count": 0
+        }
+      ]
+    },
+    "safetyValidation": {
+      "Valid": true,
+      "RequiresApproval": false,
+      "Checks": [
+        "PASS:recommended_kw_positive",
+        "PASS:panel_count_positive",
+        "PASS:inverter_size_positive",
+        "PASS:cost_positive",
+        "PASS:kw_threshold",
+        "PASS:compliance_status"
+      ],
+      "Violations": [],
+      "OverrideReason": ""
+    },
+    "equipment": [
+      {
+        "id": "9e7685fc-6ce4-42af-9800-99ef7a0cbd47",
+        "status": "RESERVED",
+        "error": null,
+        "createdAt": "2026-09-15T05:38:37.795031Z",
+        "expiresAt": "2026-09-15T06:38:37.795032Z",
+        "result": {
+          "Status": "VALIDATED",
+          "ExchangeRate": 328.578935,
+          "RateTimestamp": "2026-09-15T00:02:31Z",
+          "BaseCurrency": "USD",
+          "TargetCurrency": "LKR",
+          "TotalPriceLkr": 492868.37,
+          "Lines": [
+            {
+              "InventoryItemId": "0e85b3b0-7313-4915-b085-9e5054871a8d",
+              "Name": "DEMO-069AFB00 PANEL",
+              "Category": "PANEL",
+              "Quantity": 10,
+              "UnitPriceUsd": 100.0,
+              "UnitPriceLkr": 32857.89,
+              "TotalPriceLkr": 328578.9
+            },
+            {
+              "InventoryItemId": "2b60f096-5a3e-474e-a1bf-bfe55673368a",
+              "Name": "DEMO-2D1C9197 INVERTER",
+              "Category": "INVERTER",
+              "Quantity": 1,
+              "UnitPriceUsd": 500.0,
+              "UnitPriceLkr": 164289.47,
+              "TotalPriceLkr": 164289.47
+            }
+          ],
+          "ExecutionLogs": [
+            "EquipmentRequirements: validated 500 W panel policy and inverter capacity",
+            "ExchangeRateTool: validated USD/LKR provider response",
+            "EquipmentPricingAgent: computed structured equipment estimate",
+            "PricingValidator: independently verified catalog and arithmetic",
+            "InventoryAvailabilityValidator: snapshot sufficient; backend must recheck on reservation",
+            "FormatResult: return to backend for persistence and staff review"
+          ]
+        }
+      }
+    ],
+    "errors": [],
+    "executionLogs": [
+      {
+        "agentName": "Planner",
+        "stepName": "planning",
+        "status": "completed",
+        "startedAt": "2026-09-15T05:38:33.14085Z",
+        "completedAt": "2026-09-15T05:38:33.14085Z",
+        "durationMs": 0,
+        "outputSummary": "Sizing plan created.",
+        "errorMessage": null,
+        "retryCount": 0
+      },
+      {
+        "agentName": "SolarSizingAgent",
+        "stepName": "sizing",
+        "status": "completed",
+        "startedAt": "2026-09-15T05:38:33.141204Z",
+        "completedAt": "2026-09-15T05:38:33.141204Z",
+        "durationMs": 0,
+        "outputSummary": "Structured sizing candidate created.",
+        "errorMessage": null,
+        "retryCount": 0
+      },
+      {
+        "agentName": "DeterministicValidator",
+        "stepName": "validation",
+        "status": "completed",
+        "startedAt": "2026-09-15T05:38:33.14161Z",
+        "completedAt": "2026-09-15T05:38:33.14161Z",
+        "durationMs": 0,
+        "outputSummary": "Independent sizing validation completed.",
+        "errorMessage": null,
+        "retryCount": 0
+      }
+    ],
+    "approvalHistory": [
+      {
+        "decision": "Approved",
+        "comment": "DEMO-8B847A00 Software demo approval; not utility authorization.",
+        "timestamp": "2026-09-15T05:38:36.755552Z",
+        "userId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
+      }
+    ],
+    "lifecycleEvents": [
+      {
+        "event": "PROPOSAL_CREATED",
+        "details": "Proposal created from completed survey.",
+        "timestamp": "2026-09-15T05:38:36.22086Z"
+      },
+      {
+        "event": "GUARDRAIL_STARTED",
+        "details": "Guardrail evaluation started.",
+        "timestamp": "2026-09-15T05:38:36.337599Z"
+      },
+      {
+        "event": "VALIDATION_COMPLETED",
+        "details": "Deterministic validation passed.",
+        "timestamp": "2026-09-15T05:38:36.350087Z"
+      },
+      {
+        "event": "APPROVED",
+        "details": "DEMO-8B847A00 Software demo approval; not utility authorization.",
+        "timestamp": "2026-09-15T05:38:36.765252Z"
+      }
+    ],
+    "ruleScope": "Preliminary Sri Lankan rooftop-solar assessment using documented project rules; utility approval remains external."
+  },
+  "performance": {
+    "endpoint": "GET /api/reports/overview",
+    "requests": 20,
+    "concurrency": 5,
+    "medianMs": 788.94,
+    "p95Ms": 1034.15,
+    "maxMs": 1034.85,
+    "samples": [
+      {
+        "status": 200,
+        "ms": 946.39
+      },
+      {
+        "status": 200,
+        "ms": 1034.85
+      },
+      {
+        "status": 200,
+        "ms": 1034.15
+      },
+      {
+        "status": 200,
+        "ms": 769.96
+      },
+      {
+        "status": 200,
+        "ms": 1026.41
+      },
+      {
+        "status": 200,
+        "ms": 584.89
+      },
+      {
+        "status": 200,
+        "ms": 700.83
+      },
+      {
+        "status": 200,
+        "ms": 718.73
+      },
+      {
+        "status": 200,
+        "ms": 744.98
+      },
+      {
+        "status": 200,
+        "ms": 737.92
+      },
+      {
+        "status": 200,
+        "ms": 583.63
+      },
+      {
+        "status": 200,
+        "ms": 740.41
+      },
+      {
+        "status": 200,
+        "ms": 822.23
+      },
+      {
+        "status": 200,
+        "ms": 838.65
+      },
+      {
+        "status": 200,
+        "ms": 814.42
+      },
+      {
+        "status": 200,
+        "ms": 776.99
+      },
+      {
+        "status": 200,
+        "ms": 709.35
+      },
+      {
+        "status": 200,
+        "ms": 800.89
+      },
+      {
+        "status": 200,
+        "ms": 823.13
+      },
+      {
+        "status": 200,
+        "ms": 833.23
+      }
+    ]
+  },
+  "status": "PASSED",
+  "completedAt": "2026-09-15T05:38:44.054321+00:00"
+}

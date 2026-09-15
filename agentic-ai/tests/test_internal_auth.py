@@ -32,3 +32,21 @@ def test_invalid_internal_key_is_rejected(monkeypatch):
     )
 
     assert response.status_code == 401
+
+
+def test_workflow_endpoint_preserves_objective_input_and_serializes_logs(monkeypatch):
+    main = load_main(monkeypatch, "test-internal-key")
+    response = TestClient(main.app).post(
+        "/workflow/test",
+        json={"objective": "Assess my rooftop", "customer_id": "customer-42",
+              "input_data": {"monthly_kwh": 600, "roof_area_sqm": 80, "grid_type": "ThreePhase"}},
+        headers={"X-Internal-Key": "test-internal-key"},
+    )
+    assert response.status_code == 200
+    result = response.json()
+    assert result["objective"] == "Assess my rooftop"
+    assert result["customer_id"] == "customer-42"
+    assert result["current_step"] == "completed"
+    assert len(result["execution_logs"]) == 3
+    assert all(isinstance(log, str) for log in result["execution_logs"])
+    assert result["validation_results"]["valid"] is True

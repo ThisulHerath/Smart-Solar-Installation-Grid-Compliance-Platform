@@ -2,6 +2,8 @@
 
 SE3090 university project, group **2026-AI-17**. A working Sri Lankan solar-planning demonstration spanning customer surveys, field inspection, engineering approval and equipment procurement.
 
+See the [assignment readiness checklist and proposed four-member allocation](docs/assessment/assignment-readiness.md) for verified requirements, outstanding submission work and current agentic limitations.
+
 ## What works
 
 Web and mobile registration now require email OTP verification. Account & security provides OTP-protected password changes and account deletion, with session revocation. The web login has no demo-account shortcuts. Homeowners can create assessments, submit solar analysis and follow proposals from the web portal. Configure Gmail SMTP using [email verification setup](docs/EMAIL-VERIFICATION.md) before accepting registrations.

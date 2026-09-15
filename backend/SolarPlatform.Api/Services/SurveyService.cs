@@ -106,7 +106,7 @@ public class SurveyService : ISurveyService
         _db.AgentWorkflows.Add(workflow);
         SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
         await _db.SaveChangesAsync();
-        var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
+        var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, objective = workflow.Objective, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
         workflow.ResultJson = result.Recommendation?.GetRawText();
         workflow.PlanJson = JsonSerializer.Serialize(result.Plan);
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
