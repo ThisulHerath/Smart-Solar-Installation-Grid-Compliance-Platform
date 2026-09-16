@@ -1,3 +1,4 @@
+import '../widgets/record_reference.dart';
 import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/proposal.dart';
@@ -193,6 +194,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
                           const SizedBox(height: 16),
 
                           // Technical Specs Grid
+                          RecordReference(label: 'Proposal reference', value: _proposal!.id),
+                          if (widget.surveyId != null) RecordReference(label: 'Survey reference', value: widget.surveyId!),
                           EquipmentSummary(key: ValueKey('${_proposal!.id}-$_refresh'), proposalId: _proposal!.id),
                           if (['RevisionRequested', 'Rejected', 'Failed'].contains(_proposal!.proposalStatus))
                             FilledButton(onPressed: _requestProposal, child: const Text('Request updated proposal')),

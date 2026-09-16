@@ -121,9 +121,9 @@ Do not reject or request revision on this main project before finishing pricing.
 
 Log into React as inventory officer → **Inventory**. Search/filter/sort existing equipment first; expect relevant rows and working pagination when more than ten rows exist.
 
-Optional supplier test: expand **Add supplier**, enter name `Manual Test Supplier A01`, leave optional email/phone empty, then **Save supplier**. Expect confirmation and the supplier available in the equipment form.
+Optional supplier test: click **Add supplier** at the top of Inventory, enter name `Manual Test Supplier A01`, leave optional email/phone empty, then **Save supplier**. Expect confirmation and the supplier available in the equipment form.
 
-Use **Add equipment** twice, with unique SKUs each time you repeat this guide:
+Use **Add equipment** to open the equipment dialog. Add two items, with unique SKUs each time you repeat this guide:
 
 **Panel:** SKU `MANUAL-A01-PANEL`; Name `Manual 500 W Panel`; Category PANEL; Capacity 500; Stock quantity 30; Reorder level 2; Unit price USD 100; Active checked.
 
@@ -133,11 +133,11 @@ Manufacturer/model can be `Software demo`; supplier is optional. Click **Save eq
 
 Under **Proposal equipment & pricing**, select the approved proposal by the first eight characters of PROPOSAL_ID and 5 kW. Click **Calculate equipment price**.
 
-Expected: **VALIDATED**, rate and timestamp, **10 × 500 W panels**, **1 compatible inverter**, LKR total, quote expiry and **Workflow activity** logs. Existing compatible catalog items may be selected instead of the two you added. Verify the actual selected item names and prices.
+Expected: **VALIDATED**, rate and timestamp, **10 × 500 W panels**, **1 compatible inverter**, LKR total, quote expiry and **How this estimate was prepared** logs. Existing compatible catalog items may be selected instead of the two you added. Verify the actual selected item names and prices.
 
 If the selected prices are USD 100 and USD 500, the USD subtotal is **1,500**, so the expected LKR total is **1,500 × the displayed exchange rate**, subject to line rounding. Do not expect a fixed LKR amount or the same total as the preliminary proposal. Equipment estimates exclude installation and taxes.
 
-Open **Workflow activity**. Expect exchange-rate/tool, equipment-selection and validation activity. Then click **Reserve this equipment**.
+Open **How this estimate was prepared**. Expect exchange-rate/tool, equipment-selection and validation activity. Then click **Reserve this equipment**.
 
 Expected: quote becomes **RESERVED**; reservation rows appear. For the selected panel, reserved quantity rises by 10 and available quantity falls by 10; the inverter changes by 1. Total stock stays unchanged because this reserves items rather than selling/removing them. Account for any pre-existing reservations on the selected items.
 
@@ -207,3 +207,14 @@ Keep: health screenshot; each role/profile; survey input/output; job ID and insp
 For every step record **PASS / FAIL / NOT TESTED**, actual result, screenshot and survey/job/proposal IDs. UI wording can differ from API status strings; record both when unclear. If a step fails, stop that scenario and keep the exact error rather than repeatedly submitting duplicate records.
 
 A successful main scenario establishes integrated operation. It does not establish 100% coverage, native-device behaviour, deployment readiness or completion of the assignment's planning/recovery requirements. See [assignment readiness](../assessment/assignment-readiness.md) for those remaining gaps.
+
+
+### Search, validation and record references
+
+- Web inventory: press Ctrl+K (Cmd+K on Mac), type a name or SKU, then use arrow keys and Enter to choose a suggestion. Esc closes suggestions. Enter stores a recent search; clear the text to see recent searches. Use Clear recent searches to remove the local history.
+- In browser network tools, type several characters quickly: the inventory request starts after 250 ms of inactivity. Changing the search aborts the previous request, so older results cannot overwrite newer results. Field-job search filters already loaded records without extra requests.
+- Submit an empty equipment, supplier, survey, assignment or account form. The first invalid field receives focus on web; errors appear next to fields. Errors first appear on blur, then clear as a failed field is corrected. Pending requests disable repeat submission.
+- Flutter login, registration, account security, survey and inspection fields use the shared field component. Incorrect values show an error icon and message. OTP accepts digits only; measurements retain decimal points. Optional inspection values can remain blank when saving a draft; backend checks still control final submission.
+- Flutter survey and job searches wait 250 ms, support the keyboard Search action, and show a clear control. Search by an address/name or full/partial record reference. Drag the list to dismiss the keyboard.
+- Open profiles, surveys, jobs and proposals and use Copy reference. The complete identifier remains selectable if clipboard access is unavailable.
+- Test at a phone width (390 px), with enlarged text, and with a physical keyboard. Server-side authorization and engineering approval rules remain authoritative.

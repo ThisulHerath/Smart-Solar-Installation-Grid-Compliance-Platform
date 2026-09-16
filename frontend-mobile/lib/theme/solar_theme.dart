@@ -18,24 +18,89 @@ class SolarColors {
 }
 
 ThemeData buildSolarTheme() {
-  final scheme = ColorScheme.fromSeed(seedColor: SolarColors.primary, brightness: Brightness.light).copyWith(
-    primary: SolarColors.primary, onPrimary: SolarColors.onPrimary,
-    secondary: SolarColors.lime, onSecondary: SolarColors.text,
-    surface: SolarColors.surface, onSurface: SolarColors.text,
-    onSurfaceVariant: SolarColors.muted, outline: SolarColors.border,
+  final scheme = ColorScheme.fromSeed(
+          seedColor: SolarColors.primary, brightness: Brightness.light)
+      .copyWith(
+    primary: SolarColors.primary,
+    onPrimary: SolarColors.onPrimary,
+    secondary: SolarColors.lime,
+    onSecondary: SolarColors.text,
+    surface: SolarColors.surface,
+    onSurface: SolarColors.text,
+    onSurfaceVariant: SolarColors.muted,
+    outline: SolarColors.border,
     error: SolarColors.error,
   );
   return ThemeData(
-    useMaterial3: true, colorScheme: scheme, scaffoldBackgroundColor: SolarColors.background,
-    appBarTheme: const AppBarTheme(backgroundColor: SolarColors.background, foregroundColor: SolarColors.text, surfaceTintColor: Colors.transparent, elevation: 0, scrolledUnderElevation: 1),
-    cardTheme: CardThemeData(color: SolarColors.surface, elevation: 0, margin: const EdgeInsets.symmetric(vertical: 8), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: const BorderSide(color: SolarColors.border))),
-    inputDecorationTheme: InputDecorationTheme(filled: true, fillColor: SolarColors.surface, labelStyle: const TextStyle(color: SolarColors.muted), hintStyle: const TextStyle(color: SolarColors.muted), prefixIconColor: SolarColors.muted, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: SolarColors.border)), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: SolarColors.border)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: SolarColors.primary, width: 1.5))),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(backgroundColor: SolarColors.primary, foregroundColor: SolarColors.onPrimary, elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16))),
-    filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(backgroundColor: SolarColors.primary, foregroundColor: SolarColors.onPrimary, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16))),
-    outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(foregroundColor: SolarColors.primary, side: const BorderSide(color: SolarColors.border), padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14))),
-    textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: SolarColors.primary)),
-    chipTheme: const ChipThemeData(backgroundColor: SolarColors.surfaceSoft, labelStyle: TextStyle(color: SolarColors.primary), side: BorderSide(color: SolarColors.border)),
+    useMaterial3: true,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
+    visualDensity: VisualDensity.standard,
+    iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(minimumSize: const Size(48, 48))),
+    colorScheme: scheme,
+    scaffoldBackgroundColor: SolarColors.background,
+    appBarTheme: const AppBarTheme(
+        backgroundColor: SolarColors.background,
+        foregroundColor: SolarColors.text,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 1),
+    cardTheme: CardThemeData(
+        color: SolarColors.surface,
+        elevation: 0,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: SolarColors.border))),
+    inputDecorationTheme: InputDecorationTheme(
+        errorMaxLines: 3,
+        filled: true,
+        fillColor: SolarColors.surface,
+        labelStyle: const TextStyle(color: SolarColors.muted),
+        hintStyle: const TextStyle(color: SolarColors.muted),
+        prefixIconColor: SolarColors.muted,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: SolarColors.border)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: SolarColors.border)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide:
+                const BorderSide(color: SolarColors.primary, width: 1.5))),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+            minimumSize: const Size(48, 48),
+            backgroundColor: SolarColors.primary,
+            foregroundColor: SolarColors.onPrimary,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16))),
+    filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+            minimumSize: const Size(48, 48),
+            backgroundColor: SolarColors.primary,
+            foregroundColor: SolarColors.onPrimary,
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16))),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+            minimumSize: const Size(48, 48),
+            foregroundColor: SolarColors.primary,
+            side: const BorderSide(color: SolarColors.border),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14))),
+    textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+            minimumSize: const Size(48, 48),
+            foregroundColor: SolarColors.primary)),
+    chipTheme: const ChipThemeData(
+        backgroundColor: SolarColors.surfaceSoft,
+        labelStyle: TextStyle(color: SolarColors.primary),
+        side: BorderSide(color: SolarColors.border)),
     dividerColor: SolarColors.border,
-    snackBarTheme: const SnackBarThemeData(backgroundColor: SolarColors.primary, contentTextStyle: TextStyle(color: SolarColors.onPrimary)),
+    snackBarTheme: const SnackBarThemeData(
+        backgroundColor: SolarColors.primary,
+        contentTextStyle: TextStyle(color: SolarColors.onPrimary)),
   );
 }

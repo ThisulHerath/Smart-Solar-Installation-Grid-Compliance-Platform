@@ -1,3 +1,5 @@
+import { ValidatedForm } from '../components/ValidatedForm';
+import { RecordReference } from '../components/RecordReference';
 import React, { useState, useEffect, useCallback } from 'react';
 import { WorkflowSummary } from '../components/WorkflowSummary';
 import { InspectionPhotoGallery } from '../components/InspectionPhotoGallery';
@@ -84,11 +86,11 @@ interface ModalProps {
 const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm, onCancel }) => {
   const [comment, setComment] = useState('');
   const needsComment = action !== 'approve';
-  const canSubmit = !needsComment || comment.trim().length > 0;
+
 
   return (
     <div className="modal-overlay" id={`modal-${action}`}>
-      <div className="modal proposal-decision" role="dialog" aria-modal="true" aria-labelledby="decision-title" aria-describedby="decision-description">
+      <ValidatedForm onSubmit={e => { e.preventDefault(); onConfirm(comment); }} className="modal proposal-decision" role="dialog" aria-modal="true" aria-labelledby="decision-title" aria-describedby="decision-description">
         <div className="proposal-decision__heading">
           <p className="proposal-decision__eyebrow">SMARTSOLAR · ENGINEERING REVIEW</p>
           <h3 className="modal__title" id="decision-title">{title}</h3>
@@ -132,7 +134,7 @@ const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm
         <div className="modal__actions">
           <button
             className="btn btn-secondary"
-            onClick={onCancel}
+            type="button" onClick={onCancel}
             disabled={isPending}
             id={`cancel-${action}`}
           >
@@ -140,8 +142,8 @@ const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm
           </button>
           <button
             className={`btn ${action === 'approve' ? 'btn-success' : action === 'reject' ? 'btn-danger' : 'btn-warning'}`}
-            onClick={() => onConfirm(comment)}
-            disabled={isPending || !canSubmit}
+            type="submit"
+            disabled={isPending}
             id={`confirm-${action}`}
           >
             {isPending ? 'Processing…' : (
@@ -151,7 +153,7 @@ const ActionModal: React.FC<ModalProps> = ({ title, action, isPending, onConfirm
             )}
           </button>
         </div>
-      </div>
+      </ValidatedForm>
     </div>
   );
 };
@@ -230,9 +232,9 @@ export const ProposalDetailPage: React.FC = () => {
             ← Back to Proposals
           </button>
           <h1 className="page-title">Engineering Proposal</h1>
-          <p className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
-            Proposal reference: {proposal.id.slice(0, 8).toUpperCase()}
-          </p>
+          <div className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
+            <RecordReference label="Proposal reference" value={proposal.id} /><RecordReference label="Survey reference" value={proposal.solarSurveyId} />
+          </div>
         </div>
         <span className="status-badge" style={{ backgroundColor: statusColor + '22', color: statusColor, border: `1px solid ${statusColor}44`, padding: '8px 16px', fontSize: '14px', fontWeight: 700 }}>
           {STATUS_LABELS[proposal.proposalStatus] ?? proposal.proposalStatus}

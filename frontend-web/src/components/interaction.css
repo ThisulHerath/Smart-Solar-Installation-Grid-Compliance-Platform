@@ -1,0 +1,20 @@
+.solar-search { position:relative; min-width:240px; flex:1; color:#183c30; }
+.solar-search>label { display:block; font-size:.85rem; font-weight:600; margin-bottom:8px; }
+.solar-search-input { display:flex; align-items:center; gap:8px; padding:0 12px; border:1px solid #c4d3b8; border-radius:12px; background:#fefff9; }
+.solar-search .solar-search-input input { min-width:0; width:100%; border:0; background:transparent; color:#183c30; padding:14px 0; outline:none; box-shadow:none; }
+.solar-search-input:focus-within { outline:2px solid #47754e; outline-offset:2px; }
+.solar-search button,.record-reference button { min-width:48px; min-height:48px; display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:8px; background:#edf0e3; color:#183c30; cursor:pointer; }
+.solar-search kbd { white-space:nowrap; font-size:.65rem; color:#53654f; padding:4px; border:1px solid #d6dfca; border-radius:4px; }
+.solar-search-menu { position:absolute; z-index:30; top:100%; left:0; right:0; background:#fefff9; border:1px solid #d6dfca; padding:14px; border-radius:12px; box-shadow:0 12px 30px #183c3020; }
+.solar-search-menu ul { list-style:none; padding:0; margin:8px 0; }
+.solar-search-menu li { padding:12px; min-height:48px; cursor:pointer; overflow-wrap:anywhere; border-radius:8px; }
+.solar-search-menu li[aria-selected=true],.solar-search-menu li:hover { background:#e3eccf; }
+.solar-search-menu p,.solar-search-menu small { font-size:.8rem; color:#53654f; }
+.search-skeleton span { display:block; height:16px; margin:12px 0; border-radius:4px; background:#e3eccf; }
+.search-skeleton span:nth-child(2) { width:75%; }
+.record-reference { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:12px 0; font-size:.78rem; color:#53654f; }
+.record-reference code { user-select:all; overflow-wrap:anywhere; color:#183c30; background:#edf0e3; padding:6px 8px; border-radius:6px; }
+[aria-invalid=true] { border-color:#b33838!important; }
+.field-message-error { color:#a72d2d; display:flex; align-items:center; gap:6px; font-size:.8rem; line-height:1.5; }
+
+.inventory-page .solar-search .solar-search-input input { border:0; border-radius:0; padding:14px 0; background:transparent; }

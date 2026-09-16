@@ -1,3 +1,4 @@
+import { ValidatedForm } from './ValidatedForm';
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { FieldJob, Survey } from '../types/auth';
@@ -27,7 +28,7 @@ export function AssignTechnicianForm({ onAssigned, onCancel }: {
     <p style={{ color: 'var(--text-secondary)', marginBottom: 20 }}>Choose a customer survey and the technician who will inspect the site.</p>
     {error && <div role="alert" style={{ color: 'var(--solar-danger)', marginBottom: 12 }}>{error}</div>}
     {loading ? <p role="status">Loading surveys and technicians…</p> :
-      <form onSubmit={async e => {
+      <ValidatedForm onSubmit={async e => {
         e.preventDefault(); if (saving) return;
         setSaving(true); setError('');
         try {
@@ -54,10 +55,10 @@ export function AssignTechnicianForm({ onAssigned, onCancel }: {
         {!surveys.length && <p>Create a customer survey before assigning a site visit.</p>}
         {!technicians.length && <p>No active field technicians are available.</p>}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
-          <button className="btn btn-primary" type="submit" disabled={saving || !surveyId || !technicianId}>{saving ? 'Assigning…' : 'Assign site visit'}</button>
+          <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? 'Assigning…' : 'Assign site visit'}</button>
           <button className="btn btn-secondary" type="button" disabled={saving} onClick={onCancel}>Cancel</button>
           {error && <button className="btn btn-secondary" type="button" disabled={saving} onClick={() => setAttempt(x => x + 1)}>Reload options</button>}
         </div>
-      </form>}
+      </ValidatedForm>}
   </section>;
 }

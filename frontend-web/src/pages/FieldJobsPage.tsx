@@ -1,3 +1,4 @@
+import { SearchBox } from '../components/SearchBox';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -72,6 +73,7 @@ export const FieldJobsPage: React.FC = () => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
+      j.id.toLowerCase().includes(q) || j.solarSurveyId.toLowerCase().includes(q) ||
       j.customerName.toLowerCase().includes(q) ||
       j.propertyAddress.toLowerCase().includes(q) ||
       j.technicianName.toLowerCase().includes(q) ||
@@ -119,21 +121,7 @@ export const FieldJobsPage: React.FC = () => {
           ))}
         </div>
 
-        <input
-          type="text"
-          placeholder="Search by customer, address, technician..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          style={{
-            background: 'rgba(58, 85, 49, 0.05)',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '8px 14px',
-            color: '#fff',
-            fontSize: '0.85rem',
-            minWidth: '280px'
-          }}
-        />
+        <SearchBox scope="field-jobs" label="Search field jobs" value={searchQuery} onChange={setSearchQuery} suggestions={jobs.flatMap(j => [j.customerName, j.propertyAddress, j.technicianName])} loading={loading} />
       </div>
 
       {/* Main List */}

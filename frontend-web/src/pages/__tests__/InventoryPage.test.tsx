@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InventoryPage } from '../InventoryPage';
 import { inventoryRequest } from '../../services/inventoryService';
@@ -14,6 +14,25 @@ describe('Inventory workflows', () => {
     vi.clearAllMocks();
     vi.mocked(useAuth).mockReturnValue({ user: { roles: ['INVENTORY_OFFICER'] } } as ReturnType<typeof useAuth>);
     request.mockImplementation(async (path) => path.startsWith('?') ? { items: [panel], total: 1 } : []);
+  });
+  it('debounces query changes and aborts the previous request', async () => {
+    vi.useFakeTimers();
+    try {
+      render(<InventoryPage />);
+      await act(async () => { await vi.advanceTimersByTimeAsync(250); });
+      const initial = request.mock.calls.find(call => call[0].startsWith('?'))!;
+      const signal = initial[3]!;
+      const search = screen.getByRole('combobox', { name: 'Search inventory' });
+      fireEvent.change(search, { target: { value: 'P' } });
+      expect(signal.aborted).toBe(true);
+      await act(async () => { await vi.advanceTimersByTimeAsync(200); });
+      fireEvent.change(search, { target: { value: 'Panel' } });
+      await act(async () => { await vi.advanceTimersByTimeAsync(249); });
+      expect(request.mock.calls.filter(call => call[0].startsWith('?'))).toHaveLength(1);
+      await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+      expect(request.mock.calls.filter(call => call[0].startsWith('?'))).toHaveLength(2);
+      expect(request.mock.calls.filter(call => call[0].startsWith('?'))[1][0]).toContain('search=Panel');
+    } finally { vi.useRealTimers(); }
   });
   it('renders availability and low stock', async () => {
     render(<InventoryPage />);
@@ -35,10 +54,26 @@ describe('Inventory workflows', () => {
   it('submits a new item without trusted client reservation fields', async () => {
     render(<InventoryPage />); await screen.findByText('Solar panel');
     fireEvent.click(screen.getByRole('button', { name: 'Add equipment' }));
+    expect(screen.getByRole('dialog', { name: 'Add equipment' })).toBeInTheDocument();
+    expect(screen.getByLabelText('SKU')).toHaveFocus();
     fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'P-NEW' } });
-    fireEvent.change(screen.getByLabelText('NAME'), { target: { value: 'New panel' } });
+    fireEvent.change(screen.getByLabelText('Equipment name'), { target: { value: 'New panel' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save equipment' }));
     await waitFor(() => expect(request).toHaveBeenCalledWith('', 'POST', expect.objectContaining({ sku: 'P-NEW', name: 'New panel' })));
+  });
+  it('keeps save errors inside the dialog and restores focus when cancelled', async () => {
+    render(<InventoryPage />); await screen.findByText('Solar panel');
+    const trigger = screen.getByRole('button', { name: 'Add equipment' });
+    trigger.focus(); fireEvent.click(trigger);
+    request.mockRejectedValue(new Error('SKU already exists'));
+    fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'P-500' } });
+    fireEvent.change(screen.getByLabelText('Equipment name'), { target: { value: 'Duplicate panel' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save equipment' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('SKU already exists');
+    expect(screen.getByRole('dialog')).toContainElement(screen.getByRole('alert'));
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
   it('displays a failed quote and offers no reservation', async () => {
     request.mockImplementation(async path => path.startsWith('?') ? { items: [], total: 0 } : path === '/proposals' ? [{ id: 'approved', recommendedKw: 5 }] : path.includes('/equipment') ? [{ id: 'q', status: 'FAILED', error: 'Exchange service unavailable', createdAt: new Date().toISOString() }] : []);

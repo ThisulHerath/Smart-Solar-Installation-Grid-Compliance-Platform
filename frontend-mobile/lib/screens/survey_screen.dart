@@ -1,3 +1,7 @@
+import '../widgets/solar_search.dart';
+import '../widgets/record_reference.dart';
+import '../widgets/solar_field.dart';
+import '../utils/validators.dart';
 import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -14,6 +18,7 @@ class SurveyScreen extends StatefulWidget {
 }
 
 class _SurveyScreenState extends State<SurveyScreen> {
+  final _form = GlobalKey<FormState>();
   final _usageController = TextEditingController();
   final _roofController = TextEditingController();
   final _addressController = TextEditingController();
@@ -66,7 +71,9 @@ class _SurveyScreenState extends State<SurveyScreen> {
       final data = await _api.getSurveys();
       if (mounted) {
         setState(() {
-          _surveys = data.map((e) => SolarSurvey.fromJson(Map<String, dynamic>.from(e))).toList();
+          _surveys = data
+              .map((e) => SolarSurvey.fromJson(Map<String, dynamic>.from(e)))
+              .toList();
           _error = null;
         });
       }
@@ -98,12 +105,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
   }
 
   Future<void> _createAndSubmitSurvey() async {
+    if (!_form.currentState!.validate()) return;
     final usage = double.tryParse(_usageController.text.trim());
     final roof = double.tryParse(_roofController.text.trim());
     final address = _addressController.text.trim();
 
     if (usage == null || usage <= 0) {
-      setState(() => _error = 'Please enter a valid positive monthly usage (kWh).');
+      setState(
+          () => _error = 'Please enter a valid positive monthly usage (kWh).');
       return;
     }
     if (roof == null || roof <= 0) {
@@ -150,14 +159,16 @@ class _SurveyScreenState extends State<SurveyScreen> {
         final status = submitted['surveyStatus'] ?? 'Processing';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Survey submitted successfully! Current status: $status'),
+            content:
+                Text('Survey submitted successfully! Current status: $status'),
             backgroundColor: SolarColors.primary,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _error = 'Submission failed: ${e.toString().replaceAll('Exception:', '').trim()}');
+        setState(() => _error =
+            'Submission failed: ${e.toString().replaceAll('Exception:', '').trim()}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(_error!),
@@ -192,7 +203,9 @@ class _SurveyScreenState extends State<SurveyScreen> {
       backgroundColor: SolarColors.background,
       appBar: AppBar(
         backgroundColor: SolarColors.surface,
-        title: const Text('Homeowner Solar Assessment', style: TextStyle(fontWeight: FontWeight.bold, color: SolarColors.text)),
+        title: const Text('My solar surveys',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: SolarColors.text)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: SolarColors.muted),
@@ -201,169 +214,262 @@ class _SurveyScreenState extends State<SurveyScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Create New Survey Card
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: SolarColors.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: SolarColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Row(
+        child: Form(
+            key: _form,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Create New Survey Card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: SolarColors.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: SolarColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.add_location_alt, color: SolarColors.primary, size: 22),
-                      SizedBox(width: 8),
-                      Text(
-                        'Create & Submit Solar Survey',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: SolarColors.text),
+                      const Row(
+                        children: [
+                          Icon(Icons.add_location_alt,
+                              color: SolarColors.primary, size: 22),
+                          SizedBox(width: 8),
+                          Text(
+                            'New solar assessment',
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: SolarColors.text),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 16),
+
+                      SolarField(
+                        controller: _usageController,
+                        inputFormatters: [solarDecimalFormatter],
+                        validator: (v) => Validators.number(v, min: 0.01),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        style: const TextStyle(color: SolarColors.text),
+                        decoration: const InputDecoration(
+                          labelText: 'Monthly Consumption (kWh)',
+                          labelStyle: TextStyle(color: SolarColors.muted),
+                          prefixIcon:
+                              Icon(Icons.bolt, color: SolarColors.warning),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.border)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.primary)),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      SolarField(
+                        controller: _roofController,
+                        inputFormatters: [solarDecimalFormatter],
+                        validator: (v) => Validators.number(v, min: 1),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        style: const TextStyle(color: SolarColors.text),
+                        decoration: const InputDecoration(
+                          labelText: 'Roof Surface Area (m²)',
+                          labelStyle: TextStyle(color: SolarColors.muted),
+                          prefixIcon:
+                              Icon(Icons.square_foot, color: SolarColors.info),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.border)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.primary)),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      DropdownButtonFormField<String>(
+                        initialValue: _gridType,
+                        dropdownColor: SolarColors.surfaceSoft,
+                        style: const TextStyle(color: SolarColors.text),
+                        decoration: const InputDecoration(
+                          labelText: 'Grid Connection Type',
+                          labelStyle: TextStyle(color: SolarColors.muted),
+                          prefixIcon:
+                              Icon(Icons.power, color: SolarColors.primary),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.border)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.primary)),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                              value: 'SinglePhase',
+                              child: Text('Single Phase (230V)')),
+                          DropdownMenuItem(
+                              value: 'ThreePhase',
+                              child: Text('Three Phase (400V)')),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) setState(() => _gridType = val);
+                        },
+                      ),
+                      const SizedBox(height: 14),
+
+                      SolarField(
+                        controller: _addressController,
+                        validator: Validators.required,
+                        maxLength: 500,
+                        style: const TextStyle(color: SolarColors.text),
+                        decoration: const InputDecoration(
+                          labelText: 'Property Address',
+                          labelStyle: TextStyle(color: SolarColors.muted),
+                          prefixIcon:
+                              Icon(Icons.home, color: SolarColors.muted),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.border)),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: SolarColors.primary)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Image picker button
+                      OutlinedButton.icon(
+                        onPressed: _loading ? null : _pickImage,
+                        icon: Icon(
+                            _attachedImage == null
+                                ? Icons.camera_alt
+                                : Icons.check_circle,
+                            color: SolarColors.info),
+                        label: Text(
+                          _attachedImage == null
+                              ? 'Attach Site Photo (Optional)'
+                              : 'Photo Attached (${_attachedImage!.name})',
+                          style: const TextStyle(color: SolarColors.info),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0x3338BDF8)),
+                          minimumSize: const Size(double.infinity, 48),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Submit button
+                      ElevatedButton.icon(
+                        onPressed: _loading ? null : _createAndSubmitSurvey,
+                        icon: _loading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: SolarColors.onPrimary))
+                            : const Icon(Icons.send_rounded),
+                        label: Text(_loading
+                            ? 'Analysing your survey…'
+                            : 'Submit for solar analysis'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: SolarColors.primary,
+                          foregroundColor: SolarColors.onPrimary,
+                          minimumSize: const Size(double.infinity, 48),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+
+                      if (_error != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 14),
+                          child: Text(_error!,
+                              style: const TextStyle(
+                                  color: SolarColors.error, fontSize: 13)),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-
-                  TextField(
-                    controller: _usageController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(color: SolarColors.text),
-                    decoration: const InputDecoration(
-                      labelText: 'Monthly Consumption (kWh)',
-                      labelStyle: TextStyle(color: SolarColors.muted),
-                      prefixIcon: Icon(Icons.bolt, color: SolarColors.warning),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  TextField(
-                    controller: _roofController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(color: SolarColors.text),
-                    decoration: const InputDecoration(
-                      labelText: 'Roof Surface Area (m²)',
-                      labelStyle: TextStyle(color: SolarColors.muted),
-                      prefixIcon: Icon(Icons.square_foot, color: SolarColors.info),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-
-                  DropdownButtonFormField<String>(
-                    initialValue: _gridType,
-                    dropdownColor: SolarColors.surfaceSoft,
-                    style: const TextStyle(color: SolarColors.text),
-                    decoration: const InputDecoration(
-                      labelText: 'Grid Connection Type',
-                      labelStyle: TextStyle(color: SolarColors.muted),
-                      prefixIcon: Icon(Icons.power, color: SolarColors.primary),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'SinglePhase', child: Text('Single Phase (230V)')),
-                      DropdownMenuItem(value: 'ThreePhase', child: Text('Three Phase (400V)')),
-                    ],
-                    onChanged: (val) {
-                      if (val != null) setState(() => _gridType = val);
-                    },
-                  ),
-                  const SizedBox(height: 14),
-
-                  TextField(
-                    controller: _addressController,
-                    style: const TextStyle(color: SolarColors.text),
-                    decoration: const InputDecoration(
-                      labelText: 'Property Address',
-                      labelStyle: TextStyle(color: SolarColors.muted),
-                      prefixIcon: Icon(Icons.home, color: SolarColors.muted),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.border)),
-                      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: SolarColors.primary)),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Image picker button
-                  OutlinedButton.icon(
-                    onPressed: _loading ? null : _pickImage,
-                    icon: Icon(_attachedImage == null ? Icons.camera_alt : Icons.check_circle, color: SolarColors.info),
-                    label: Text(
-                      _attachedImage == null ? 'Attach Site Photo (Optional)' : 'Photo Attached (${_attachedImage!.name})',
-                      style: const TextStyle(color: SolarColors.info),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0x3338BDF8)),
-                      minimumSize: const Size(double.infinity, 44),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Submit button
-                  ElevatedButton.icon(
-                    onPressed: _loading ? null : _createAndSubmitSurvey,
-                    icon: _loading
-                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: SolarColors.onPrimary))
-                        : const Icon(Icons.send_rounded),
-                    label: Text(_loading ? 'Submitting to AI Agent...' : 'Submit Survey for AI Sizing'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: SolarColors.primary,
-                      foregroundColor: SolarColors.onPrimary,
-                      minimumSize: const Size(double.infinity, 48),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-
-                  if (_error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 14),
-                      child: Text(_error!, style: const TextStyle(color: SolarColors.error, fontSize: 13)),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Survey History List
-            TextField(decoration: const InputDecoration(labelText: 'Search surveys by address'), onChanged: (value) => setState(() => _search = value.toLowerCase())),
-            DropdownButton<String>(value: _statusFilter, isExpanded: true, onChanged: (value) => setState(() => _statusFilter = value ?? ''), items: [
-              const DropdownMenuItem(value: '', child: Text('All statuses')),
-              ..._surveys.map((s) => s.surveyStatus).toSet().map((status) => DropdownMenuItem(value: status, child: Text(status))),
-            ]),
-            const Text(
-              'Your Submitted Surveys & AI Results',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: SolarColors.text),
-            ),
-            const SizedBox(height: 12),
-
-            if (_fetching && _surveys.isEmpty)
-              const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
-            else if (_surveys.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: SolarColors.surface,
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text('No surveys submitted yet.', style: TextStyle(color: SolarColors.muted)),
-              )
-            else
-              ..._surveys.where((survey) => survey.propertyAddress.toLowerCase().contains(_search) && (_statusFilter.isEmpty || survey.surveyStatus == _statusFilter)).map((survey) => _buildSurveyItemCard(survey)),
-          ],
-        ),
+                const SizedBox(height: 24),
+
+                if (!_fetching &&
+                    _surveys.isNotEmpty &&
+                    !_surveys.any((s) =>
+                        (s.propertyAddress.toLowerCase().contains(_search) ||
+                            s.id.toLowerCase().contains(_search)) &&
+                        (_statusFilter.isEmpty ||
+                            s.surveyStatus == _statusFilter)))
+                  const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Text(
+                          'No matching surveys. Try another address or reference, or select all statuses.')),
+                // Survey History List
+                SolarSearch(
+                    label: 'Search surveys',
+                    onChanged: (value) =>
+                        setState(() => _search = value.toLowerCase())),
+                DropdownButton<String>(
+                    value: _statusFilter,
+                    isExpanded: true,
+                    onChanged: (value) =>
+                        setState(() => _statusFilter = value ?? ''),
+                    items: [
+                      const DropdownMenuItem(
+                          value: '', child: Text('All statuses')),
+                      ..._surveys.map((s) => s.surveyStatus).toSet().map(
+                          (status) => DropdownMenuItem(
+                              value: status, child: Text(status))),
+                    ]),
+                const Text(
+                  'Your solar assessments',
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: SolarColors.text),
+                ),
+                const SizedBox(height: 12),
+
+                if (_fetching && _surveys.isEmpty)
+                  const Center(
+                      child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: CircularProgressIndicator()))
+                else if (_surveys.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: SolarColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text('No surveys submitted yet.',
+                        style: TextStyle(color: SolarColors.muted)),
+                  )
+                else
+                  ..._surveys
+                      .where((survey) =>
+                          (survey.propertyAddress
+                                  .toLowerCase()
+                                  .contains(_search) ||
+                              survey.id.toLowerCase().contains(_search)) &&
+                          (_statusFilter.isEmpty ||
+                              survey.surveyStatus == _statusFilter))
+                      .map((survey) => _buildSurveyItemCard(survey)),
+              ],
+            )),
       ),
     );
   }
 
   Widget _buildSurveyItemCard(SolarSurvey survey) {
     final statusColor = _getStatusColor(survey.surveyStatus);
-    final hasFailed = survey.surveyStatus.toUpperCase() == 'FAILED' || survey.errorMessage != null;
+    final hasFailed = survey.surveyStatus.toUpperCase() == 'FAILED' ||
+        survey.errorMessage != null;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -376,18 +482,25 @@ class _SurveyScreenState extends State<SurveyScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          RecordReference(label: 'Survey reference', value: survey.id),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
-                  survey.propertyAddress.isNotEmpty ? survey.propertyAddress : 'Solar Survey',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: SolarColors.text),
+                  survey.propertyAddress.isNotEmpty
+                      ? survey.propertyAddress
+                      : 'Solar Survey',
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: SolarColors.text),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -395,7 +508,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 ),
                 child: Text(
                   survey.surveyStatus,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor),
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: statusColor),
                 ),
               ),
             ],
@@ -422,9 +538,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 children: [
                   const Row(
                     children: [
-                      Icon(Icons.wb_sunny, color: SolarColors.primary, size: 16),
+                      Icon(Icons.wb_sunny,
+                          color: SolarColors.primary, size: 16),
                       SizedBox(width: 6),
-                      Text('Recommended System Size', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: SolarColors.primary)),
+                      Text('Recommended System Size',
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: SolarColors.primary)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -432,16 +553,30 @@ class _SurveyScreenState extends State<SurveyScreen> {
                     spacing: 12,
                     runSpacing: 8,
                     children: [
-                      Text('Array: ${survey.recommendedKw} kW', style: const TextStyle(color: SolarColors.text, fontWeight: FontWeight.bold)),
-                      Text('Panels: ${survey.panelCount ?? "-"} x 400W', style: const TextStyle(color: SolarColors.text, fontWeight: FontWeight.bold)),
-                      Text('Inverter: ${survey.inverterKw} kW', style: const TextStyle(color: SolarColors.text, fontWeight: FontWeight.bold)),
+                      Text('Array: ${survey.recommendedKw} kW',
+                          style: const TextStyle(
+                              color: SolarColors.text,
+                              fontWeight: FontWeight.bold)),
+                      Text('Panels: ${survey.panelCount ?? "-"} x 400W',
+                          style: const TextStyle(
+                              color: SolarColors.text,
+                              fontWeight: FontWeight.bold)),
+                      Text('Inverter: ${survey.inverterKw} kW',
+                          style: const TextStyle(
+                              color: SolarColors.text,
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                   if (survey.isValid != null) ...[
                     const SizedBox(height: 6),
                     Text(
                       'Deterministic Validation: ${survey.isValid == true ? "PASSED" : "FAILED"}',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: survey.isValid == true ? SolarColors.primary : SolarColors.error),
+                      style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: survey.isValid == true
+                              ? SolarColors.primary
+                              : SolarColors.error),
                     ),
                   ],
                 ],
@@ -453,26 +588,31 @@ class _SurveyScreenState extends State<SurveyScreen> {
               decoration: BoxDecoration(
                 color: SolarColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: SolarColors.error.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: SolarColors.error.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: SolarColors.error, size: 18),
+                  const Icon(Icons.warning_amber_rounded,
+                      color: SolarColors.error, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      survey.errorMessage ?? 'Sizing could not be completed. Please try again later.',
-                      style: const TextStyle(fontSize: 12, color: SolarColors.error),
+                      survey.errorMessage ??
+                          'Sizing could not be completed. Please try again later.',
+                      style: const TextStyle(
+                          fontSize: 12, color: SolarColors.error),
                     ),
                   ),
                 ],
               ),
             ),
           ],
-          if (['ANALYSISCOMPLETE', 'COMPLETED'].contains(survey.surveyStatus.toUpperCase()))
+          if (['ANALYSISCOMPLETE', 'COMPLETED']
+              .contains(survey.surveyStatus.toUpperCase()))
             TextButton.icon(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => ProposalScreen(surveyId: survey.id))),
+                  builder: (_) => ProposalScreen(surveyId: survey.id))),
               icon: const Icon(Icons.description_outlined),
               label: const Text('Proposal and equipment'),
             ),

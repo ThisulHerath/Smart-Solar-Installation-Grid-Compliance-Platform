@@ -1,3 +1,4 @@
+import { RecordReference } from '../components/RecordReference';
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -238,7 +239,7 @@ export const FieldJobDetailPage: React.FC = () => {
           <div>No compliance evaluation run yet. The technician must submit on-site telemetry or staff can trigger evaluation above.</div>
         </div>
       )}
-      <InspectionPhotoGallery jobId={jobId} />
+      <RecordReference label="Job reference" value={job.id} /><RecordReference label="Survey reference" value={job.solarSurveyId} /><InspectionPhotoGallery jobId={jobId} />
     </div>
   );
 };
