@@ -1,4 +1,4 @@
-# 
+# Smart Solar Installation & Grid Compliance Platform
 
 SE3090 university project, group **2026-AI-17**. A working Sri Lankan solar-planning demonstration spanning customer surveys, field inspection, engineering approval and equipment procurement.
 
