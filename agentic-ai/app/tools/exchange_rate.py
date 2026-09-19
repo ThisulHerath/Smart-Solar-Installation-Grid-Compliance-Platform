@@ -2,6 +2,7 @@
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 import threading
+import time
 import httpx
 from app.schemas.pricing_schemas import ExchangeRate
 
@@ -26,10 +27,19 @@ def get_usd_to_lkr_exchange_rate(base: str = "USD", target: str = "LKR") -> Exch
         if _cached and _cached_at and datetime.now(timezone.utc) - _cached_at < timedelta(hours=1):
             return validate_rate(_cached)
         # Redirects are disabled to preserve the endpoint allow-list.
-        with httpx.Client(timeout=8, follow_redirects=False) as client:
-            response = client.get(ENDPOINT)
-            response.raise_for_status()
-            data = response.json()
+        # Retry read-only transient failures once. Never retry validation/4xx failures.
+        with httpx.Client(timeout=4, follow_redirects=False) as client:
+            for attempt in range(2):
+                try:
+                    response = client.get(ENDPOINT)
+                    response.raise_for_status()
+                    data = response.json()
+                    break
+                except (httpx.TimeoutException, httpx.NetworkError, httpx.HTTPStatusError) as error:
+                    transient = not isinstance(error, httpx.HTTPStatusError) or error.response.status_code in (429, 502, 503, 504)
+                    if attempt == 1 or not transient:
+                        raise
+                    time.sleep(0.2)
         if data.get("result") != "success" or data.get("base_code") != "USD":
             raise ValueError("Invalid exchange provider response")
         rate = validate_rate(ExchangeRate(rate=Decimal(str(data["rates"]["LKR"])), timestamp=datetime.fromtimestamp(data["time_last_update_unix"], timezone.utc)))

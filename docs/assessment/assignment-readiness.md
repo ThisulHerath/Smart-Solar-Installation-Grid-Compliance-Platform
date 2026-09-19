@@ -1,5 +1,7 @@
 # SE3090 assignment readiness
 
+Follow-up, 19 September 2026: see [English lecture audit](lecture-theory-audit.en.md), [Sinhala lecture audit](lecture-theory-audit.si.md) and [bilingual presentation report](lecture-theory-report.html). They distinguish deterministic specialists from LLM agents, record later changes and report their own verification scope. The dated results below remain historical evidence.
+
 **15 September 2026.** Reviewed against the supplied 17-page assignment specification. Page references below refer to that document. This is a development audit, not a signed submission or an awarded grade.
 
 **The assignment requires at least four distinct agents and at least one complete assessed agentic workflow (page 6). It does not prescribe four named workflows.** A standard group also needs four primary business components.

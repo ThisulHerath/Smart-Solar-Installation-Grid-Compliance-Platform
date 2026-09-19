@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Smart Solar • Lecture alignment report</title>
+<style>
+:root{color-scheme:light;--ink:#173f32;--muted:#526451;--paper:#f6f7ef;--line:#d3ddc7;--accent:#dcf08b}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.8 "Segoe UI","Nirmala UI",sans-serif}
+header{padding:22px 5vw;border-bottom:1px solid var(--line);background:#fffef8;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.brand{font-weight:750;font-size:23px;letter-spacing:-1px}.brand small{display:block;font-size:12px;font-weight:500;letter-spacing:1px;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:8px}button{font:inherit;border:1px solid #9aaf89;border-radius:24px;background:transparent;color:var(--ink);padding:9px 18px;min-height:48px;cursor:pointer}button[aria-pressed=true]{background:var(--ink);color:white}button:hover{border-color:var(--ink)}button:focus-visible,a:focus-visible{outline:3px solid #8da94a;outline-offset:4px}
+.layout{max-width:1480px;margin:auto;padding:36px 5vw;display:grid;grid-template-columns:230px minmax(0,1fr);gap:52px}aside{position:sticky;top:24px;height:max-content}aside p{font-size:12px;letter-spacing:1px;font-weight:700}nav a{display:block;padding:8px 0;color:var(--muted);text-decoration:none;font-size:14px;line-height:1.5}nav a:hover{text-decoration:underline;color:var(--ink)}
+main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1.25;letter-spacing:-1px;margin:0 0 18px}h2{font-size:27px;line-height:1.4;border-top:1px solid var(--line);padding-top:34px;margin-top:50px}h3{font-size:21px;line-height:1.5;margin-top:30px}p{margin:16px 0}li{padding:5px 0}ul,ol{padding-left:25px}strong{font-weight:700}code{font-family:Consolas,monospace;font-size:.9em;background:#e8eedd;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}article[lang=si]{font-family:"Nirmala UI","Iskoola Pota","Segoe UI",sans-serif;line-height:2}article[lang=si] h1{line-height:1.7;font-size:34px}article[lang=si] h2,article[lang=si] h3{line-height:1.8}
+.overview{background:#e7eed6;padding:24px;border-radius:16px;margin-bottom:32px}.overview h2{border:0;padding:0;margin:0 0 12px;font-size:21px}.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.flow div{background:#fffef8;padding:14px 10px;border-radius:8px;font-size:13px}.flow b{display:block;font-size:16px}.notice{font-size:14px;color:var(--muted)}[hidden]{display:none!important}footer{border-top:1px solid var(--line);padding:25px 5vw;font-size:13px;color:var(--muted)}
+@media(max-width:850px){.layout{display:block;padding:28px 6vw}aside{position:static;margin-bottom:30px}nav{display:flex;flex-wrap:wrap;gap:8px 18px}nav a{max-width:100%}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media print{header,.controls,aside,.overview,footer{display:none!important}.layout{display:block;padding:0}main{max-width:none}body{background:white;font-size:10.5pt;line-height:1.6}h1{font-size:25pt}h2{font-size:18pt;break-after:avoid}h3{font-size:14pt;break-after:avoid}article+article{break-before:page}code{overflow-wrap:anywhere}article[lang=si]{font-size:11pt}p,li{orphans:3;widows:3}@page{size:A4;margin:18mm}}
+</style></head><body>
+<header><div class="brand">smartsolar.<small>LECTURE ALIGNMENT / දේශන න්‍යාය</small></div><div class="controls" aria-label="Report language"><button type="button" data-choice="en" aria-pressed="true">English</button><button type="button" data-choice="si" aria-pressed="false">සිංහල</button><button type="button" data-choice="both" aria-pressed="false">Both / දෙකම</button><button type="button" id="print">Print / Save PDF</button></div></header>
+<div class="layout"><aside><p>CONTENTS / අන්තර්ගතය</p><nav aria-label="Report contents" data-language="en"><a href="#en-section-0">1. Main findings</a><a href="#en-section-1">2. Lecture-by-lecture review</a><a href="#en-section-2">3. What exactly changed in this audit?</a><a href="#en-section-3">4. How the complete workflow connects</a><a href="#en-section-4">5. The different “four parts” — do not mix them up</a><a href="#en-section-5">6. Four members: four end-to-end business components</a><a href="#en-section-6">7. Verification in this audit</a><a href="#en-section-7">8. What remains for a stronger submission</a><a href="#en-section-8">9. Source register</a></nav>
+<nav aria-label="වාර්තාවේ කොටස්" data-language="si"><a href="#si-section-0">1. ප්‍රධාන නිගමනය</a><a href="#si-section-1">2. එක් එක් දේශනයේ න්‍යාය යොදා ඇති ආකාරය</a><a href="#si-section-2">3. මෙම සංශෝධනයෙන් කළ දේ</a><a href="#si-section-3">4. සම්පූර්ණ workflow එක සම්බන්ධ වන ආකාරය</a><a href="#si-section-4">5. “හතර” යන්නෙන් අදහස් කරන වෙනස් කාණ්ඩ</a><a href="#si-section-5">6. සාමාජිකයන් හතර සඳහා වගකීම් බෙදීම</a><a href="#si-section-6">7. පරීක්ෂණ සහ ඒවායේ සීමා</a><a href="#si-section-7">8. වැඩි ලකුණු සඳහා තව අවශ්‍ය දේ</a><a href="#si-section-8">9. මූලාශ්‍ර</a></nav></aside><main>
+<section class="overview" aria-label="Workflow overview"><h2>One shared installation journey</h2><div class="flow"><div>01 · Member 1<b>Assess</b>Survey → sizing</div><div>02 · Member 2<b>Inspect</b>Evidence → screening</div><div>03 · Member 3<b>Review</b>Validation → human approval</div><div>04 · Member 4<b>Prepare</b>Quote → stock reservation</div></div><p class="notice">No paid model required. Current specialists are deterministic; live LLM reasoning and full RAG remain gaps.<br>ගෙවන model සේවාවක් අවශ්‍ය නැත. දැනට ක්‍රියා කරන්නේ නීති මත පදනම් වූ workflows ය.</p></section>
+<article lang="en" data-language="en"><h1>Smart Solar: lecture theory audit and presentation guide</h1>
+<p>Review began 16 September; report completed 19 September 2026 • English report • Local source review and automated verification</p>
+<h2 id="en-section-0">1. Main findings</h2>
+<p>The application already applies many of the core framework, React, C#, database and security concepts in the slides. I added several missing practical applications and tested them. It remains runnable without a paid language-model service, as requested.</p>
+<p><strong>The important limitation:</strong> the four classes named “Agent” are currently deterministic domain specialists. Their calculations and next steps are programmed. There is no configured live language model choosing tools, no ReAct reasoning loop, and no full generative RAG. LangGraph provides orchestration; it is not itself the intelligence of a language model. Describe the current implementation as <strong>validated specialist workflows with human approval</strong>, and explain the limitation openly. A no-paid-service requirement can also be met by a local model, but one has not been installed or evaluated here.</p>
+<p>This report is an implementation audit, not an awarded grade, safety certification or proof that every screen works. It distinguishes existing work from this change. All source paths are relative to the repository root. Slide references use <strong>PDF page numbers</strong>, which can differ from numbers printed on slides. The two files named <code>lec5 part2</code> and <code>lec5 part3</code> contain Lecture 06 and Lecture 07 material respectively.</p>
+<p>Status key: <strong>✓ Existing</strong> = found in the source; <strong>✓ Added</strong> = implemented in this change and checked at the stated scope; <strong>△ Partial</strong> = a meaningful gap remains; <strong>○ Alternative</strong> = optional design choice, not something to install just to tick a box.</p>
+<h2 id="en-section-1">2. Lecture-by-lecture review</h2>
+<h3>Lecture 1 — frameworks, inversion of control and selection</h3>
+<ul>
+<li><strong>✓ Existing — inversion of control (p.13).</strong> ASP.NET receives HTTP requests and invokes controllers; React invokes components during rendering; Flutter runs the widget lifecycle. Application code fills framework extension points. <code>backend/SolarPlatform.Api/Program.cs</code> and <code>frontend-web/src/App.tsx</code> show this clearly.</li>
+<li><strong>✓ Existing — separation and reuse.</strong> Controllers, services, DTOs, database entities, client API services and reusable widgets have distinct roles. This is more than using a library: framework lifecycles control execution.</li>
+<li><strong>✓ Added — justified selection (pp.29–31).</strong> ADR-007 records the no-paid-model constraint, alternatives, benefits and limits. Existing ADR-001–006 cover client state, Flutter state, orchestration, persistence, deployment and transactions. A written decision is evidence of reasoning; it is not a performance benchmark.</li>
+<li><strong>△ Partial — cloud-native delivery (p.39).</strong> Docker and CI definitions exist. That does not prove public deployment, production observability, backup recovery or current green GitHub runs. Localhost URLs are not public deployment evidence.</li>
+<li><strong>○ Alternative — microservices/serverless.</strong> The current ASP.NET business API plus internal Python service fits the project. Splitting every business component into a separate deployed service would add operational work without proving better design.</li>
+</ul>
+<h3>Lecture 2 — advanced React</h3>
+<ul>
+<li><strong>✓ Existing — composition, controlled inputs and routing (pp.8, 16–19, 37–38).</strong> Reusable fields, search, record references, photo galleries and layout components are composed into screens. Auth Context supplies shared login state. <code>ProtectedRoute.tsx</code> improves navigation; backend authorization remains the security boundary.</li>
+<li><strong>✓ Added — UI / hook / service separation (pp.12, 20–23, 32).</strong> <code>hooks/useInventoryCatalog.ts</code> owns inventory server state, loading/error handling, a 250 ms debounce and AbortController cleanup. <code>InventoryPage.tsx</code> renders filters and results, while <code>services/inventoryService.ts</code> owns HTTP access. Aborted responses cannot overwrite newer results.</li>
+<li><strong>✓ Existing — accessible validation and keyboard search.</strong> <code>AuthField.tsx</code>, <code>ValidatedForm.tsx</code>, <code>SearchBox.tsx</code> and validation helpers already provide reusable behavior. This audit does not claim an exhaustive accessibility certification across every page.</li>
+<li><strong>✓ Added — lazy route loading and Suspense (p.37, p.44).</strong> Staff/workspace pages now load as separate route chunks. The production build confirms separate Inventory, Proposal, Field and Profile chunks. No before/after load-time benchmark was taken, so do not claim a percentage speedup.</li>
+<li><strong>✓ Added — render error boundary (p.39).</strong> <code>PageErrorBoundary.tsx</code> offers reload/home recovery without rendering the exception text. It handles render/lazy-import failures; event-handler and asynchronous request errors still need their own handling.</li>
+<li><strong>○ Alternative — Redux, Zustand, React Hook Form, Zod, TanStack Query, Next.js (pp.27–28, 33–35, 39, 46).</strong> These are possible solutions, not seven compulsory dependencies. Existing Context/local state and reusable validators suit current needs. Inventory has a focused hook, not a complete query cache. Other large pages can still be decomposed further.</li>
+</ul>
+<h3>Lecture 3 — C#, OOP, ASP.NET and REST</h3>
+<ul>
+<li><strong>✓ Existing — encapsulation and interfaces (pp.16–19).</strong> Business rules belong in services rather than UI buttons. Interfaces such as <code>IAgenticAiService</code> permit substitute implementations in tests. Meaningful abstraction matters more than inventing inheritance hierarchies.</li>
+<li><strong>✓ Existing — dependency injection (p.26).</strong> <code>Program.cs</code> registers services and the EF context; controllers request dependencies through constructors. Scoped services/context follow request lifetimes. A singleton should not capture a request-scoped context.</li>
+<li><strong>✓ Existing — middleware pipeline (p.27).</strong> Authentication, authorization and exception handling form request-processing stages. Middleware ordering affects both protection and error handling.</li>
+<li><strong>✓ Existing — REST and layered design (pp.30–35, 38–42).</strong> Survey, field-job, proposal and inventory resources have DTOs and resource routes. Workflow actions such as submit/approve/reserve represent business operations. Controllers delegate to services; clients do not query PostgreSQL directly.</li>
+<li><strong>✓ Existing — async operations, Swagger and testing (pp.45–51).</strong> Async database/HTTP access avoids unnecessarily blocking request threads. Swagger describes contracts; it is not proof that authorization and business behavior are correct. Automated tests cover those separately.</li>
+<li><strong>✓ Added — standard exception responses.</strong> The global exception handler now emits Problem Details with a trace identifier and a compatible <code>message</code> field for existing clients. Unknown failures and wrapped infrastructure errors do not return provider details. This standardization applies to middleware-handled exceptions; controller-specific responses are not all rewritten.</li>
+</ul>
+<h3>Lecture 4 — persistence, transactions and authorization</h3>
+<ul>
+<li><strong>✓ Existing — relational modeling (pp.16–25, 31–37).</strong> <code>Data/AppDbContext.cs</code>, inventory configuration and migrations model users, surveys, jobs, inspections, proposals, decisions, equipment and quotes. UUID keys identify records; SKU is a business identifier. Foreign keys, indexes and constraints complement application checks.</li>
+<li><strong>✓ Existing — transaction integrity (pp.9–10).</strong> <code>Services/InventoryService.cs</code> checks quote/approval state and stock inside transactional reservation logic. Serializable isolation, concurrency checks and replay handling protect against double reservation. This is a concrete ACID example.</li>
+<li><strong>△ Partial — integrity evidence.</strong> The database integration test was skipped in this audit because its isolated database was not configured. Earlier audit evidence is historical, not a fresh result. Normalization should be justified per entity; stored quote/result snapshots intentionally preserve historical decisions rather than always recomputing current values.</li>
+<li><strong>✓ Existing — authentication versus authorization (pp.40–46, 49–53).</strong> JWT establishes identity; role and ownership checks decide permission. Hiding a web button is insufficient. An authenticated homeowner must still be denied another homeowner&#x27;s survey or an engineer-only approval operation.</li>
+<li><strong>✓ Added — Problem Details and safe failures (p.54).</strong> Middleware responses include <code>status</code>, <code>title</code>, <code>detail</code>, <code>instance</code>, <code>traceId</code> and compatibility <code>message</code>. Tests verify generic 500 and wrapped 503 responses do not expose synthetic secret strings.</li>
+<li><strong>△ Partial — deployment security.</strong> Browser token storage, token lifecycle/refresh design and authorized delivery of stored photos need hardening before real public use. Protected metadata routes do not automatically protect a public static image URL. Native secure storage does not remove browser XSS risks. Database least privilege and recovery have not been audited here.</li>
+<li><strong>○ Alternative — CAP and sticky sessions (pp.11–12, 42).</strong> Do not say PostgreSQL “guarantees all CAP properties.” Session-affinity solutions are not automatically necessary for this JWT-based API. These theories guide tradeoffs; they are not standalone features to add.</li>
+</ul>
+<h3>Lecture 5 part 1 — LLMs and agent fundamentals</h3>
+<ul>
+<li><strong>✓ Existing — structured contracts, specialist responsibilities, guardrails and human approval.</strong> Pydantic validates Python input/output; backend DTOs and services independently control actions. These are useful foundations for an agent framework.</li>
+<li><strong>△ Partial — actual agent autonomy (pp.22–25, 29, 32).</strong> The lecture&#x27;s LLM-directed loop observes tool results and chooses a next action. The present PlannerAgent emits a fixed eight-step roadmap. It does not reinterpret a goal, choose tools dynamically or replan after failure. Its docstring now states this honestly.</li>
+<li><strong>✓ Existing / ✓ Added — simplest suitable workflow (p.25).</strong> Deterministic arithmetic and explicit approval dependencies are preserved. No language model should replace stock arithmetic or authorize installation.</li>
+<li><strong>△ Partial — six framework components (p.36).</strong> Tools, some state/history, monitoring and orchestration exist. Model inference and runtime prompts for such inference are absent. Prompt files or class names alone do not establish model execution.</li>
+</ul>
+<h3>Lecture 5 part 2 — retrieval, RAG and memory</h3>
+<ul>
+<li><strong>✓ Added — source-backed retrieval foundations (pp.6, 22, 25, 43).</strong> <code>app/tools/project_knowledge.py</code> indexes six reviewed project passages. A deterministic lexical score selects matching passages and returns a title, source ID, version and score. The compliance pipeline retrieves grid/inspection guidance and includes references in its notes and structured response.</li>
+<li><strong>✓ Added — evidence boundaries.</strong> Empty matches return no evidence; overlong queries are rejected; no arbitrary path, web URL, upload or customer record is a source. These passages describe project rules, not official utility regulations. Retrieval does not change the numerical validator or grant clearance.</li>
+<li><strong>✓ Added — small retrieval evaluation (p.22).</strong> Six deliberately small queries each expect one passage at rank 1. All six pass. On this fixture only, Hit@1 and MRR are 1.0. This is a regression set, not proof of general language understanding or Sinhala retrieval quality.</li>
+<li><strong>△ Partial — full RAG (pp.6, 15–21, 32, 37).</strong> There are no embeddings, vector store, semantic search, hybrid reranking or language-model answer generation. Therefore this feature is lexical retrieval with cited project guidance, not full generative RAG. No claim of answer faithfulness evaluation is made because no model generates answers.</li>
+<li><strong>△ Partial — memory (p.47).</strong> Request/graph state resembles working memory; persisted decisions resemble episodic history; reviewed passages resemble semantic facts; validators/roadmaps resemble procedural knowledge. These are conceptual mappings, not a model memory subsystem that automatically recalls and learns from conversations.</li>
+</ul>
+<h3>Lecture 5 part 3 — coordination, reliability, middleware and MCP</h3>
+<ul>
+<li><strong>✓ Existing — pipeline coordination (pp.12–16).</strong> A survey precedes sizing; an inspection precedes compliance; validated proposals precede human approval; approval precedes reservation. These dependencies make a pipeline suitable.</li>
+<li><strong>✓ Existing — structured handoffs and persisted IDs (pp.19–20).</strong> ASP.NET exchanges typed payloads with Python and stores business results. Survey/job/proposal/quote identifiers connect stages. The whole workflow is not one long in-memory LLM conversation.</li>
+<li><strong>✓ Added — bounded external-tool recovery (p.21).</strong> Exchange-rate access retries once for selected transient failures: timeout/network failure or HTTP 429/502/503/504. It waits 200 ms before the retry and still validates response/currency/freshness. Ordinary 4xx and invalid response data do not receive this retry. Failure is surfaced; a fictional fallback exchange rate is never used.</li>
+<li><strong>✓ Added — actual stage timing (pp.24, 27–31).</strong> Sizing and compliance stages now capture start/end, measured duration, workflow trace ID and unique span ID. A failed sizing stage retains its failure event. The sizing graph has an eight-step recursion cap. Proposal/pricing trace formats are still less complete; these are not full distributed OpenTelemetry traces.</li>
+<li><strong>✓ Added — evidence-required input.</strong> An omitted inverter-location suitability value is now unknown rather than silently true. Compliance cannot become clear just because this evidence was absent.</li>
+<li><strong>✓ Existing — least privilege and human approval (pp.23, 30).</strong> Python does not reserve stock or approve a proposal. Backend services enforce authorized actions. A reassuring AI sentence cannot bypass a failed validation result.</li>
+<li><strong>○ Alternative — router/parallel/supervisor and MCP (pp.12, 18, 33–36).</strong> Not every coordination pattern is useful here. The internal FastAPI HTTP API is REST, not an MCP server. No MCP support is claimed.</li>
+</ul>
+<h2 id="en-section-2">3. What exactly changed in this audit?</h2>
+<ol>
+<li>Extracted debounced/cancellable inventory fetching into a reusable React hook; retained existing page behavior.</li>
+<li>Added lazy loading for workspace routes, a loading fallback and a safe page-crash recovery screen.</li>
+<li>Changed middleware-handled backend exceptions to Problem Details while preserving client compatibility.</li>
+<li>Added six versioned project-policy passages, lexical retrieval and compliance references.</li>
+<li>Replaced synthetic timing for sizing/compliance with measured stage events; retained failures and capped sizing graph steps.</li>
+<li>Added a single bounded retry for transient exchange-tool failures, without a made-up fallback rate.</li>
+<li>Rejected non-finite sizing values and stopped treating missing inverter-location evidence as suitable.</li>
+<li>Added focused regression tests, ADR-007 and these bilingual reports. No paid inference dependency, database migration, commit or push was added.</li>
+</ol>
+<h2 id="en-section-3">4. How the complete workflow connects</h2>
+<p><strong>React / Flutter → ASP.NET API → business services → PostgreSQL.</strong> Where calculation or screening is needed, ASP.NET calls <strong>internal FastAPI → specialist workflow → independent validator</strong>, receives structured results, then persists the appropriate state. An internal service key protects the Python boundary. Client JWTs and backend role/ownership checks protect user actions.</p>
+<p>The browser and phone share record IDs through the API. They do not call Python or PostgreSQL directly. PostgreSQL holds durable business records; Python evaluates bounded requests. Engineer approval is a persisted business pause, not a sleeping Python process. After approval, pricing and reservation are separate authorized operations.</p>
+<h3>Worked example: a hypothetical 600 kWh home</h3>
+<p>This is test data and a calculation explanation, not a live installation recommendation.</p>
+<ol>
+<li><strong>Homeowner:</strong> create a survey with monthly use <strong>600 kWh</strong>, roof area <strong>80 m²</strong>, grid type <strong>ThreePhase</strong>, and a clearly labelled test address. Submit the survey. The sizing rule produces <strong>600 ÷ 120 = 5.00 kW</strong>; preliminary 400 W sizing currently returns <strong>12 panels</strong> using the existing rounding rule. Record the survey reference.</li>
+<li><strong>Administrator / engineer:</strong> create or open its field job and assign a technician. Assignment connects the technician to this survey; it is not a new unrelated survey.</li>
+<li><strong>Technician:</strong> inspect the same site, record measurements and add photos. For a synthetic compliant example, use <strong>400 V</strong>, <strong>50 Hz</strong>, <strong>63 A</strong>, and inverter location <strong>suitable</strong>. Complete any other fields requested by the form. These values are demonstration inputs, not instructions to measure unsafe equipment yourself.</li>
+<li><strong>Compliance workflow:</strong> validate input → retrieve grid/inspection project guidance → apply screening rules → independently check the candidate. With the example measurements it reports <strong>COMPLIANT / LOW</strong> under the project&#x27;s rules and includes versioned references. Missing evidence or out-of-range values produce issues instead.</li>
+<li><strong>Homeowner / proposal workflow:</strong> request a proposal using the completed assessment. SafetyGuardrailAgent produces structured findings and the deterministic validator checks them. If the proposal was created before inspection, its stored result may still describe the old state: request a fresh proposal using the completed assessment, rather than bypassing validation.</li>
+<li><strong>Senior engineer / authorized administrator:</strong> review technical details, site evidence and technician photos, then approve, reject or request revision. A “safe” specialist result is not the engineer&#x27;s approval. An invalid proposal must remain blocked.</li>
+<li><strong>Inventory officer:</strong> calculate the equipment estimate for the approved proposal. The catalog policy uses <strong>500 W panels</strong>, so a 5 kW quote selects <strong>10 panels</strong> plus a compatible inverter. At illustrative prices <strong>USD 100 × 10 + USD 500</strong>, and an illustrative <strong>300 LKR/USD</strong>, the equipment subtotal is <strong>LKR 450,000</strong>. Actual UI totals use catalog prices and the validated current provider rate. Installation and taxes are excluded.</li>
+<li><strong>Reserve equipment:</strong> ASP.NET rechecks approval, quote expiry and stock inside the reservation transaction. On success, reserved/available quantities change. A repeated successful reservation must not deduct stock twice. The homeowner can then see the updated shared status.</li>
+</ol>
+<p><strong>Panel-count caveat:</strong> preliminary sizing assumes 400 W and catalog pricing assumes 500 W. Therefore 12 and 10 are not the same bill of materials. The current preliminary rounding also does not guarantee that 12 × 400 W exactly supplies 5 kW. Explain the stages and assumptions; harmonizing preliminary sizing with final equipment selection is an outstanding domain-design improvement before calling this a final engineering design.</p>
+<h3>Failure examples worth demonstrating</h3>
+<ul>
+<li>Leave a required inspection value absent: no compliance clearance.</li>
+<li>Try to approve as a homeowner: backend denies the action, even if a handcrafted request is sent.</li>
+<li>Open an old pre-inspection proposal: validation can remain blocked; use a newly evaluated proposal.</li>
+<li>Exchange provider unavailable after the bounded retry: pricing fails visibly; no invented rate and no automatic reservation.</li>
+<li>Stock changes after quote generation: reservation rechecks stock and can reject/conflict; the quote is not a stock guarantee.</li>
+<li>Invalid sizing such as NaN: workflow fails with a recorded failed stage rather than returning a successful estimate.</li>
+</ul>
+<h2 id="en-section-4">5. The different “four parts” — do not mix them up</h2>
+<h3>Four coordination patterns in the lecture</h3>
+<p><code>lec5 part3.pdf</code>, p.12 names <strong>Router, Pipeline, Parallel, Supervisor</strong>.</p>
+<ol>
+<li><strong>Router:</strong> choose one specialist based on the request. A future help request might route to billing or field support. Existing HTTP routing is not evidence of an LLM router.</li>
+<li><strong>Pipeline:</strong> each stage feeds the next. This is the main implemented pattern, because approval must follow inspection/validation.</li>
+<li><strong>Parallel:</strong> independent specialists run together, then results merge. It could suit independent document checks, but dependent approval/reservation stages should not be parallelized. No runtime parallel-agent workflow is claimed.</li>
+<li><strong>Supervisor:</strong> a coordinator dynamically chooses specialists and next steps from results. The fixed PlannerAgent is not such a supervisor.</li>
+</ol>
+<p>These are coordination choices, not a rule that every project must implement all four.</p>
+<h3>Four domain specialists in this project</h3>
+<ol>
+<li><strong>SolarSizingAgent:</strong> survey electricity use → preliminary capacity, panel and inverter estimates.</li>
+<li><strong>GridComplianceAgent:</strong> technician measurements → project-rule screening, violations and recommendations.</li>
+<li><strong>SafetyGuardrailAgent:</strong> proposal data → safety findings and escalation signals; cannot grant human approval.</li>
+<li><strong>EquipmentPricingAgent:</strong> compatible equipment plus the exchange tool → structured equipment cost; cannot write inventory.</li>
+</ol>
+<p>PlannerAgent adds a fixed roadmap. Independent validators check outputs rather than relying only on the specialist that produced them. Four class names alone do not prove four LLM agents.</p>
+<h3>Four memory types and six framework components</h3>
+<p><code>lec5 part2.pdf</code>, p.47 lists <strong>working, episodic, semantic and procedural memory</strong>. The mappings are graph input/state, stored events/decisions, reviewed knowledge passages, and rules/roadmaps. Those mappings explain architecture; they do not establish autonomous learning.</p>
+<p><code>lec5 part1.pdf</code>, p.36 actually lists <strong>six</strong> components: <strong>Models, Tools, Memory, Monitoring, Prompts, Middleware/Orchestration</strong>. Model inference and runtime prompting remain missing here; the other areas exist to differing degrees.</p>
+<p>For a simple demo narrative you may group this application into four stages — <strong>assess → inspect → review → prepare equipment</strong> — but label them business stages, not the lecturer&#x27;s universal definition of an agent.</p>
+<h2 id="en-section-5">6. Four members: four end-to-end business components</h2>
+<p>This is a proposed allocation. The user said work so far was done alone. It is not a claim that four members already authored the code. Do not divide only by technology layer; each member needs genuine work, tests, review and explanation across their component.</p>
+<h3>Member 1 — Customer assessment and sizing</h3>
+<p>Own surveys, profile-related assessment inputs and preliminary sizing. React: survey review and useful references. Flutter: homeowner survey/photo/status flow. Backend/data: survey DTOs, ownership, validation and workflow records. Python: SolarSizingAgent and sizing validation. Demonstrate 600 kWh → 5 kW, invalid input rejection and a user unable to read someone else&#x27;s record. Next useful work: resolve the preliminary/final panel-policy inconsistency and improve structured plan contracts with tested dependencies.</p>
+<h3>Member 2 — Field operations and compliance</h3>
+<p>Own assignment, technician jobs, inspections, photos, location and electrical measurements. React: dispatch and inspection review. Flutter: assigned-job capture, camera/gallery and location experience. Backend/data: job/inspection/telemetry/photo access. Python: GridComplianceAgent, source-backed policy evidence and independent compliance validation. Demonstrate compliant data and one missing/unsafe reading. Next useful work: authenticated photo delivery and real-device camera/GPS tests.</p>
+<h3>Member 3 — Engineering proposal and approval</h3>
+<p>Own proposal generation, evidence review, safety findings, revision/rejection/approval and decision history. React: engineer review with technician photos. Flutter: homeowner proposal outcome. Backend/data: proposal lifecycle, authorization and audit records. Python: SafetyGuardrailAgent and deterministic proposal validation. Demonstrate that invalid input blocks approval and a homeowner cannot approve. Next useful work: clarify stale proposals after new inspections and extend actual timing/failure retention through this subgraph.</p>
+<h3>Member 4 — Equipment, pricing and reservation</h3>
+<p>Own equipment CRUD/search, supplier/stock information, estimates, currency conversion and reservation/release. React: professional catalog and quotation workflow. Flutter: equipment status and quotation presentation. Backend/data: catalog, quotes, stock transactions and concurrency. Python: EquipmentPricingAgent and bounded exchange-rate tool. Demonstrate correct arithmetic, outage behavior and repeated reservation without double deduction. Next useful work: run isolated PostgreSQL concurrency tests and extend tool-attempt traces.</p>
+<p>Each member should make genuine issues, commits, tests and peer reviews, and write their own reflection. Shared architecture can be documented jointly. Do not fabricate contribution history, signatures or evaluation evidence.</p>
+<h2 id="en-section-6">7. Verification in this audit</h2>
+<ul>
+<li><strong>Python:</strong> 55 tests passed. Includes six small retrieval cases, safe compliance failure, missing location evidence, measured sizing events, failed-stage retention and bounded tool retries. A dependency deprecation warning remains.</li>
+<li><strong>ASP.NET:</strong> 98 tests passed; 1 PostgreSQL integration test skipped. The skipped test is not a pass and provides no fresh database-concurrency proof.</li>
+<li><strong>React:</strong> 47 tests passed across 12 files. The intentional error-boundary test causes expected development error output; an existing account-flow test also warns that its test router has no dashboard route.</li>
+<li><strong>Web production build:</strong> TypeScript and Vite succeeded; separate route chunks were emitted.</li>
+<li><strong>Flutter (19 September):</strong> 20 tests passed; <code>flutter analyze</code> reported no issues. No Flutter source was changed in this lecture audit. Package-update notices are informational, not analyzer failures.</li>
+</ul>
+<p>These are automated local checks. They do not establish production uptime, physical-device behavior, load capacity or a fresh browser-to-phone end-to-end run. Earlier evidence in <code>assignment-readiness.md</code> is dated separately and must not be relabelled as this run.</p>
+<p>Useful reruns from the repository: <code>dotnet test backend/SolarPlatform.Tests -c Release</code>; run <code>npm test</code> and <code>npm run build</code> inside <code>frontend-web</code>; run <code>..\.venv\Scripts\python.exe -m pytest -q</code> inside <code>agentic-ai</code>; run <code>flutter analyze</code> and <code>flutter test</code> inside <code>frontend-mobile</code>.</p>
+<h2 id="en-section-7">8. What remains for a stronger submission</h2>
+<ol>
+<li>Resolve agentic acceptance explicitly. If the lecturer expects LLM-selected tools, the current deterministic workflow is partial. An evaluated local model could satisfy no-paid-inference operation; it still needs resource planning, typed tool contracts, bounded steps, safe failure and actual evidence. Do not simply change labels.</li>
+<li>Extend trace consistency and durable interrupted-run recovery across all four components. Current measured timing improvements cover sizing and compliance, not the entire business process.</li>
+<li>Finish deployment security: protected image delivery, token lifecycle review, HTTPS, real configuration, least-privilege database access and recovery evidence.</li>
+<li>Run a clean end-to-end demonstration with the same survey ID through Flutter submission, React assignment/review, pricing/reservation and mobile status. Record negative cases as well as the happy path.</li>
+<li>Harmonize and explain sizing/catalog assumptions. The application is a planning prototype; do not present its project thresholds as certified CEB/LECO requirements.</li>
+<li>Supply actual public URLs, a tested final mobile build, the demo video, genuine four-member contributions, individual reflections and the assignment&#x27;s final report format. No report or test total guarantees a mark.</li>
+</ol>
+<h3>Short presentation explanation</h3>
+<p>“Our platform connects homeowner assessment, technician inspection, engineer approval and equipment preparation through one secured API. Four specialists produce structured results. Independent rules validate those results; authorized humans approve proposals, and database transactions protect stock. We apply React composition and hooks, ASP.NET dependency injection and middleware, EF relationships and transactions, and measured workflow logging. The current no-paid-model version is a deterministic pipeline with cited project guidance. We do not claim autonomous LLM reasoning or full RAG.”</p>
+<h2 id="en-section-8">9. Source register</h2>
+<ul>
+<li><code>lec1.pdf</code> — 47 pages; cited pp.13, 29–31, 39–40.</li>
+<li><code>lec2.pdf</code> — 52 pages; cited pp.8, 12, 16–23, 27–28, 32–39, 42–46.</li>
+<li><code>lec3.pdf</code> — 57 pages; cited pp.16–19, 26–27, 30–35, 38–42, 45–51.</li>
+<li><code>lec4.pdf</code> — 60 pages; cited pp.9–12, 16–25, 31–46, 49–54.</li>
+<li><code>lec5 part1.pdf</code> — 40 pages; cited pp.22–25, 29, 32, 36.</li>
+<li><code>lec5 part2.pdf</code> — 57 pages; cited pp.6, 15–25, 32, 37, 43, 47.</li>
+<li><code>lec5 part3.pdf</code> — 37 pages; cited pp.12–24, 27–36.</li>
+</ul>
+<p>All seven were supplied from the user&#x27;s <code>YEAR3SEM1/SE3090-Software Engineering Frameworks/lec</code> folder. Text was extracted and representative theory diagrams were visually inspected. The source-to-code mapping above is this audit&#x27;s interpretation; examples are labelled synthetic. No external legal or utility-standard verification was performed.</p></article>
+<article lang="si" data-language="si"><h1>Smart Solar: දේශන න්‍යාය සහ ව්‍යාපෘතිය පිළිබඳ වාර්තාව</h1>
+<p>2026 සැප්තැම්බර් 19 • සිංහල වාර්තාව • ඉංග්‍රීසි වාර්තාව සමඟ භාවිත කරන්න</p>
+<h2 id="si-section-0">1. ප්‍රධාන නිගමනය</h2>
+<p>මෙම ව්‍යාපෘතිය තුළ frameworks, React, C#, ASP.NET, relational databases සහ authorization පිළිබඳ දේශනවල බොහෝ මූලික සංකල්ප දැනටමත් යොදා ඇත. අඩු වූ ප්‍රායෝගික කොටස් කිහිපයක් මෙම සංශෝධනයෙන් එක් කර පරීක්ෂා කර ඇත. ඔබගේ ඉල්ලීම අනුව ගෙවීම් කරන language-model සේවාවක් අවශ්‍ය නොවේ.</p>
+<p><strong>වැදගත් සීමාව:</strong> දැනට “Agent” ලෙස නම් කර ඇති ප්‍රධාන කොටස් හතර ක්‍රියා කරන්නේ පෙර ලියා ඇති නීති සහ ගණනය කිරීම් අනුවය. ඊළඟ tool එක තෝරන live LLM එකක්, ReAct reasoning loop එකක් හෝ සම්පූර්ණ generative RAG එකක් මෙහි නැත. LangGraph භාවිත කිරීම පමණින් එය ස්වයංක්‍රීයව LLM agent එකක් වන්නේ නැත. නිවැරදි විස්තරය වන්නේ <strong>ස්වාධීන validation සහ මානව අනුමැතිය සහිත specialist workflows</strong> යන්නයි.</p>
+<p>ගෙවීම් නොකර local model එකක් භාවිත කිරීම ඉදිරියේදී කළ හැකි තේරීමකි. නමුත් එවැනි runtime/model එකක් මෙහි ස්ථාපනය කර පරීක්ෂා කර නැත. වාර්තාවෙන් සියලු ලකුණු ලැබෙන බව, සියලු screens පරීක්ෂා කළ බව හෝ පද්ධතිය විදුලි ස්ථාපනයකට සහතිකයක් බව අදහස් නොවේ.</p>
+<p><strong>තත්ත්ව සලකුණු:</strong> ✓ දැනට තිබේ = source code තුළ හමු විය; ✓ එක් කළා = මෙම සංශෝධනයෙන් ක්‍රියාත්මක කළා; △ අර්ධ වශයෙන් = තව සීමා තිබේ; ○ විකල්පයක් = සෑම ව්‍යාපෘතියකටම අනිවාර්ය නොවේ. පිටු අංක PDF viewer එකේ පිටු අංකයි. <code>lec5 part2</code> තුළ Lecture 06 ද, <code>lec5 part3</code> තුළ Lecture 07 ද ඇතුළත් වේ.</p>
+<h2 id="si-section-1">2. එක් එක් දේශනයේ න්‍යාය යොදා ඇති ආකාරය</h2>
+<h3>Lecture 1 — Frameworks සහ Inversion of Control</h3>
+<ul>
+<li><strong>✓ දැනට තිබේ — IoC, පිටුව 13.</strong> ASP.NET HTTP request එක ලබාගෙන controller එක කැඳවයි. React component එක render කරන්නේ React runtime එකයි. Flutter widget lifecycle එක පාලනය කරන්නේ Flutter framework එකයි. අපගේ code එක framework එක ලබා දෙන extension points තුළ ක්‍රියා කරයි. <code>Program.cs</code> සහ <code>App.tsx</code> උදාහරණ ලෙස පෙන්වන්න.</li>
+<li><strong>✓ දැනට තිබේ — වගකීම් වෙන් කිරීම.</strong> Controllers request භාර ගනී; services business rules පවත්වා ගනී; DTOs හරහා data හුවමාරු වේ; EF entities මඟින් database records නිරූපණය වේ. මෙයින් code වෙනස් කිරීම සහ testing පහසු වේ.</li>
+<li><strong>✓ එක් කළා — තාක්ෂණික තේරීම් සාධාරණීකරණය, පිටු 29–31.</strong> ADR-007 තුළ paid model නොභාවිත කිරීම, සරල lexical retrieval තේරීම, සීමා සහ වෙනත් විකල්ප ලියා ඇත. ADR යනු තීරණයට හේතුව සටහන් කිරීමකි; එය performance benchmark එකක් නොවේ.</li>
+<li><strong>△ අර්ධ වශයෙන් — deployment, පිටුව 39.</strong> Docker සහ CI configuration තිබුණත් ඒවා තිබීමෙන් public deployment එක සාර්ථක බව තහවුරු නොවේ. Public URLs, backup/recovery සහ අවසන් CI evidence අවශ්‍යය.</li>
+<li><strong>○ විකල්පයක් — microservices/serverless.</strong> සෑම component එකකටම වෙනම service එකක් සෑදීම අනිවාර්ය නොවේ. දැනට business API එක සහ internal Python service එක වෙන් කිරීම පැහැදිලි සීමාවක් ලබා දෙයි.</li>
+</ul>
+<h3>Lecture 2 — Advanced React</h3>
+<ul>
+<li><strong>✓ දැනට තිබේ — composition සහ controlled forms, පිටු 8, 16–19.</strong> Fields, search, photo gallery, record references සහ layout නැවත භාවිත කළ හැකි components ලෙස ඇත. Auth Context login state බෙදා ගනී.</li>
+<li><strong>✓ එක් කළා — UI / hook / service වෙන් කිරීම, පිටු 12, 20–23, 32.</strong> <code>useInventoryCatalog.ts</code> තුළ inventory loading, error, data සහ 250 ms debounce එක ඇත. පෙර request එක අවලංගු කිරීමට AbortController භාවිත කරයි. එබැවින් පැරණි search response එකකට අලුත් results මත ලිවීමට නොහැක. Page එක UI පෙන්වන අතර service එක HTTP request කරයි.</li>
+<li><strong>✓ දැනට තිබේ — validation සහ keyboard search.</strong> <code>AuthField</code>, <code>ValidatedForm</code>, <code>SearchBox</code> සහ shared validators තිබේ. නමුත් සියලු screens සඳහා සම්පූර්ණ accessibility certification එකක් ලබා දී නැත.</li>
+<li><strong>✓ එක් කළා — lazy routes සහ Suspense, පිටු 37, 44.</strong> Workspace pages අවශ්‍ය වූ විට වෙනම chunks ලෙස load වේ. Build output තුළ ඒවා වෙන වෙනම ඇති බව තහවුරු විය. මිනුමක් නොකළ නිසා “මෙතරම් ප්‍රතිශතයකින් වේගවත් වුණා” යැයි පැවසිය නොහැක.</li>
+<li><strong>✓ එක් කළා — error boundary, පිටුව 39.</strong> Page එක render වීම අසාර්ථක වූ විට reload/home options පෙන්වයි. Exception text එක screen එකට නොදමයි. මෙය සියලු asynchronous errors හසුරුවන එකක් නොවන නිසා API failures සඳහා වෙනම handling තවමත් අවශ්‍යය.</li>
+<li><strong>○ විකල්පයක් — Redux, Zustand, TanStack Query, Next.js, React Hook Form, Zod.</strong> මේ සියල්ල එකවර දැමීම දේශනයේ අරමුණ නොවේ. ගැටලුවට ගැළපෙන එක තේරීම වැදගත්ය. දැනට Context, local state සහ reusable hooks/validators භාවිත කරයි. සම්පූර්ණ server-state caching framework එකක් තිබෙන බව නොකියන්න.</li>
+</ul>
+<h3>Lecture 3 — C#, OOP, ASP.NET සහ REST</h3>
+<ul>
+<li><strong>✓ දැනට තිබේ — encapsulation සහ interfaces, පිටු 16–19.</strong> Business rules services තුළ ඇත. <code>IAgenticAiService</code> වැනි interfaces නිසා testing සඳහා වෙනත් implementation එකක් ලබා දිය හැක. අවශ්‍ය නැති inheritance hierarchy එකක් එකතු කිරීමෙන් OOP හොඳ වන්නේ නැත.</li>
+<li><strong>✓ දැනට තිබේ — Dependency Injection, පිටුව 26.</strong> <code>Program.cs</code> services සහ DbContext register කරයි. Controllers constructor හරහා dependencies ලබා ගනී. Request එකකට scoped lifetime එක database context සඳහා ගැළපේ.</li>
+<li><strong>✓ දැනට තිබේ — middleware, පිටුව 27.</strong> Authentication, authorization සහ exception handling request pipeline එකේ වගකීම් වේ. ඒවායේ අනුපිළිවෙළ වැදගත්ය.</li>
+<li><strong>✓ දැනට තිබේ — REST සහ layers, පිටු 30–42.</strong> Surveys, field jobs, proposals සහ inventory සඳහා resource routes හා DTOs ඇත. Submit, approve, reserve වැනි operations සරල CRUD වලට වඩා business transitions වේ. UI එක database එකට සෘජුව සම්බන්ධ නොවේ.</li>
+<li><strong>✓ දැනට තිබේ — async සහ Swagger, පිටු 45–51.</strong> Database/HTTP වැඩ async ලෙස සිදු වේ. Swagger API contract පෙන්වයි; එය පමණක් authorization නිවැරදි බවට සාක්ෂියක් නොවේ.</li>
+<li><strong>✓ එක් කළා — එකඟ error contract එකක්.</strong> Middleware විසින් හසුරුවන exceptions දැන් Problem Details ලෙස ලබා දෙයි. පැරණි clients සඳහා <code>message</code> field එක තබා ඇත. නොදන්නා errors වල raw provider details පෙන්වන්නේ නැත.</li>
+</ul>
+<h3>Lecture 4 — Database, transactions සහ ආරක්ෂාව</h3>
+<ul>
+<li><strong>✓ දැනට තිබේ — relational design, පිටු 16–25, 31–37.</strong> Users, surveys, jobs, inspections, proposals, decisions, equipment සහ quotes සඳහා entities හා relationships ඇත. UUID එක record identifier එකයි; SKU එක business identifier එකකි. Foreign keys සහ constraints මඟින් database මට්ටමින් සම්බන්ධතා රැකේ.</li>
+<li><strong>✓ දැනට තිබේ — ACID transaction උදාහරණය, පිටු 9–10.</strong> Equipment reserve කරන විට quote, approval සහ stock නැවත පරීක්ෂා කර transaction එකක update කරයි. Concurrent requests දෙකකට එකම stock වැරදි ලෙස දෙවරක් වෙන් කිරීම වැළැක්වීමට isolation/concurrency checks ඇත. එකම successful request නැවත කිරීමෙන් stock නැවත අඩු නොවිය යුතුය.</li>
+<li><strong>△ අර්ධ වශයෙන් — database පරීක්ෂණ සාක්ෂි.</strong> මෙම audit එකේ isolated PostgreSQL test එක skip විය. එය pass එකක් ලෙස ගණන් නොගන්න. කලින් වාර්තාවේ database run එක වෙනම දිනයක සාක්ෂියකි.</li>
+<li><strong>✓ දැනට තිබේ — authentication සහ authorization වෙන් කිරීම, පිටු 40–46, 49–53.</strong> JWT මඟින් user හඳුනා ගනී. Role/ownership checks මඟින් කළ හැකි ක්‍රියාව තීරණය වේ. Button එක hide කිරීම security නොවේ; backend එකත් deny කළ යුතුය.</li>
+<li><strong>✓ එක් කළා — Problem Details, පිටුව 54.</strong> <code>status</code>, <code>title</code>, <code>detail</code>, <code>instance</code>, <code>traceId</code> වැනි fields ඇත. Test එකක රහස් වැනි synthetic error text යැවූ විට එය response එකේ නොපෙන්වන බව පරීක්ෂා කර ඇත. සියලු controller-specific error responses මෙහි නැවත ලියා නැත.</li>
+<li><strong>△ අර්ධ වශයෙන් — production security.</strong> Browser token storage, refresh/token lifecycle, private photo delivery, database permissions සහ backups තව review කළ යුතුය. Photo metadata endpoint එකට authorization තිබුණත් image URL එක public static URL එකක් නම් එය වෙනම ගැටලුවකි.</li>
+<li><strong>○ විකල්පයක් — CAP සහ sticky sessions, පිටු 11–12, 42.</strong> PostgreSQL භාවිත කළ නිසා CAP තුනම සම්පූර්ණයෙන් ලැබෙන බව නොකියන්න. JWT API එකකට session affinity අනිවාර්ය නොවේ. මේවා තේරීම් විශ්ලේෂණය කිරීමට භාවිත කරන න්‍යාය වේ.</li>
+</ul>
+<h3>Lecture 5 part 1 — LLM සහ agent පදනම</h3>
+<ul>
+<li><strong>✓ දැනට තිබේ — structured inputs/outputs, validation සහ human approval.</strong> Pydantic schemas සහ backend DTOs මඟින් data contract පාලනය කරයි. Specialist output එක independent validator එකකින් පරීක්ෂා කරයි.</li>
+<li><strong>△ අර්ධ වශයෙන් — සැබෑ autonomy, පිටු 22–25, 29, 32.</strong> දේශනයේ agent එක tool result නිරීක්ෂණය කර ඊළඟ ක්‍රියාව model එකෙන් තෝරයි. මෙහි PlannerAgent එක දැනට පෙර ලියා ඇති පියවර අටක් ලබා දෙයි. එය dynamic supervisor හෝ ReAct agent එකක් නොවේ. Code comment එකත් එයට ගැළපෙන ලෙස නිවැරදි කර ඇත.</li>
+<li><strong>✓ යොදා ඇත — සරලම ගැළපෙන workflow එක තේරීම, පිටුව 25.</strong> Cost calculation, stock update සහ approval වැනි අවදානම් ක්‍රියා සඳහා deterministic rules තබා ඇත. Model එකකට අනුමැතිය ලබා දීමට ඉඩ දී නැත.</li>
+<li><strong>△ අර්ධ වශයෙන් — framework components, පිටුව 36.</strong> දේශනයේ components හයක් ඇත. Tools, state/history, monitoring සහ orchestration යම් මට්ටමකින් තිබුණත් live model inference සහ එයට runtime prompts නැත.</li>
+</ul>
+<h3>Lecture 5 part 2 — RAG, retrieval සහ memory</h3>
+<ul>
+<li><strong>✓ එක් කළා — source-backed retrieval, පිටු 6, 22, 25, 43.</strong> <code>project_knowledge.py</code> තුළ project policies හයක කෙටි passages ඇත. Query වචන සමඟ ගැළපීමෙන් relevant passages තෝරා source ID, version සහ score ලබා දෙයි. Compliance workflow එක grid/inspection references notes තුළ ඇතුළත් කරයි.</li>
+<li><strong>✓ එක් කළා — evidence සීමාව.</strong> Match එකක් නැති විට පිළිතුරක් ගොතා නොදමයි. Query දිග සීමා කර ඇත. Arbitrary files, URLs, uploads හෝ customer records මෙයට sources ලෙස නොගනී. මේවා project rules මිස නිල CEB/LECO නීති බව නොකියන්න.</li>
+<li><strong>✓ එක් කළා — කුඩා retrieval evaluation එකක්.</strong> Queries හයක් සඳහා expected passage එක පළමු ස්ථානයේ ලැබෙන බව tests හයම තහවුරු කරයි. එම කුඩා fixture එකේ Hit@1 සහ MRR 1.0 වේ. එයින් සියලු natural-language queries හෝ සිංහල retrieval හොඳ බව තහවුරු නොවේ.</li>
+<li><strong>△ අර්ධ වශයෙන් — full RAG.</strong> Embeddings, vector database, semantic search, reranking සහ model-generated answer මෙහි නැත. එබැවින් “full RAG කරලා” යැයි නොකියන්න. නිවැරදි නම lexical retrieval සහ cited project guidance යන්නයි. ගණනය කිරීම් සහ approval validator එක retrieved text නිසා වෙනස් නොවේ.</li>
+<li><strong>△ අර්ධ වශයෙන් — memory, පිටුව 47.</strong> Graph state එක working memory ලෙසත්, saved decisions episodic history ලෙසත්, reviewed passages semantic facts ලෙසත්, rules procedural knowledge ලෙසත් සංකල්පමය වශයෙන් පැහැදිලි කළ හැක. නමුත් model එකක් ඒවා මතක තබාගෙන ස්වයංක්‍රීයව ඉගෙන ගන්නා memory system එකක් නොවේ.</li>
+</ul>
+<h3>Lecture 5 part 3 — coordination, reliability සහ MCP</h3>
+<ul>
+<li><strong>✓ දැනට තිබේ — pipeline, පිටු 12–16.</strong> Survey → inspection → compliance → proposal → human approval → equipment යන dependencies නිසා pipeline එක ගැළපේ.</li>
+<li><strong>✓ දැනට තිබේ — structured handoffs, පිටු 19–20.</strong> ASP.NET සහ Python අතර typed payloads හුවමාරු වේ. Survey/job/proposal/quote IDs මඟින් stages සම්බන්ධ වේ. එක දිගට memory තුළ ධාවනය වන LLM conversation එකක් ලෙස මෙය ක්‍රියා නොකරයි.</li>
+<li><strong>✓ එක් කළා — bounded retry, පිටුව 21.</strong> Exchange-rate tool එක timeout/network error හෝ HTTP 429/502/503/504 සඳහා පමණක් තවත් එක් උත්සාහයක් කරයි. උත්සාහ අතර 200 ms විරාමයක් ඇත. Invalid response එකක් හෝ සාමාන්‍ය 4xx සඳහා එම retry එක නොකරයි. අවසානයේත් fail නම් ව්‍යාජ rate එකක් නොදමයි.</li>
+<li><strong>✓ එක් කළා — measured traces, පිටු 24, 27–31.</strong> Sizing/compliance stages සඳහා actual start/end, duration, trace ID සහ span ID ඇත. Failed sizing stage එකේ log එක ඉතිරි වේ. Sizing graph එකට step limit එකක් ඇත. Proposal/pricing ඇතුළු මුළු පද්ධතියටම සම්පූර්ණ distributed tracing තිබෙන බව නොකියන්න.</li>
+<li><strong>✓ එක් කළා — missing evidence guardrail.</strong> Inverter location suitable යන value එක නොදුන් විට එය කලින් තිබූ default true එකෙන් සාර්ථක නොවී unknown ලෙස සලකයි.</li>
+<li><strong>✓ දැනට තිබේ — least privilege, පිටු 23, 30.</strong> Python agent එකට stock වෙනස් කිරීමට හෝ proposal approve කිරීමට බලය නැත. Backend සහ authorized human action ඒවා පාලනය කරයි.</li>
+<li><strong>○ විකල්පයක් — MCP, පිටු 33–36.</strong> මෙහි internal FastAPI connection එක REST වේ. එය MCP server එකක් නොවේ. දේශනයේ නම සඳහන් වූ නිසා පමණක් MCP එකතු කිරීම අවශ්‍ය නැත.</li>
+</ul>
+<h2 id="si-section-2">3. මෙම සංශෝධනයෙන් කළ දේ</h2>
+<ol>
+<li>Inventory fetching එක reusable hook එකකට වෙන් කර debounce/cancellation තබා ගත්තා.</li>
+<li>Workspace routes lazy load කිරීම, loading fallback සහ page error recovery එක් කළා.</li>
+<li>Backend exception middleware එක Problem Details contract එකට ගෙන ආවා.</li>
+<li>Versioned project-policy retrieval සහ compliance references එක් කළා.</li>
+<li>Sizing/compliance සඳහා සැබෑ stage timing සහ failed-event retention එක් කළා.</li>
+<li>Exchange tool එකට සීමිත transient retry එකක් එක් කළා; fake fallback rate එකක් නැත.</li>
+<li>NaN/Infinity වැනි sizing input ප්‍රතික්ෂේප කිරීම සහ missing inverter evidence වැරදි ලෙස pass නොවීම තහවුරු කළා.</li>
+<li>Regression tests, ADR-007 සහ මෙම භාෂා දෙකේ වාර්තා එක් කළා. Paid inference dependency, database migration, commit හෝ push එකක් නොකළා.</li>
+</ol>
+<h2 id="si-section-3">4. සම්පූර්ණ workflow එක සම්බන්ධ වන ආකාරය</h2>
+<p><strong>React / Flutter → ASP.NET API → business services → PostgreSQL.</strong> Calculation/screening අවශ්‍ය තැනදී ASP.NET විසින් <strong>internal FastAPI → specialist → independent validator</strong> කැඳවයි. Structured result එක ලැබුණු පසු business state save කරයි. Client එක Python හෝ PostgreSQL වෙත සෘජුව නොයයි.</p>
+<p>Engineer approval එක database තුළ සුරකින business pause එකකි. එය Python process එකක් දිගටම බලා සිටින තත්ත්වයක් නොවේ. Approval පසුව pricing සහ reservation වෙනම authorized operations ලෙස ක්‍රියාත්මක වේ. Phone සහ web එකම record IDs/API භාවිත කරන නිසා එකම installation එකේ තත්ත්වය දැකිය හැක.</p>
+<h3>උදාහරණය — මාසයකට 600 kWh භාවිත කරන පරීක්ෂණ නිවසක්</h3>
+<p>මෙය synthetic test example එකකි; සැබෑ electrical design උපදෙසක් නොවේ.</p>
+<ol>
+<li><strong>Homeowner:</strong> 600 kWh, 80 m², ThreePhase සහ test address එකක් දමා survey submit කරන්න. Sizing rule එක <strong>600 ÷ 120 = 5 kW</strong> ලබා දෙයි. දැනට preliminary 400 W assumption එක සහ rounding අනුව <strong>panels 12</strong> පෙන්වයි. Survey reference එක සටහන් කරගන්න.</li>
+<li><strong>Administrator / engineer:</strong> එම survey එකට field job එකක් සාදා technician assign කරන්න. අලුත් අසම්බන්ධ survey එකක් සාදන්න එපා.</li>
+<li><strong>Technician:</strong> එම job එකේ measurements සහ photos ඇතුළත් කරන්න. Synthetic compliant example එක සඳහා <strong>400 V, 50 Hz, 63 A, inverter location suitable</strong> භාවිත කළ හැක. Form එකේ අනෙක් required fields ද සම්පූර්ණ කරන්න.</li>
+<li><strong>Compliance:</strong> input validation → project references → rule screening → independent check. මෙම example එක project rules අනුව <strong>COMPLIANT / LOW</strong> විය යුතුය. Missing/unsafe data තිබුණොත් issues ලැබේ.</li>
+<li><strong>Proposal:</strong> completed compliance assessment එකෙන් proposal request කරන්න. Inspection ට පෙර සෑදූ proposal එකේ old snapshot එක තිබිය හැක. එවිට validation bypass නොකර completed assessment භාවිත කර අලුත් proposal එකක් ගන්න.</li>
+<li><strong>Engineer:</strong> technical details, technician photos සහ findings බලන්න. Approve, reject හෝ revision request කරන්න. “Safe” result එකක් තිබීම human approval එක නොවේ. Invalid proposal එක blocked විය යුතුය.</li>
+<li><strong>Inventory officer:</strong> approved proposal එකේ equipment price ගණනය කරන්න. Catalog policy එක <strong>500 W panels</strong> නිසා 5 kW සඳහා <strong>panels 10</strong> සහ compatible inverter එකක් තෝරයි. උදාහරණයක් ලෙස panels USD 100 × 10 සහ inverter USD 500 නම් USD 1,500 වේ. උදාහරණ rate එක 300 LKR/USD නම් <strong>LKR 450,000</strong> වේ. සැබෑ screen එකේ rate සහ prices වෙනස් විය හැක; installation/taxes මෙයට ඇතුළත් නොවේ.</li>
+<li><strong>Reserve:</strong> backend එක approval, quote expiry සහ available stock transaction එක තුළ නැවත පරීක්ෂා කරයි. Success වූ විට reserved/available stock වෙනස් වේ. එකම reservation නැවත කිරීමෙන් stock දෙවරක් අඩු නොවිය යුතුය.</li>
+</ol>
+<p><strong>Panel ගණන පිළිබඳ සීමාව:</strong> preliminary stage එකේ 400 W සහ catalog stage එකේ 500 W යන වෙනස් assumptions ඇත. ඒ නිසා 12 සහ 10 එකම bill of materials එක නොවේ. තවද 12 × 400 W = 4.8 kW වන නිසා preliminary rounding එක exact 5 kW final design එකක් සහතික නොකරයි. මෙය presentation එකේ පැහැදිලි කර, අවසන් engineering design ලෙස ප්‍රකාශ කිරීමට පෙර එකඟ policy එකකට ගෙන ආ යුතුය.</p>
+<h3>පෙන්විය යුතු failure examples</h3>
+<ul>
+<li>Required inspection value එකක් නැති විට clearance නොලැබීම.</li>
+<li>Homeowner කෙනෙකු engineer approval request කළ විට backend deny කිරීම.</li>
+<li>Old proposal එකේ validation තවම blocked වීම සහ fresh proposal එකක් අවශ්‍ය වීම.</li>
+<li>Exchange service unavailable නම් bounded retry පසුව pricing fail වීම; fake rate/reservation නොමැති වීම.</li>
+<li>Quote පසු stock වෙනස් වූ විට reserve කරන මොහොතේ නැවත stock පරීක්ෂා කිරීම.</li>
+<li>Invalid sizing input එක successful result වෙනුවට failed stage එකක් ලබා දීම.</li>
+</ul>
+<h2 id="si-section-4">5. “හතර” යන්නෙන් අදහස් කරන වෙනස් කාණ්ඩ</h2>
+<h3>දේශනයේ coordination patterns හතර</h3>
+<p><code>lec5 part3.pdf</code>, පිටුව 12:</p>
+<ol>
+<li><strong>Router:</strong> request එකට ගැළපෙන specialist එක තෝරයි. සාමාන්‍ය HTTP routing තිබීම LLM router එකක් තිබීමේ සාක්ෂියක් නොවේ.</li>
+<li><strong>Pipeline:</strong> පෙර stage output එක ඊළඟ stage එක භාවිත කරයි. ව්‍යාපෘතියේ ප්‍රධාන ක්‍රමය මෙයයි.</li>
+<li><strong>Parallel:</strong> ස්වාධීන වැඩ කිහිපයක් එකවර කර ප්‍රතිඵල එකතු කරයි. Approval සහ stock reservation වැනි dependent stages එසේ එකවර කළ යුතු නැත. දැනට parallel-agent runtime එකක් කියා නොපෙන්වන්න.</li>
+<li><strong>Supervisor:</strong> ප්‍රතිඵල අනුව ඊළඟ specialist/step එක තීරණය කරයි. Fixed PlannerAgent එක එවැනි dynamic supervisor එකක් නොවේ.</li>
+</ol>
+<p>මේ patterns හතරම සෑම project එකකම තිබිය යුතු යැයි දේශනයෙන් අදහස් නොවේ.</p>
+<h3>ව්‍යාපෘතියේ specialist කොටස් හතර</h3>
+<ol>
+<li><strong>SolarSizingAgent:</strong> electricity usage එකෙන් preliminary system size ලබා දෙයි.</li>
+<li><strong>GridComplianceAgent:</strong> technician measurements project rules සමඟ පරීක්ෂා කරයි.</li>
+<li><strong>SafetyGuardrailAgent:</strong> proposal risks සහ escalation flags ලබා දෙයි; human approval ලබා නොදෙයි.</li>
+<li><strong>EquipmentPricingAgent:</strong> compatible equipment සහ exchange rate එකෙන් quotation ගණනය කරයි; stock ලියන්නේ නැත.</li>
+</ol>
+<p>PlannerAgent අමතර fixed roadmap එක ලබා දෙයි. Validators outputs පරීක්ෂා කරයි. Agent නම ඇති classes හතරක් තිබීම LLM agents හතරක් තිබීමේ සාක්ෂියක් නොවේ.</p>
+<h3>Memory හතර සහ framework components හය</h3>
+<p><code>lec5 part2.pdf</code>, පිටුව 47 හි <strong>working, episodic, semantic, procedural</strong> memory වර්ග හතර ඇත. මෙහි graph state, stored decisions, reviewed passages සහ business rules සමඟ ඒවා සංකල්පමය වශයෙන් සම්බන්ධ කළ හැක.</p>
+<p><code>lec5 part1.pdf</code>, පිටුව 36 හි ඇත්තේ <strong>Models, Tools, Memory, Monitoring, Prompts, Middleware/Orchestration</strong> යන components <strong>හයයි</strong>. එය හතරක් ලෙස presentation එකේ නොකියන්න. Model inference සහ runtime prompting දැනට නැත.</p>
+<p>සරල demo story එකක් සඳහා <strong>assess → inspect → review → prepare equipment</strong> ලෙස stages හතරක් භාවිත කළ හැක. ඒවා business stages ලෙස නම් කරන්න.</p>
+<h2 id="si-section-5">6. සාමාජිකයන් හතර සඳහා වගකීම් බෙදීම</h2>
+<p>මෙය ඉදිරියට යෝජිත බෙදීමකි. දැනට වැඩ කළේ ඔබ තනිව බව ඔබ පැවසූ නිසා මේවා කලින් කළ contributions ලෙස වාර්තා නොකරන්න. එක් අයෙකු backend පමණක්, තවත් අයෙකු UI පමණක් ලෙස බෙදනවාට වඩා සෑම අයෙකුටම තම component එක end-to-end භාර දෙන්න.</p>
+<h3>Member 1 — Customer assessment සහ sizing</h3>
+<p>Survey/profile assessment inputs, ownership rules, survey data සහ SolarSizingAgent භාර ගන්න. React survey review, Flutter homeowner survey/photo/status flow, API, database සහ tests ඇතුළත් වේ. Demo එකේ 600 kWh → 5 kW සහ invalid input rejection පෙන්වන්න. ඉදිරියේදී panel assumptions එකඟ කිරීම සහ structured plan dependencies වැඩි දියුණු කිරීම සුදුසුය.</p>
+<h3>Member 2 — Field operations සහ compliance</h3>
+<p>Technician assignment, inspections, measurements, photos/GPS සහ GridComplianceAgent භාර ගන්න. React dispatch/review සහ Flutter field capture දෙකම ඇතුළත් වේ. Compliant example එකක් සහ missing measurement example එකක් පෙන්වන්න. ඉදිරියේදී protected photo delivery සහ physical-device camera/GPS testing කරන්න.</p>
+<h3>Member 3 — Proposal සහ engineer approval</h3>
+<p>Proposal lifecycle, safety findings, technician evidence review, approve/reject/revise සහ audit history භාර ගන්න. React engineer screen, Flutter homeowner result, backend authorization සහ SafetyGuardrailAgent ඇතුළත් වේ. Invalid proposal block වීම සහ wrong-role approval deny වීම පෙන්වන්න. Stale proposal refresh පැහැදිලි කිරීම සහ full timing traces වැඩි දියුණු කිරීම ඉදිරි වැඩ ලෙස ගන්න.</p>
+<h3>Member 4 — Inventory, pricing සහ reservation</h3>
+<p>Catalog CRUD/search, stock, quotations, exchange tool, reservation/release සහ EquipmentPricingAgent භාර ගන්න. React inventory UI, Flutter equipment summary, backend transactions සහ database tests ඇතුළත් වේ. Correct totals, tool failure සහ repeated reservation එකෙන් double deduction නොවීම පෙන්වන්න. Isolated PostgreSQL concurrency test සහ tool-attempt traces වැඩි දියුණු කරන්න.</p>
+<p>සෑම සාමාජිකයෙකුම සැබෑ issue, commit, test සහ peer review evidence එකතු කළ යුතුය. තමන් කළ දේ පිළිබඳ reflection තමන් ලියන්න. අතීත contributions, signatures හෝ marks evidence ගොතා නොදමන්න.</p>
+<h2 id="si-section-6">7. පරීක්ෂණ සහ ඒවායේ සීමා</h2>
+<ul>
+<li>Python tests <strong>55ක් pass</strong> විය. Retrieval queries හය, safe failures, missing evidence, timing සහ bounded retries ඇතුළත් වේ. Dependency deprecation warning එකක් ඇත.</li>
+<li>ASP.NET tests <strong>98ක් pass</strong>, PostgreSQL integration test <strong>1ක් skip</strong> විය. එය fresh database concurrency proof එකක් නොවේ.</li>
+<li>React tests <strong>47ක් pass</strong> විය. Error boundary test එක හිතාමතා render error එකක් ඇති කරයි. Account test router එකේ dashboard route නැති බවට පැරණි warning එකක්ද ඇත.</li>
+<li>TypeScript/Vite production build සාර්ථක විය; lazy route chunks නිපදවිය.</li>
+<li>Flutter සඳහා සැප්තැම්බර් 19 දින tests <strong>20ක් pass</strong> විය; <code>flutter analyze</code> එකේ issues නොමැත. Package-update notices analyzer failures නොවේ. මෙම lecture audit එකේ Flutter source වෙනස් කර නැත.</li>
+</ul>
+<p>මෙම automated checks වලින් real-device permissions, public deployment, load capacity හෝ සම්පූර්ණ phone-to-browser demo එකක් තහවුරු නොවේ. කලින් දිනයක තිබූ test evidence මෙවර run එක ලෙස ඉදිරිපත් නොකරන්න.</p>
+<h2 id="si-section-7">8. වැඩි ලකුණු සඳහා තව අවශ්‍ය දේ</h2>
+<ol>
+<li>Lecturer බලාපොරොත්තු වන්නේ LLM විසින් tools තෝරන agent එකක් නම් එම කොටස තව අර්ධ වශයෙන් බව පැහැදිලි කරන්න. No-paid-model constraint එකට local model එකක් ගැළපිය හැකි නමුත් එය නිසි contracts, resource limits සහ tests සමඟ වෙනම ක්‍රියාත්මක කළ යුතුය.</li>
+<li>සියලු components සඳහා tracing සහ interrupted-run recovery එකඟ කරන්න. දැනට measured improvements sizing/compliance සඳහා පමණි.</li>
+<li>Photo protection, token lifecycle, HTTPS, database permissions සහ backup/recovery පරීක්ෂා කරන්න.</li>
+<li>එකම survey ID එකෙන් Flutter submit → React assignment/approval → pricing/reservation → mobile status යන demo එක record කරන්න. Failure cases ද පෙන්වන්න.</li>
+<li>Sizing/catalog assumptions එකඟ කර project thresholds නිල utility certification ලෙස නොපෙන්වන්න.</li>
+<li>සැබෑ public URLs, අවසන් mobile build, demo video, genuine member contributions, reflections සහ assignment report format සම්පූර්ණ කරන්න. Tests pass වූ පමණින් full marks සහතික නොවේ.</li>
+</ol>
+<h3>Presentation එකේ කියන්න පුළුවන් කෙටි විස්තරය</h3>
+<p>“අපේ පද්ධතිය homeowner survey එක, technician inspection එක, engineer approval එක සහ equipment preparation එක secured API එකකින් සම්බන්ධ කරනවා. Specialists හතර structured results ලබා දෙනවා. Independent validators ඒවා පරීක්ෂා කරනවා. Human approval සහ database transactions අවදානම් ක්‍රියා පාලනය කරනවා. React hooks/composition, ASP.NET DI/middleware, EF relationships/transactions සහ workflow logging අපි භාවිත කරනවා. දැනට no-paid-model version එක deterministic pipeline එකක් සහ cited project guidance එකක්. Autonomous LLM reasoning හෝ full RAG තියෙනවා කියලා අපි කියන්නේ නැහැ.”</p>
+<h2 id="si-section-8">9. මූලාශ්‍ර</h2>
+<p>ඔබ ලබා දුන් <code>lec1.pdf</code> (පිටු 47), <code>lec2.pdf</code> (52), <code>lec3.pdf</code> (57), <code>lec4.pdf</code> (60), <code>lec5 part1.pdf</code> (40), <code>lec5 part2.pdf</code> (57), <code>lec5 part3.pdf</code> (37) භාවිත කර ඇත. ඉහත sections තුළ අදාළ PDF පිටු සඳහන් කර ඇත. Source-to-code mapping එක මෙම audit එකේ විශ්ලේෂණයයි. සම්පූර්ණ technical file references සහ rerun commands ඉංග්‍රීසි වාර්තාවේ ඇත. External electrical standards හෝ නීතිමය certification මෙම audit එකෙන් තහවුරු කර නැත.</p></article></main></div><footer>Prepared from seven supplied lecture PDFs and repository evidence. Review began 16 September; report completed 19 September 2026. Local implementation audit — no grade or production certification implied.</footer>
+<script>
+const buttons=document.querySelectorAll('[data-choice]');
+function showLanguage(value){document.querySelectorAll('[data-language]').forEach(el=>el.hidden=value!=='both'&&el.dataset.language!==value);buttons.forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.choice===value)));document.documentElement.lang=value==='si'?'si':'en';}
+buttons.forEach(button=>button.addEventListener('click',()=>showLanguage(button.dataset.choice)));
+document.getElementById('print').addEventListener('click',()=>window.print());showLanguage('en');
+</script></body></html>

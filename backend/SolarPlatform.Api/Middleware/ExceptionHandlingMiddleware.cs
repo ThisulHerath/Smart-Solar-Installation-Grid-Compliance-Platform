@@ -1,5 +1,7 @@
 using System.Net;
 using System.Text.Json;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SolarPlatform.Api.Middleware;
 
@@ -23,6 +25,7 @@ public class ExceptionHandlingMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unhandled exception occurred during request execution: {Path}", context.Request.Path);
+            if (context.Response.HasStarted) throw;
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -59,6 +62,11 @@ public class ExceptionHandlingMiddleware
                 statusCode = HttpStatusCode.Unauthorized;
                 message = exception.Message;
                 break;
+            case InvalidOperationException when exception.InnerException != null:
+                // Infrastructure failures must not expose nested provider/configuration details.
+                statusCode = HttpStatusCode.ServiceUnavailable;
+                message = "A required service is temporarily unavailable. Please retry later.";
+                break;
             case InvalidOperationException:
                 statusCode = HttpStatusCode.BadRequest;
                 message = exception.Message;
@@ -73,17 +81,23 @@ public class ExceptionHandlingMiddleware
                 break;
         }
 
-        context.Response.ContentType = "application/json";
+        context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = (int)statusCode;
 
-        var response = new
+        var response = new ProblemDetails
         {
-            status = context.Response.StatusCode,
-            message = message,
-            timestamp = DateTime.UtcNow
+            Status = context.Response.StatusCode,
+            Title = statusCode.ToString(),
+            Detail = message,
+            Type = "about:blank",
+            Instance = context.Request.Path
         };
+        // Preserve the existing clients' message field while providing a standard error contract.
+        response.Extensions["message"] = message;
+        response.Extensions["traceId"] = Activity.Current?.Id ?? context.TraceIdentifier;
+        response.Extensions["timestamp"] = DateTime.UtcNow;
 
-        var json = JsonSerializer.Serialize(response);
+        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         return context.Response.WriteAsync(json);
     }
 }

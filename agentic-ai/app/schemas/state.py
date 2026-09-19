@@ -1,8 +1,9 @@
 from typing import List, Dict, Any, Optional, TypedDict
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
 class SolarSizingInput(BaseModel):
+    model_config = ConfigDict(allow_inf_nan=False)
     workflow_id: str
     customer_id: str
     monthly_kwh: float = Field(gt=0)
@@ -39,7 +40,7 @@ class WorkflowStateDict(TypedDict, total=False):
     errors: List[str]
     approval_status: str
     final_outcome: str
-    execution_logs: List[str]
+    execution_logs: List[Dict[str, Any]]
     final_result: Dict[str, Any]
     candidate_recommendation: Dict[str, Any]
 

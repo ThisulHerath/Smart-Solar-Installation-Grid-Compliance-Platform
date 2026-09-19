@@ -1,3 +1,4 @@
+import { useInventoryCatalog } from '../hooks/useInventoryCatalog';
 import { SearchBox } from '../components/SearchBox';
 import { ValidatedForm } from '../components/ValidatedForm';
 import { useEffect, useState } from 'react';
@@ -14,9 +15,8 @@ const money = (value: number) => new Intl.NumberFormat('en-LK', { minimumFractio
 export function InventoryPage() {
   const { user } = useAuth();
   const canWrite = user?.roles.some(role => ['ADMINISTRATOR', 'INVENTORY_OFFICER'].includes(role));
-  const [items, setItems] = useState<InventoryItem[]>([]), [total, setTotal] = useState(0);
   const [search, setSearch] = useState(''), [category, setCategory] = useState(''), [sort, setSort] = useState('name'), [low, setLow] = useState(false), [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true), [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState(false), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [draft, setDraft] = useState<Draft | null>(null), [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [proposals, setProposals] = useState<{ id: string; recommendedKw: number }[]>([]), [proposal, setProposal] = useState(''), [quotes, setQuotes] = useState<Quote[]>([]);
   const [reservations, setReservations] = useState<{ id: string; equipmentQuoteId: string; itemName: string; quantity: number; status: string; totalPriceLkr: number }[]>([]);
@@ -24,17 +24,8 @@ export function InventoryPage() {
   const [supplierOpen, setSupplierOpen] = useState(false);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [dialogError, setDialogError] = useState('');
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    setLoading(true);
-    const timer = window.setTimeout(() => {
-    request<{ items: InventoryItem[]; total: number }>(`?${new URLSearchParams({ search, sort, page: String(page), pageSize: '10', lowStock: String(low), ...(category ? { category } : {}) })}`, 'GET', undefined, controller.signal)
-      .then(data => { if (!cancelled) { setItems(data.items); setTotal(data.total); } })
-      .catch(e => { if (!cancelled) setError(e.message); }).finally(() => { if (!cancelled) setLoading(false); });
-    }, 250);
-    return () => { cancelled = true; window.clearTimeout(timer); controller.abort(); };
-  }, [search, category, sort, low, page, revision]);
+  const query = new URLSearchParams({ search, sort, page: String(page), pageSize: '10', lowStock: String(low), ...(category ? { category } : {}) }).toString();
+  const { items, total, loading, error: catalogError } = useInventoryCatalog(query, revision);
   useEffect(() => {
     Promise.all([request<Supplier[]>('/suppliers'), request<typeof proposals>('/proposals'), request<typeof reservations>('/reservations')])
       .then(([s, p, r]) => { setSuppliers(s); setProposals(p); setReservations(r); }).catch(e => setError(e.message));
@@ -52,7 +43,7 @@ export function InventoryPage() {
   return <main className="inventory-page">
     <header className="inventory-heading"><div><p className="eyebrow">EQUIPMENT & PROCUREMENT</p><h1>Inventory</h1><p>Manage equipment, review pricing, and reserve stock for approved proposals.</p></div>
       {canWrite && <div className="inventory-header-actions"><button className="inventory-secondary" onClick={() => { setDialogError(''); setSupplierOpen(true); }}>Add supplier</button><button className="btn btn-primary" onClick={() => { setDialogError(''); setDraft({ ...empty }); }}>Add equipment</button></div>}</header>
-    {error && <div role="alert" className="inventory-error">{error}</div>}{notice && <p role="status" className="inventory-notice">{notice}</p>}
+    {(error || catalogError) && <div role="alert" className="inventory-error">{error || catalogError}</div>}{notice && <p role="status" className="inventory-notice">{notice}</p>}
     <section className="inventory-panel">
       <div className="inventory-section-heading"><div><h2>Equipment catalog</h2><p>Search your stock and keep track of equipment available for allocation.</p></div><span className="inventory-count">{total} matching items</span></div>
       <div className="inventory-filters">

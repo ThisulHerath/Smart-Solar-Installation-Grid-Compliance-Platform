@@ -10,7 +10,7 @@ class ComplianceEvaluationInput(BaseModel):
     grid_type: str = "SinglePhase"
     phase_count: Optional[int] = 1
     main_breaker_rating: Optional[float] = None
-    inverter_location_suitable: Optional[bool] = True
+    inverter_location_suitable: Optional[bool] = None
     roof_area_sqm: Optional[float] = None
     roof_tilt: Optional[float] = None
     roof_orientation: Optional[str] = None
@@ -34,4 +34,5 @@ class ComplianceEvaluationResponse(BaseModel):
     recommendations: List[str] = Field(default_factory=list)
     validation_status: str
     notes: Optional[str] = None
+    evidence: List[Dict[str, Any]] = Field(default_factory=list)
     execution_logs: List[Dict[str, Any]] = Field(default_factory=list)

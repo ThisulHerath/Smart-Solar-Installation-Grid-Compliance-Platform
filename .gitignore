@@ -38,6 +38,7 @@ ENV/
 .pytest_cache/
 .coverage
 htmlcov/
+/tmp/lecture-audit/
 
 # Dart / Flutter
 .dart_tool/

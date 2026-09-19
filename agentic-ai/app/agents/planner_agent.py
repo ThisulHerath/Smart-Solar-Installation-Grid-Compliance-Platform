@@ -3,16 +3,16 @@ import uuid
 
 class PlannerAgent:
     """
-    Responsible for interpreting high-level solar objectives, decomposing them
-    into executable sub-tasks, and orchestrating multi-agent delegation.
+    Returns the fixed project roadmap. This is deterministic coordination,
+    not language-model reasoning or autonomous tool selection.
     """
     def __init__(self, name: str = "PlannerAgent"):
         self.name = name
 
     def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         objective = state.get("objective", "Solar site assessment")
-        logs: List[str] = state.get("execution_logs", [])
-        completed: List[str] = state.get("completed_steps", [])
+        logs = list(state.get("execution_logs", []))
+        completed: List[str] = list(state.get("completed_steps", []))
 
         logs.append(f"[{self.name}] Formulating execution plan for objective: '{objective}'")
         
