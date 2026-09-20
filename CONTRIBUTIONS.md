@@ -2,7 +2,7 @@
 
 ## Smart Solar Installation & Grid Compliance Platform
 
-**Module:** SE3090 – Agentic AI  
+**Module:** SE3090 – Software Engineering Frameworks 
 **Group:** 2026-AI-17
 
 ---
@@ -340,7 +340,7 @@ Each member is responsible for understanding and being able to demonstrate the f
 
 ## Group
 
-**SE3090 – Agentic AI**  
+**SE3090 – Software Engineering Frameworks**  
 **Group 2026-AI-17**
 
 | Member | Name | Student ID |
