@@ -7,8 +7,6 @@ import {
   UserRound,
 } from 'lucide-react';
 
-import { RecordReference } from '../components/RecordReference';
-
 import { useAuth } from '../context/AuthContext';
 import '../styles/profile.css';
 
@@ -128,10 +126,6 @@ export function ProfilePage() {
             </div>
           </dl>
 
-          <RecordReference
-            label="User reference"
-            value={user.id}
-          />
         </section>
       </div>
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Mail } from 'lucide-react';
 import {
   Link,
   Navigate,
@@ -14,6 +15,7 @@ import { api } from '../services/api';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -29,7 +31,7 @@ export function LoginPage() {
     <AuthShell>
       <p className="eyebrow">WELCOME BACK</p>
 
-      <h2>Sign in to Smart Solar</h2>
+      <h2>Login</h2>
 
       <p className="auth-intro">
         Your solar project, all in one place.
@@ -61,7 +63,7 @@ export function LoginPage() {
               password
             );
 
-            login(result.token, result.user);
+            login(result.token, result.user, rememberMe);
 
             navigate('/dashboard', {
               replace: true,
@@ -81,6 +83,7 @@ export function LoginPage() {
           label="Email address"
           id="login-email"
           className="input-field"
+          icon={<Mail size={17} />}
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
@@ -97,11 +100,32 @@ export function LoginPage() {
           className="input-field"
           type="password"
           autoComplete="current-password"
+          placeholder="Enter your password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           disabled={busy}
         />
+
+        <div className="login-options">
+          <label className="remember-me">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              disabled={busy}
+            />
+            <span>Remember me</span>
+          </label>
+          <button
+            type="button"
+            className="forgot-password"
+            onClick={() => setError('Password reset is not available yet. Please contact support.')}
+            disabled={busy}
+          >
+            Forgot password?
+          </button>
+        </div>
 
         <button
           className="btn btn-primary"

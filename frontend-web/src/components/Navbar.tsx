@@ -28,6 +28,12 @@ export const Navbar = () => {
             </Link>
             {user ? (
               <div className="app-account">
+                    <nav className="workspace-public-nav" aria-label="Main navigation">
+                      <Link to="/">Home</Link>
+                      <Link to="/dashboard">Projects</Link>
+                      <Link to="/profile">Gallery</Link>
+                      <Link to="/account">Contact</Link>
+                    </nav>
                 <Link to="/profile" className="app-user" aria-label="My profile">
                   <span className="app-user-avatar">{initials}</span>
                   <span className="app-user-details">
@@ -58,7 +64,7 @@ export const Navbar = () => {
               <Link className="btn btn-primary" to="/login">Log in</Link>
             )}
           </div>
-          {user && (
+          {user && false && (
             <nav id="app-navigation" className={`app-navigation ${expanded ? 'expanded' : ''}`} aria-label="Workspace navigation">
               {[
                 { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, show: true },

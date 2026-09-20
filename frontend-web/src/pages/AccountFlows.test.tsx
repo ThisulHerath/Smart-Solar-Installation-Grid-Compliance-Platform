@@ -166,6 +166,10 @@ describe('Public authentication', () => {
       });
     }
 
+    fireEvent.click(
+      screen.getByLabelText('I agree to the terms & conditions'),
+    );
+
     fireEvent.submit(
       screen
         .getByRole('button', {

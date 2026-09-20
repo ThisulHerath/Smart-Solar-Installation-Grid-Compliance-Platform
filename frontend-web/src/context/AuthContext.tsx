@@ -6,7 +6,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (token: string, user: User) => void;
+  login: (token: string, user: User, remember?: boolean) => void;
   logout: () => void;
   hasRole: (role: string) => boolean;
 }
@@ -15,12 +15,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('smartsolar_token'));
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem('smartsolar_token') ??
+    sessionStorage.getItem('smartsolar_token'),
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const storedToken = localStorage.getItem('smartsolar_token');
+      const storedToken =
+        localStorage.getItem('smartsolar_token') ??
+        sessionStorage.getItem('smartsolar_token');
       if (storedToken) {
         try {
           const currentUser = await api.getMe();
@@ -38,14 +43,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     initializeAuth();
   }, []);
 
-  const login = (newToken: string, newUser: User) => {
-    localStorage.setItem('smartsolar_token', newToken);
+  const login = (newToken: string, newUser: User, remember = true) => {
+    localStorage.removeItem('smartsolar_token');
+    sessionStorage.removeItem('smartsolar_token');
+    (remember ? localStorage : sessionStorage).setItem(
+      'smartsolar_token',
+      newToken,
+    );
     setToken(newToken);
     setUser(newUser);
   };
 
   const logout = () => {
     localStorage.removeItem('smartsolar_token');
+    sessionStorage.removeItem('smartsolar_token');
     setToken(null);
     setUser(null);
   };

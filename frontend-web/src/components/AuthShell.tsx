@@ -1,13 +1,38 @@
 import { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { Sun, ShieldCheck, ArrowRight } from './Icons';
+import { Link, useLocation } from 'react-router-dom';
+import { Sun } from './Icons';
 import '../styles/account.css';
+
 export function AuthShell({ children }: { children: ReactNode }) {
-  return <main className="auth-shell"><section className="auth-story" aria-label="About Smart Solar">
-    <Link className="auth-brand" to="/"><Sun size={30} /> Smart Solar<span>SRI LANKA</span></Link>
-    <div className="auth-story-copy"><p className="eyebrow">YOUR ROOFTOP. YOUR NEXT CHAPTER.</p><h1>A clearer path<br />to solar.</h1><p>From your first roof assessment to engineering review, keep your solar installation moving with confidence.</p>
-      <div className="solar-scene" aria-hidden="true"><div className="solar-sun" /><div className="solar-roof" /><span className="solar-ground" /></div>
-      <div className="auth-steps"><span>01 · Assess your home</span><ArrowRight size={16} /><span>02 · Plan your installation</span></div></div>
-    <p className="auth-trust"><ShieldCheck size={18} /> Email verification protects your account.</p>
-  </section><section className="auth-form-panel"><div className="auth-form-content">{children}</div><p className="auth-footnote">Built for rooftop solar in Sri Lanka.<br />Engineering and utility approval remain part of every installation.</p></section></main>;
+  const location = useLocation();
+  const isRegister = location.pathname === '/register';
+
+  return (
+    <main className="auth-shell">
+      <header className="auth-nav">
+        <Link className="auth-brand" to="/" aria-label="Smart Solar home">
+          <span className="auth-brand-mark"><Sun size={25} /></span>
+          <span className="auth-brand-name">smart<span>solar.</span></span>
+        </Link>
+
+        <nav className="auth-links" aria-label="Public navigation">
+          <Link to="/">Home</Link>
+          <Link to="/">Projects</Link>
+          <Link to="/">Gallery</Link>
+          <Link to="/">Contact</Link>
+        </nav>
+
+        <Link className="auth-nav-action" to={isRegister ? '/login' : '/register'}>
+          {isRegister ? 'Sign in' : 'Register'}
+        </Link>
+      </header>
+
+      <section className="auth-form-panel" aria-label={isRegister ? 'Register' : 'Login'}>
+        <div className={`auth-form-card${isRegister ? ' register-card' : ''}`}>
+          <Link className="auth-card-close" to="/" aria-label="Close">×</Link>
+          <div className="auth-form-content">{children}</div>
+        </div>
+      </section>
+    </main>
+  );
 }

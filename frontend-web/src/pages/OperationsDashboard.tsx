@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-
-import { WorkspaceLinks } from '../components/WorkspaceLinks';
 import { useAuth } from '../context/AuthContext';
 import { HomeownerWorkspace } from './HomeownerWorkspace';
 
@@ -29,6 +27,7 @@ export function OperationsDashboard() {
       'INVENTORY_OFFICER',
     ].includes(role)
   );
+  const admin = user?.roles.includes('ADMINISTRATOR');
 
   useEffect(() => {
     if (!staff) return;
@@ -57,31 +56,62 @@ export function OperationsDashboard() {
       .catch((e) => setError(e.message));
   }, [staff]);
 
+  if (admin && user) {
+    return (
+      <section className="admin-dashboard-content">
+          <section className="admin-welcome-card">
+            <p>SMART SOLAR · SRI LANKA</p>
+            <h1>Welcome, {user.fullName}</h1>
+            <span>Coordinate rooftop solar surveys, field inspections, engineering review, and equipment preparation.</span>
+          </section>
+
+          {error && <p role="alert">{error}</p>}
+          {!report && !error && <p>Loading your dashboard…</p>}
+
+          {report && (
+            <>
+              <div className="admin-metrics-grid">
+                {[
+                  ['Solar surveys', report.surveyCount, 'survey'],
+                  ['Awaiting approval', report.pendingApprovals, 'pending'],
+                  ['Approved proposals', report.approvedProposals, 'approved'],
+                  ['Low stock items', report.lowStockItems, 'low-stock'],
+                ].map(([label, value, tone]) => (
+                  <section className={`admin-metric-card ${tone}`} key={label}>
+                    <span>{label}</span>
+                    <strong>{value}</strong>
+                  </section>
+                ))}
+              </div>
+
+              <section className="admin-equipment-card">
+                <h2>Reserved equipment value</h2>
+                <strong>LKR {report.reservedEquipmentValueLkr.toLocaleString('en-LK')}</strong>
+                <p>Equipment value only; excludes installation and taxes.</p>
+                <h3>Proposal activity</h3>
+                {report.proposalStatuses.length ? report.proposalStatuses.map((row) => (
+                  <span key={row.status}>{row.status}: {row.count}</span>
+                )) : <span>No proposals yet.</span>}
+              </section>
+            </>
+          )}
+      </section>
+    );
+  }
+
   return (
-    <main
-      style={{
-        display: 'grid',
-        gap: 24,
-      }}
-    >
+    <main className="workspace-dashboard" style={{ display: 'grid', gap: 24 }}>
       <section
-        className="glass-panel"
+        className="glass-panel dashboard-hero"
         style={{
           padding: 32,
         }}
       >
-        <p
-          style={{
-            color: '#287247',
-            letterSpacing: 2,
-          }}
-        >
-          SMART SOLAR · SRI LANKA
-        </p>
+        <p className="dashboard-kicker">SMART SOLAR · SRI LANKA</p>
 
         <h1>Welcome, {user?.fullName}</h1>
 
-        <p>
+        <p className="dashboard-hero-copy">
           Coordinate rooftop solar surveys, field inspections,
           engineering review, and equipment preparation.
         </p>
@@ -178,7 +208,6 @@ export function OperationsDashboard() {
         </>
       )}
 
-      <WorkspaceLinks />
     </main>
   );
 };

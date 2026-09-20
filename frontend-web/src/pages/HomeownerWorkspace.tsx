@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { RecordReference } from '../components/RecordReference';
 import { ValidatedForm } from '../components/ValidatedForm';
 import { api } from '../services/api';
 import { Survey } from '../types/auth';
@@ -9,13 +8,16 @@ import { Survey } from '../types/auth';
 import '../styles/account.css';
 
 async function request(path: string, body?: unknown) {
+  const token =
+    localStorage.getItem('smartsolar_token') ??
+    sessionStorage.getItem('smartsolar_token');
   const response = await fetch(
     `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116'}/api/${path}`,
     {
       method: body === undefined ? 'GET' : 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('smartsolar_token')}`,
+        Authorization: `Bearer ${token}`,
       },
       ...(body === undefined
         ? {}
@@ -38,6 +40,7 @@ async function request(path: string, body?: unknown) {
 }
 
 export function HomeownerWorkspace() {
+  const [activeImage, setActiveImage] = useState(0);
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -80,6 +83,14 @@ export function HomeownerWorkspace() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveImage((current) => (current + 1) % 3);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   const act = async (fn: () => Promise<void>) => {
     setError('');
     setBusy(true);
@@ -103,6 +114,40 @@ export function HomeownerWorkspace() {
       className="account-page"
       style={{ width: '100%' }}
     >
+      <section className="solar-dashboard-carousel" aria-label="Solar inspiration gallery">
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-left"
+          aria-label="Previous image"
+          onClick={() => setActiveImage((activeImage + 2) % 3)}
+        >
+          ‹
+        </button>
+        <img
+          src={`/images/${activeImage + 1}.jpeg`}
+          alt="Solar installation showcase"
+        />
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-right"
+          aria-label="Next image"
+          onClick={() => setActiveImage((activeImage + 1) % 3)}
+        >
+          ›
+        </button>
+        <div className="carousel-dots" aria-label="Gallery images">
+          {[0, 1, 2].map((index) => (
+            <button
+              type="button"
+              key={index}
+              className={index === activeImage ? 'active' : ''}
+              aria-label={`Show image ${index + 1}`}
+              onClick={() => setActiveImage(index)}
+            />
+          ))}
+        </div>
+      </section>
+
       <div
         style={{
           display: 'flex',
@@ -139,112 +184,122 @@ export function HomeownerWorkspace() {
       )}
 
       {showForm && (
-        <ValidatedForm
-          className="glass-panel account-card account-form"
-          onSubmit={(e) => {
-            e.preventDefault();
+        <div className="assessment-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="assessment-modal-title">
+          <ValidatedForm
+            className="assessment-modal-card account-form"
+            onSubmit={(e) => {
+              e.preventDefault();
 
-            void act(async () => {
-              await request('surveys', {
-                monthlyKwh: Number(kwh),
-                roofAreaSqm: Number(area),
-                gridType: grid,
-                propertyAddress: address,
-                roofOrientation: 'Unknown',
+              void act(async () => {
+                await request('surveys', {
+                  monthlyKwh: Number(kwh),
+                  roofAreaSqm: Number(area),
+                  gridType: grid,
+                  propertyAddress: address,
+                  roofOrientation: 'Unknown',
+                });
+
+                setShowForm(false);
+                setAddress('');
+                setKwh('');
+                setArea('');
               });
-
-              setShowForm(false);
-              setAddress('');
-              setKwh('');
-              setArea('');
-            });
-          }}
-        >
-          <h3>Tell us about your home</h3>
-
-          <label htmlFor="site-address">
-            Property address
-          </label>
-
-          <input
-            id="site-address"
-            className="input-field"
-            required
-            maxLength={500}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            disabled={busy}
-          />
-
-          <label htmlFor="monthly-use">
-            Monthly electricity use (kWh)
-          </label>
-
-          <input
-            id="monthly-use"
-            className="input-field"
-            type="number"
-            min="0.01"
-            max="100000"
-            step="0.01"
-            required
-            value={kwh}
-            onChange={(e) => setKwh(e.target.value)}
-            disabled={busy}
-          />
-
-          <label htmlFor="roof-area">
-            Available roof area (m²)
-          </label>
-
-          <input
-            id="roof-area"
-            className="input-field"
-            type="number"
-            min="1"
-            max="100000"
-            step="0.01"
-            required
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
-            disabled={busy}
-          />
-
-          <label htmlFor="grid-type">
-            Electricity connection
-          </label>
-
-          <select
-            id="grid-type"
-            className="input-field"
-            value={grid}
-            onChange={(e) => setGrid(e.target.value)}
-            disabled={busy}
+            }}
           >
-            <option value="SinglePhase">
-              Single phase
-            </option>
+            <button
+              type="button"
+              className="assessment-modal-close"
+              aria-label="Close assessment form"
+              onClick={() => setShowForm(false)}
+            >
+              ×
+            </button>
 
-            <option value="ThreePhase">
-              Three phase
-            </option>
-          </select>
+            <h3 id="assessment-modal-title">Tell us about your home</h3>
 
-          <p className="field-help">
-            Use your electricity bill and an approximate
-            usable roof area. A site inspection will verify
-            these details.
-          </p>
+            <label htmlFor="site-address">
+              Property address
+            </label>
 
-          <button
-            className="btn btn-primary"
-            disabled={busy}
-          >
-            {busy
-              ? 'Saving…'
-              : 'Save assessment draft'}
-          </button>
-        </ValidatedForm>
+            <input
+              id="site-address"
+              className="input-field"
+              placeholder="Enter your property address"
+              required
+              maxLength={500}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              disabled={busy}
+            />
+
+            <label htmlFor="monthly-use">
+              Monthly electricity use (kWh)
+            </label>
+
+            <input
+              id="monthly-use"
+              className="input-field"
+              type="number"
+              placeholder="e.g. 450"
+              min="0.01"
+              max="100000"
+              step="0.01"
+              required
+              value={kwh}
+              onChange={(e) => setKwh(e.target.value)}
+              disabled={busy}
+            />
+
+            <label htmlFor="roof-area">
+              Available roof area (m²)
+            </label>
+
+            <input
+              id="roof-area"
+              className="input-field"
+              type="number"
+              placeholder="e.g. 120"
+              min="1"
+              max="100000"
+              step="0.01"
+              required
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
+              disabled={busy}
+            />
+
+            <label htmlFor="grid-type">
+              Electricity connection
+            </label>
+
+            <select
+              id="grid-type"
+              className="input-field"
+              value={grid}
+              onChange={(e) => setGrid(e.target.value)}
+              disabled={busy}
+            >
+              <option value="SinglePhase">
+                Single phase
+              </option>
+
+              <option value="ThreePhase">
+                Three phase
+              </option>
+            </select>
+
+            <p className="field-help">
+              Use your electricity bill and an approximate usable roof area. A site inspection will verify these details.
+            </p>
+
+            <button
+              className="btn btn-primary"
+              disabled={busy}
+            >
+              {busy ? 'Saving…' : 'Save assessment draft'}
+            </button>
+          </ValidatedForm>
+        </div>
       )}
 
       {loading ? (
@@ -283,11 +338,6 @@ export function HomeownerWorkspace() {
             <h3 style={{ marginTop: 16 }}>
               {survey.propertyAddress}
             </h3>
-
-            <RecordReference
-              label="Survey reference"
-              value={survey.id}
-            />
 
             <p>
               {survey.monthlyKwh} kWh / month ·{' '}

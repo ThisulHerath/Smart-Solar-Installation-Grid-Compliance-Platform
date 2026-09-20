@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Image as ImageIcon
 } from '../components/Icons';
+import '../styles/surveys.css';
 
 interface SizingResult {
   recommended_kw?: number;
@@ -133,9 +134,9 @@ export const SurveysPage: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="staff-surveys-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
-      <div className="glass-panel" style={{ padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="glass-panel staff-surveys-header" style={{ padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>Staff Solar Survey Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
@@ -154,9 +155,9 @@ export const SurveysPage: React.FC = () => {
           <div>No customer surveys found. Submit a survey from the mobile app to get started.</div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>
+        <div className="staff-surveys-split" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>
           {/* Survey List */}
-          <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+          <div className="glass-panel staff-survey-list" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, padding: '4px 8px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Submitted Surveys ({surveys.length})
             </div>
@@ -194,9 +195,9 @@ export const SurveysPage: React.FC = () => {
 
           {/* Survey Detail Panel */}
           {selectedSurvey && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="staff-survey-detail" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Card 1: Customer Input & Specifications */}
-              <div className="glass-panel" style={{ padding: '24px' }}>
+              <div className="glass-panel staff-survey-detail-card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
                     <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{selectedSurvey.propertyAddress}</h2>
@@ -263,7 +264,7 @@ export const SurveysPage: React.FC = () => {
                   const isFailed = wf.status?.toLowerCase() === 'failed' || wf.errorMessage;
 
                   return (
-                    <div key={wf.workflowId || idx} className="glass-panel" style={{ padding: '24px' }}>
+                    <div key={wf.workflowId || idx} className="glass-panel staff-survey-workflow-card" style={{ padding: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Cpu size={20} color="var(--solar-emerald)" />

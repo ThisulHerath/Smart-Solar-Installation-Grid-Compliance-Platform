@@ -4,7 +4,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116
 
 class ApiService {
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('smartsolar_token');
+    const token =
+      localStorage.getItem('smartsolar_token') ??
+      sessionStorage.getItem('smartsolar_token');
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };

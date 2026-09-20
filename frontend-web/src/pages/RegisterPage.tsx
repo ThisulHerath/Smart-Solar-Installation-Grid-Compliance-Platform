@@ -1,5 +1,6 @@
 import { AuthField, AuthForm } from '../components/AuthField';
 import { useState } from 'react';
+import { Mail, Phone, UserRound } from 'lucide-react';
 
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 
@@ -26,6 +27,7 @@ export function RegisterPage() {
     useState<Challenge | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const { user, login } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +41,11 @@ export function RegisterPage() {
 
     if (details.password !== confirm) {
       setError('Your passwords do not match.');
+      return;
+    }
+
+    if (!termsAccepted) {
+      setError('Please accept the terms and conditions to continue.');
       return;
     }
 
@@ -69,6 +76,17 @@ export function RegisterPage() {
       label={label}
       id={`register-${key}`}
       type={type}
+      placeholder={
+        key === 'fullName' ? 'Enter your full name' :
+          key === 'email' ? 'you@example.com' :
+            key === 'phoneNumber' ? '+94 77 123 4567' :
+              'Create a strong password'
+      }
+      icon={
+        key === 'fullName' ? <UserRound size={17} /> :
+          key === 'email' ? <Mail size={17} /> :
+            key === 'phoneNumber' ? <Phone size={17} /> : undefined
+      }
       autoComplete={autoComplete}
       value={details[key] || ''}
       onChange={(e) =>
@@ -104,7 +122,7 @@ export function RegisterPage() {
       <h2>
         {challenge
           ? 'Check your email'
-          : 'Create your account'}
+          : 'Registration'}
       </h2>
 
       <p className="auth-intro">
@@ -157,66 +175,60 @@ export function RegisterPage() {
         />
       ) : (
         <AuthForm
-          className="account-form"
+          className="account-form register-form"
           onSubmit={(e) => {
             e.preventDefault();
             void requestCode();
           }}
         >
-          {field(
-            'fullName',
-            'Full name',
-            'text',
-            'name'
-          )}
+          <div className="register-columns">
+            <div className="register-column register-profile-column">
+              {field('fullName', 'Full name', 'text', 'name')}
+              {field('email', 'Email address', 'email', 'email')}
+              {field('phoneNumber', 'Phone number (optional)', 'tel', 'tel')}
+            </div>
 
-          {field(
-            'email',
-            'Email address',
-            'email',
-            'email'
-          )}
+            <div className="register-column register-security-column">
+              {field('password', 'Password', 'password', 'new-password')}
 
-          {field(
-            'phoneNumber',
-            'Phone number (optional)',
-            'tel',
-            'tel'
-          )}
+              <AuthField
+                label="Confirm password"
+                matchValue={details.password}
+                id="register-confirm"
+                className="input-field"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Re-enter your password"
+                required
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                disabled={busy}
+              />
 
-          {field(
-            'password',
-            'Password',
-            'password',
-            'new-password'
-          )}
+              <label className="register-terms">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  aria-required="true"
+                  onChange={(event) => setTermsAccepted(event.target.checked)}
+                  disabled={busy}
+                />
+                <span>I agree to the terms &amp; conditions</span>
+              </label>
 
-          <AuthField
-            label="Confirm password"
-            matchValue={details.password}
-            id="register-confirm"
-            className="input-field"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            disabled={busy}
-          />
+              <p className="field-help">
+                We’ll email you a code to verify that this address belongs to you.
+              </p>
 
-          <p className="field-help">
-            We’ll email you a code to verify that this address
-            belongs to you.
-          </p>
-
-          <button
-            className="btn btn-primary"
-            disabled={busy}
-          >
-            {busy
-              ? 'Sending code…'
-              : 'Continue with email verification'}
-          </button>
+              <button
+                className="btn btn-primary register-submit"
+                aria-label="Continue with email verification"
+                disabled={busy}
+              >
+                {busy ? 'Sending code…' : 'Register'}
+              </button>
+            </div>
+          </div>
         </AuthForm>
       )}
 
