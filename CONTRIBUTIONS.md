@@ -2,7 +2,8 @@
 
 ## Smart Solar Installation & Grid Compliance Platform
 
-**Module:** SE3090 – Software Engineering Frameworks 
+**Module:** SE3090 – Software Engineering Frameworks
+
 **Group:** 2026-AI-17
 
 ---
