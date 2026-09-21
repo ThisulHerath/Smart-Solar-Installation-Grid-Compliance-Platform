@@ -63,7 +63,9 @@ export async function inventoryRequest<T>(
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${
-          localStorage.getItem('smartsolar_token') || ''
+          localStorage.getItem('smartsolar_token') ??
+          sessionStorage.getItem('smartsolar_token') ??
+          ''
         }`,
       },
       body:

@@ -290,7 +290,7 @@ export const FieldJobsPage: React.FC = () => {
 
       {/* Filters and Search */}
       <div
-        className="glass-panel"
+        className="glass-panel field-jobs-toolbar"
         style={{
           padding: '16px 20px',
           display: 'flex',
@@ -301,6 +301,7 @@ export const FieldJobsPage: React.FC = () => {
         }}
       >
         <div
+          className="field-job-filter-chips"
           style={{
             display: 'flex',
             gap: '8px',
@@ -331,8 +332,8 @@ export const FieldJobsPage: React.FC = () => {
               }}
             >
               {status === 'ALL'
-                ? 'All Jobs'
-                : status}
+                ? 'All jobs'
+                : status.replace(/([a-z])([A-Z])/g, '$1 $2')}
             </button>
           ))}
         </div>
@@ -431,6 +432,7 @@ export const FieldJobsPage: React.FC = () => {
         </div>
       ) : (
         <div
+          className="field-job-card-grid"
           style={{
             display: 'grid',
             gridTemplateColumns:
@@ -468,6 +470,7 @@ export const FieldJobsPage: React.FC = () => {
                   }}
                 >
                   <div
+                    className="field-job-card-customer"
                     style={{
                       fontWeight: 700,
                       fontSize: '1.05rem',

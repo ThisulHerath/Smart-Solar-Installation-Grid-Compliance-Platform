@@ -922,8 +922,17 @@ export function InventoryPage() {
 
       {/* Reservations */}
 
-      <section className="inventory-panel">
-        <h2>Reservations</h2>
+      <section className="inventory-panel inventory-reservations-panel">
+        <div className="inventory-section-heading">
+          <div>
+            <p className="eyebrow">ALLOCATED EQUIPMENT</p>
+            <h2>Reservations</h2>
+            <p>Track stock that is already committed to approved proposals.</p>
+          </div>
+          <span className="inventory-count">
+            {reservations.length} active reservations
+          </span>
+        </div>
 
         {reservations.length === 0 ? (
           <p>No reservations yet.</p>

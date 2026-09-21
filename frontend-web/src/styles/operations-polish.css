@@ -175,7 +175,7 @@
 .admin-route-content .staff-surveys-page { gap: 22px !important; }
 .admin-route-content .staff-surveys-header { position: static; box-shadow: 0 10px 25px #173e440d !important; }
 .admin-route-content .staff-surveys-split { grid-template-columns: 290px minmax(0, 1fr) !important; gap: 20px !important; }
-.admin-route-content .staff-survey-list { position: sticky !important; top: 132px; height: auto; max-height: calc(100dvh - 155px) !important; padding: 12px !important; }
+.admin-route-content .staff-survey-list { position: sticky !important; top: 132px; min-height: 0; height: auto; max-height: calc(100dvh - 190px) !important; padding: 12px 12px 20px !important; scrollbar-gutter: stable; }
 .admin-route-content .staff-survey-list > div:not(:first-child) { border-color: #e0eadb !important; border-radius: 7px !important; background: #fff !important; }
 .admin-route-content .staff-survey-list > div:not(:first-child):hover { border-color: #8cc85d !important; background: #f8fcf5 !important; }
 .admin-route-content .staff-survey-detail-card,
@@ -195,9 +195,33 @@
 }
 
 .admin-route-content .field-job-card-heading { gap: 12px; }
+.admin-route-content .field-job-card-heading > div { min-width: 0; }
+.admin-route-content .field-job-card-customer { overflow: hidden; color: #344548 !important; text-overflow: ellipsis; white-space: nowrap; }
 .admin-route-content .field-job-card-heading .badge,
 .admin-route-content .field-job-card-compliance > span { flex-shrink: 0; white-space: nowrap; }
 .admin-route-content .field-job-card-compliance { gap: 12px; }
+.admin-route-content .field-job-card-grid { grid-auto-rows: 1fr; }
+.admin-route-content .field-job-card-grid > .glass-panel { min-height: 0; height: 100%; box-sizing: border-box; }
+
+.admin-route-content .field-jobs-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, .86fr);
+  gap: 22px !important;
+  align-items: end !important;
+  padding: 18px 20px !important;
+}
+
+.admin-route-content .field-job-filter-chips { gap: 8px !important; }
+.admin-route-content .field-job-filter-chips .btn { min-height: 38px; padding: 0 13px !important; border-radius: 6px; font-size: 12px !important; }
+.admin-route-content .field-job-filter-chips .btn-secondary { border-color: #cfe0c8 !important; background: #fff !important; color: #4e7651 !important; }
+.admin-route-content .field-jobs-toolbar .solar-search { min-width: 0; }
+.admin-route-content .field-jobs-toolbar .solar-search label { display: block; margin-bottom: 8px; color: #405958; font-size: 12px; font-weight: 750; }
+.admin-route-content .field-jobs-toolbar .solar-search-input { min-height: 46px; border-color: #cbdcc6; border-radius: 7px; background: #fff; }
+.admin-route-content .field-jobs-toolbar .solar-search-input input { font-size: 13px; }
+
+@media (max-width: 900px) {
+  .admin-route-content .field-jobs-toolbar { grid-template-columns: 1fr; align-items: stretch !important; }
+}
 
 .admin-route-content .field-job-detail-page { display: flex; flex-direction: column; gap: 20px !important; }
 .admin-route-content .field-job-detail-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 2px; }
@@ -221,11 +245,39 @@
 .admin-route-content .field-job-compliance-notes p { color: #516769 !important; }
 
 .admin-route-content .inventory-page { max-width: none; }
-.admin-route-content .inventory-panel { padding: 26px; }
-.admin-route-content .inventory-heading { margin-bottom: 26px; }
-.admin-route-content .inventory-page .inventory-filters { padding: 16px; }
+.admin-route-content .inventory-page { display: flex; flex-direction: column; gap: 22px; }
+.admin-route-content .inventory-panel { margin: 0; padding: 26px; }
+.admin-route-content .inventory-heading { margin: 0; padding: 28px 30px; border: 1px solid #d9e8d3; border-left: 5px solid #0a5569; border-radius: 10px; background: #fff; box-shadow: 0 10px 25px #173e440d; }
+.admin-route-content .inventory-heading h1 { margin: 0 0 7px; color: #304143; font-size: clamp(28px, 3vw, 38px); letter-spacing: 0; }
+.admin-route-content .inventory-heading > div > p:last-child { max-width: 570px; margin: 0; color: #607879; font-size: 14px; }
+.admin-route-content .inventory-header-actions { gap: 10px; }
+.admin-route-content .inventory-header-actions button { min-height: 40px; padding: 0 15px; font-size: 13px; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-filters { grid-template-columns: minmax(260px, 2fr) minmax(150px, .9fr) minmax(170px, 1fr) auto; padding: 16px; }
 .admin-route-content .inventory-page .inventory-count { border-radius: 999px; background: #eaf5df; color: #4e9130; font-weight: 750; }
-.admin-route-content .inventory-page .inventory-table { border: 1px solid #e0eadb; border-radius: 8px; }
+.admin-route-content .inventory-page .inventory-table { margin: 0; border: 1px solid #e0eadb; border-radius: 8px; background: #fff; }
+.admin-route-content .inventory-page .inventory-table table { min-width: 850px; }
+.admin-route-content .inventory-page .inventory-table td:first-child { min-width: 230px; white-space: normal; }
+.admin-route-content .inventory-page .inventory-table td:first-child strong { color: #344b4d; font-size: 14px; }
+.admin-route-content .inventory-page .inventory-table td:nth-child(3),
+.admin-route-content .inventory-page .inventory-table td:nth-child(4),
+.admin-route-content .inventory-page .inventory-table td:nth-child(5),
+.admin-route-content .inventory-page .inventory-table td:nth-child(6) { font-variant-numeric: tabular-nums; }
+.admin-route-content .inventory-page .inventory-table td:nth-child(5) { color: #286c43; font-weight: 800; }
+.admin-route-content .inventory-page .stock-low,
+.admin-route-content .inventory-page .inventory-status { display: inline-flex; align-items: center; min-height: 25px; border: 1px solid #efd6a1; border-radius: 999px; background: #fff7e7; color: #9a6613; font-size: 11px; font-weight: 800; padding: 0 9px; }
+.admin-route-content .inventory-page .inventory-table td:nth-child(7) { color: #4f8d31; font-size: 12px; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-toolbar { margin-top: 18px; padding: 0 2px; color: #6d8280; font-size: 12px; }
+.admin-route-content .inventory-page .inventory-toolbar button { min-height: 36px; border-radius: 6px; background: #0c6171; border-color: #0c6171; font-size: 12px; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-toolbar button:disabled { background: #eef3eb; color: #98a79a; border-color: #e0e9dc; }
+.admin-route-content .inventory-page .inventory-quote-selector { margin: 2px 0 20px; border: 1px solid #e0eadb; border-radius: 9px; background: #f7faf4; }
+.admin-route-content .inventory-page .inventory-quote-selector button { min-height: 44px; background: #0c6171; border-color: #0c6171; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-empty { margin: 0 0 20px; border-color: #cbdcc5; background: #fbfdf9; color: #617978; }
+.admin-route-content .inventory-page .estimate-sheet { margin-top: 0; border-radius: 10px; border-color: #d8e7d1; box-shadow: none; }
+.admin-route-content .inventory-page .estimate-heading { background: #f6faf2; }
+.admin-route-content .inventory-page .estimate-heading h3 { color: #304143; }
+.admin-route-content .inventory-page .estimate-total > strong { color: #0c6171; }
+.admin-route-content .inventory-page .estimate-summary { background: #f3f8ee; }
+.admin-route-content .inventory-page .inventory-reservations-panel .inventory-table { margin-top: 4px; }
 
 @media (max-width: 900px) {
   .admin-route-content .operations-page { padding: 26px 20px 48px; }

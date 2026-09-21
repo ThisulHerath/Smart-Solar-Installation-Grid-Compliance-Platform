@@ -6,8 +6,6 @@ import React, {
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { api } from '../services/api';
-import { RecordReference } from '../components/RecordReference';
-
 import { InspectionPhotoGallery } from '../components/InspectionPhotoGallery';
 import { FieldJob } from '../types/auth';
 
@@ -805,16 +803,6 @@ export const FieldJobDetailPage: React.FC = () => {
       {/* ==================================================
           References & Photo Gallery
       ================================================== */}
-
-      <RecordReference
-        label="Job reference"
-        value={job.id}
-      />
-
-      <RecordReference
-        label="Survey reference"
-        value={job.solarSurveyId}
-      />
 
       <InspectionPhotoGallery jobId={jobId} />
     </div>

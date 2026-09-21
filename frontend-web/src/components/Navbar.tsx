@@ -16,7 +16,7 @@ export const Navbar = () => {
   const inventory = user?.roles.some(role => ['ADMINISTRATOR', 'SENIOR_ENGINEER', 'INVENTORY_OFFICER'].includes(role));
   const initials = user?.fullName.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase();
   const userRole = user?.roles[0]?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase()) || 'Member';
-  const activeNav = location.pathname === '/dashboard' ? 'projects' : location.hash === '#services' ? 'services' : location.hash === '#process' ? 'process' : 'home';
+  const activeNav = administrator || location.pathname === '/dashboard' ? 'projects' : location.hash === '#services' ? 'services' : location.hash === '#process' ? 'process' : 'home';
 
   const handleConfirmLogout = () => {
     setShowLogoutConfirm(false);
