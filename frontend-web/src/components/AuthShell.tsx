@@ -1,7 +1,9 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { Sun } from './Icons';
 import '../styles/account.css';
+import '../styles/auth-home-nav.css';
 
 export function AuthShell({ children }: { children: ReactNode }) {
   const location = useLocation();
@@ -9,22 +11,21 @@ export function AuthShell({ children }: { children: ReactNode }) {
 
   return (
     <main className="auth-shell">
-      <header className="auth-nav">
-        <Link className="auth-brand" to="/" aria-label="Smart Solar home">
-          <span className="auth-brand-mark"><Sun size={25} /></span>
-          <span className="auth-brand-name">smart<span>solar.</span></span>
+      <header className="auth-home-navbar">
+        <Link className="auth-home-brand" to="/" aria-label="Smart Solar home">
+          <Sun size={27} />
+          <span>smart <b>solar</b></span>
         </Link>
 
-        <nav className="auth-links" aria-label="Public navigation">
+        <nav className="auth-home-links" aria-label="Public navigation">
           <Link to="/">Home</Link>
-          <Link to="/">Projects</Link>
-          <Link to="/">Gallery</Link>
-          <Link to="/">Contact</Link>
+          <Link to="/#services">Services</Link>
+          <Link to="/#projects">Projects</Link>
+          <Link to="/#process">How it works</Link>
+          <Link to="/login">Log in</Link>
         </nav>
 
-        <Link className="auth-nav-action" to={isRegister ? '/login' : '/register'}>
-          {isRegister ? 'Sign in' : 'Register'}
-        </Link>
+        <div className="auth-home-tools"><Search size={24} aria-hidden="true" /><Link to={isRegister ? '/login' : '/register'}>{isRegister ? 'Login' : 'Register'}</Link></div>
       </header>
 
       <section className="auth-form-panel" aria-label={isRegister ? 'Register' : 'Login'}>

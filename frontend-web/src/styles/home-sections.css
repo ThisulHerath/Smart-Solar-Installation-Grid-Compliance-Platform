@@ -1,0 +1,53 @@
+.eco-services h2 span,
+.eco-why h2 span { color: #70b83d; }
+
+.service-grid--visual { gap: 20px; border: 0; }
+.service-grid--visual article { min-height: 0; padding: 0 0 29px; overflow: hidden; border: 1px solid #edf0ec; border-radius: 44px; background: #fff; box-shadow: 0 9px 25px #173e4408; }
+.service-grid--visual article::before { content: ''; position: absolute; z-index: 1; top: 0; right: 0; left: 0; height: 205px; background: linear-gradient(110deg, #07536a57, #0a58745e); pointer-events: none; }
+.service-grid--visual article:first-child { border-color: #79bd45; border-bottom-width: 4px; box-shadow: 0 9px 25px #79bd4514; }
+.service-grid--visual article:hover { background: #fff; border-color: #8ac35d; transform: translateY(-3px); }
+.service-grid--visual img { display: block; width: 100%; height: 205px; object-fit: cover; object-position: center 50%; filter: saturate(.82) contrast(.96); }
+.service-grid--visual article:nth-child(1) img { object-position: center 47%; }
+.service-grid--visual article:nth-child(2) img { object-position: center 60%; }
+.service-grid--visual article:nth-child(3) img { object-position: center 45%; }
+.service-grid--visual .service-icon { z-index: 2; display: grid; place-items: center; position: relative; width: 94px; height: 94px; margin: -47px 0 0 28px; border: 6px solid #fff; border-radius: 50%; background: #07536a; color: #fff; box-shadow: 0 7px 15px #133e4538; }
+.service-grid--visual .service-icon svg { position: static; right: auto; bottom: auto; width: 37px; height: 37px; color: #fff; stroke-width: 2.5; }
+.service-grid--visual h3 { margin: 33px 28px 13px; color: #3d4a4c; font-size: 20px; }
+.service-grid--visual p { min-height: 69px; margin: 0 28px 21px; color: #6e7c7e; font-size: 13px; line-height: 1.65; }
+.service-grid--visual a { display: inline-flex; align-items: center; gap: 8px; margin-left: 28px; color: #65a83c; font-size: 13px; font-weight: 750; }
+.service-grid--visual a:hover { color: #07536a; }
+
+.eco-why { width: min(1300px, calc(100% - 64px)); margin: 0 auto 92px; padding: 73px 74px; border-radius: 28px; background: #f7f9f5; }
+.eco-why header { display: grid; grid-template-columns: 1fr auto; gap: 15px; align-items: center; }
+.eco-why header > p { grid-column: 1 / -1; margin: 0; color: #6b9f45; font-size: 11px; font-weight: 800; letter-spacing: .18em; }
+.eco-why h2 { margin: 0; color: #303d3e; font-size: clamp(32px, 3.6vw, 50px); line-height: 1.1; }
+.eco-why-cta { padding: 13px 24px; border-radius: 999px; background: #72bd3e; color: #fff !important; font-size: 12px; font-weight: 750; }
+.eco-why-content { display: grid; grid-template-columns: .85fr 1.15fr; gap: 62px; align-items: center; margin-top: 43px; }
+.why-image { position: relative; }
+.why-image img { display: block; width: 100%; height: 330px; object-fit: cover; object-position: center 30%; border-radius: 28px 28px 28px 84px; }
+.why-image::after { content: ''; position: absolute; inset: 0; border-radius: 28px 28px 28px 84px; background: linear-gradient(0deg, #073a4c35, transparent 60%); }
+.why-image button { position: absolute; z-index: 1; top: 50%; left: 50%; display: grid; place-items: center; width: 58px; height: 58px; border: 2px solid #fff; border-radius: 50%; background: #07536ac7; color: #fff; transform: translate(-50%, -50%); }
+.why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 31px 38px; }
+.why-grid article svg { color: #07536a; }
+.why-grid h3 { margin: 10px 0 7px; color: #435052; font-size: 15px; }
+.why-grid p { margin: 0; color: #748386; font-size: 12px; line-height: 1.7; }
+
+@media (max-width: 850px) {
+  .eco-why { padding: 55px 42px; }
+  .eco-why-content { gap: 36px; }
+  .why-grid { gap: 25px; }
+}
+
+@media (max-width: 650px) {
+  .service-grid--visual { gap: 14px; }
+  .service-grid--visual article::before { height: 195px; }
+  .service-grid--visual img { height: 195px; }
+  .eco-why { width: calc(100% - 36px); margin-bottom: 65px; padding: 42px 25px; border-radius: 18px; }
+  .eco-why header { display: block; }
+  .eco-why-cta { display: inline-flex; margin-top: 24px; }
+  .eco-why-content { grid-template-columns: 1fr; gap: 35px; margin-top: 35px; }
+  .why-image img { height: 285px; border-radius: 24px 24px 24px 64px; }
+  .why-image::after { border-radius: 24px 24px 24px 64px; }
+  .why-grid { gap: 26px 20px; }
+  .why-grid h3 { font-size: 14px; }
+}

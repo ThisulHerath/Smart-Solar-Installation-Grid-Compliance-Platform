@@ -476,7 +476,7 @@
   overscroll-behavior: contain;
   flex-direction: column;
   padding: 26px 16px 22px;
-  background: #a4e995;
+  background: #15444c;
   border-radius: 0 0 0 14px;
 }
 
@@ -515,8 +515,8 @@
 .admin-sidebar-link.active,
 .admin-sidebar-link:hover,
 .admin-sidebar-logout:hover {
-  background: #fff;
-  color: #33b34a;
+  background: #23606a;
+  color: #ffffff;
 }
 
 .admin-sidebar-logout {

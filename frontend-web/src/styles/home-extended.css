@@ -1,0 +1,131 @@
+.eco-banner { width: 100%; margin: 0 0 90px; padding: 64px max(36px, calc((100vw - 1150px) / 2)); border-radius: 0; background: #0b596b; color: #fff; }
+.eco-banner > div { width: min(800px, 100%); }
+.eco-banner p { color: #8bc751; }
+.eco-banner h2 { color: #fff; font-size: clamp(30px, 3.1vw, 46px); }
+.eco-banner h2 span { color: #8bc751; }
+.eco-banner .banner-cta { background: #77bf40; }
+
+.eco-process {
+  width: min(1240px, calc(100% - 64px));
+  margin: 0 auto 110px;
+  padding: 28px 0 36px;
+}
+
+.eco-testimonial,
+.eco-team,
+.eco-insights,
+.eco-faq,
+.eco-newsletter { width: min(1120px, calc(100% - 64px)); margin: 0 auto 95px; }
+.eco-process header,
+.eco-testimonial header,
+.eco-team header,
+.eco-faq header { text-align: center; }
+.eco-process header p,
+.eco-testimonial header p,
+.eco-team header p,
+.eco-insights header p,
+.eco-faq header p,
+.eco-newsletter > p { margin: 0 0 9px; color: #6da944; font-size: 10px; font-weight: 800; letter-spacing: .19em; }
+.eco-process h2,
+.eco-testimonial h2,
+.eco-team h2,
+.eco-faq h2,
+.eco-newsletter h2 { margin: 0; color: #344143; font-size: clamp(30px, 3.5vw, 47px); line-height: 1.1; }
+.eco-process h2 { font-size: clamp(35px, 4vw, 56px); }
+.eco-process h2 span,
+.eco-testimonial h2 span,
+.eco-team h2 span,
+.eco-faq h2 span,
+.eco-newsletter h2 span { color: #70b83d; }
+
+.process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 58px; }
+.process-steps article { position: relative; text-align: center; }
+.process-steps article:not(:last-child)::after { content: ''; position: absolute; top: 32px; left: calc(50% + 54px); width: calc(100% - 108px); height: 1px; background: #86a7a1; }
+.process-steps article > span { position: relative; z-index: 1; display: grid; place-items: center; width: 66px; height: 66px; margin: auto; border-radius: 50%; background: #07536a; color: #fff; }
+.process-steps b { position: absolute; right: -9px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #78bd42; color: #fff; font-size: 10px; }
+.process-steps h3 { margin: 22px 0 9px; color: #425154; font-size: 16px; }
+.process-steps p { max-width: 195px; margin: auto; color: #758588; font-size: 12px; line-height: 1.6; }
+
+.eco-testimonial { padding-top: 10px; }
+.testimonial-card { display: grid; grid-template-columns: 260px 1fr; gap: 43px; align-items: center; width: min(720px, 100%); margin: 38px auto 0; }
+.testimonial-card > img { width: 260px; height: 265px; object-fit: cover; border-radius: 28px 28px 28px 70px; }
+.testimonial-rating { display: flex; align-items: center; gap: 10px; color: #6a7a7c; font-size: 12px; }
+.testimonial-rating span { display: flex; color: #dfa82f; }
+.testimonial-card > div > p { margin: 20px 0; color: #67797b; font-size: 14px; line-height: 1.75; }
+.testimonial-card strong { color: #3c4b4e; font-size: 14px; }
+.testimonial-card small { display: block; margin-top: 5px; color: #859295; font-size: 11px; font-weight: 500; }
+
+.eco-contact { display: grid; grid-template-columns: 1fr .85fr; gap: 72px; width: 100%; margin: 0 0 95px; padding: 70px max(36px, calc((100vw - 1120px) / 2)); background: #0b596b; color: #fff; }
+.eco-contact form { display: grid; gap: 13px; }
+.contact-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.eco-contact label { display: grid; gap: 7px; color: #fff; font-size: 11px; font-weight: 650; }
+.eco-contact input,
+.eco-contact textarea { width: 100%; box-sizing: border-box; border: 1px solid #ffffff18; border-radius: 7px; outline: 0; background: #ffffff20; color: #fff; font: inherit; font-size: 12px; }
+.eco-contact input { height: 39px; padding: 0 13px; }
+.eco-contact textarea { resize: vertical; min-height: 105px; padding: 12px 13px; }
+.eco-contact input::placeholder,
+.eco-contact textarea::placeholder { color: #c6dcdd; }
+.eco-contact input:focus,
+.eco-contact textarea:focus { border-color: #8ed45b; }
+.eco-contact form > button { display: inline-flex; justify-content: center; align-items: center; gap: 7px; width: max-content; margin-top: 7px; padding: 12px 19px; border: 0; border-radius: 999px; background: #78bd42; color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; }
+.eco-contact > div > p:first-child { margin: 0 0 12px; color: #d4eeef; font-size: 10px; font-weight: 800; letter-spacing: .18em; }
+.eco-contact h2 { margin: 0; color: #fff; font-size: clamp(33px, 3.5vw, 48px); line-height: 1.08; }
+.eco-contact h2 span { color: #8bce50; }
+.eco-contact > div > p:not(:first-child) { max-width: 390px; margin: 20px 0; color: #d1e0e2; font-size: 13px; line-height: 1.7; }
+.eco-contact ul { display: grid; gap: 13px; padding: 0; margin: 0; list-style: none; color: #ecf5f5; font-size: 12px; }
+.eco-contact li { display: flex; align-items: center; gap: 10px; }
+.eco-contact li svg { padding: 6px; border-radius: 50%; background: #78bd42; color: #fff; box-sizing: content-box; }
+
+.eco-team header { margin-bottom: 38px; }
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: min(820px, 100%); margin: auto; }
+.team-grid article { text-align: center; }
+.team-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 30px 30px 30px 68px; }
+.team-grid h3 { margin: 14px 0 4px; color: #405053; font-size: 14px; }
+.team-grid p { margin: 0; color: #7b898b; font-size: 11px; }
+
+.eco-insights header { display: grid; grid-template-columns: 1fr auto; align-items: end; margin-bottom: 34px; }
+.eco-insights h2 { margin: 0; color: #344143; font-size: clamp(30px, 3.5vw, 47px); line-height: 1.1; }
+.eco-insights h2 span { color: #70b83d; }
+.eco-insights header > a { padding: 12px 19px; border-radius: 999px; background: #72bd3e; color: #fff; font-size: 11px; font-weight: 750; }
+.insight-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 23px; }
+.insight-grid article { padding-bottom: 9px; }
+.insight-grid img { display: block; width: 100%; height: 165px; object-fit: cover; border-radius: 20px 20px 20px 46px; }
+.insight-grid small { display: block; margin-top: 17px; color: #6daa42; font-size: 10px; font-weight: 800; }
+.insight-grid h3 { min-height: 43px; margin: 8px 0 10px; color: #425154; font-size: 14px; line-height: 1.35; }
+.insight-grid a { display: inline-flex; align-items: center; gap: 6px; color: #69a93a; font-size: 11px; font-weight: 750; }
+
+.eco-faq { padding: 70px; border-radius: 25px; background: #f5f7f3; }
+.eco-faq header { margin-bottom: 31px; }
+.eco-faq article { overflow: hidden; margin-top: 9px; border-radius: 7px; background: #fff; }
+.eco-faq article.is-open { background: #0b596b; color: #fff; }
+.eco-faq article button { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 15px 17px; border: 0; background: transparent; color: inherit; text-align: left; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.eco-faq article p { margin: -3px 17px 15px; color: #d7e7e9; font-size: 11px; line-height: 1.65; }
+
+.eco-newsletter { text-align: center; }
+.eco-newsletter form { display: flex; justify-content: center; gap: 10px; margin-top: 28px; }
+.eco-newsletter label { display: flex; align-items: center; gap: 9px; width: 250px; padding: 0 13px; border: 1px solid #d9e5d5; border-radius: 999px; color: #70b83d; }
+.eco-newsletter input { width: 100%; height: 40px; border: 0; outline: 0; color: #455458; font-size: 12px; }
+.eco-newsletter button { padding: 0 24px; border: 0; border-radius: 999px; background: #07536a; color: #fff; font-size: 12px; font-weight: 750; cursor: pointer; }
+
+@media (max-width: 760px) {
+  .eco-banner { margin-bottom: 65px; padding: 50px 18px; }
+  .eco-process,.eco-testimonial,.eco-team,.eco-insights,.eco-faq,.eco-newsletter { width: calc(100% - 36px); margin-bottom: 65px; }
+  .process-steps { grid-template-columns: 1fr 1fr; gap: 34px 18px; }
+  .process-steps article:not(:last-child)::after { display: none; }
+  .testimonial-card { grid-template-columns: 1fr; gap: 26px; }
+  .testimonial-card > img { width: 100%; height: 280px; }
+  .eco-contact { grid-template-columns: 1fr; gap: 45px; margin-bottom: 65px; padding: 48px 18px; }
+  .contact-field-row { grid-template-columns: 1fr; }
+  .team-grid { gap: 12px; }
+  .team-grid img { border-radius: 17px 17px 17px 37px; }
+  .team-grid h3 { font-size: 11px; }
+  .team-grid p { font-size: 9px; }
+  .eco-insights header { display: block; }
+  .eco-insights header > a { display: inline-flex; margin-top: 20px; }
+  .insight-grid { grid-template-columns: 1fr; gap: 28px; }
+  .insight-grid img { height: 205px; }
+  .eco-faq { padding: 36px 18px; }
+  .eco-newsletter form { flex-direction: column; align-items: stretch; }
+  .eco-newsletter label { box-sizing: border-box; width: 100%; }
+  .eco-newsletter button { height: 42px; }
+}

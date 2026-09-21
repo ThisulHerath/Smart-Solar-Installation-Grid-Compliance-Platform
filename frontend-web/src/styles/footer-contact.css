@@ -1,0 +1,53 @@
+.eco-footer {
+  width: 100%;
+  margin-top: 0;
+  border-top: 1px solid #e1e8e3;
+  background: #fff;
+}
+
+.eco-footer-contact,
+.eco-footer-bottom {
+  display: flex;
+  align-items: center;
+  width: min(1300px, calc(100% - 64px));
+  margin: auto;
+}
+
+.eco-footer-contact {
+  justify-content: center;
+  gap: 28px;
+  min-height: 68px;
+  color: #65787a;
+  font-size: 12px;
+}
+
+.eco-footer-contact a:not(.eco-brand) { color: #65787a; }
+.eco-footer-contact a:not(.eco-brand):hover { color: #5da42f; }
+.eco-footer-contact .eco-brand { margin: 0 7px; color: #07536a; font-size: 16px; }
+.eco-footer-contact > span { color: #65787a; }
+
+.eco-footer-bottom {
+  justify-content: space-between;
+  min-height: 58px;
+  border-top: 1px solid #e1e8e3;
+}
+
+.eco-footer p { margin: 0; color: #718184; font-size: 12px; }
+.eco-footer-bottom > span { color: #6b7c7e; font-size: 11px; text-transform: uppercase; letter-spacing: .14em; }
+
+@media (max-width: 650px) {
+  .eco-footer-contact,
+  .eco-footer-bottom { width: calc(100% - 36px); }
+
+  .eco-footer-contact {
+    min-height: 0;
+    padding: 23px 0;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 14px 20px;
+  }
+
+  .eco-footer-contact .eco-brand { order: -1; width: 100%; margin: 0; }
+  .eco-footer-bottom { min-height: 70px; gap: 12px; }
+  .eco-footer p { font-size: 11px; }
+}
