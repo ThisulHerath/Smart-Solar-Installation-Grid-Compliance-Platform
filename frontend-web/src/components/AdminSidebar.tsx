@@ -1,4 +1,4 @@
-import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, LogOut, ShieldCheck } from 'lucide-react';
+import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, LogOut, Sun } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,8 +19,8 @@ export function AdminSidebar() {
   return (
     <aside className="admin-sidebar" aria-label="Administrator navigation">
       <Link className="admin-sidebar-brand" to="/dashboard">
-        <ShieldCheck size={30} />
-        <strong>SOLAR</strong>
+        <Sun size={27} />
+        <span>smart <b>solar</b></span>
       </Link>
 
       <nav className="admin-sidebar-nav">

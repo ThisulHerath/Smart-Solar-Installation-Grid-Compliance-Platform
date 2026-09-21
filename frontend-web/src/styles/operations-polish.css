@@ -1,0 +1,247 @@
+.admin-route-content .operations-page {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: 36px 34px 64px;
+  color: #304143;
+  box-sizing: border-box;
+}
+
+.admin-route-content .operations-page .page-header,
+.admin-route-content .operations-page .inventory-heading,
+.admin-route-content .field-jobs-page > .glass-panel:first-child,
+.admin-route-content .staff-surveys-header {
+  min-height: 112px;
+  margin: 0 0 28px;
+  padding: 24px 28px !important;
+  border: 1px solid #d8e7d1 !important;
+  border-left: 5px solid #72b83e !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .operations-page .page-header,
+.admin-route-content .operations-page .inventory-heading,
+.admin-route-content .field-jobs-page > .glass-panel:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.admin-route-content .operations-page .page-title,
+.admin-route-content .operations-page .inventory-heading h1,
+.admin-route-content .field-jobs-page > .glass-panel:first-child h1,
+.admin-route-content .staff-surveys-header h1 {
+  margin: 0 0 7px !important;
+  color: #2d3f42 !important;
+  font-size: clamp(25px, 2.2vw, 33px) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.admin-route-content .operations-page .page-subtitle,
+.admin-route-content .operations-page .inventory-heading p,
+.admin-route-content .field-jobs-page > .glass-panel:first-child p,
+.admin-route-content .staff-surveys-header p {
+  margin: 0;
+  color: #6b7e80 !important;
+  font-size: 13px !important;
+  line-height: 1.6;
+}
+
+.admin-route-content .operations-page .eyebrow {
+  margin: 0 0 8px;
+  color: #67ab39;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.admin-route-content .operations-page .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border-radius: 7px;
+}
+
+.admin-route-content .operations-page .btn-secondary,
+.admin-route-content .operations-page .inventory-secondary {
+  border: 1px solid #c9ddc2 !important;
+  background: #fff !important;
+  color: #47724c !important;
+}
+
+.admin-route-content .operations-page .filter-bar,
+.admin-route-content .field-jobs-page > .glass-panel:nth-of-type(2),
+.admin-route-content .inventory-filters {
+  margin: 0 0 22px;
+  border: 1px solid #dce9d7 !important;
+  border-radius: 9px !important;
+  background: #f6faf2 !important;
+  box-shadow: none !important;
+}
+
+.admin-route-content .operations-page .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 13px;
+}
+
+.admin-route-content .operations-page .filter-chip {
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #fff;
+  color: #5d7476;
+  font-size: 12px;
+}
+
+.admin-route-content .operations-page .filter-chip--active {
+  border-color: #72b83e !important;
+  background: #eaf5df !important;
+  color: #4b8d28 !important;
+}
+
+.admin-route-content .operations-page .data-table-wrapper,
+.admin-route-content .operations-page .inventory-panel,
+.admin-route-content .operations-page .staff-survey-list,
+.admin-route-content .operations-page .staff-survey-detail-card,
+.admin-route-content .operations-page .staff-survey-workflow-card {
+  border: 1px solid #dce8d7 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .operations-page .data-table th,
+.admin-route-content .operations-page .inventory-table th {
+  padding: 14px 16px;
+  background: #f4f8f1 !important;
+  color: #617574 !important;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.admin-route-content .operations-page .data-table td,
+.admin-route-content .operations-page .inventory-table td {
+  padding: 15px 16px;
+  color: #405457;
+  font-size: 13px;
+}
+
+.admin-route-content .operations-page .data-table tr:hover td,
+.admin-route-content .operations-page .inventory-table tbody tr:hover td {
+  background: #f9fcf7;
+}
+
+.admin-route-content .operations-page .card.card--pending {
+  overflow: hidden;
+  border: 1px solid #dce8d7 !important;
+  border-left: 5px solid #d7a22f !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .operations-page .card__header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #e7eee2;
+  background: #fbfcfa;
+}
+
+.admin-route-content .operations-page .card__body { padding: 20px 22px; }
+.admin-route-content .operations-page .card__footer { padding: 0 22px 22px; }
+.admin-route-content .operations-page .spec-grid { gap: 12px; }
+.admin-route-content .operations-page .spec-item { padding: 13px; border: 1px solid #e0eadb; border-radius: 7px; background: #f9fcf7; }
+.admin-route-content .operations-page .spec-label { color: #738680; font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.admin-route-content .operations-page .spec-value { margin-top: 5px; color: #354a4c; font-size: 15px; font-weight: 750; }
+
+.admin-route-content .operations-page .empty-state,
+.admin-route-content .operations-page .loading-state,
+.admin-route-content .operations-page .alert {
+  padding: 34px;
+  border: 1px solid #dce8d7;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 25px #173e440d;
+}
+
+.admin-route-content .staff-surveys-page { gap: 22px !important; }
+.admin-route-content .staff-surveys-header { position: static; box-shadow: 0 10px 25px #173e440d !important; }
+.admin-route-content .staff-surveys-split { grid-template-columns: 290px minmax(0, 1fr) !important; gap: 20px !important; }
+.admin-route-content .staff-survey-list { position: sticky !important; top: 132px; height: auto; max-height: calc(100dvh - 155px) !important; padding: 12px !important; }
+.admin-route-content .staff-survey-list > div:not(:first-child) { border-color: #e0eadb !important; border-radius: 7px !important; background: #fff !important; }
+.admin-route-content .staff-survey-list > div:not(:first-child):hover { border-color: #8cc85d !important; background: #f8fcf5 !important; }
+.admin-route-content .staff-survey-detail-card,
+.admin-route-content .staff-survey-workflow-card { padding: 22px !important; }
+
+.admin-route-content .field-jobs-page > div[style*="grid-template-columns"] > .glass-panel {
+  border: 1px solid #dce8d7 !important;
+  border-top: 4px solid #0a5569 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .field-jobs-page > div[style*="grid-template-columns"] > .glass-panel:hover {
+  border-color: #9bcf75 !important;
+  transform: translateY(-2px);
+}
+
+.admin-route-content .field-job-card-heading { gap: 12px; }
+.admin-route-content .field-job-card-heading .badge,
+.admin-route-content .field-job-card-compliance > span { flex-shrink: 0; white-space: nowrap; }
+.admin-route-content .field-job-card-compliance { gap: 12px; }
+
+.admin-route-content .field-job-detail-page { display: flex; flex-direction: column; gap: 20px !important; }
+.admin-route-content .field-job-detail-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 2px; }
+.admin-route-content .field-job-overview,
+.admin-route-content .field-job-compliance { padding: 26px 30px !important; border: 1px solid #d8e7d1 !important; border-radius: 10px !important; background: #fff !important; box-shadow: 0 10px 25px #173e440d !important; }
+.admin-route-content .field-job-overview { border-top: 4px solid #0a5569 !important; }
+.admin-route-content .field-job-overview h1 { margin: 0; color: #304143; font-size: clamp(23px, 2.2vw, 31px) !important; letter-spacing: 0; }
+.admin-route-content .field-job-overview-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px !important; }
+.admin-route-content .field-job-address { margin: 6px 0 0; color: #4e686b !important; font-size: 15px; font-weight: 650; }
+.admin-route-content .field-job-records { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 0; color: #829295 !important; font-size: 11px !important; }
+.admin-route-content .field-job-summary-grid,
+.admin-route-content .field-job-compliance-grid { gap: 14px !important; }
+.admin-route-content .field-job-summary-grid > div,
+.admin-route-content .field-job-compliance-grid > div { border: 1px solid #e1ebdc; border-radius: 8px !important; background: #f8fbf6 !important; }
+.admin-route-content .field-job-summary-grid > div { padding: 16px 18px !important; }
+.admin-route-content .field-job-compliance { border-left: 5px solid #72b83e !important; }
+.admin-route-content .field-job-compliance h2 { margin: 0; color: #304143; letter-spacing: 0; }
+.admin-route-content .field-job-compliance-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px !important; }
+.admin-route-content .field-job-compliance-title { display: flex; align-items: center; gap: 10px; }
+.admin-route-content .field-job-compliance-notes { border-color: #dce8d7 !important; background: #fbfdf9 !important; }
+.admin-route-content .field-job-compliance-notes p { color: #516769 !important; }
+
+.admin-route-content .inventory-page { max-width: none; }
+.admin-route-content .inventory-panel { padding: 26px; }
+.admin-route-content .inventory-heading { margin-bottom: 26px; }
+.admin-route-content .inventory-page .inventory-filters { padding: 16px; }
+.admin-route-content .inventory-page .inventory-count { border-radius: 999px; background: #eaf5df; color: #4e9130; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-table { border: 1px solid #e0eadb; border-radius: 8px; }
+
+@media (max-width: 900px) {
+  .admin-route-content .operations-page { padding: 26px 20px 48px; }
+  .admin-route-content .operations-page .page-header,
+  .admin-route-content .operations-page .inventory-heading,
+  .admin-route-content .field-jobs-page > .glass-panel:first-child,
+  .admin-route-content .staff-surveys-header { align-items: flex-start; flex-direction: column; }
+  .admin-route-content .staff-surveys-split { grid-template-columns: 1fr !important; }
+  .admin-route-content .staff-survey-list { position: static !important; max-height: 360px !important; }
+}
+
+@media (max-width: 650px) {
+  .admin-route-content .operations-page { padding: 20px 14px 42px; }
+  .admin-route-content .operations-page .page-header,
+  .admin-route-content .operations-page .inventory-heading,
+  .admin-route-content .field-jobs-page > .glass-panel:first-child,
+  .admin-route-content .staff-surveys-header { padding: 20px !important; }
+  .admin-route-content .operations-page .card__header { align-items: flex-start; flex-direction: column; }
+}

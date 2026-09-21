@@ -10,7 +10,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
   const isRegister = location.pathname === '/register';
 
   return (
-    <main className="auth-shell">
+    <main className={`auth-shell${isRegister ? ' auth-shell--register' : ' auth-shell--login'}`}>
       <header className="auth-home-navbar">
         <Link className="auth-home-brand" to="/" aria-label="Smart Solar home">
           <Sun size={27} />
@@ -22,7 +22,6 @@ export function AuthShell({ children }: { children: ReactNode }) {
           <Link to="/#services">Services</Link>
           <Link to="/#projects">Projects</Link>
           <Link to="/#process">How it works</Link>
-          <Link to="/login">Log in</Link>
         </nav>
 
         <div className="auth-home-tools"><Search size={24} aria-hidden="true" /><Link to={isRegister ? '/login' : '/register'}>{isRegister ? 'Login' : 'Register'}</Link></div>

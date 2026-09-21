@@ -41,7 +41,7 @@ export const PendingApprovalsPage: React.FC = () => {
   }, [load]);
 
   return (
-    <div className="page-container">
+    <div className="page-container operations-page approvals-page">
       <div className="page-header">
         <div>
           <h1

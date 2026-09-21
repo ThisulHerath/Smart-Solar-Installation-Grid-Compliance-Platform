@@ -178,6 +178,7 @@ export const FieldJobsPage: React.FC = () => {
 
   return (
     <div
+      className="field-jobs-page operations-page"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -457,6 +458,7 @@ export const FieldJobsPage: React.FC = () => {
               <div>
                 {/* Customer and Status */}
                 <div
+                  className="field-job-card-heading"
                   style={{
                     display: 'flex',
                     justifyContent:
@@ -469,7 +471,7 @@ export const FieldJobsPage: React.FC = () => {
                     style={{
                       fontWeight: 700,
                       fontSize: '1.05rem',
-                      color: '#fff',
+                      color: '#344548',
                     }}
                   >
                     {job.customerName}
@@ -576,6 +578,7 @@ export const FieldJobsPage: React.FC = () => {
                 {/* Compliance */}
                 {job.compliance && (
                   <div
+                    className="field-job-card-compliance"
                     style={{
                       padding: '8px 12px',
                       borderRadius:
@@ -628,7 +631,6 @@ export const FieldJobsPage: React.FC = () => {
                       Risk:{' '}
                       {job.compliance.riskLevel}
                     </span>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Risk: {job.compliance.riskLevel}</span>
                   </div>
                 )}
               </div>

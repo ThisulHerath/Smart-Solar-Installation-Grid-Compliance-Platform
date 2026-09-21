@@ -134,7 +134,7 @@ export const SurveysPage: React.FC = () => {
   }
 
   return (
-    <div className="staff-surveys-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="staff-surveys-page operations-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
       <div className="glass-panel staff-surveys-header" style={{ padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -294,19 +294,19 @@ export const SurveysPage: React.FC = () => {
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recommended Array Capacity</div>
-                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2f4b4e', marginTop: '2px' }}>
                                 {sizing.recommended_kw} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>kW</span>
                               </div>
                             </div>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Estimated Panel Count</div>
-                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2f4b4e', marginTop: '2px' }}>
                                 {sizing.estimated_panel_count} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>panels (400W)</span>
                               </div>
                             </div>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Estimated Inverter Size</div>
-                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2f4b4e', marginTop: '2px' }}>
                                 {sizing.estimated_inverter_kw} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>kW</span>
                               </div>
                             </div>

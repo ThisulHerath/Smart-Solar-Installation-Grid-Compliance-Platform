@@ -267,6 +267,7 @@ export const FieldJobDetailPage: React.FC = () => {
 
   return (
     <div
+      className="field-job-detail-page operations-page"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -278,6 +279,7 @@ export const FieldJobDetailPage: React.FC = () => {
       ================================================== */}
 
       <div
+        className="field-job-detail-toolbar"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -358,12 +360,13 @@ export const FieldJobDetailPage: React.FC = () => {
       ================================================== */}
 
       <div
-        className="glass-panel"
+        className="glass-panel field-job-overview"
         style={{
           padding: '24px 28px',
         }}
       >
         <div
+          className="field-job-overview-header"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -385,13 +388,18 @@ export const FieldJobDetailPage: React.FC = () => {
                   fontSize: '1.4rem',
                 }}
               >
-                {job.propertyAddress}
+                Field visit overview
               </h1>
 
               {getStatusBadge(job.status)}
             </div>
 
+            <p className="field-job-address">
+              {job.propertyAddress}
+            </p>
+
             <p
+              className="field-job-records"
               style={{
                 color: 'var(--text-secondary)',
                 fontSize: '0.85rem',
@@ -408,6 +416,7 @@ export const FieldJobDetailPage: React.FC = () => {
 
         {/* Job Information */}
         <div
+          className="field-job-summary-grid"
           style={{
             display: 'grid',
             gridTemplateColumns:
@@ -437,7 +446,7 @@ export const FieldJobDetailPage: React.FC = () => {
               style={{
                 fontSize: '1rem',
                 fontWeight: 700,
-                color: '#fff',
+                color: '#344548',
                 marginTop: '4px',
               }}
             >
@@ -556,7 +565,7 @@ export const FieldJobDetailPage: React.FC = () => {
 
       {job.compliance ? (
         <div
-          className="glass-panel"
+          className="glass-panel field-job-compliance"
           style={{
             padding: '24px 28px',
             borderLeft: `4px solid ${
@@ -567,6 +576,7 @@ export const FieldJobDetailPage: React.FC = () => {
           }}
         >
           <div
+            className="field-job-compliance-header"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -575,6 +585,7 @@ export const FieldJobDetailPage: React.FC = () => {
             }}
           >
             <div
+              className="field-job-compliance-title"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -629,6 +640,7 @@ export const FieldJobDetailPage: React.FC = () => {
 
           {/* Compliance Details */}
           <div
+            className="field-job-compliance-grid"
             style={{
               display: 'grid',
               gridTemplateColumns:
@@ -729,6 +741,7 @@ export const FieldJobDetailPage: React.FC = () => {
           {/* Compliance Notes */}
           {job.compliance.complianceNotes && (
             <div
+              className="field-job-compliance-notes"
               style={{
                 background:
                   'rgba(58, 85, 49, 0.02)',
@@ -755,7 +768,7 @@ export const FieldJobDetailPage: React.FC = () => {
                 style={{
                   fontSize: '0.88rem',
                   lineHeight: '1.5',
-                  color: '#e2e8f0',
+                  color: '#516769',
                   margin: 0,
                 }}
               >

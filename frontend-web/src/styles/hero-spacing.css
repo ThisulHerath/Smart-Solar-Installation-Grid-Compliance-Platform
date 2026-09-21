@@ -1,0 +1,5 @@
+.eco-hero { min-height: 610px; padding: 42px 0; }
+
+@media (max-width: 760px) {
+  .eco-hero { padding: 45px 0; }
+}

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
+import { ClipboardCheck, MapPinned, ShieldCheck } from 'lucide-react';
 
 import { ValidatedForm } from '../components/ValidatedForm';
 import { api } from '../services/api';
 import { Survey } from '../types/auth';
+import projectSolarFacility from '../../images/project-solar-facility.png';
 
 import '../styles/account.css';
 
@@ -148,15 +151,7 @@ export function HomeownerWorkspace() {
         </div>
       </section>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 16,
-          flexWrap: 'wrap',
-        }}
-      >
+      <section className="homeowner-project-heading">
         <div>
           <h2>My solar projects</h2>
 
@@ -164,7 +159,12 @@ export function HomeownerWorkspace() {
             Plan your rooftop installation and follow its
             engineering review.
           </p>
-        </div>
+
+          <div className="project-assessment-points" aria-label="Solar assessment journey">
+            <span><ClipboardCheck size={17} aria-hidden="true" />Share your details</span>
+            <span><MapPinned size={17} aria-hidden="true" />Review your site</span>
+            <span><ShieldCheck size={17} aria-hidden="true" />Plan for approval</span>
+          </div>
 
         <button
           className="btn btn-primary"
@@ -175,7 +175,9 @@ export function HomeownerWorkspace() {
             ? 'Close form'
             : 'Start a solar assessment'}
         </button>
-      </div>
+        </div>
+        <img src={projectSolarFacility} alt="Commercial solar facility at sunset" />
+      </section>
 
       {error && (
         <p className="account-error" role="alert">
@@ -183,7 +185,7 @@ export function HomeownerWorkspace() {
         </p>
       )}
 
-      {showForm && (
+      {showForm && createPortal((
         <div className="assessment-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="assessment-modal-title">
           <ValidatedForm
             className="assessment-modal-card account-form"
@@ -300,7 +302,7 @@ export function HomeownerWorkspace() {
             </button>
           </ValidatedForm>
         </div>
-      )}
+      ), document.body)}
 
       {loading ? (
         <p role="status">
@@ -325,10 +327,10 @@ export function HomeownerWorkspace() {
       ) : (
         surveys.map((survey) => (
           <article
-            className="glass-panel account-card"
+            className="project-survey-card"
             key={survey.id}
           >
-            <span className="badge badge-emerald">
+            <span className={`badge ${survey.surveyStatus === 'Failed' ? 'badge-danger' : 'badge-emerald'}`}>
               {survey.surveyStatus.replace(
                 /([a-z])([A-Z])/g,
                 '$1 $2'
@@ -367,10 +369,17 @@ export function HomeownerWorkspace() {
             )}
 
             {survey.surveyStatus === 'Failed' && (
-              <p className="account-error">
-                Analysis could not finish. Contact the
-                project team to review the assessment.
-              </p>
+              <>
+                <p className="account-error">
+                  Analysis could not finish. Contact the
+                  project team to review the assessment.
+                </p>
+                <div className="project-survey-card__review">
+                  <span>Needs review</span>
+                  <strong>Project team support</strong>
+                  <p>Our team will help you verify the assessment details.</p>
+                </div>
+              </>
             )}
 
             {survey.surveyStatus === 'AnalysisComplete' &&

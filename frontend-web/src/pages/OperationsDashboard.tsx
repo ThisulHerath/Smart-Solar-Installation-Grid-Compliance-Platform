@@ -15,7 +15,7 @@ type Report = {
 };
 
 export function OperationsDashboard() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const [report, setReport] = useState<Report | null>(null);
   const [error, setError] = useState('');
@@ -38,11 +38,7 @@ export function OperationsDashboard() {
         'http://localhost:5116'
       }/api/reports/overview`,
       {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem(
-            'smartsolar_token'
-          )}`,
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       }
     )
       .then(async (response) => {
@@ -54,14 +50,14 @@ export function OperationsDashboard() {
       })
       .then(setReport)
       .catch((e) => setError(e.message));
-  }, [staff]);
+  }, [staff, token]);
 
   if (admin && user) {
     return (
       <section className="admin-dashboard-content">
           <section className="admin-welcome-card">
             <p>SMART SOLAR · SRI LANKA</p>
-            <h1>Welcome, {user.fullName}</h1>
+            <h1>Welcome, System Administrator Dashboard</h1>
             <span>Coordinate rooftop solar surveys, field inspections, engineering review, and equipment preparation.</span>
           </section>
 

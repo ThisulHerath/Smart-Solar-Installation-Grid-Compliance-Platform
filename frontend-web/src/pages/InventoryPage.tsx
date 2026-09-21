@@ -168,7 +168,7 @@ export function InventoryPage() {
   }
 
   return (
-    <main className="inventory-page">
+    <main className="inventory-page operations-page">
       {/* Header */}
 
       <header className="inventory-heading">

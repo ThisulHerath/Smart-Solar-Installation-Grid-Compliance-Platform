@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, BadgeCheck, CalendarCheck2, CheckCircle2, ClipboardList, Headphones, Layers3, Leaf, Mail, MapPin, Menu, Minus, Phone, Play, Plus, Search, Send, ShieldCheck, Star, Sun, WalletCards, Wrench, X, Zap } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowRight, BadgeCheck, CalendarCheck2, CheckCircle2, ClipboardList, Headphones, Layers3, Leaf, LogOut, Mail, MapPin, Menu, Minus, Phone, Play, Plus, Search, Send, ShieldCheck, Star, Sun, WalletCards, Wrench, X, Zap } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
 import solarEngineerPortrait from '../../images/hero-engineer.png';
@@ -16,6 +16,9 @@ import '../styles/footer-contact.css';
 import '../styles/home-sections.css';
 import '../styles/home-extended.css';
 import '../styles/hero-engineer.css';
+import '../styles/landing-nav-active.css';
+import '../styles/landing-account.css';
+import '../styles/hero-spacing.css';
 import '../styles/about-emphasis.css';
 import '../styles/footer-full.css';
 
@@ -30,10 +33,14 @@ const faqs = [
 const touchLabel = 'GET IN TOUCH · GET IN TOUCH ·';
 
 export function LandingPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const { hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(1);
   const destination = user ? '/dashboard' : '/register';
+  const activeSection = hash === '#services' ? 'services' : hash === '#projects' ? 'projects' : hash === '#process' ? 'process' : 'home';
+  const userInitials = user?.fullName.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || '';
+  const userRole = user?.roles[0]?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase()) || 'Member';
 
   return (
     <div className="eco-landing">
@@ -42,13 +49,12 @@ export function LandingPage() {
         <Link className="eco-brand" to="/" aria-label="Smart Solar home"><Sun size={24} /><span>smart</span>solar</Link>
         <button className="eco-menu" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20} /> : <Menu size={20} />}</button>
         <nav className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">
-          <a href="#main-content" onClick={() => setMenuOpen(false)}>Home</a>
-          <a href="#services" onClick={() => setMenuOpen(false)}>Services</a>
-          <a href="#projects" onClick={() => setMenuOpen(false)}>Projects</a>
-          <a href="#process" onClick={() => setMenuOpen(false)}>How it works</a>
-          <Link to={user ? '/profile' : '/login'}>{user ? 'Profile' : 'Log in'}</Link>
+          <a className={activeSection === 'home' ? 'is-active' : ''} href="#main-content" onClick={() => setMenuOpen(false)}>Home</a>
+          <a className={activeSection === 'services' ? 'is-active' : ''} href="#services" onClick={() => setMenuOpen(false)}>Services</a>
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)}>Projects</Link>
+          <a className={activeSection === 'process' ? 'is-active' : ''} href="#process" onClick={() => setMenuOpen(false)}>How it works</a>
         </nav>
-        <div className="nav-actions"><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></div>
+        <div className="nav-actions">{user ? <div className="landing-account-actions"><Link className="landing-user" to="/profile" aria-label="Open my profile"><span className="landing-user-avatar">{userInitials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" className="landing-logout" onClick={logout}><LogOut size={17} /> Logout</button></div> : <><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></>}</div>
       </header>
 
       <main id="main-content">
