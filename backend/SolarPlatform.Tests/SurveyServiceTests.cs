@@ -25,6 +25,25 @@ public class SurveyServiceTests
     }
 
     private SurveyService Service() => new(_db, _ai.Object);
+    [Fact] public async Task Delete_RequiresOwnership_AndRemovesProject()
+    {
+        var survey = await Service().CreateAsync(_owner, Request());
+        Assert.False(await Service().DeleteAsync(_other, survey.Id));
+        Assert.True(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
+        Assert.True(await Service().DeleteAsync(_owner, survey.Id));
+        Assert.False(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
+    }
+
+    [Fact] public async Task Delete_RejectsProjectWithInventoryRecords()
+    {
+        var survey = await Service().CreateAsync(_owner, Request());
+        var proposal = new EngineeringProposal { SolarSurveyId = survey.Id };
+        _db.EngineeringProposals.Add(proposal);
+        _db.Set<EquipmentQuote>().Add(new EquipmentQuote { EngineeringProposal = proposal });
+        await _db.SaveChangesAsync();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service().DeleteAsync(_owner, survey.Id));
+        Assert.True(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
+    }
     private static SurveyRequestDto Request() => new() { MonthlyKwh = 900, RoofAreaSqm = 75, GridType = GridType.SinglePhase, PropertyAddress = "10 Solar Lane" };
     private static SolarSizingResponseDto Success() => new()
     {

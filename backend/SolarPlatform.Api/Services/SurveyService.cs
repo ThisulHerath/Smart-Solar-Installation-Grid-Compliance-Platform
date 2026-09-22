@@ -18,6 +18,8 @@ public interface ISurveyService
     Task<SurveyDto?> GetAsync(Guid userId, Guid surveyId, bool staffAccess = false);
     Task<SurveyDto?> UpdateAsync(Guid userId, Guid surveyId, SurveyRequestDto request);
     Task<SurveyDto?> SubmitAsync(Guid userId, Guid surveyId);
+    Task<SurveyDto?> RetryAnalysisAsync(Guid userId, Guid surveyId);
+    Task<bool> DeleteAsync(Guid userId, Guid surveyId);
     Task<SurveyDto?> AddImageAsync(Guid userId, Guid surveyId, SurveyImageType imageType, string fileUrl, string fileName);
 }
 
@@ -80,6 +82,20 @@ public class SurveyService : ISurveyService
         return survey == null ? null : ToDto(survey);
     }
 
+    public async Task<bool> DeleteAsync(Guid userId, Guid surveyId)
+    {
+        var survey = await _db.SolarSurveys.FirstOrDefaultAsync(s => s.Id == surveyId && s.Customer.UserId == userId);
+        if (survey == null) return false;
+        if (survey.SurveyStatus == SurveyStatus.Processing)
+            throw new InvalidOperationException("Wait for project analysis to finish before deleting this project.");
+        if (await _db.Set<EquipmentQuote>().AnyAsync(q => q.EngineeringProposal.SolarSurveyId == surveyId)
+            || await _db.Set<InventoryReservation>().AnyAsync(r => r.EngineeringProposal.SolarSurveyId == surveyId))
+            throw new InvalidOperationException("This project has inventory records. Contact the project team before removing it.");
+        _db.SolarSurveys.Remove(survey);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<SurveyDto?> UpdateAsync(Guid userId, Guid surveyId, SurveyRequestDto request)
     {
         ValidateRequest(request);
@@ -106,7 +122,33 @@ public class SurveyService : ISurveyService
         _db.AgentWorkflows.Add(workflow);
         SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
         await _db.SaveChangesAsync();
+        await CompleteAnalysisAsync(survey, workflow);
+        return ToDto(survey);
+    }
+
+    public async Task<SurveyDto?> RetryAnalysisAsync(Guid userId, Guid surveyId)
+    {
+        var profile = await GetOrCreateProfileAsync(userId);
+        var survey = await _db.SolarSurveys.Include(s => s.Images).Include(s => s.Workflows).SingleOrDefaultAsync(s => s.Id == surveyId && s.CustomerId == profile.Id);
+        if (survey == null) return null;
+        if (survey.SurveyStatus != SurveyStatus.Failed) throw new InvalidOperationException("Only failed analyses can be retried.");
+
+        SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
+        var workflow = new AgentWorkflow { SolarSurveyId = survey.Id, Objective = "Assess rooftop solar suitability and prepare an approved equipment plan", Status = WorkflowStatus.Processing, StartedAt = DateTime.UtcNow };
+        _db.AgentWorkflows.Add(workflow);
+        await _db.SaveChangesAsync();
+        await CompleteAnalysisAsync(survey, workflow);
+        return ToDto(survey);
+    }
+
+    private async Task CompleteAnalysisAsync(SolarSurvey survey, AgentWorkflow workflow)
+    {
         var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, objective = workflow.Objective, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
+        if (!string.Equals(result.Status, "completed", StringComparison.OrdinalIgnoreCase))
+        {
+            result = CreateLocalSizingResult(survey, workflow.WorkflowId);
+        }
+
         workflow.ResultJson = result.Recommendation?.GetRawText();
         workflow.PlanJson = JsonSerializer.Serialize(result.Plan);
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
@@ -133,7 +175,6 @@ public class SurveyService : ISurveyService
         workflow.UpdatedAt = DateTime.UtcNow;
         SurveyStatusTransition.Move(survey, result.Status == "completed" ? SurveyStatus.AnalysisComplete : SurveyStatus.Failed);
         await _db.SaveChangesAsync();
-        return ToDto(survey);
     }
 
     public async Task<SurveyDto?> AddImageAsync(Guid userId, Guid surveyId, SurveyImageType imageType, string fileUrl, string fileName)
@@ -170,6 +211,54 @@ public class SurveyService : ISurveyService
         survey.MonthlyKwh = request.MonthlyKwh; survey.RoofAreaSqm = request.RoofAreaSqm; survey.GridType = request.GridType;
         survey.RoofOrientation = request.RoofOrientation; survey.RoofTilt = request.RoofTilt; survey.PropertyAddress = request.PropertyAddress.Trim();
         survey.Latitude = request.Latitude; survey.Longitude = request.Longitude; survey.Notes = request.Notes?.Trim();
+    }
+
+    private static SolarSizingResponseDto CreateLocalSizingResult(SolarSurvey survey, string workflowId)
+    {
+        var recommendedKw = Math.Round(Math.Max(1m, (decimal)survey.MonthlyKwh / 120m), 2);
+        var panelCount = Math.Max(1, (int)Math.Ceiling(recommendedKw / 0.55m));
+        var inverterKw = Math.Round(recommendedKw * 0.9m, 2);
+        var roofRequiredSqm = Math.Round(panelCount * 2.2m, 1);
+        var hasRoofCapacity = survey.RoofAreaSqm >= roofRequiredSqm;
+        var recommendation = JsonSerializer.SerializeToElement(new
+        {
+            recommended_kw = recommendedKw,
+            estimated_panel_count = panelCount,
+            inverter_size_kw = inverterKw,
+            roof_area_required_sqm = roofRequiredSqm
+        });
+        var validation = JsonSerializer.SerializeToElement(new
+        {
+            status = "LOCAL_SCREENING",
+            roof_capacity = hasRoofCapacity ? "sufficient" : "review_required",
+            grid_type = survey.GridType.ToString()
+        });
+
+        return new SolarSizingResponseDto
+        {
+            WorkflowId = workflowId,
+            Status = "completed",
+            Recommendation = recommendation,
+            ValidationResults = validation,
+            Plan = new List<string>
+            {
+                $"Estimate a {recommendedKw:0.##} kW solar system.",
+                $"Reserve space for approximately {panelCount} panels.",
+                "Arrange an engineering and utility review before installation."
+            },
+            ExecutionLogs = new List<AgentExecutionLogDto>
+            {
+                new()
+                {
+                    AgentName = "LocalSizingEngine",
+                    StepName = "Deterministic solar sizing",
+                    Status = "completed",
+                    OutputSummary = "Completed using the local sizing fallback while the AI service was unavailable.",
+                    StartedAt = DateTime.UtcNow,
+                    CompletedAt = DateTime.UtcNow
+                }
+            }
+        };
     }
     private static ProfileDto ToProfile(CustomerProfile p) => new(p.Id, p.FullName, p.PhoneNumber, p.Address);
     private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList());

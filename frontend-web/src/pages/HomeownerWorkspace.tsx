@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { ClipboardCheck, MapPinned, ShieldCheck } from 'lucide-react';
+import { Trash2, ChevronLeft, ChevronRight, Search, ClipboardCheck, MapPinned, ShieldCheck } from 'lucide-react';
 
 import { ValidatedForm } from '../components/ValidatedForm';
 import { api } from '../services/api';
@@ -9,15 +9,16 @@ import { Survey } from '../types/auth';
 import projectSolarFacility from '../../images/project-solar-facility.png';
 
 import '../styles/account.css';
+import '../styles/project-pagination.css';
 
-async function request(path: string, body?: unknown) {
+async function request(path: string, body?: unknown, method?: string) {
   const token =
     localStorage.getItem('smartsolar_token') ??
     sessionStorage.getItem('smartsolar_token');
   const response = await fetch(
     `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116'}/api/${path}`,
     {
-      method: body === undefined ? 'GET' : 'POST',
+      method: method ?? (body === undefined ? 'GET' : 'POST'),
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
@@ -48,6 +49,35 @@ export function HomeownerWorkspace() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
+  const [deleteError, setDeleteError] = useState('');
+  const deleteDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (deleteTarget) deleteDialog.current?.showModal();
+    else deleteDialog.current?.close();
+  }, [deleteTarget]);
+
+  const deleteProject = async () => {
+    if (!deleteTarget || busy) return;
+    setBusy(true);
+    setDeleteError('');
+    try {
+      await request(`surveys/${deleteTarget.id}`, undefined, 'DELETE');
+      setSurveys(current => current.filter(item => item.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Unable to delete project. Please try again.');
+    } finally {
+      setBusy(false);
+    }
+  };
+  const [projectSearch, setProjectSearch] = useState('');
+  const [projectPage, setProjectPage] = useState(1);
+  const filteredSurveys = surveys.filter(survey => (survey.propertyAddress || '').toLowerCase().includes(projectSearch.trim().toLowerCase()));
+  const pageCount = Math.max(1, Math.ceil(filteredSurveys.length / 5));
+  const currentPage = Math.min(projectPage, pageCount);
+  const pageStart = (currentPage - 1) * 5;
+  const visibleSurveys = filteredSurveys.slice(pageStart, pageStart + 5);
 
   const [showForm, setShowForm] = useState(false);
   const [address, setAddress] = useState('');
@@ -309,27 +339,35 @@ export function HomeownerWorkspace() {
           Loading your projects…
         </p>
       ) : !surveys.length ? (
-        <section className="glass-panel account-card">
-          <h3>
-            Your solar journey starts here
-          </h3>
-
-          <p>
-            Create your first assessment using your
-            electricity bill and roof area. You can add
-            site photos using the mobile app.
-          </p>
-
-          <Link to="/account">
-            Manage your account
-          </Link>
+        <section className="glass-panel account-card journey-start-card">
+          <div className="journey-start-card__intro">
+            <span className="journey-start-card__eyebrow"><ShieldCheck size={15} /> Your first project</span>
+            <h3>Your solar journey starts here</h3>
+            <p>Create your first assessment using your electricity bill and usable roof area. Our team will guide the review from there.</p>
+            <Link to="/account" className="journey-start-card__account-link">Manage your account</Link>
+          </div>
+          <ol className="journey-start-card__steps" aria-label="Solar project steps">
+            <li><span><ClipboardCheck size={18} /></span><div><b>Share the essentials</b><small>Add your bill usage and roof area.</small></div></li>
+            <li><span><MapPinned size={18} /></span><div><b>Site review</b><small>We verify your rooftop details.</small></div></li>
+            <li><span><ShieldCheck size={18} /></span><div><b>Plan with confidence</b><small>Receive your engineered proposal.</small></div></li>
+          </ol>
         </section>
       ) : (
-        surveys.map((survey) => (
+        <section className="project-list" aria-label="Your projects">
+          <div className="project-list__toolbar">
+            <h3>Projects <span>{surveys.length}</span></h3>
+            <label className="project-list__search"><Search size={18} aria-hidden="true" /><input type="search" aria-label="Search projects" placeholder="Search by address" value={projectSearch} onChange={event => { setProjectSearch(event.target.value); setProjectPage(1); }} /></label>
+          </div>
+          {!filteredSurveys.length && <p role="status">No projects match your search.</p>}
+        <div className="project-list__cards">{visibleSurveys.map((survey) => (
           <article
             className="project-survey-card"
             key={survey.id}
           >
+            <button type="button" className="project-delete" title="Delete project" aria-label={`Delete project ${survey.propertyAddress}`} disabled={busy || survey.surveyStatus === 'Processing'} onClick={() => {
+              setDeleteError('');
+              setDeleteTarget(survey);
+            }}><Trash2 size={17} /></button>
             <span className={`badge ${survey.surveyStatus === 'Failed' ? 'badge-danger' : 'badge-emerald'}`}>
               {survey.surveyStatus.replace(
                 /([a-z])([A-Z])/g,
@@ -371,14 +409,19 @@ export function HomeownerWorkspace() {
             {survey.surveyStatus === 'Failed' && (
               <>
                 <p className="account-error">
-                  Analysis could not finish. Contact the
-                  project team to review the assessment.
+                  Analysis incomplete. Retry to continue.
                 </p>
-                <div className="project-survey-card__review">
-                  <span>Needs review</span>
-                  <strong>Project team support</strong>
-                  <p>Our team will help you verify the assessment details.</p>
-                </div>
+                <button
+                  className="btn btn-primary project-survey-card__retry"
+                  disabled={busy}
+                  onClick={() =>
+                    void act(async () => {
+                      await request(`surveys/${survey.id}/retry`, {});
+                    })
+                  }
+                >
+                  {busy ? 'Rechecking...' : 'Retry analysis'}
+                </button>
               </>
             )}
 
@@ -415,8 +458,24 @@ export function HomeownerWorkspace() {
               </p>
             ))}
           </article>
-        ))
+        ))}</div>
+          {filteredSurveys.length > 0 && <nav className="project-list__pagination" aria-label="Project pages">
+            <span role="status">{pageStart + 1}-{Math.min(pageStart + 5, filteredSurveys.length)} of {filteredSurveys.length} projects</span>
+            <div>
+              <button type="button" title="Previous page" aria-label="Previous project page" disabled={currentPage === 1} onClick={() => setProjectPage(currentPage - 1)}><ChevronLeft size={18} /></button>
+              <span>Page {currentPage} of {pageCount}</span>
+              <button type="button" title="Next page" aria-label="Next project page" disabled={currentPage === pageCount} onClick={() => setProjectPage(currentPage + 1)}><ChevronRight size={18} /></button>
+            </div>
+          </nav>}
+        </section>
       )}
+      {createPortal(<dialog ref={deleteDialog} className="project-delete-dialog" aria-labelledby="delete-project-title" onCancel={event => { if (busy) event.preventDefault(); else setDeleteTarget(null); }}>
+        <h2 id="delete-project-title">Delete project?</h2>
+        <p><strong>{deleteTarget?.propertyAddress}</strong></p>
+        <p>This permanently removes the project, proposals and inspection records. This cannot be undone.</p>
+        {deleteError && <p role="alert" className="project-delete-dialog__error">{deleteError}</p>}
+        <div><button type="button" disabled={busy} onClick={() => setDeleteTarget(null)}>Cancel</button><button type="button" className="project-delete-dialog__confirm" disabled={busy} onClick={() => void deleteProject()}>{busy ? 'Deleting...' : 'Delete project'}</button></div>
+      </dialog>, document.body)}
     </section>
   );
 };

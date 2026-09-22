@@ -162,6 +162,30 @@
 .admin-route-content .operations-page .spec-label { color: #738680; font-size: 10px; font-weight: 750; text-transform: uppercase; }
 .admin-route-content .operations-page .spec-value { margin-top: 5px; color: #354a4c; font-size: 15px; font-weight: 750; }
 
+/* Engineering approval queue */
+.admin-route-content .approvals-page { display: flex; flex-direction: column; }
+.admin-route-content .approvals-page .page-header { position: relative; overflow: hidden; min-height: 142px !important; margin-bottom: 24px !important; border-left-color: #d7a22f !important; }
+.admin-route-content .approvals-page .page-header::after { content: ''; position: absolute; width: 220px; height: 220px; right: 6%; top: -152px; border: 32px solid #eef5e9; border-radius: 50%; pointer-events: none; }
+.admin-route-content .approvals-page .page-header > * { position: relative; z-index: 1; }
+.admin-route-content .approvals-page .page-title { color: #304143 !important; font-size: clamp(26px, 2.4vw, 35px) !important; }
+.admin-route-content .approvals-page .page-subtitle { max-width: 480px; }
+.admin-route-content .approvals-page .page-header .btn-secondary { min-width: 112px; border-color: #dec994 !important; color: #8c621a !important; }
+.admin-route-content .approvals-page > p[style] { display: flex; align-items: center; gap: 10px; margin: 0 0 18px !important; color: #5e7472 !important; font-size: 14px; }
+.admin-route-content .approvals-page > p[style] strong { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: #fff3d9; color: #9a6710 !important; font-size: 14px; }
+.admin-route-content .approvals-page > div[style] { display: grid !important; gap: 16px !important; }
+.admin-route-content .approvals-page .card--pending { transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.admin-route-content .approvals-page .card--pending:hover { border-color: #d5b76b !important; box-shadow: 0 14px 28px #173e4414 !important; transform: translateY(-1px); }
+.admin-route-content .approvals-page .card__header { min-height: 61px; box-sizing: border-box; }
+.admin-route-content .approvals-page .card__header > div { display: flex !important; flex-wrap: wrap; gap: 8px !important; }
+.admin-route-content .approvals-page .card__header > span { color: #70817f !important; font-size: 12px !important; font-variant-numeric: tabular-nums; }
+.admin-route-content .approvals-page .status-badge, .admin-route-content .approvals-page .badge { white-space: nowrap; }
+.admin-route-content .approvals-page .spec-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.admin-route-content .approvals-page .spec-item { min-width: 0; min-height: 88px; justify-content: center; padding: 14px 16px; }
+.admin-route-content .approvals-page .spec-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.admin-route-content .approvals-page .card__footer { display: flex; justify-content: flex-end; padding-top: 14px; border-top: 1px solid #e7eee2; background: #fcfdfb; }
+.admin-route-content .approvals-page .card__footer .btn { min-width: 174px; background: #0c6171; border-color: #0c6171; }
+.admin-route-content .approvals-page .card__footer .btn:hover { background: #084c59; border-color: #084c59; }
+
 .admin-route-content .operations-page .empty-state,
 .admin-route-content .operations-page .loading-state,
 .admin-route-content .operations-page .alert {
@@ -332,6 +356,7 @@
   .admin-route-content .staff-surveys-header { align-items: flex-start; flex-direction: column; }
   .admin-route-content .staff-surveys-split { grid-template-columns: 1fr !important; }
   .admin-route-content .staff-survey-list { position: static !important; max-height: 360px !important; }
+  .admin-route-content .approvals-page .spec-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 650px) {
@@ -341,4 +366,7 @@
   .admin-route-content .field-jobs-page > .glass-panel:first-child,
   .admin-route-content .staff-surveys-header { padding: 20px !important; }
   .admin-route-content .operations-page .card__header { align-items: flex-start; flex-direction: column; }
+  .admin-route-content .approvals-page .page-header::after { display: none; }
+  .admin-route-content .approvals-page .spec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-route-content .approvals-page .card__footer .btn { width: 100%; }
 }

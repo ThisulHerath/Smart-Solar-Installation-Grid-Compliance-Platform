@@ -62,6 +62,20 @@ public class SurveysController : ControllerBase
         catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
     }
 
+    [HttpDelete("{id:guid}"), Authorize(Roles = RoleConstants.Homeowner)]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try { return await _service.DeleteAsync(UserId(), id) ? NoContent() : NotFound(); }
+        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+    }
+
+    [HttpPost("{id:guid}/retry"), Authorize(Roles = RoleConstants.Homeowner)]
+    public async Task<IActionResult> RetryAnalysis(Guid id)
+    {
+        try { var survey = await _service.RetryAnalysisAsync(UserId(), id); return survey == null ? NotFound() : Ok(survey); }
+        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
+    }
+
     [HttpPost("{id:guid}/images"), Authorize(Roles = RoleConstants.Homeowner)]
     [RequestSizeLimit(5 * 1024 * 1024)]
     public async Task<IActionResult> UploadImage(Guid id, IFormFile file, [FromForm] SurveyImageType imageType)

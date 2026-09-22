@@ -89,6 +89,7 @@
 .workspace-dashboard .project-survey-card > p { position: relative; z-index: 1; grid-column: 1; margin: 0; color: #627a7d; font-size: 14px; }
 .workspace-dashboard .project-survey-card > .btn { position: relative; z-index: 1; grid-column: 2; grid-row: 1 / span 3; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px; border: 0 !important; border-radius: 999px; background: #72b83e !important; box-shadow: none !important; white-space: nowrap; }
 .workspace-dashboard .project-survey-card > .btn:hover:not(:disabled) { background: #5e9f30 !important; }
+.workspace-dashboard .project-survey-card > .project-survey-card__retry { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 16px; }
 .workspace-dashboard .project-survey-card > .account-error,
 .workspace-dashboard .project-survey-card > p:has(a) { grid-column: 1 / -1; margin-top: 16px; }
 .workspace-dashboard .project-survey-card > p a { color: #5c9f35; font-weight: 750; text-decoration: none; }
@@ -99,6 +100,20 @@
 .workspace-dashboard .project-survey-card__review p { margin: 6px 0 0; color: #867271; font-size: 11px; line-height: 1.5; }
 .workspace-dashboard .account-page > article,
 .workspace-dashboard .account-page > section.account-card { border: 1px solid #dfe8d8 !important; border-radius: 10px; box-shadow: 0 8px 22px #1d45350c; }
+.workspace-dashboard .account-page > section.journey-start-card { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(390px, .95fr); gap: 30px; align-items: center; padding: 28px 30px !important; overflow: hidden; border-left: 4px solid #72b83e !important; background: linear-gradient(105deg, #fff 0%, #fbfdf9 64%, #f1f8eb 100%) !important; }
+.journey-start-card__intro { min-width: 0; }
+.journey-start-card__eyebrow { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 9px; color: #5b9e31; font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.workspace-dashboard .journey-start-card h3 { margin: 0 0 8px; color: #304143; font-size: 22px; letter-spacing: 0; }
+.workspace-dashboard .journey-start-card p { max-width: 610px; margin: 0; color: #63797b; font-size: 14px; line-height: 1.65; }
+.journey-start-card__account-link { display: inline-flex; margin-top: 16px; color: #28704c; font-size: 13px; font-weight: 750; text-decoration: none; }
+.journey-start-card__account-link:hover { color: #195839; text-decoration: underline; text-underline-offset: 4px; }
+.journey-start-card__steps { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; counter-reset: journey-step; }
+.journey-start-card__steps li { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 11px; align-items: center; min-height: 59px; padding: 8px 0; counter-increment: journey-step; }
+.journey-start-card__steps li:not(:last-child)::after { position: absolute; top: 52px; left: 17px; width: 1px; height: 23px; background: #cfe3c5; content: ''; }
+.journey-start-card__steps > li > span { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid #c9e1bc; border-radius: 50%; color: #5b9e31; background: #eff8e9; }
+.journey-start-card__steps div { min-width: 0; display: grid; gap: 2px; }
+.journey-start-card__steps b { color: #3d5653; font-size: 13px; }
+.journey-start-card__steps small { color: #758784; font-size: 11px; line-height: 1.35; }
 .workspace-shell > footer { border-top-color: #dfe8d8 !important; background: #fff; color: #718184 !important; }
 
 @media (max-width: 760px) {
@@ -112,6 +127,7 @@
   .workspace-dashboard .project-survey-card { grid-template-columns: 1fr; gap: 0; min-height: 0; padding: 24px; }
   .workspace-dashboard .project-survey-card > .btn { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 20px; }
   .workspace-dashboard .project-survey-card__review { grid-column: 1; grid-row: auto; min-width: 0; margin-top: 20px; }
+  .workspace-dashboard .account-page > section.journey-start-card { grid-template-columns: 1fr; gap: 20px; padding: 24px !important; }
 }
 
 @media (max-width: 1100px) and (min-width: 761px) {

@@ -13,6 +13,7 @@ public static class SurveyStatusTransition
             (SurveyStatus.Submitted, SurveyStatus.Processing) => true,
             (SurveyStatus.Processing, SurveyStatus.AnalysisComplete) => true,
             (SurveyStatus.Processing, SurveyStatus.Failed) => true,
+            (SurveyStatus.Failed, SurveyStatus.Processing) => true,
             _ => false
         };
 

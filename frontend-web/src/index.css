@@ -304,13 +304,28 @@ h1, h2, h3, h4 {
 .inspection-gallery__heading p, .inspection-gallery__empty { color: #596b51; font-size: 14px; line-height: 1.6; }
 .inspection-gallery__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
 .inspection-gallery__photo { margin: 0; border: 1px solid #dce4d2; border-radius: 14px; overflow: hidden; background: #fafbf3; }
-.inspection-gallery__photo img { display: block; width: 100%; height: 190px; object-fit: contain; background: #edf1e5; }
+.inspection-gallery__thumbnail { position: relative; display: block; width: 100%; height: 238px; padding: 0; border: 0; overflow: hidden; cursor: zoom-in; background: #edf1e5; }
+.inspection-gallery__thumbnail img { display: block; width: 100%; height: 100%; object-fit: contain; background: #edf1e5; transition: transform .28s ease; }
+.inspection-gallery__thumbnail:hover img { transform: scale(1.035); }
+.inspection-gallery__thumbnail span { position: absolute; right: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 6px; color: #fff; background: rgb(18 56 46 / 85%); font-size: 12px; font-weight: 700; opacity: 0; transform: translateY(5px); transition: opacity .2s ease, transform .2s ease; }
+.inspection-gallery__thumbnail:hover span, .inspection-gallery__thumbnail:focus-visible span { opacity: 1; transform: translateY(0); }
+.inspection-gallery__thumbnail:focus-visible { outline: 3px solid #638746; outline-offset: -3px; }
 .inspection-gallery__photo figcaption { padding: 16px; display: flex; flex-direction: column; gap: 6px; overflow-wrap: anywhere; }
 .inspection-gallery__photo strong { color: #254733; }
 .inspection-gallery__photo span, .inspection-gallery__photo time, .inspection-gallery__photo small { color: #596b51; font-size: 12px; }
 .inspection-gallery__photo a { color: #245d3e; font-size: 13px; }
 .inspection-gallery__photo a:focus-visible { outline: 3px solid #638746; outline-offset: -3px; }
 .inspection-gallery__unavailable { padding: 24px; min-height: 190px; color: #80522b; background: #f5efdf; }
+.inspection-photo-modal { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 28px; background: rgb(11 29 24 / 76%); backdrop-filter: blur(5px); }
+.inspection-photo-modal__content { width: min(960px, 100%); max-height: min(860px, calc(100vh - 56px)); overflow: hidden; border: 1px solid rgb(255 255 255 / 36%); border-radius: 10px; background: #fff; box-shadow: 0 24px 70px rgb(0 0 0 / 35%); animation: inspection-photo-pop .22s ease-out; }
+.inspection-photo-modal__header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border-bottom: 1px solid #e4eadf; color: #193e30; }
+.inspection-photo-modal__header div { min-width: 0; display: grid; gap: 2px; }
+.inspection-photo-modal__header small { overflow: hidden; color: #687a70; text-overflow: ellipsis; white-space: nowrap; }
+.inspection-photo-modal__header button { display: grid; flex: 0 0 auto; width: 34px; height: 34px; place-items: center; border: 1px solid #cddbcf; border-radius: 6px; color: #214d3d; background: #fff; cursor: pointer; }
+.inspection-photo-modal__header button:hover { background: #f0f5eb; }
+.inspection-photo-modal__content > img { display: block; width: 100%; max-height: calc(min(860px, 100vh - 56px) - 66px); object-fit: contain; background: #192d26; }
+@keyframes inspection-photo-pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@media (max-width: 600px) { .inspection-gallery__thumbnail { height: 210px; } .inspection-photo-modal { padding: 14px; } .inspection-photo-modal__content { max-height: calc(100vh - 28px); } .inspection-photo-modal__content > img { max-height: calc(100vh - 94px); } }
 .proposal-guidance-note { color: #596b51; font-size: 13px; line-height: 1.7; margin: 12px 0 18px; overflow-wrap: anywhere; }
 .proposal-review-details > summary { cursor: pointer; color: #244d36; font-size: 17px; font-weight: 650; padding: 4px 0; }
 .proposal-review-details > summary:focus-visible { outline: 2px solid #376c4d; outline-offset: 5px; }
