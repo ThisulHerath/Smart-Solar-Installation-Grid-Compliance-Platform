@@ -33,7 +33,7 @@ const faqs = [
 const touchLabel = 'GET IN TOUCH · GET IN TOUCH ·';
 
 export function LandingPage() {
-  const { user, logout } = useAuth();
+  const { user, logout, profilePhoto } = useAuth();
   const { hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(1);
@@ -54,7 +54,7 @@ export function LandingPage() {
           <Link to="/dashboard" onClick={() => setMenuOpen(false)}>Projects</Link>
           <a className={activeSection === 'process' ? 'is-active' : ''} href="#process" onClick={() => setMenuOpen(false)}>How it works</a>
         </nav>
-        <div className="nav-actions">{user ? <div className="landing-account-actions"><Link className="landing-user" to="/profile" aria-label="Open my profile"><span className="landing-user-avatar">{userInitials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" className="landing-logout" onClick={logout}><LogOut size={17} /> Logout</button></div> : <><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></>}</div>
+        <div className="nav-actions">{user ? <div className="landing-account-actions"><Link className="landing-user" to="/profile" aria-label="Open my profile"><span className="landing-user-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : userInitials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" className="landing-logout" onClick={logout}><LogOut size={17} /> Logout</button></div> : <><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></>}</div>
       </header>
 
       <main id="main-content">

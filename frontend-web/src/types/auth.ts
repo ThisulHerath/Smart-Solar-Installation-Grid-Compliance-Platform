@@ -3,6 +3,7 @@ export interface User {
   email: string;
   fullName: string;
   phoneNumber?: string;
+  profileImageUrl?: string;
   roles: string[];
   createdAt: string;
 }

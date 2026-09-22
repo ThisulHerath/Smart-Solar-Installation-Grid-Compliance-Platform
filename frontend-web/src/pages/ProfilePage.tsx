@@ -11,22 +11,29 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import '../styles/profile.css';
 
 export function ProfilePage() {
-  const { user } = useAuth();
+  const { user, profilePhoto, setProfilePhoto } = useAuth();
   const photoInput = useRef<HTMLInputElement>(null);
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [draftPhoto, setDraftPhoto] = useState<string | null>(null);
+  const [draftFile, setDraftFile] = useState<File | null>(null);
+  const [hasPhotoDraft, setHasPhotoDraft] = useState(false);
   const [photoError, setPhotoError] = useState('');
-  const photoKey = user ? `smartsolar_profile_photo_${user.id}` : '';
+  const [savingPhoto, setSavingPhoto] = useState(false);
 
   useEffect(() => {
-    setPhoto(photoKey ? localStorage.getItem(photoKey) : null);
-  }, [photoKey]);
+    setDraftPhoto(profilePhoto);
+    setDraftFile(null);
+    setHasPhotoDraft(false);
+  }, [profilePhoto]);
 
   if (!user) {
     return null;
   }
+
+  const photo = hasPhotoDraft ? draftPhoto : profilePhoto;
 
   const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -38,8 +45,8 @@ export function ProfilePage() {
       setPhotoError('Choose an image file to use as your profile photo.');
       return;
     }
-    if (file.size > 1_500_000) {
-      setPhotoError('Choose an image smaller than 1.5 MB.');
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Choose an image smaller than 5 MB.');
       return;
     }
 
@@ -48,8 +55,9 @@ export function ProfilePage() {
       const image = typeof reader.result === 'string' ? reader.result : null;
       if (!image) return;
       try {
-        localStorage.setItem(photoKey, image);
-        setPhoto(image);
+        setDraftPhoto(image);
+        setDraftFile(file);
+        setHasPhotoDraft(true);
       } catch {
         setPhotoError('This image is too large to save in this browser.');
       }
@@ -59,9 +67,29 @@ export function ProfilePage() {
   };
 
   const removePhoto = () => {
-    localStorage.removeItem(photoKey);
-    setPhoto(null);
+    setDraftPhoto(null);
+    setDraftFile(null);
+    setHasPhotoDraft(true);
     setPhotoError('');
+  };
+
+  const savePhoto = async () => {
+    setSavingPhoto(true);
+    try {
+      if (draftFile) {
+        const result = await api.uploadProfileImage(draftFile);
+        setProfilePhoto(result.profileImageUrl);
+      } else {
+        await api.deleteProfileImage();
+        setProfilePhoto(null);
+      }
+      setHasPhotoDraft(false);
+      setPhotoError('');
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : 'Unable to save your profile image.');
+    } finally {
+      setSavingPhoto(false);
+    }
   };
 
   const initials = user.fullName
@@ -113,6 +141,12 @@ export function ProfilePage() {
           {photo && (
             <button className="profile-photo-remove" type="button" onClick={removePhoto}>
               <Trash2 size={14} /> Remove photo
+            </button>
+          )}
+
+          {hasPhotoDraft && (
+            <button className="btn btn-primary profile-photo-save" type="button" onClick={() => void savePhoto()} disabled={savingPhoto}>
+              {savingPhoto ? 'Saving...' : 'Save changes'}
             </button>
           )}
 

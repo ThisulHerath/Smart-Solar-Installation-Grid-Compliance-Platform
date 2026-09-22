@@ -1,6 +1,12 @@
 import { AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment } from '../types/auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
+
+export function resolveAssetUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (/^(https?:|data:)/i.test(url)) return url;
+  return new URL(url, `${API_BASE_URL}/`).toString();
+}
 
 class ApiService {
   private getHeaders(): HeadersInit {
@@ -49,6 +55,29 @@ class ApiService {
       throw new Error('Failed to fetch user session.');
     }
     return res.json();
+  }
+
+  async uploadProfileImage(file: File): Promise<{ profileImageUrl: string }> {
+    const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
+    const body = new FormData();
+    body.append('file', file);
+    const res = await fetch(`${API_BASE_URL}/api/auth/profile-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Unable to save your profile image.');
+    return data;
+  }
+
+  async deleteProfileImage(): Promise<void> {
+    const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
+    const res = await fetch(`${API_BASE_URL}/api/auth/profile-image`, {
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok && res.status !== 204) throw new Error('Unable to remove your profile image.');
   }
 
   // Architecture Verification Endpoints

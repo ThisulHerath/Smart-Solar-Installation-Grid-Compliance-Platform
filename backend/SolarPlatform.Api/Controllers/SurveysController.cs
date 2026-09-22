@@ -12,7 +12,12 @@ namespace SolarPlatform.Api.Controllers;
 public class SurveysController : ControllerBase
 {
     private readonly ISurveyService _service;
-    public SurveysController(ISurveyService service) => _service = service;
+    private readonly IFileStorageService _fileStorage;
+    public SurveysController(ISurveyService service, IFileStorageService fileStorage)
+    {
+        _service = service;
+        _fileStorage = fileStorage;
+    }
 
     [HttpPost, Authorize(Roles = RoleConstants.Homeowner)]
     public async Task<IActionResult> Create(SurveyRequestDto request)
@@ -64,23 +69,19 @@ public class SurveysController : ControllerBase
         var allowed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { [".jpg"] = "image/jpeg", [".jpeg"] = "image/jpeg", [".png"] = "image/png" };
         var extension = Path.GetExtension(file.FileName);
         if (file.Length <= 0 || file.Length > 5 * 1024 * 1024 || !allowed.TryGetValue(extension, out var mime) || !string.Equals(file.ContentType, mime, StringComparison.OrdinalIgnoreCase)) return BadRequest(new { message = "Only JPEG and PNG images up to 5 MB are accepted." });
-        var safeName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-        var uploadRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-        Directory.CreateDirectory(uploadRoot);
-        // Authorize and check the draft status before creating any file, avoiding orphan uploads.
+        // Authorize and check the draft status before creating any remote file.
         var existing = await _service.GetAsync(UserId(), id);
         if (existing == null) return NotFound();
         if (existing.SurveyStatus != SurveyStatus.Draft) return Conflict(new { message = "Images can only be attached to draft surveys." });
-        var target = Path.Combine(uploadRoot, safeName);
         try
         {
-            await using (var stream = System.IO.File.Create(target)) await file.CopyToAsync(stream);
-            var survey = await _service.AddImageAsync(UserId(), id, imageType, $"/uploads/{safeName}", Path.GetFileName(file.FileName));
-            if (survey == null) { System.IO.File.Delete(target); return NotFound(); }
+            await using var stream = file.OpenReadStream();
+            var imageUrl = await _fileStorage.SaveFileAsync(stream, file.FileName, $"survey-images/{id:N}", HttpContext.RequestAborted);
+            var survey = await _service.AddImageAsync(UserId(), id, imageType, imageUrl, Path.GetFileName(file.FileName));
+            if (survey == null) { await _fileStorage.DeleteFileAsync(imageUrl, HttpContext.RequestAborted); return NotFound(); }
             return Ok(survey);
         }
-        catch (InvalidOperationException ex) { if (System.IO.File.Exists(target)) System.IO.File.Delete(target); return Conflict(new { message = ex.Message }); }
-        catch { if (System.IO.File.Exists(target)) System.IO.File.Delete(target); throw; }
+        catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
     }
 
     [HttpGet("{id:guid}/status")]

@@ -98,7 +98,7 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
         await SaveConfirmationAsync();
         var (token, expiry) = tokens.GenerateToken(user, [role.Name]);
         return new AuthResponseDto { Token = token, ExpiresIn = expiry, User = new UserDto { Id = user.Id, Email = user.Email,
-            FullName = user.FullName, PhoneNumber = user.PhoneNumber, Roles = [role.Name], CreatedAt = user.CreatedAt } };
+            FullName = user.FullName, PhoneNumber = user.PhoneNumber, ProfileImageUrl = user.ProfileImageUrl, Roles = [role.Name], CreatedAt = user.CreatedAt } };
     }
 
     public async Task ConfirmAccountActionAsync(Guid userId, string purpose, VerifyEmailCodeDto request)

@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types/auth';
-import { api } from '../services/api';
+import { api, resolveAssetUrl } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  profilePhoto: string | null;
   isLoading: boolean;
   login: (token: string, user: User, remember?: boolean) => void;
   logout: () => void;
+  setProfilePhoto: (photo: string | null) => void;
   hasRole: (role: string) => boolean;
 }
 
@@ -20,6 +22,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     sessionStorage.getItem('smartsolar_token'),
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profilePhoto, setProfilePhotoState] = useState<string | null>(null);
+
+  useEffect(() => {
+    setProfilePhotoState(resolveAssetUrl(
+      user?.profileImageUrl ?? (user ? localStorage.getItem(`smartsolar_profile_photo_${user.id}`) : null),
+    ));
+  }, [user?.id]);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -61,12 +70,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
+  const setProfilePhoto = (photo: string | null) => {
+    if (!user) return;
+    const key = `smartsolar_profile_photo_${user.id}`;
+    const resolvedPhoto = resolveAssetUrl(photo);
+    if (resolvedPhoto) localStorage.setItem(key, resolvedPhoto);
+    else localStorage.removeItem(key);
+    setProfilePhotoState(resolvedPhoto);
+  };
+
   const hasRole = (role: string): boolean => {
     return !!user?.roles?.includes(role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, token, profilePhoto, isLoading, login, logout, setProfilePhoto, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

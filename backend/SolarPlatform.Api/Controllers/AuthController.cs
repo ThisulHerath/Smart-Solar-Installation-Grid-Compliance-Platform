@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using SolarPlatform.Api.Data;
 using SolarPlatform.Api.DTOs;
 using SolarPlatform.Api.Services;
 
@@ -15,12 +17,16 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly ILogger<AuthController> _logger;
     private readonly EmailVerificationService _verification;
+    private readonly AppDbContext _db;
+    private readonly IFileStorageService _fileStorage;
 
-    public AuthController(IAuthService authService, ILogger<AuthController> logger, EmailVerificationService verification)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger, EmailVerificationService verification, AppDbContext db, IFileStorageService fileStorage)
     {
         _authService = authService;
         _logger = logger;
         _verification = verification;
+        _db = db;
+        _fileStorage = fileStorage;
     }
 
     [HttpPost("register")]
@@ -118,5 +124,38 @@ public class AuthController : ControllerBase
         }
 
         return Ok(user);
+    }
+
+    [Authorize, HttpPost("profile-image")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> UploadProfileImage(IFormFile file, CancellationToken cancellationToken)
+    {
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (file.Length <= 0 || file.Length > 5 * 1024 * 1024 || extension is not ".jpg" and not ".jpeg" and not ".png" and not ".webp")
+            return BadRequest(new { message = "Choose a JPG, PNG or WebP image up to 5 MB." });
+
+        var user = await _db.Users.SingleAsync(u => u.Id == CurrentUserId, cancellationToken);
+        await using var stream = file.OpenReadStream();
+        var imageUrl = await _fileStorage.SaveFileAsync(stream, file.FileName, $"profile-images/{user.Id:N}", cancellationToken);
+        var oldUrl = user.ProfileImageUrl;
+        user.ProfileImageUrl = imageUrl;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(cancellationToken);
+        if (!string.IsNullOrWhiteSpace(oldUrl)) await _fileStorage.DeleteFileAsync(oldUrl, cancellationToken);
+        return Ok(new { profileImageUrl = imageUrl });
+    }
+
+    [Authorize, HttpDelete("profile-image")]
+    public async Task<IActionResult> DeleteProfileImage(CancellationToken cancellationToken)
+    {
+        var user = await _db.Users.SingleAsync(u => u.Id == CurrentUserId, cancellationToken);
+        if (string.IsNullOrWhiteSpace(user.ProfileImageUrl)) return NoContent();
+        var oldUrl = user.ProfileImageUrl;
+        if (!await _fileStorage.DeleteFileAsync(oldUrl, cancellationToken))
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Unable to remove the profile image. Please try again." });
+        user.ProfileImageUrl = null;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(cancellationToken);
+        return NoContent();
     }
 }

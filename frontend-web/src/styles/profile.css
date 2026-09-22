@@ -103,6 +103,11 @@
   color: #b64a4f;
 }
 
+.profile-photo-save {
+  min-height: 36px;
+  padding-inline: 15px;
+}
+
 .profile-photo-error {
   margin: -8px 0 0;
   color: #b64a4f;
@@ -235,8 +240,8 @@
 }
 
 .workspace-shell .profile-avatar {
-  width: 82px;
-  height: 82px;
+  width: 118px;
+  height: 118px;
   border: 3px solid #fff;
   border-radius: 50%;
   background: #70c9df;
@@ -245,8 +250,8 @@
 }
 
 .workspace-shell .profile-photo-control {
-  width: 82px;
-  height: 82px;
+  width: 118px;
+  height: 118px;
 }
 
 .workspace-shell .profile-identity h2 {

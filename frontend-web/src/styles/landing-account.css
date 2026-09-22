@@ -1,6 +1,8 @@
 .landing-account-actions { display: flex; align-items: center; gap: 22px; }
 .landing-user { display: flex; align-items: center; gap: 12px; color: #293b3e; }
 .landing-user-avatar { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #e7f1da; color: #63a437; font-size: 19px; font-weight: 800; }
+.landing-user-avatar { overflow: hidden; }
+.landing-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .landing-user strong { display: block; max-width: 160px; overflow: hidden; color: #283a3d; font-size: 14px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .landing-user small { display: block; margin-top: 3px; color: #6e7e80; font-size: 11px; }
 .landing-logout { display: inline-flex; align-items: center; gap: 9px; padding: 14px 19px; border: 0; border-radius: 7px; background: #df1b2d; color: #fff; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }

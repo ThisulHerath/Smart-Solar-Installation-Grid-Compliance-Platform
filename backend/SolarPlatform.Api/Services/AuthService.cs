@@ -91,6 +91,7 @@ public class AuthService : IAuthService
                 Email = user.Email,
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
+                ProfileImageUrl = user.ProfileImageUrl,
                 Roles = roles,
                 CreatedAt = user.CreatedAt
             }
@@ -133,6 +134,7 @@ public class AuthService : IAuthService
                 Email = user.Email,
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
+                ProfileImageUrl = user.ProfileImageUrl,
                 Roles = roles,
                 CreatedAt = user.CreatedAt
             }
@@ -155,6 +157,7 @@ public class AuthService : IAuthService
             Email = user.Email,
             FullName = user.FullName,
             PhoneNumber = user.PhoneNumber,
+            ProfileImageUrl = user.ProfileImageUrl,
             Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
             CreatedAt = user.CreatedAt
         };

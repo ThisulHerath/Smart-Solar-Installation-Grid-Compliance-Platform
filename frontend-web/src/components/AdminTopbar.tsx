@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function AdminTopbar() {
-  const { user } = useAuth();
+  const { user, profilePhoto } = useAuth();
 
   if (!user) return null;
 
@@ -18,7 +18,7 @@ export function AdminTopbar() {
     <header className="admin-topbar">
       <h1>Dashboard</h1>
       <Link className="admin-topbar-user" to="/profile" aria-label="Open profile">
-        <span>{initials}</span>
+        <span>{profilePhoto ? <img src={profilePhoto} alt="" /> : initials}</span>
         <div>
           <strong>{user.fullName}</strong>
           <small>System admin · Administrator</small>
