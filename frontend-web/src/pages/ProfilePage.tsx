@@ -1,9 +1,12 @@
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowUpRight,
+  Camera,
   Mail,
   Phone,
   ShieldCheck,
+  Trash2,
   UserRound,
 } from 'lucide-react';
 
@@ -12,10 +15,54 @@ import '../styles/profile.css';
 
 export function ProfilePage() {
   const { user } = useAuth();
+  const photoInput = useRef<HTMLInputElement>(null);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState('');
+  const photoKey = user ? `smartsolar_profile_photo_${user.id}` : '';
+
+  useEffect(() => {
+    setPhoto(photoKey ? localStorage.getItem(photoKey) : null);
+  }, [photoKey]);
 
   if (!user) {
     return null;
   }
+
+  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    setPhotoError('');
+
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setPhotoError('Choose an image file to use as your profile photo.');
+      return;
+    }
+    if (file.size > 1_500_000) {
+      setPhotoError('Choose an image smaller than 1.5 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = typeof reader.result === 'string' ? reader.result : null;
+      if (!image) return;
+      try {
+        localStorage.setItem(photoKey, image);
+        setPhoto(image);
+      } catch {
+        setPhotoError('This image is too large to save in this browser.');
+      }
+    };
+    reader.onerror = () => setPhotoError('Unable to read this image. Please try another one.');
+    reader.readAsDataURL(file);
+  };
+
+  const removePhoto = () => {
+    localStorage.removeItem(photoKey);
+    setPhoto(null);
+    setPhotoError('');
+  };
 
   const initials = user.fullName
     .split(' ')
@@ -41,12 +88,35 @@ export function ProfilePage() {
 
       <div className="profile-grid">
         <section className="glass-panel profile-identity">
-          <div
-            className="profile-avatar"
-            aria-hidden="true"
-          >
-            {initials || <UserRound />}
+          <div className="profile-photo-control">
+            <div className="profile-avatar" aria-hidden="true">
+              {photo ? <img src={photo} alt="" /> : initials || <UserRound />}
+            </div>
+            <button
+              className="profile-photo-upload"
+              type="button"
+              aria-label="Choose profile photo"
+              title="Choose profile photo"
+              onClick={() => photoInput.current?.click()}
+            >
+              <Camera size={16} />
+            </button>
+            <input
+              ref={photoInput}
+              className="profile-photo-input"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handlePhotoChange}
+            />
           </div>
+
+          {photo && (
+            <button className="profile-photo-remove" type="button" onClick={removePhoto}>
+              <Trash2 size={14} /> Remove photo
+            </button>
+          )}
+
+          {photoError && <p className="profile-photo-error" role="alert">{photoError}</p>}
 
           <h2>{user.fullName}</h2>
 

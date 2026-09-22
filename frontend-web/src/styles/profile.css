@@ -45,6 +45,70 @@
   font-weight: 700;
 }
 
+.profile-photo-control {
+  position: relative;
+  width: 96px;
+  height: 96px;
+}
+
+.profile-avatar {
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-input {
+  display: none;
+}
+
+.profile-photo-upload {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #0a5569;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+
+.profile-photo-upload:hover {
+  background: #69b63b;
+  transform: scale(1.08);
+}
+
+.profile-photo-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #5b7477;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.profile-photo-remove:hover {
+  color: #b64a4f;
+}
+
+.profile-photo-error {
+  margin: -8px 0 0;
+  color: #b64a4f;
+  font-size: 12px;
+}
+
 .profile-identity h2 {
   font-size: 23px;
 }
@@ -178,6 +242,11 @@
   background: #70c9df;
   color: #071d23;
   font-size: 34px;
+}
+
+.workspace-shell .profile-photo-control {
+  width: 82px;
+  height: 82px;
 }
 
 .workspace-shell .profile-identity h2 {

@@ -122,7 +122,7 @@ export function RegisterPage() {
       <h2>
         {challenge
           ? 'Check your email'
-          : 'Registration'}
+          : 'Create your account'}
       </h2>
 
       <p className="auth-intro">
@@ -184,8 +184,10 @@ export function RegisterPage() {
           <div className="register-columns">
             <div className="register-column register-profile-column">
               {field('fullName', 'Full name', 'text', 'name')}
-              {field('email', 'Email address', 'email', 'email')}
-              {field('phoneNumber', 'Phone number (optional)', 'tel', 'tel')}
+              <div className="register-contact-row">
+                {field('email', 'Email address', 'email', 'email')}
+                {field('phoneNumber', 'Phone number (optional)', 'tel', 'tel')}
+              </div>
             </div>
 
             <div className="register-column register-security-column">

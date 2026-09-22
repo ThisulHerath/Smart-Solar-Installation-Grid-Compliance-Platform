@@ -6,6 +6,37 @@
 .admin-sidebar-brand svg { width: 34px; height: 34px; color: #8dce50; }
 .admin-sidebar-brand span { white-space: nowrap; }
 .admin-sidebar-brand b { font-weight: 800; }
+
+@keyframes sidebar-solar-glow {
+  0% { filter: drop-shadow(0 0 2px #a8d95a80); transform: rotate(0deg) scale(1); }
+  50% { filter: drop-shadow(0 0 9px #b6ef67); transform: rotate(180deg) scale(1.1); }
+  100% { filter: drop-shadow(0 0 2px #a8d95a80); transform: rotate(360deg) scale(1); }
+}
+
+.admin-sidebar-brand svg {
+  transform-origin: center;
+  animation: sidebar-solar-glow 2.6s linear infinite !important;
+}
+
+.admin-sidebar-brand:hover svg {
+  animation-duration: 1.2s !important;
+}
+
+:is(.eco-brand, .auth-home-brand, .member-home-brand, .admin-sidebar-brand) > svg,
+.app-brand-icon > svg {
+  transform-origin: center;
+  animation: sidebar-solar-glow 2.6s linear infinite !important;
+}
+
+:is(.eco-brand, .auth-home-brand, .member-home-brand, .admin-sidebar-brand):hover > svg,
+.app-brand:hover .app-brand-icon > svg {
+  animation-duration: 1.2s !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.eco-brand, .auth-home-brand, .member-home-brand, .admin-sidebar-brand) > svg,
+  .app-brand-icon > svg { animation: none !important; }
+}
 .admin-route-content > .member-home-nav { grid-template-columns: minmax(0, 1fr) auto; padding-inline: clamp(24px, 3vw, 44px); }
 .admin-route-content > .member-home-nav .member-home-brand { display: none; }
 .admin-route-content > .member-home-nav nav { justify-self: center; }

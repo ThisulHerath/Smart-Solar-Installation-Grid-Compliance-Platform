@@ -14,6 +14,11 @@ export type Registration = {
   phoneNumber?: string;
 };
 
+export type PasswordReset = {
+  email: string;
+  newPassword: string;
+};
+
 export type AccountAction = 'password' | 'account-deletion';
 
 async function post<T>(
@@ -74,6 +79,18 @@ export const accountApi = {
     code: string
   ) =>
     post<AuthResponse>('register', {
+      challengeId,
+      code,
+    }),
+
+  requestPasswordReset: (details: PasswordReset) =>
+    post<{ challenge: Challenge | null; message: string }>(
+      'password/reset/request-otp',
+      details
+    ),
+
+  confirmPasswordReset: (challengeId: string, code: string) =>
+    post<{ message: string }>('password/reset/confirm', {
       challengeId,
       code,
     }),

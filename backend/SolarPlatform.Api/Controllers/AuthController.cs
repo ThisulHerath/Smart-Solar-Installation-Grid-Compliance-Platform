@@ -51,6 +51,28 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password changed. Please sign in with your new password." });
     }
 
+    [HttpPost("password/reset/request-otp")]
+    public async Task<IActionResult> RequestPasswordReset(ForgotPasswordRequestDto request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var challenge = await _verification.RequestPasswordResetAsync(request);
+        return Ok(new
+        {
+            challenge,
+            message = "If an active account uses that email address, we sent a verification code."
+        });
+    }
+
+    [HttpPost("password/reset/confirm")]
+    public async Task<IActionResult> ConfirmPasswordReset(VerifyEmailCodeDto request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        await _verification.ConfirmPasswordResetAsync(request);
+        return Ok(new { message = "Password reset. You can now sign in with your new password." });
+    }
+
     [Authorize, HttpPost("account-deletion/request-otp")]
     public async Task<IActionResult> RequestDeletion() =>
         Ok(await _verification.RequestAccountActionAsync(CurrentUserId, EmailVerificationService.Deletion));

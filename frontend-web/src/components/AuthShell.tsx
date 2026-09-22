@@ -2,13 +2,25 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Sun } from './Icons';
-import solarScene from '../../images/hero-solar.jpg';
+import loginSolarSolutionScene from '../../images/login-solar-solution.png';
+import registerEngineerScene from '../../images/register-solar-engineer.png';
 import '../styles/account.css';
 import '../styles/auth-home-nav.css';
 
 export function AuthShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const isRegister = location.pathname === '/register';
+  const formCard = (
+    <div className={`auth-form-card${isRegister ? ' register-card' : ''}`}>
+      <Link className="auth-card-close" to="/" aria-label="Close">Ã—</Link>
+      <div className="auth-form-content">{children}</div>
+    </div>
+  );
+  const visual = (
+    <aside className={`auth-visual${isRegister ? ' auth-visual--register' : ''}`} aria-hidden="true">
+      <img src={isRegister ? registerEngineerScene : loginSolarSolutionScene} alt="" />
+    </aside>
+  );
 
   return (
     <main className={`auth-shell${isRegister ? ' auth-shell--register' : ' auth-shell--login'}`}>
@@ -29,13 +41,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
       </header>
 
       <section className="auth-form-panel" aria-label={isRegister ? 'Register' : 'Login'}>
-        <div className={`auth-form-card${isRegister ? ' register-card' : ''}`}>
-          <Link className="auth-card-close" to="/" aria-label="Close">×</Link>
-          <div className="auth-form-content">{children}</div>
+        <div className="auth-card-frame">
+          {formCard}
+          {visual}
         </div>
-        <aside className="auth-visual" aria-hidden="true">
-          <img src={solarScene} alt="" />
-        </aside>
       </section>
     </main>
   );

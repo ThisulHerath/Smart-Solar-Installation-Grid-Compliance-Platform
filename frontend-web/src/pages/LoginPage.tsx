@@ -31,7 +31,7 @@ export function LoginPage() {
     <AuthShell>
       <p className="eyebrow">WELCOME BACK</p>
 
-      <h2>Login</h2>
+      <h2>Welcome back</h2>
 
       <p className="auth-intro">
         Your solar project, all in one place.
@@ -112,15 +112,17 @@ export function LoginPage() {
             <input
               type="checkbox"
               checked={rememberMe}
+              required
+              aria-required="true"
               onChange={(event) => setRememberMe(event.target.checked)}
               disabled={busy}
             />
             <span>Remember me</span>
           </label>
           <button
-            type="button"
             className="forgot-password"
-            onClick={() => setError('Password reset is not available yet. Please contact support.')}
+            type="button"
+            onClick={() => navigate('/forgot-password')}
             disabled={busy}
           >
             Forgot password?
@@ -129,7 +131,7 @@ export function LoginPage() {
 
         <button
           className="btn btn-primary"
-          disabled={busy}
+          disabled={busy || !rememberMe}
         >
           {busy ? 'Signing in…' : 'Sign in'}
         </button>

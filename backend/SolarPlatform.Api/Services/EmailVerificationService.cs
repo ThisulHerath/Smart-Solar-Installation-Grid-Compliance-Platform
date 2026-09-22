@@ -11,7 +11,7 @@ namespace SolarPlatform.Api.Services;
 public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, IJwtTokenService tokens,
     IOtpEmailSender sender, IConfiguration config, TimeProvider clock)
 {
-    public const string Registration = "registration", PasswordChange = "password change", Deletion = "account deletion";
+    public const string Registration = "registration", PasswordChange = "password change", PasswordReset = "password reset", Deletion = "account deletion";
     private DateTime Now => clock.GetUtcNow().UtcDateTime;
 
     public async Task<EmailChallengeResponse> RequestRegistrationAsync(RegisterRequestDto request)
@@ -33,6 +33,25 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
         if (purpose == PasswordChange) ValidatePassword(newPassword ?? "");
         return await IssueAsync(new EmailChallenge { Email = user.Email, Purpose = purpose, UserId = user.Id,
             UserVersion = user.SecurityVersion, PasswordHash = purpose == PasswordChange ? hasher.HashPassword(newPassword!) : null });
+    }
+
+    public async Task<EmailChallengeResponse?> RequestPasswordResetAsync(ForgotPasswordRequestDto request)
+    {
+        ValidatePassword(request.NewPassword);
+        var email = request.Email.Trim().ToLowerInvariant();
+        var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email && u.IsActive);
+
+        // Keep the response identical for unknown addresses to avoid user enumeration.
+        if (user == null) return null;
+
+        return await IssueAsync(new EmailChallenge
+        {
+            Email = user.Email,
+            Purpose = PasswordReset,
+            UserId = user.Id,
+            UserVersion = user.SecurityVersion,
+            PasswordHash = hasher.HashPassword(request.NewPassword)
+        });
     }
 
     private async Task<EmailChallengeResponse> IssueAsync(EmailChallenge challenge)
@@ -87,7 +106,7 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
         var challenge = await VerifyAsync(request, purpose, userId);
         var user = await ActiveUserAsync(userId);
         if (challenge.UserVersion != user.SecurityVersion) throw new InvalidOperationException("This code is no longer valid. Request a new code.");
-        if (purpose == PasswordChange) user.PasswordHash = challenge.PasswordHash!;
+        if (purpose is PasswordChange or PasswordReset) user.PasswordHash = challenge.PasswordHash!;
         else if (purpose == Deletion)
         {
             user.IsActive = false;
@@ -105,6 +124,17 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
         var pending = await db.EmailChallenges.Where(c => c.Email == challenge.Email && c.ConsumedAt == null).ToListAsync();
         foreach (var item in pending) Consume(item);
         await SaveConfirmationAsync();
+    }
+
+    public async Task ConfirmPasswordResetAsync(VerifyEmailCodeDto request)
+    {
+        var challenge = await db.EmailChallenges.AsNoTracking()
+            .SingleOrDefaultAsync(c => c.Id == request.ChallengeId);
+
+        if (challenge?.Purpose != PasswordReset || challenge.UserId == null)
+            throw new InvalidOperationException("This code has expired or is unavailable. Request a new code.");
+
+        await ConfirmAccountActionAsync(challenge.UserId.Value, PasswordReset, request);
     }
 
     private async Task<EmailChallenge> VerifyAsync(VerifyEmailCodeDto request, string purpose, Guid? userId)
