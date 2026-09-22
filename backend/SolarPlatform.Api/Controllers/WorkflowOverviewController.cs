@@ -16,21 +16,30 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> Get(Guid id, CancellationToken ct)
     {
         var actor = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        
         var staff = User.IsInRole(RoleConstants.Administrator) || User.IsInRole(RoleConstants.SeniorEngineer);
+        
         var survey = await db.SolarSurveys.AsNoTracking().Include(x => x.Workflows).ThenInclude(x => x.ExecutionLogs)
             .SingleOrDefaultAsync(x => x.Id == id && (staff || x.Customer.UserId == actor), ct);
+       
         if (survey == null) return NotFound();
         var sizing = survey.Workflows.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
-        var compliance = await db.ComplianceAssessments.AsNoTracking().Where(x => x.SiteInspection.FieldJob.SolarSurveyId == id).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct);
+        var compliance = await db.ComplianceAssessments.AsNoTracking().Where(x => x.SiteInspection.FieldJob.SolarSurveyId == id).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct); 
         var proposal = await db.EngineeringProposals.AsNoTracking().Include(x => x.AuditLogs).Include(x => x.LifecycleEvents).Where(x => x.SolarSurveyId == id).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct);
         var quotes = proposal == null ? new List<EquipmentQuote>() : await db.Set<EquipmentQuote>().AsNoTracking().Where(x => x.EngineeringProposalId == proposal.Id).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
         var activeQuote = quotes.FirstOrDefault(x => x.Status == "RESERVED") ?? quotes.FirstOrDefault();
         var completed = new List<string>();
+
         if (sizing?.Status == WorkflowStatus.Completed) completed.Add("SolarSizingAgent");
+        
         if (compliance != null) completed.Add("GridComplianceAgent");
+        
         if (proposal?.GuardrailResultJson != null) completed.Add("SafetyGuardrailAgent");
+        
         if (proposal?.ProposalStatus == ProposalStatus.Approved) completed.Add("HumanApproval");
+        
         if (activeQuote?.Status is "VALIDATED" or "RESERVED" or "RELEASED") completed.Add("EquipmentPricingAgent");
+        
         if (activeQuote?.Status == "RESERVED") completed.Add("InventoryReservation");
         return Ok(new {
             workflowId = survey.Id, objective = sizing?.Objective ?? "Assess rooftop solar suitability and prepare an approved equipment plan",
