@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { Sun } from './Icons';
+import solarScene from '../../images/hero-solar.jpg';
 import '../styles/account.css';
 import '../styles/auth-home-nav.css';
 
@@ -32,6 +33,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
           <Link className="auth-card-close" to="/" aria-label="Close">×</Link>
           <div className="auth-form-content">{children}</div>
         </div>
+        <aside className="auth-visual" aria-hidden="true">
+          <img src={solarScene} alt="" />
+        </aside>
       </section>
     </main>
   );

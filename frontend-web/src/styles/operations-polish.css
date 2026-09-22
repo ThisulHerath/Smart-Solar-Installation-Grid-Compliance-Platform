@@ -279,6 +279,51 @@
 .admin-route-content .inventory-page .estimate-summary { background: #f3f8ee; }
 .admin-route-content .inventory-page .inventory-reservations-panel .inventory-table { margin-top: 4px; }
 
+.admin-route-content .staff-dashboard { width: min(100%, 1320px); box-sizing: border-box; margin: 0 auto; padding: 36px 34px 64px; display: grid; gap: 22px; }
+.staff-dashboard-hero { padding: 38px 40px; border-radius: 10px; background: linear-gradient(115deg, #0a5569, #377d61); color: #fff; box-shadow: 0 14px 28px #173e4420; }
+.staff-dashboard--inventory-officer .staff-dashboard-hero,
+.staff-dashboard--field-technician .staff-dashboard-hero { background: linear-gradient(115deg, #0a5569, #377d61); box-shadow: 0 14px 28px #173e4420; }
+.staff-dashboard-hero p, .staff-dashboard-tools header p { margin: 0 0 9px; color: #b5dc8b; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+.staff-dashboard--inventory-officer .staff-dashboard-hero p,
+.staff-dashboard--field-technician .staff-dashboard-hero p { color: #b5dc8b; }
+.staff-dashboard-hero h1 { margin: 0 0 16px; color: #fff; font-size: clamp(28px, 3vw, 40px); letter-spacing: 0; }
+.staff-dashboard-hero h2 { margin: 0 0 7px; color: #fff; font-size: 18px; letter-spacing: 0; }
+.staff-dashboard-hero span { color: #f8eee0; font-size: 14px; }
+.staff-dashboard-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.staff-dashboard-metrics article { min-height: 106px; padding: 18px; border: 1px solid #dce8d7; border-radius: 9px; background: #fff; box-shadow: 0 8px 20px #173e4409; }
+.staff-dashboard-metrics span { display: block; color: #718582; font-size: 11px; font-weight: 750; text-transform: uppercase; }
+.staff-dashboard-metrics strong { display: block; margin-top: 12px; color: #354a4c; font-size: 25px; }
+.staff-dashboard-tools { overflow: hidden; border: 1px solid #dce8d7; border-radius: 10px; background: #fff; box-shadow: 0 10px 25px #173e440d; }
+.staff-dashboard-tools header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid #e5ede1; }
+.staff-dashboard-tools header p { color: #67a63c; }
+.staff-dashboard-tools h2 { margin: 0; color: #304143; font-size: 20px; letter-spacing: 0; }
+.staff-dashboard-tools header > span { color: #788b88; font-size: 12px; }
+.staff-dashboard-tools > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; padding: 14px; background: #f8fbf6; }
+.staff-dashboard-tools a { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 13px; align-items: center; min-height: 94px; padding: 15px; border: 1px solid #dfe9da; border-radius: 8px; background: #fff; color: inherit; text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.staff-dashboard-tools a:last-child { border-right: 1px solid #dfe9da; }
+.staff-dashboard-tools a:hover { border-color: #b5d99d; background: #fff; box-shadow: 0 7px 16px #173e4410; transform: translateY(-1px); }
+.staff-dashboard-tools a > span { grid-row: 1 / span 2; display: inline-grid; width: 38px; height: 38px; place-items: center; border: 1px solid #c9e1bb; border-radius: 8px; background: #eff8ea; color: #5a9d33; }
+.staff-dashboard--inventory-officer .staff-dashboard-tools a > span,
+.staff-dashboard--field-technician .staff-dashboard-tools a > span { border-color: #c9e1bb; background: #eff8ea; color: #5a9d33; }
+.staff-dashboard-tools h3 { margin: 0; color: #344b4d; font-size: 15px; }
+.staff-dashboard-tools a p { grid-column: 2; margin: 3px 0 0; color: #728583; font-size: 11px; line-height: 1.45; }
+.staff-dashboard-tools a b { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 5px; margin: 0; color: #679f3c; font-size: 0; }
+.staff-dashboard-tools a b svg { width: 18px; height: 18px; }
+.staff-dashboard-error { margin: 0; padding: 13px 16px; border: 1px solid #f1c9c4; border-radius: 8px; background: #fff4f2; color: #a44a46; font-size: 13px; }
+.admin-route-content .technician-jobs-page { width: min(100%, 1320px); box-sizing: border-box; margin: 0 auto; padding: 36px 34px 64px; }
+.technician-jobs-heading { padding: 30px; border: 1px solid #d7e8d4; border-left: 5px solid #28715f; border-radius: 10px; background: #fff; box-shadow: 0 10px 25px #173e440d; }
+.technician-jobs-heading h1 { margin: 0 0 7px; color: #304143; font-size: 32px; }
+.technician-jobs-heading p:last-child { margin: 0; color: #6d8180; font-size: 14px; }
+.technician-jobs-empty { margin-top: 22px; padding: 35px; border: 1px dashed #c9dfc3; border-radius: 9px; color: #718682; text-align: center; }
+.technician-job-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 22px; }
+.technician-job-grid article { padding: 21px; border: 1px solid #dce8d7; border-top: 4px solid #28715f; border-radius: 9px; background: #fff; box-shadow: 0 9px 22px #173e440c; }
+.technician-job-status { display: inline-flex; padding: 5px 8px; border-radius: 999px; background: #ecf8f1; color: #2b7a61; font-size: 10px; font-weight: 800; }
+.technician-job-grid h2 { margin: 15px 0 11px; color: #344b4d; font-size: 18px; }
+.technician-job-grid p { display: flex; gap: 7px; margin: 7px 0; color: #718581; font-size: 12px; line-height: 1.5; }
+.technician-job-grid p svg { flex: 0 0 auto; color: #4b9477; }
+.technician-job-grid strong { display: block; margin-top: 15px; color: #a16c14; font-size: 12px; }
+.technician-job-note { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; color: #347f64; font-size: 12px; font-weight: 800; }
+
 @media (max-width: 900px) {
   .admin-route-content .operations-page { padding: 26px 20px 48px; }
   .admin-route-content .operations-page .page-header,

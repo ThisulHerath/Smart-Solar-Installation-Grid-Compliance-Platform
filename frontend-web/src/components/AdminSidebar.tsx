@@ -1,4 +1,4 @@
-import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, LogOut, Sun } from 'lucide-react';
+import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, LogOut, Sun, UsersRound } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,6 +14,7 @@ export function AdminSidebar() {
     { to: '/proposals', label: 'Proposals', icon: FileText },
     { to: '/proposals/pending', label: 'Approvals', icon: FileCheck2 },
     { to: '/inventory', label: 'Inventory', icon: Box },
+    { to: '/users', label: 'User management', icon: UsersRound },
   ];
 
   return (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HomeownerWorkspace } from './HomeownerWorkspace';
+import { StaffDashboard } from '../components/StaffDashboard';
 
 type Report = {
   surveyCount: number;
@@ -93,6 +94,10 @@ export function OperationsDashboard() {
           )}
       </section>
     );
+  }
+
+  if (user && !user.roles.includes('HOMEOWNER')) {
+    return <StaffDashboard user={user} report={report} error={error} />;
   }
 
   return (

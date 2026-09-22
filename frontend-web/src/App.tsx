@@ -75,6 +75,16 @@ const InventoryPage = lazy(() =>
   }))
 );
 
+const UserManagementPage = lazy(() =>
+  import('./pages/UserManagementPage').then((module) => ({
+    default: module.UserManagementPage,
+  }))
+);
+
+const TechnicianJobsPage = lazy(() =>
+  import('./pages/TechnicianJobsPage').then((module) => ({ default: module.TechnicianJobsPage }))
+);
+
 export const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -125,6 +135,15 @@ export const App: React.FC = () => {
                   />
 
                   <Route
+                    element={<ProtectedRoute allowedRoles={['ADMINISTRATOR']} />}
+                  >
+                    <Route
+                      path="/users"
+                      element={<UserManagementPage />}
+                    />
+                  </Route>
+
+                  <Route
                     path="/profile"
                     element={<ProfilePage />}
                   />
@@ -133,6 +152,10 @@ export const App: React.FC = () => {
                     path="/account"
                     element={<AccountPage />}
                   />
+
+                  <Route element={<ProtectedRoute allowedRoles={['FIELD_TECHNICIAN']} />}>
+                    <Route path="/technician-jobs" element={<TechnicianJobsPage />} />
+                  </Route>
 
                   <Route
                     element={
