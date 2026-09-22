@@ -16,7 +16,9 @@ public class EquipmentPricingClient(HttpClient http, IConfiguration configuratio
         using var request = new HttpRequestMessage(HttpMethod.Post, "/workflow/equipment-pricing") { Content = JsonContent.Create(payload) };
         request.Headers.Add("X-Internal-Key", key);
         using var response = await http.SendAsync(request, ct);
+        
         response.EnsureSuccessStatusCode();
+
         return await response.Content.ReadFromJsonAsync<PricingResult>(cancellationToken: ct)
             ?? throw new InvalidOperationException("Empty pricing response.");
     }
