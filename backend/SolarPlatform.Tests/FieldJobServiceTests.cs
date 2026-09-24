@@ -91,7 +91,10 @@ public class FieldJobServiceTests
                 Recommendations: new List<string> { "Grid voltage stable" },
                 ValidationStatus: "PASSED",
                 Notes: "Passed all checks",
-                ExecutionLogs: new List<ComplianceExecutionLogDto>()
+                ExecutionLogs: new List<ComplianceExecutionLogDto>
+                {
+                    new("GridComplianceAgent", "evaluation", "completed", "Compliant", null, 1)
+                }
             ));
     }
 
@@ -246,7 +249,10 @@ public class FieldJobServiceTests
                 Recommendations: new List<string> { "Install AVR" },
                 ValidationStatus: "PASSED",
                 Notes: "Voltage violation",
-                ExecutionLogs: new List<ComplianceExecutionLogDto>()
+                ExecutionLogs: new List<ComplianceExecutionLogDto>
+                {
+                    new("GridComplianceAgent", "evaluation", "completed", "Non-compliant", null, 1)
+                }
             ));
 
         var service = CreateService();
@@ -259,5 +265,24 @@ public class FieldJobServiceTests
         Assert.Equal(FieldJobStatus.Failed, finalJob!.Status);
         Assert.NotNull(finalJob.Compliance);
         Assert.False(finalJob.Compliance.GridCompliant);
+    }
+
+    [Fact]
+    public async Task ComplianceAgentUnavailable_FailsWithoutCreatingLocalAssessment()
+    {
+        _aiMock
+            .Setup(x => x.ExecuteComplianceEvaluationAsync(It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EvaluateComplianceResponseDto?)null);
+
+        var service = CreateService();
+        var job = await service.CreateOrAssignJobAsync(new CreateFieldJobDto(_surveyId, _techId, null));
+        await service.CheckInAsync(job.Id, _techId, new CheckInDto(6.9271m, 79.8612m));
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.SubmitInspectionAsync(job.Id, _techId));
+
+        Assert.Contains("GridComplianceAgent", error.Message);
+        Assert.Empty(await _db.ComplianceAssessments.ToListAsync());
+        Assert.Equal(FieldJobStatus.Failed, (await _db.FieldJobs.FindAsync(job.Id))!.Status);
     }
 }

@@ -144,9 +144,18 @@ public class SurveyService : ISurveyService
     private async Task CompleteAnalysisAsync(SolarSurvey survey, AgentWorkflow workflow)
     {
         var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, objective = workflow.Objective, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
-        if (!string.Equals(result.Status, "completed", StringComparison.OrdinalIgnoreCase))
+        var completedBySizingAgent =
+            string.Equals(result.Status, "completed", StringComparison.OrdinalIgnoreCase) &&
+            result.Recommendation.HasValue &&
+            result.ExecutionLogs.Any(log =>
+                string.Equals(log.AgentName, "SolarSizingAgent", StringComparison.Ordinal) &&
+                string.Equals(log.Status, "completed", StringComparison.OrdinalIgnoreCase));
+
+        if (!completedBySizingAgent)
         {
-            result = CreateLocalSizingResult(survey, workflow.WorkflowId);
+            result.Status = "failed";
+            result.Recommendation = null;
+            result.Errors.Add("SolarSizingAgent did not return a completed, traceable result.");
         }
 
         workflow.ResultJson = result.Recommendation?.GetRawText();
@@ -213,53 +222,6 @@ public class SurveyService : ISurveyService
         survey.Latitude = request.Latitude; survey.Longitude = request.Longitude; survey.Notes = request.Notes?.Trim();
     }
 
-    private static SolarSizingResponseDto CreateLocalSizingResult(SolarSurvey survey, string workflowId)
-    {
-        var recommendedKw = Math.Round(Math.Max(1m, (decimal)survey.MonthlyKwh / 120m), 2);
-        var panelCount = Math.Max(1, (int)Math.Ceiling(recommendedKw / 0.55m));
-        var inverterKw = Math.Round(recommendedKw * 0.9m, 2);
-        var roofRequiredSqm = Math.Round(panelCount * 2.2m, 1);
-        var hasRoofCapacity = survey.RoofAreaSqm >= roofRequiredSqm;
-        var recommendation = JsonSerializer.SerializeToElement(new
-        {
-            recommended_kw = recommendedKw,
-            estimated_panel_count = panelCount,
-            inverter_size_kw = inverterKw,
-            roof_area_required_sqm = roofRequiredSqm
-        });
-        var validation = JsonSerializer.SerializeToElement(new
-        {
-            status = "LOCAL_SCREENING",
-            roof_capacity = hasRoofCapacity ? "sufficient" : "review_required",
-            grid_type = survey.GridType.ToString()
-        });
-
-        return new SolarSizingResponseDto
-        {
-            WorkflowId = workflowId,
-            Status = "completed",
-            Recommendation = recommendation,
-            ValidationResults = validation,
-            Plan = new List<string>
-            {
-                $"Estimate a {recommendedKw:0.##} kW solar system.",
-                $"Reserve space for approximately {panelCount} panels.",
-                "Arrange an engineering and utility review before installation."
-            },
-            ExecutionLogs = new List<AgentExecutionLogDto>
-            {
-                new()
-                {
-                    AgentName = "LocalSizingEngine",
-                    StepName = "Deterministic solar sizing",
-                    Status = "completed",
-                    OutputSummary = "Completed using the local sizing fallback while the AI service was unavailable.",
-                    StartedAt = DateTime.UtcNow,
-                    CompletedAt = DateTime.UtcNow
-                }
-            }
-        };
-    }
     private static ProfileDto ToProfile(CustomerProfile p) => new(p.Id, p.FullName, p.PhoneNumber, p.Address);
     private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList());
 }

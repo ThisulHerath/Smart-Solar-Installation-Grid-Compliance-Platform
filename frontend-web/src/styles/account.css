@@ -699,7 +699,7 @@
   caret-color: #183c30;
   -webkit-box-shadow: 0 0 0 1000px #fefff9 inset;
   border-color: #466052;
-};
+}
 
 /* Keep the auth composition consistent with the public solar scene. */
 .auth-shell .auth-nav {

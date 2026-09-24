@@ -393,17 +393,17 @@ public class FieldJobService : IFieldJobService
             TechnicianNotes: inspection.TechnicianNotes
         );
 
-        EvaluateComplianceResponseDto? aiResult = null;
-        try
+        var aiResult = await _agenticAi.ExecuteComplianceEvaluationAsync(complianceRequest);
+        if (aiResult == null || !aiResult.ExecutionLogs.Any(log =>
+                string.Equals(log.AgentName, "GridComplianceAgent", StringComparison.Ordinal) &&
+                string.Equals(log.Status, "completed", StringComparison.OrdinalIgnoreCase)))
         {
-            aiResult = await _agenticAi.ExecuteComplianceEvaluationAsync(complianceRequest);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Agentic AI compliance call failed, using deterministic local evaluation.");
+            job.Status = FieldJobStatus.Failed;
+            job.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+            throw new InvalidOperationException("GridComplianceAgent did not return a completed, traceable result. No local compliance result was created; retry when the agent service is healthy.");
         }
 
-        // If AI returned a result, use it; otherwise fallback to deterministic local evaluator
         var assessment = inspection.ComplianceAssessment;
         if (assessment == null)
         {
@@ -414,68 +414,15 @@ public class FieldJobService : IFieldJobService
             _db.ComplianceAssessments.Add(assessment);
         }
 
-        if (aiResult != null)
-        {
-            assessment.WorkflowId = aiResult.WorkflowId;
-            assessment.GridCompliant = aiResult.GridCompliant;
-            assessment.ComplianceStatus = aiResult.ComplianceStatus;
-            assessment.RiskLevel = aiResult.RiskLevel;
-            assessment.ValidationStatus = aiResult.ValidationStatus;
-            assessment.ComplianceNotes = string.Join("; ", aiResult.Violations.Concat(aiResult.Recommendations));
-            assessment.UpdatedAt = DateTime.UtcNow;
+        assessment.WorkflowId = aiResult.WorkflowId;
+        assessment.GridCompliant = aiResult.GridCompliant;
+        assessment.ComplianceStatus = aiResult.ComplianceStatus;
+        assessment.RiskLevel = aiResult.RiskLevel;
+        assessment.ValidationStatus = aiResult.ValidationStatus;
+        assessment.ComplianceNotes = string.Join("; ", aiResult.Violations.Concat(aiResult.Recommendations));
+        assessment.UpdatedAt = DateTime.UtcNow;
 
-            job.Status = aiResult.GridCompliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;
-        }
-        else
-        {
-            // Deterministic local compliance evaluation fallback
-            var violations = new List<string>();
-            if (!gridVoltage.HasValue || !gridFrequency.HasValue || !inspection.MainBreakerRating.HasValue || !inspection.InverterLocationSuitable.HasValue)
-                violations.Add("Required inspection measurements are missing.");
-            var recommendations = new List<string>();
-
-            // Voltage check (230V +/- 6% for single phase, 400V +/- 6% for three phase)
-            if (gridVoltage.HasValue)
-            {
-                var targetV = inspection.GridTypeObserved == GridType.ThreePhase ? 400m : 230m;
-                var minV = targetV * 0.94m;
-                var maxV = targetV * 1.06m;
-                if (gridVoltage.Value < minV || gridVoltage.Value > maxV)
-                {
-                    violations.Add($"Grid voltage {gridVoltage.Value}V is outside acceptable range ({minV:F1}V - {maxV:F1}V).");
-                }
-            }
-
-            // Frequency check (50Hz +/- 1% -> 49.5 - 50.5Hz)
-            if (gridFrequency.HasValue)
-            {
-                if (gridFrequency.Value < 49.5m || gridFrequency.Value > 50.5m)
-                {
-                    violations.Add($"Grid frequency {gridFrequency.Value}Hz is outside standard tolerances (49.5Hz - 50.5Hz).");
-                }
-            }
-
-            // Inverter suitability
-            if (inspection.InverterLocationSuitable == false)
-            {
-                violations.Add("Technician identified inverter location as unsuitable for thermal dissipation and safety.");
-            }
-
-            bool compliant = violations.Count == 0;
-            string risk = compliant ? "Low" : (violations.Count > 1 ? "High" : "Medium");
-
-            assessment.WorkflowId = $"local-comp-{Guid.NewGuid().ToString()[..8]}";
-            assessment.GridCompliant = compliant;
-            assessment.ComplianceStatus = compliant ? "COMPLIANT" : "NON_COMPLIANT";
-            assessment.RiskLevel = risk;
-            assessment.ValidationStatus = "DeterministicValidated";
-            assessment.ComplianceNotes = violations.Count > 0
-                ? $"Violations: {string.Join("; ", violations)}"
-                : "Local project screening passed while the AI service was unavailable. Separate utility and engineering approval is required.";
-            assessment.UpdatedAt = DateTime.UtcNow;
-
-            job.Status = compliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;
-        }
+        job.Status = aiResult.GridCompliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;
 
         job.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();

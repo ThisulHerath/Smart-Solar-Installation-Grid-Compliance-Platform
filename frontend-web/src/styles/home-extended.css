@@ -11,29 +11,24 @@
   padding: 28px 0 36px;
 }
 
-.eco-testimonial,
 .eco-team,
 .eco-insights,
 .eco-faq,
 .eco-newsletter { width: min(1120px, calc(100% - 64px)); margin: 0 auto 95px; }
 .eco-process header,
-.eco-testimonial header,
 .eco-team header,
 .eco-faq header { text-align: center; }
 .eco-process header p,
-.eco-testimonial header p,
 .eco-team header p,
 .eco-insights header p,
 .eco-faq header p,
 .eco-newsletter > p { margin: 0 0 9px; color: #6da944; font-size: 10px; font-weight: 800; letter-spacing: .19em; }
 .eco-process h2,
-.eco-testimonial h2,
 .eco-team h2,
 .eco-faq h2,
 .eco-newsletter h2 { margin: 0; color: #344143; font-size: clamp(30px, 3.5vw, 47px); line-height: 1.1; }
 .eco-process h2 { font-size: clamp(35px, 4vw, 56px); }
 .eco-process h2 span,
-.eco-testimonial h2 span,
 .eco-team h2 span,
 .eco-faq h2 span,
 .eco-newsletter h2 span { color: #70b83d; }
@@ -45,15 +40,6 @@
 .process-steps b { position: absolute; right: -9px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #78bd42; color: #fff; font-size: 10px; }
 .process-steps h3 { margin: 22px 0 9px; color: #425154; font-size: 16px; }
 .process-steps p { max-width: 195px; margin: auto; color: #758588; font-size: 12px; line-height: 1.6; }
-
-.eco-testimonial { padding-top: 10px; }
-.testimonial-card { display: grid; grid-template-columns: 260px 1fr; gap: 43px; align-items: center; width: min(720px, 100%); margin: 38px auto 0; }
-.testimonial-card > img { width: 260px; height: 265px; object-fit: cover; border-radius: 28px 28px 28px 70px; }
-.testimonial-rating { display: flex; align-items: center; gap: 10px; color: #6a7a7c; font-size: 12px; }
-.testimonial-rating span { display: flex; color: #dfa82f; }
-.testimonial-card > div > p { margin: 20px 0; color: #67797b; font-size: 14px; line-height: 1.75; }
-.testimonial-card strong { color: #3c4b4e; font-size: 14px; }
-.testimonial-card small { display: block; margin-top: 5px; color: #859295; font-size: 11px; font-weight: 500; }
 
 .eco-contact { display: grid; grid-template-columns: 1fr .85fr; gap: 72px; width: 100%; margin: 0 0 95px; padding: 70px max(36px, calc((100vw - 1120px) / 2)); background: #0b596b; color: #fff; }
 .eco-contact form { display: grid; gap: 13px; }
@@ -109,11 +95,9 @@
 
 @media (max-width: 760px) {
   .eco-banner { margin-bottom: 65px; padding: 50px 18px; }
-  .eco-process,.eco-testimonial,.eco-team,.eco-insights,.eco-faq,.eco-newsletter { width: calc(100% - 36px); margin-bottom: 65px; }
+  .eco-process,.eco-team,.eco-insights,.eco-faq,.eco-newsletter { width: calc(100% - 36px); margin-bottom: 65px; }
   .process-steps { grid-template-columns: 1fr 1fr; gap: 34px 18px; }
   .process-steps article:not(:last-child)::after { display: none; }
-  .testimonial-card { grid-template-columns: 1fr; gap: 26px; }
-  .testimonial-card > img { width: 100%; height: 280px; }
   .eco-contact { grid-template-columns: 1fr; gap: 45px; margin-bottom: 65px; padding: 48px 18px; }
   .contact-field-row { grid-template-columns: 1fr; }
   .team-grid { gap: 12px; }
