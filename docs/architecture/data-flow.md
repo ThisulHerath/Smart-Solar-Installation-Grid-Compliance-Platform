@@ -16,6 +16,7 @@ sequenceDiagram
     API-->>User: 200 OK { token, user: { id, email, fullName, roles } }
 ```
 
+
 ## 2. Agentic AI Workflow Flow
 ```mermaid
 sequenceDiagram
@@ -33,6 +34,7 @@ sequenceDiagram
     AI-->>API: Structured Workflow JSON
     API-->>Client: 200 OK { workflow_id, plan, execution_logs, approval_status }
 ```
+
 
 ## 3. Survey Submission & Preliminary Sizing Flow
 ```mermaid
@@ -56,6 +58,8 @@ sequenceDiagram
     API-->>Homeowner: 200 OK { survey, workflowStatus }
 ```
 > Note: the survey's `roofAreaSqm` at this stage is homeowner-reported and used only for *preliminary* sizing. It is re-measured by a technician during field inspection (Flow 4) and that measured value takes precedence for compliance evaluation.
+
+
 
 ## 4. Field Inspection & Grid Compliance Flow
 ```mermaid
@@ -90,37 +94,9 @@ sequenceDiagram
 ```
 > An engineer can also re-trigger evaluation directly via `POST /api/field-jobs/{jobId}/evaluate-compliance`, independent of the technician's original submit call.
 
-## 5. Engineering Proposal Approval Flow
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Homeowner
-    actor Engineer as Senior Engineer / Admin
-    participant API as ASP.NET Core API
-    participant DB as PostgreSQL
 
-    Homeowner->>API: POST /api/proposals { solarSurveyId, notes }
-    API->>DB: Read ComplianceAssessment + survey AI results
-    API->>DB: Create EngineeringProposal (status: Pending, using latest ComplianceStatus/RiskLevel)
-    API-->>Homeowner: 201 Created proposal
-    Engineer->>API: GET /api/proposals/pending
-    API-->>Engineer: Pending proposals queue
 
-    alt Compliance evidence present and adequate
-        Engineer->>API: POST /api/proposals/{id}/approve { comment }
-        API->>DB: Set status: Approved + write ApprovalAuditLog
-    else Missing/insufficient compliance evidence
-        Engineer->>API: POST /api/proposals/{id}/reject { comment (required) }
-        API->>DB: Set status: Rejected + write ApprovalAuditLog
-    else Needs more information
-        Engineer->>API: POST /api/proposals/{id}/revise { comment (required) }
-        API->>DB: Set status: RevisionRequested + write ApprovalAuditLog
-        Note over Homeowner,API: Technician can re-inspect; a corrected compliance assessment enables resubmission
-    end
-    API-->>Engineer: 200 OK updated proposal
-```
-
-## 6. Equipment Pricing & Reservation Flow
+## 5. Equipment Pricing & Reservation Flow
 ```mermaid
 sequenceDiagram
     autonumber
