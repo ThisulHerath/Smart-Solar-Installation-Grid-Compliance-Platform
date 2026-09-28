@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, BadgeCheck, CalendarCheck2, CheckCircle2, ClipboardList, Headphones, Layers3, Leaf, LogOut, Mail, MapPin, Menu, Minus, Phone, Play, Plus, Search, Send, ShieldCheck, Sun, WalletCards, Wrench, X, Zap } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
+import { LogoutConfirmDialog } from '../components/LogoutConfirmDialog';
 import solarEngineerPortrait from '../../images/hero-engineer.png';
 import serviceInstallation from '../../images/service-installation.png';
 import servicePlanning from '../../images/service-planning.png';
@@ -36,6 +37,7 @@ export function LandingPage() {
   const { hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(1);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const destination = user ? '/dashboard' : '/register';
   const activeSection = hash === '#services' ? 'services' : hash === '#projects' ? 'projects' : hash === '#process' ? 'process' : 'home';
   const userInitials = user?.fullName.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || '';
@@ -50,11 +52,21 @@ export function LandingPage() {
         <nav className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">
           <a className={activeSection === 'home' ? 'is-active' : ''} href="#main-content" onClick={() => setMenuOpen(false)}>Home</a>
           <a className={activeSection === 'services' ? 'is-active' : ''} href="#services" onClick={() => setMenuOpen(false)}>Services</a>
-          <Link to="/dashboard" onClick={() => setMenuOpen(false)}>{user ? 'Dashboard' : 'Projects'}</Link>
           <a className={activeSection === 'process' ? 'is-active' : ''} href="#process" onClick={() => setMenuOpen(false)}>How it works</a>
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)}>{user ? 'Dashboard' : 'Projects'}</Link>
         </nav>
-        <div className="nav-actions">{user ? <div className="landing-account-actions"><Link className="landing-user" to="/profile" aria-label="Open my profile"><span className="landing-user-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : userInitials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" className="landing-logout" onClick={logout}><LogOut size={17} /> Logout</button></div> : <><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></>}</div>
+        <div className="nav-actions">{user ? <div className="landing-account-actions"><Link className="landing-user" to="/profile" aria-label="Open my profile"><span className="landing-user-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : userInitials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" className="landing-logout" onClick={() => setShowLogoutConfirm(true)}><LogOut size={17} /> Logout</button></div> : <><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></>}</div>
       </header>
+
+      {showLogoutConfirm && (
+        <LogoutConfirmDialog
+          onCancel={() => setShowLogoutConfirm(false)}
+          onConfirm={() => {
+            setShowLogoutConfirm(false);
+            logout();
+          }}
+        />
+      )}
 
       <main id="main-content">
         <section className="eco-hero">

@@ -10,11 +10,14 @@
 .member-home-nav nav a:hover { color: #69b63b; }
 .member-home-account { justify-self: end; display: flex; align-items: center; gap: 22px; }
 .member-home-user { display: flex; align-items: center; gap: 12px; color: #293b3e; text-decoration: none; }
+.member-home-user.is-active .member-home-avatar { box-shadow: 0 0 0 3px #69b63b; }
+.member-home-user.is-active strong { color: #579d32; }
 .member-home-avatar { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #e7f1da; color: #63a437; font-size: 19px; font-weight: 800; }
 .member-home-user strong { display: block; max-width: 155px; overflow: hidden; color: #283a3d; font-size: 14px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .member-home-user small { display: block; margin-top: 3px; color: #6e7e80; font-size: 11px; }
-.member-home-account button { display: inline-flex; align-items: center; gap: 9px; padding: 14px 19px; border: 0; border-radius: 7px; background: #df1b2d; color: #fff; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
-.member-home-account button:hover { background: #bd1324; }
+.member-home-account button { display: inline-flex; align-items: center; gap: 9px; padding: 14px 19px; border: 1px solid #0a4658; border-radius: 7px; background: #07536a; color: #fff; box-shadow: 0 5px 14px #07536a24; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.member-home-account button svg { color: #d4ef83; }
+.member-home-account button:hover { background: #06475a; }
 .member-home-login { justify-self: end; padding: 16px 28px; border-radius: 999px; background: #07536a; color: #fff; font-size: 13px; font-weight: 750; text-decoration: none; }
 
 @media (max-width: 850px) { .member-home-nav { grid-template-columns: auto 1fr auto; padding-inline: 24px; } .member-home-brand { margin-left: 0; font-size: 19px; } .member-home-brand svg { width: 26px; height: 26px; } .member-home-nav nav { justify-self: center; gap: 18px; } .member-home-nav nav a { font-size: 12px; } .member-home-account { gap: 12px; } }

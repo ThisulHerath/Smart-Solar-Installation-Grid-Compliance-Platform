@@ -5,8 +5,9 @@
 .landing-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .landing-user strong { display: block; max-width: 160px; overflow: hidden; color: #283a3d; font-size: 14px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
 .landing-user small { display: block; margin-top: 3px; color: #6e7e80; font-size: 11px; }
-.landing-logout { display: inline-flex; align-items: center; gap: 9px; padding: 14px 19px; border: 0; border-radius: 7px; background: #df1b2d; color: #fff; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
-.landing-logout:hover { background: #bd1324; }
+.landing-logout { display: inline-flex; align-items: center; gap: 9px; padding: 14px 19px; border: 1px solid #0a4658; border-radius: 7px; background: #07536a; color: #fff; box-shadow: 0 5px 14px #07536a24; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
+.landing-logout svg { color: #d4ef83; }
+.landing-logout:hover { background: #06475a; }
 
 @media (max-width: 760px) {
   .landing-account-actions { gap: 9px; }

@@ -36,8 +36,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #e8f3dc;
+  color: #07536a;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -61,6 +61,16 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+.logout-confirm-button {
+  border: 1px solid #0a4658 !important;
+  background: #07536a !important;
+  color: #fff !important;
+}
+
+.logout-confirm-button:hover {
+  background: #06475a !important;
 }
 
 /* Reference-style authenticated workspace header. */

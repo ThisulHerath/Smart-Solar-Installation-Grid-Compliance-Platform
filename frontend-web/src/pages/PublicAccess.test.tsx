@@ -98,6 +98,13 @@ it('shows a direct dashboard link in the landing navigation for signed-in roles'
 
   expect(await screen.findByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
   expect(screen.queryByRole('link', { name: 'Projects' })).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Logout' }));
+  expect(screen.getByRole('dialog', { name: 'Are you sure you want to log out?' })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(localStorage.getItem('smartsolar_token')).toBe('test-token');
 });
 
 it(
@@ -136,6 +143,9 @@ it(
         name: /Account & security/,
       })
     ).toHaveAttribute('href', '/account');
+
+    expect(screen.getByRole('link', { name: 'Dashboard' })).not.toHaveClass('is-active');
+    expect(screen.getByRole('link', { name: 'Open my profile' })).toHaveClass('is-active');
 
     fireEvent.click(
       screen.getByRole('button', {
