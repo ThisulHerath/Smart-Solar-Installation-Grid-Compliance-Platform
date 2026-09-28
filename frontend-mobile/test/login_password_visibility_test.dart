@@ -32,7 +32,11 @@ void main() {
     await tester.tap(toggleFinder);
     await tester.pump();
 
-    passwordField = tester.widget<TextField>(passwordFieldFinder);
+    final visiblePasswordFieldFinder = find.byWidgetPredicate(
+      (widget) => widget is TextField && !widget.obscureText,
+    );
+    expect(visiblePasswordFieldFinder, findsOneWidget);
+    passwordField = tester.widget<TextField>(visiblePasswordFieldFinder);
     expect(passwordField.obscureText, isFalse);
 
     final hideToggleFinder = find.byTooltip('Hide password');
@@ -41,7 +45,11 @@ void main() {
     await tester.tap(hideToggleFinder);
     await tester.pump();
 
-    passwordField = tester.widget<TextField>(passwordFieldFinder);
+    final obscuredPasswordFieldFinder = find.byWidgetPredicate(
+      (widget) => widget is TextField && widget.obscureText,
+    );
+    expect(obscuredPasswordFieldFinder, findsOneWidget);
+    passwordField = tester.widget<TextField>(obscuredPasswordFieldFinder);
     expect(passwordField.obscureText, isTrue);
   });
 }
