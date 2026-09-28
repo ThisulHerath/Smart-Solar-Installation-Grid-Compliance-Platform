@@ -85,14 +85,4 @@ public class GuardrailResultDto
     [JsonPropertyName("execution_logs")]
     public List<Dictionary<string, object>> ExecutionLogs { get; set; } = new();
 
-    /// <summary>Fail-safe default — always requires approval when AI is unavailable.</summary>
-    public static GuardrailResultDto SafeDefault() => new()
-    {
-        SafetyStatus = "REQUIRES_APPROVAL",
-        RiskLevel = "HIGH",
-        RequiresApproval = true,
-        Issues = new List<string> { "Safety guardrail evaluation unavailable — approval required by default." },
-        Recommendations = new List<string> { "Retry after AI service is restored." },
-        RecommendationSummary = "AI guardrail could not be evaluated. Manual review required."
-    };
 }

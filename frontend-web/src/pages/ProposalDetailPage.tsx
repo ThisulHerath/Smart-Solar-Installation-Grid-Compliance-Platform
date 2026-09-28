@@ -193,8 +193,7 @@ export const ProposalDetailPage: React.FC = () => {
   const isEngineeringStaff = Boolean(user?.roles.some(role => ['SENIOR_ENGINEER', 'ADMINISTRATOR'].includes(role)));
   const isPending = proposal?.proposalStatus === 'PendingApproval' && isEngineeringStaff;
   const missingCompliance = !proposal?.gridComplianceStatus || proposal.gridComplianceStatus.toUpperCase() === 'UNKNOWN';
-  const validationPassed = validationResult ? validationResult.valid || validationResult.requiresApproval : true;
-  const approvalBlocked = !validationPassed;
+  const approvalBlocked = proposal?.safetyStatus.toUpperCase() === 'BLOCKED';
 
   async function handleAction(action: 'approve' | 'reject' | 'revise', comment: string) {
     if (!id) return;
@@ -224,7 +223,7 @@ export const ProposalDetailPage: React.FC = () => {
   const statusColor = STATUS_COLORS[proposal.proposalStatus] || '#60715e';
 
   return (
-    <div className="page-container">
+    <div className="page-container proposal-detail-page">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -355,7 +354,10 @@ export const ProposalDetailPage: React.FC = () => {
                 };
                 return <li key={i}><span>{labels[name] || (name || check).replace(/_/g, ' ')}</span><strong>{result === 'PASS' ? 'Passed' : result === 'FAIL' ? 'Needs attention' : 'Review required'}</strong></li>;
               })}</ul>
-              <details className="proposal-technical-record"><summary>Technical check codes</summary><ul>{(validationResult.checks ?? []).map((check, i) => <li key={i}><code>{check}</code></li>)}</ul></details>
+              <details className="proposal-technical-record">
+                <summary><span>Technical check codes</span><small>{(validationResult.checks ?? []).length} checks</small></summary>
+                <ul>{(validationResult.checks ?? []).map((check, i) => <li key={i}><code>{check}</code></li>)}</ul>
+              </details>
             </>}
             <WorkflowSummary surveyId={proposal.solarSurveyId} />
             <p className="proposal-guidance-note">Proposal record: {proposal.id} · Survey record: {proposal.solarSurveyId}</p>
@@ -371,7 +373,7 @@ export const ProposalDetailPage: React.FC = () => {
 
           {approvalBlocked && (
             <div className="alert alert--error">
-              Approval is blocked. Request revision so the homeowner can generate an updated proposal using the completed inspection, or reject this proposal.
+              Approval is blocked because the safety assessment requires corrective action. Request a revision or reject this proposal.
             </div>
           )}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>

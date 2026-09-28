@@ -5,7 +5,9 @@ import 'package:smart_solar_mobile/providers/auth_provider.dart';
 import 'package:smart_solar_mobile/screens/login_screen.dart';
 
 void main() {
-  testWidgets('login screen toggles password visibility when eye icon is tapped', (tester) async {
+  testWidgets(
+      'login screen toggles password visibility when eye icon is tapped',
+      (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -17,7 +19,7 @@ void main() {
     );
 
     final passwordFieldFinder = find.byWidgetPredicate(
-      (widget) => widget is TextField && widget.decoration?.labelText == 'Password',
+      (widget) => widget is TextField && widget.obscureText,
     );
     expect(passwordFieldFinder, findsOneWidget);
 

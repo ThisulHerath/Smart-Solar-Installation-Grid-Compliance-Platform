@@ -23,3 +23,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/hero-solar.jpg
+    - assets/images/solar-home-portrait.png
+    - assets/images/hero-engineer.png
+    - assets/images/login-solar-solution.png
+    - assets/images/register-solar-engineer.png

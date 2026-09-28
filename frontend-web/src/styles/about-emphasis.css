@@ -1,0 +1,27 @@
+.eco-about {
+  width: min(1220px, calc(100% - 64px));
+  grid-template-columns: .9fr 1.1fr;
+  gap: 92px;
+  margin-bottom: 118px;
+}
+
+.eco-about > div > p:first-child { font-size: 12px; letter-spacing: .14em; }
+.eco-about h2 { font-size: clamp(42px, 4.4vw, 61px); }
+.eco-about > div > p:not(:first-child) { max-width: 560px; margin: 27px 0; font-size: 16px; line-height: 1.85; }
+.about-stats { gap: 42px; margin-top: 37px; }
+.about-stats strong { font-size: 31px; }
+.about-stats small { margin-top: 6px; font-size: 12px; }
+
+@media (max-width: 850px) {
+  .eco-about { gap: 50px; }
+  .about-stats { gap: 24px; }
+}
+
+@media (max-width: 650px) {
+  .eco-about { width: calc(100% - 36px); margin-bottom: 72px; }
+  .eco-about h2 { font-size: 41px; }
+  .eco-about > div > p:not(:first-child) { font-size: 15px; }
+  .about-stats { gap: 12px; margin-top: 28px; }
+  .about-stats strong { font-size: 23px; }
+  .about-stats small { font-size: 10px; }
+}

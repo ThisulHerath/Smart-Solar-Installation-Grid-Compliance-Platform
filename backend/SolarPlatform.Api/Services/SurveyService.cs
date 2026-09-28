@@ -18,6 +18,8 @@ public interface ISurveyService
     Task<SurveyDto?> GetAsync(Guid userId, Guid surveyId, bool staffAccess = false);
     Task<SurveyDto?> UpdateAsync(Guid userId, Guid surveyId, SurveyRequestDto request);
     Task<SurveyDto?> SubmitAsync(Guid userId, Guid surveyId);
+    Task<SurveyDto?> RetryAnalysisAsync(Guid userId, Guid surveyId);
+    Task<bool> DeleteAsync(Guid userId, Guid surveyId);
     Task<SurveyDto?> AddImageAsync(Guid userId, Guid surveyId, SurveyImageType imageType, string fileUrl, string fileName);
 }
 
@@ -80,6 +82,20 @@ public class SurveyService : ISurveyService
         return survey == null ? null : ToDto(survey);
     }
 
+    public async Task<bool> DeleteAsync(Guid userId, Guid surveyId)
+    {
+        var survey = await _db.SolarSurveys.FirstOrDefaultAsync(s => s.Id == surveyId && s.Customer.UserId == userId);
+        if (survey == null) return false;
+        if (survey.SurveyStatus == SurveyStatus.Processing)
+            throw new InvalidOperationException("Wait for project analysis to finish before deleting this project.");
+        if (await _db.Set<EquipmentQuote>().AnyAsync(q => q.EngineeringProposal.SolarSurveyId == surveyId)
+            || await _db.Set<InventoryReservation>().AnyAsync(r => r.EngineeringProposal.SolarSurveyId == surveyId))
+            throw new InvalidOperationException("This project has inventory records. Contact the project team before removing it.");
+        _db.SolarSurveys.Remove(survey);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<SurveyDto?> UpdateAsync(Guid userId, Guid surveyId, SurveyRequestDto request)
     {
         ValidateRequest(request);
@@ -106,7 +122,42 @@ public class SurveyService : ISurveyService
         _db.AgentWorkflows.Add(workflow);
         SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
         await _db.SaveChangesAsync();
+        await CompleteAnalysisAsync(survey, workflow);
+        return ToDto(survey);
+    }
+
+    public async Task<SurveyDto?> RetryAnalysisAsync(Guid userId, Guid surveyId)
+    {
+        var profile = await GetOrCreateProfileAsync(userId);
+        var survey = await _db.SolarSurveys.Include(s => s.Images).Include(s => s.Workflows).SingleOrDefaultAsync(s => s.Id == surveyId && s.CustomerId == profile.Id);
+        if (survey == null) return null;
+        if (survey.SurveyStatus != SurveyStatus.Failed) throw new InvalidOperationException("Only failed analyses can be retried.");
+
+        SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
+        var workflow = new AgentWorkflow { SolarSurveyId = survey.Id, Objective = "Assess rooftop solar suitability and prepare an approved equipment plan", Status = WorkflowStatus.Processing, StartedAt = DateTime.UtcNow };
+        _db.AgentWorkflows.Add(workflow);
+        await _db.SaveChangesAsync();
+        await CompleteAnalysisAsync(survey, workflow);
+        return ToDto(survey);
+    }
+
+    private async Task CompleteAnalysisAsync(SolarSurvey survey, AgentWorkflow workflow)
+    {
         var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, objective = workflow.Objective, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
+        var completedBySizingAgent =
+            string.Equals(result.Status, "completed", StringComparison.OrdinalIgnoreCase) &&
+            result.Recommendation.HasValue &&
+            result.ExecutionLogs.Any(log =>
+                string.Equals(log.AgentName, "SolarSizingAgent", StringComparison.Ordinal) &&
+                string.Equals(log.Status, "completed", StringComparison.OrdinalIgnoreCase));
+
+        if (!completedBySizingAgent)
+        {
+            result.Status = "failed";
+            result.Recommendation = null;
+            result.Errors.Add("SolarSizingAgent did not return a completed, traceable result.");
+        }
+
         workflow.ResultJson = result.Recommendation?.GetRawText();
         workflow.PlanJson = JsonSerializer.Serialize(result.Plan);
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
@@ -133,7 +184,6 @@ public class SurveyService : ISurveyService
         workflow.UpdatedAt = DateTime.UtcNow;
         SurveyStatusTransition.Move(survey, result.Status == "completed" ? SurveyStatus.AnalysisComplete : SurveyStatus.Failed);
         await _db.SaveChangesAsync();
-        return ToDto(survey);
     }
 
     public async Task<SurveyDto?> AddImageAsync(Guid userId, Guid surveyId, SurveyImageType imageType, string fileUrl, string fileName)
@@ -171,6 +221,7 @@ public class SurveyService : ISurveyService
         survey.RoofOrientation = request.RoofOrientation; survey.RoofTilt = request.RoofTilt; survey.PropertyAddress = request.PropertyAddress.Trim();
         survey.Latitude = request.Latitude; survey.Longitude = request.Longitude; survey.Notes = request.Notes?.Trim();
     }
+
     private static ProfileDto ToProfile(CustomerProfile p) => new(p.Id, p.FullName, p.PhoneNumber, p.Address);
     private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList());
 }

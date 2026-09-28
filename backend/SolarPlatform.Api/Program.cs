@@ -16,6 +16,12 @@ using SolarPlatform.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Avoid the Windows Event Log provider in local development, where its permissions
+// can turn an otherwise recoverable warning into a failed HTTP request.
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 if (builder.Environment.IsDevelopment())
 {
     var envFilePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", ".env"));

@@ -26,9 +26,11 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         var quotes = proposal == null ? new List<EquipmentQuote>() : await db.Set<EquipmentQuote>().AsNoTracking().Where(x => x.EngineeringProposalId == proposal.Id).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
         var activeQuote = quotes.FirstOrDefault(x => x.Status == "RESERVED") ?? quotes.FirstOrDefault();
         var completed = new List<string>();
-        if (sizing?.Status == WorkflowStatus.Completed) completed.Add("SolarSizingAgent");
-        if (compliance != null) completed.Add("GridComplianceAgent");
-        if (proposal?.GuardrailResultJson != null) completed.Add("SafetyGuardrailAgent");
+        if (sizing?.Status == WorkflowStatus.Completed && sizing.ExecutionLogs.Any(x => x.AgentName == "SolarSizingAgent" && x.Status == "completed")) completed.Add("SolarSizingAgent");
+        if (compliance != null &&
+            !string.IsNullOrWhiteSpace(compliance.WorkflowId) &&
+            !compliance.WorkflowId.StartsWith("local-comp-", StringComparison.OrdinalIgnoreCase)) completed.Add("GridComplianceAgent");
+        if (HasCompletedAgentTrace(proposal?.GuardrailResultJson, "SafetyGuardrailAgent")) completed.Add("SafetyGuardrailAgent");
         if (proposal?.ProposalStatus == ProposalStatus.Approved) completed.Add("HumanApproval");
         if (activeQuote?.Status is "VALIDATED" or "RESERVED" or "RELEASED") completed.Add("EquipmentPricingAgent");
         if (activeQuote?.Status == "RESERVED") completed.Add("InventoryReservation");
@@ -50,4 +52,25 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         });
     }
     private static JsonElement? ReadJson(string? value) => string.IsNullOrWhiteSpace(value) ? null : JsonSerializer.Deserialize<JsonElement>(value);
+
+    private static bool HasCompletedAgentTrace(string? value, string agentName)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        try
+        {
+            using var document = JsonDocument.Parse(value);
+            if (!document.RootElement.TryGetProperty("execution_logs", out var logs) || logs.ValueKind != JsonValueKind.Array)
+                return false;
+
+            return logs.EnumerateArray().Any(log =>
+                log.TryGetProperty("agent_name", out var agent) &&
+                log.TryGetProperty("status", out var status) &&
+                string.Equals(agent.GetString(), agentName, StringComparison.Ordinal) &&
+                string.Equals(status.GetString(), "completed", StringComparison.OrdinalIgnoreCase));
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
 }

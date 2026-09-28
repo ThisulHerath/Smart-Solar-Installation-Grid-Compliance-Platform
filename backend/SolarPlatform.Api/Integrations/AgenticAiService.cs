@@ -169,15 +169,15 @@ public class AgenticAiService : IAgenticAiService
             var response = await _httpClient.SendAsync(message, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Agentic AI guardrail endpoint returned status {StatusCode} — defaulting to REQUIRES_APPROVAL.", response.StatusCode);
-                return GuardrailResultDto.SafeDefault();
+                _logger.LogWarning("Agentic AI guardrail endpoint returned status {StatusCode}.", response.StatusCode);
+                return null;
             }
-            return await response.Content.ReadFromJsonAsync<GuardrailResultDto>(cancellationToken: cancellationToken) ?? GuardrailResultDto.SafeDefault();
+            return await response.Content.ReadFromJsonAsync<GuardrailResultDto>(cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Guardrail evaluation failed or AI service unavailable — defaulting to REQUIRES_APPROVAL.");
-            return GuardrailResultDto.SafeDefault();
+            _logger.LogError(ex, "Guardrail evaluation failed or AI service unavailable.");
+            return null;
         }
     }
 }

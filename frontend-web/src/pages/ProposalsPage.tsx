@@ -55,7 +55,7 @@ export const ProposalsPage: React.FC = () => {
   const pendingCount = proposals.filter(p => p.proposalStatus === 'PendingApproval').length;
 
   return (
-    <div className="page-container">
+    <div className="page-container operations-page proposals-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Engineering Proposals</h1>

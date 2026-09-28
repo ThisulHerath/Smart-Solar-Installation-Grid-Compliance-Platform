@@ -1,0 +1,48 @@
+.project-list { display: grid; gap: 18px; min-width: 0; }
+.project-list__cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; border-top: 1px solid #dce5e3; }
+.workspace-dashboard .project-list .project-survey-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, auto) 34px; align-items: center; gap: 6px 24px; min-width: 0; min-height: 112px; padding: 20px 16px; border: 0; border-bottom: 1px solid #dce5e3; border-radius: 0; background: #fff; box-shadow: none; }
+.workspace-dashboard .project-list .project-survey-card::after { display: none; }
+.workspace-dashboard .project-list .project-survey-card > .badge { grid-column: 2; grid-row: 1; justify-self: end; max-width: 100%; min-height: 24px; box-sizing: border-box; white-space: normal; letter-spacing: 0; }
+.workspace-dashboard .project-list .project-survey-card h3 { grid-column: 1; grid-row: 1; margin: 0 !important; font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
+.workspace-dashboard .project-list .project-survey-card > p { grid-column: 1; margin: 0; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.workspace-dashboard .project-list .project-survey-card > p:has(a) { grid-column: 2; justify-self: end; margin: 0; font-size: 13px; }
+.workspace-dashboard .project-list .project-survey-card > p a { color: #0b596b; }
+.workspace-dashboard .project-list .project-survey-card > .btn { grid-column: 2; grid-row: 2; justify-self: end; margin: 0; min-height: 32px; max-width: 100%; padding: 6px 12px; border: 1px solid #cddedc !important; background: #f4f8f7 !important; color: #0b596b; border-radius: 6px; font-size: 12px; white-space: normal; }
+.workspace-dashboard .project-list .project-survey-card > .btn:hover:not(:disabled) { background: #e8f1ef !important; }
+.workspace-dashboard .project-list .project-survey-card > .account-error { grid-column: 1; grid-row: 3; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; color: #a5554d; font-size: 12px; }
+.project-list .project-survey-card > .project-delete { position: static; grid-column: 3; grid-row: 1 / span 2; z-index: 2; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #8b7775; cursor: pointer; }
+@media (max-width: 700px) {
+  .workspace-dashboard .project-list .project-survey-card { grid-template-columns: minmax(0, 1fr) 34px; gap: 8px 12px; padding: 16px 12px; }
+  .workspace-dashboard .project-list .project-survey-card > .badge { grid-column: 1; grid-row: 1; justify-self: start; }
+  .workspace-dashboard .project-list .project-survey-card h3 { grid-row: 2; }
+  .workspace-dashboard .project-list .project-survey-card > p,
+  .workspace-dashboard .project-list .project-survey-card > p:has(a),
+  .workspace-dashboard .project-list .project-survey-card > .account-error,
+  .workspace-dashboard .project-list .project-survey-card > .btn { grid-column: 1; grid-row: auto; justify-self: start; }
+  .project-list .project-survey-card > .project-delete { grid-column: 2; grid-row: 1; }
+}
+.project-delete:hover:not(:disabled) { background: #fff0ef !important; }
+.project-delete:disabled { opacity: .4; cursor: default; }
+.project-delete:focus-visible { outline: 2px solid #b33838; outline-offset: 2px; }
+.workspace-dashboard .project-list .project-survey-card > .btn { color: #0b596b !important; }
+.project-delete-dialog { width: min(440px, calc(100% - 32px)); margin: auto; padding: 24px; box-sizing: border-box; border: 1px solid #dce5e3; border-radius: 8px; background: #fff; color: #304143; box-shadow: 0 16px 50px #0003; }
+.project-delete-dialog::backdrop { background: #102b35a6; }
+.project-delete-dialog h2 { margin: 0 0 16px; font-size: 22px; }
+.project-delete-dialog p { margin: 12px 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.project-delete-dialog > div { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+.project-delete-dialog button { padding: 10px 16px; border: 1px solid #ccd9d5; border-radius: 6px; background: #fff; color: #304143; cursor: pointer; }
+.project-delete-dialog .project-delete-dialog__confirm { background: #b33838; border-color: #b33838; color: #fff; }
+.project-delete-dialog .project-delete-dialog__error { color: #b33838; }
+.project-delete-dialog button:disabled { opacity: .6; cursor: wait; }
+.project-list__toolbar, .project-list__pagination { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.project-list__toolbar h3 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 20px; color: #304143; }
+.project-list__toolbar h3 span { padding: 3px 9px; background: #eaf3ed; color: #287247; border-radius: 6px; font-size: 13px; }
+.project-list__search { display: flex; align-items: center; gap: 10px; width: min(100%, 320px); padding: 0 12px; border: 1px solid #cdded6; border-radius: 6px; background: #fff; color: #60777a; box-sizing: border-box; }
+.project-list__search input { width: 100%; min-width: 0; height: 42px; border: 0; outline: none; background: transparent; font: inherit; font-size: 14px; }
+.project-list__search:focus-within { outline: 2px solid #287247; outline-offset: 2px; }
+.project-list__pagination { padding: 16px 0; border-top: 1px solid #dce8df; color: #536b6e; font-size: 13px; }
+.project-list__pagination > div { display: flex; align-items: center; gap: 14px; }
+.project-list__pagination button { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid #cdded6; border-radius: 6px; background: #fff; color: #0b596b; cursor: pointer; }
+.project-list__pagination button:disabled { opacity: .4; cursor: default; }
+.project-list__pagination button:focus-visible { outline: 2px solid #287247; outline-offset: 2px; }
+@media (max-width: 600px) { .project-list__search { width: 100%; } }

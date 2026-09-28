@@ -1,0 +1,2 @@
+.eco-nav nav > a:first-child { color: #3f4b4d; text-decoration: none; }
+.eco-nav nav > a.is-active { color: #69b63b; text-decoration: underline; text-underline-offset: 6px; }

@@ -1,1 +1,276 @@
-.profile-page{max-width:1000px;margin:auto;display:grid;gap:28px}.profile-page header h1{font-size:38px;letter-spacing:-1px}.profile-page header>p:last-child,.profile-info>p,.profile-security p{color:var(--text-secondary);font-size:14px;margin-top:8px}.profile-grid{display:grid;grid-template-columns:320px 1fr;gap:24px}.profile-identity{padding:36px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:17px}.profile-avatar{display:grid;place-items:center;width:96px;height:96px;border-radius:30px;background:linear-gradient(135deg,#d4ef83,#77c9a1);color:#183c30;font-size:32px;font-weight:700}.profile-identity h2{font-size:23px}.profile-email{font-size:13px;color:var(--text-secondary);overflow-wrap:anywhere;max-width:100%}.profile-roles{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:16px}.profile-info{padding:32px}.profile-info h2,.profile-security h2{font-size:20px}.profile-info dl{margin-top:20px}.profile-info dl>div{padding:16px 0;border-bottom:1px solid var(--border-color)}.profile-info dl>div:last-child{border:0}.profile-info dt{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:12px;margin-bottom:7px}.profile-info dd{overflow-wrap:anywhere;font-size:15px}.profile-security{padding:28px;display:flex;align-items:center;gap:22px}.profile-security-icon{color:#476e35}.profile-security .btn{margin-left:auto;flex-shrink:0}@media(max-width:750px){.profile-grid{grid-template-columns:1fr}.profile-security{flex-wrap:wrap}.profile-security .btn{margin-left:0}.profile-info{padding:24px}}
+.profile-page {
+  max-width: 1000px;
+  margin: auto;
+  display: grid;
+  gap: 28px;
+}
+
+.profile-page header h1 {
+  font-size: 38px;
+  letter-spacing: -1px;
+}
+
+.profile-page header > p:last-child,
+.profile-info > p,
+.profile-security p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+}
+
+.profile-identity {
+  padding: 36px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 17px;
+}
+
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #d4ef83, #77c9a1);
+  color: #183c30;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.profile-photo-control {
+  position: relative;
+  width: 96px;
+  height: 96px;
+}
+
+.profile-avatar {
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-photo-input {
+  display: none;
+}
+
+.profile-photo-upload {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #0a5569;
+  color: #fff;
+  cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+
+.profile-photo-upload:hover {
+  background: #69b63b;
+  transform: scale(1.08);
+}
+
+.profile-photo-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #5b7477;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.profile-photo-remove:hover {
+  color: #b64a4f;
+}
+
+.profile-photo-save {
+  min-height: 36px;
+  padding-inline: 15px;
+}
+
+.profile-photo-error {
+  margin: -8px 0 0;
+  color: #b64a4f;
+  font-size: 12px;
+}
+
+.profile-identity h2 {
+  font-size: 23px;
+}
+
+.profile-email {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+.profile-roles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.profile-info {
+  padding: 32px;
+}
+
+.profile-info h2,
+.profile-security h2 {
+  font-size: 20px;
+}
+
+.profile-info dl {
+  margin-top: 20px;
+}
+
+.profile-info dl > div {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.workspace-shell .profile-info dl > div {
+  border-bottom-color: #111b1d;
+}
+
+.workspace-shell .profile-page .glass-panel {
+  border-color: #111b1d;
+}
+
+.profile-info dl > div:last-child {
+  border: 0;
+}
+
+.profile-info dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.profile-info dd {
+  overflow-wrap: anywhere;
+  font-size: 15px;
+}
+
+.profile-security {
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.profile-security-icon {
+  color: #476e35;
+}
+
+.profile-security .btn {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+@media (max-width: 750px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-security {
+    flex-wrap: wrap;
+  }
+
+  .profile-security .btn {
+    margin-left: 0;
+  }
+
+  .profile-info {
+    padding: 24px;
+  }
+}
+
+.workspace-shell .profile-page {
+  max-width: 1060px;
+  gap: 22px;
+  padding: 20px 0 36px;
+}
+
+.workspace-shell .profile-page header {
+  padding: 0 8px;
+}
+
+.workspace-shell .profile-page header h1 {
+  color: #0e242b;
+  font-size: 30px;
+  letter-spacing: -0.6px;
+  text-transform: uppercase;
+}
+
+.workspace-shell .profile-page header > p:last-child {
+  color: #29464d;
+}
+
+.workspace-shell .profile-page .glass-panel {
+  border: 2px solid rgba(25, 39, 43, 0.85);
+  border-radius: 14px;
+  background: rgba(180, 231, 235, 0.43);
+  box-shadow: 0 14px 28px rgba(48, 119, 132, 0.1), inset 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.workspace-shell .profile-avatar {
+  width: 118px;
+  height: 118px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #70c9df;
+  color: #071d23;
+  font-size: 34px;
+}
+
+.workspace-shell .profile-photo-control {
+  width: 118px;
+  height: 118px;
+}
+
+.workspace-shell .profile-identity h2 {
+  color: #0b2026;
+  font-size: 26px;
+  text-transform: uppercase;
+}
+
+.workspace-shell .profile-info h2,
+.workspace-shell .profile-security h2 { color: #0b2026; }
+
+.workspace-shell .profile-security {
+  border-color: rgba(25, 39, 43, 0.85);
+  background: rgba(180, 231, 235, 0.5);
+}
+
+.workspace-shell .profile-security .btn-primary,
+.workspace-shell .profile-security .btn-secondary {
+  background: #14aa61;
+  border-color: #078347;
+  color: #fff;
+}

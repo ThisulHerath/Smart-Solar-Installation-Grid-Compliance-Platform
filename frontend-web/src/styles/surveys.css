@@ -1,0 +1,109 @@
+.staff-surveys-page {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 22px 24px;
+  box-sizing: border-box;
+  color: #101c20;
+}
+
+.staff-surveys-header {
+  position: sticky;
+  top: 92px;
+  z-index: 20;
+  border: 3px solid #00a178 !important;
+  border-radius: 15px !important;
+  background: #fff !important;
+  padding: 12px 18px !important;
+  box-shadow: 0 10px 22px rgba(38, 89, 101, 0.1), 0 0 0 8px rgba(232, 245, 248, 0.96) !important;
+  box-shadow: 0 10px 22px rgba(38, 89, 101, 0.1) !important;
+}
+
+.staff-surveys-header h1 {
+  color: #101c20;
+  font-size: clamp(24px, 3vw, 34px) !important;
+}
+
+.staff-surveys-header p { color: #29464d !important; }
+
+.staff-surveys-header .btn {
+  border: 2px solid #818181;
+  background: #eee;
+  color: #101c20;
+}
+
+.staff-surveys-split {
+  grid-template-columns: 235px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: start;
+}
+
+.staff-survey-list {
+  position: sticky !important;
+  top: 10px;
+  max-height: calc(100dvh - 20px) !important;
+  height: calc(100dvh - 20px);
+  min-height: 520px;
+  overflow-y: auto;
+  padding: 9px !important;
+  border: 1px solid #c6c6c6 !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 22px rgba(38, 89, 101, 0.1) !important;
+}
+
+.staff-survey-list > div:first-child {
+  padding: 5px 7px 8px !important;
+  color: #47565a !important;
+  font-size: 11px !important;
+}
+
+.staff-survey-list > div:not(:first-child) {
+  padding: 10px !important;
+  border: 1px solid #d1d1d1 !important;
+  border-radius: 9px !important;
+  background: #f7f3f3 !important;
+}
+
+.staff-survey-list > div:not(:first-child):hover {
+  border-color: #00a178 !important;
+}
+
+.staff-survey-detail {
+  min-width: 0;
+  gap: 10px !important;
+}
+
+.staff-survey-detail-card,
+.staff-survey-workflow-card {
+  padding: 13px !important;
+  border: 1px solid #d1d1d1 !important;
+  border-radius: 14px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 22px rgba(38, 89, 101, 0.1) !important;
+}
+
+.staff-survey-detail-card h2 { font-size: 18px !important; }
+.staff-survey-workflow-card h3 { font-size: 16px !important; }
+
+.staff-survey-detail-card > div:nth-child(2) > div,
+.staff-survey-workflow-card > div > div[style*="background"] {
+  border-radius: 8px !important;
+}
+
+.staff-survey-workflow-card {
+  min-height: 260px;
+}
+
+@media (max-width: 900px) {
+  .staff-surveys-page { max-width: none; }
+  .staff-surveys-split { grid-template-columns: 1fr !important; }
+  .staff-survey-list {
+    position: static;
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px) !important;
+    min-height: 280px;
+  }
+
+  .staff-surveys-header { top: 76px; }
+}

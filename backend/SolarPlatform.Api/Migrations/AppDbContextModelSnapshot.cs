@@ -1067,6 +1067,10 @@ namespace SolarPlatform.Api.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
                     b.Property<int>("SecurityVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("integer");
