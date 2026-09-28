@@ -320,6 +320,19 @@ public class ProposalService : IProposalService
                 throw new InvalidOperationException(
                     $"Proposal cannot be approved from status '{proposal.ProposalStatus}'. Only PENDING_APPROVAL proposals can be approved.");
 
+            // Approval must use current compliance evidence, not only the status
+            // copied onto the proposal when it was created. The evidence may have
+            // been removed or invalidated while the proposal awaited review.
+            var hasComplianceEvidence = await _db.ComplianceAssessments
+                .AsNoTracking()
+                .AnyAsync(
+                    assessment => assessment.SiteInspection.FieldJob.SolarSurveyId == proposal.SolarSurveyId,
+                    ct);
+
+            if (!hasComplianceEvidence)
+                throw new InvalidOperationException(
+                    "Compliance evidence is required before a proposal can be approved.");
+
             // Step 2: Re-run deterministic validation
             if (proposal.SafetyStatus.Equals("BLOCKED", StringComparison.OrdinalIgnoreCase))
             {
