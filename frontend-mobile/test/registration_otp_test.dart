@@ -8,26 +8,42 @@ import 'package:smart_solar_mobile/services/api_service.dart';
 class MailApi extends ApiService {
   final calls = <String>[];
   @override
-  Future<dynamic> post(String endpoint, Map<String, dynamic> body, {bool requiresAuth = true}) async {
+  Future<dynamic> post(String endpoint, Map<String, dynamic> body,
+      {bool requiresAuth = true}) async {
     calls.add(endpoint);
-    if (endpoint.endsWith('request-otp')) return {'challengeId': 'test-challenge', 'maskedEmail': 'o•••@example.com', 'resendAfterSeconds': 60};
+    if (endpoint.endsWith('request-otp')) {
+      return {
+        'challengeId': 'test-challenge',
+        'maskedEmail': 'o•••@example.com',
+        'resendAfterSeconds': 60
+      };
+    }
     throw Exception('The verification code is incorrect.');
   }
 }
+
 void main() {
-  testWidgets('registration requests email first and retains invalid-code feedback', (tester) async {
+  testWidgets(
+      'registration requests email first and retains invalid-code feedback',
+      (tester) async {
     final api = MailApi();
-    await tester.pumpWidget(ChangeNotifierProvider(create: (_) => AuthProvider(), child: MaterialApp(home: RegisterScreen(api: api))));
+    await tester.pumpWidget(ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: MaterialApp(home: RegisterScreen(api: api))));
     final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'Solar Owner');
-    await tester.enterText(fields.at(1), 'owner@example.com');
+    await tester.enterText(fields.at(0), 'owner@example.com');
+    await tester.enterText(fields.at(1), 'Solar');
+    await tester.enterText(fields.at(2), 'Owner');
     await tester.enterText(fields.at(3), 'A safe passphrase123');
-    await tester.ensureVisible(find.text('Send verification code'));
-    await tester.tap(find.text('Send verification code')); await tester.pumpAndSettle();
+    await tester.enterText(fields.at(4), 'A safe passphrase123');
+    await tester.ensureVisible(find.text('Next'));
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
     expect(api.calls, ['/api/auth/register/request-otp']);
-    expect(find.text('Email verification code'), findsOneWidget);
+    expect(find.text('OTP'), findsOneWidget);
     await tester.enterText(find.byType(TextFormField), '123456');
-    await tester.tap(find.text('Verify & create account')); await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirm'));
+    await tester.pumpAndSettle();
     expect(api.calls.last, '/api/auth/register');
     expect(find.text('The verification code is incorrect.'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());

@@ -1,15 +1,19 @@
-import '../widgets/solar_field.dart';
-import '../utils/validators.dart';
-import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../theme/solar_theme.dart';
+import '../utils/validators.dart';
+import '../widgets/solar_field.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
+const _orange = SolarColors.lime;
+const _ink = SolarColors.text;
+const _muted = SolarColors.muted;
+const _field = SolarColors.surface;
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -22,16 +26,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (!_form.currentState!.validate()) return;
-    final email = _emailController.text.trim();
-    final pass = _passwordController.text;
-    if (email.isEmpty || pass.isEmpty) return;
-
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final success = await auth.login(email, pass);
+    final auth = context.read<AuthProvider>();
+    final success = await auth.login(
+        _emailController.text.trim(), _passwordController.text);
     if (success && mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+          MaterialPageRoute(builder: (_) => const HomeScreen()));
     }
   }
 
@@ -42,193 +42,352 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  InputDecoration _decoration(String hint, {Widget? suffix}) => InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(color: SolarColors.muted, fontSize: 12),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: _field,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: SolarColors.border)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: SolarColors.border)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: _orange, width: 1.5)),
+      );
+
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthProvider>(context);
-
+    final auth = context.watch<AuthProvider>();
     return Scaffold(
       backgroundColor: SolarColors.background,
-      appBar: AppBar(title: const Text('Log in')),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
+      body: Stack(children: [
+        const Positioned.fill(bottom: null, child: _OrangeHeader()),
+        SafeArea(child: LayoutBuilder(builder: (context, constraints) {
+          final compact = constraints.maxHeight < 640;
+          final horizontal = constraints.maxWidth < 340 ? 16.0 : 23.0;
+          final top = compact ? 96.0 : 116.0;
+          final bottom = compact ? 14.0 : 24.0;
+          final contentHeight = (constraints.maxHeight - top - bottom)
+              .clamp(0.0, double.infinity);
+          return SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-                key: _form,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo Icon
-                    Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [SolarColors.lime, Color(0xFFE3ECCF)],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(Icons.wb_sunny_rounded,
-                          color: SolarColors.text, size: 32),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Welcome back.',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: SolarColors.text,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Your solar journey, all in one place. Sign in to continue.',
-                      style: TextStyle(fontSize: 14, color: SolarColors.muted),
-                    ),
-                    const SizedBox(height: 28),
+            padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, bottom),
+            child: Center(
+                child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: contentHeight),
+                        child: IntrinsicHeight(
+                            child: Form(
+                                key: _form,
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      const Center(child: _AvatarBadge()),
+                                      SizedBox(height: compact ? 8 : 14),
+                                      const Text('Login',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              color: _ink,
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.w800)),
+                                      SizedBox(height: compact ? 14 : 24),
+                                      if (auth.errorMessage != null) ...[
+                                        Container(
+                                            padding: const EdgeInsets.all(11),
+                                            decoration: BoxDecoration(
+                                                color: const Color(0xFFFFEEEE),
+                                                borderRadius:
+                                                    BorderRadius.circular(9)),
+                                            child: Text(auth.errorMessage!,
+                                                style: const TextStyle(
+                                                    color: Color(0xFFB33838),
+                                                    fontSize: 11))),
+                                        const SizedBox(height: 11),
+                                      ],
+                                      SolarField(
+                                        controller: _emailController,
+                                        validator: Validators.email,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
+                                        autofillHints: const [
+                                          AutofillHints.email
+                                        ],
+                                        style: const TextStyle(
+                                            color: _ink, fontSize: 13),
+                                        decoration: _decoration('Email',
+                                            suffix: const Icon(
+                                                Icons.email_outlined,
+                                                color: _muted,
+                                                size: 18)),
+                                      ),
+                                      SolarField(
+                                        controller: _passwordController,
+                                        validator: Validators.required,
+                                        obscureText: _obscurePassword,
+                                        style: const TextStyle(
+                                            color: _ink, fontSize: 13),
+                                        textInputAction: TextInputAction.done,
+                                        onFieldSubmitted: (_) {
+                                          if (auth.status !=
+                                              AuthStatus.authenticating) {
+                                            _handleLogin();
+                                          }
+                                        },
+                                        decoration: _decoration('Password',
+                                            suffix: IconButton(
+                                              tooltip: _obscurePassword
+                                                  ? 'Show password'
+                                                  : 'Hide password',
+                                              icon: Icon(
+                                                  _obscurePassword
+                                                      ? Icons
+                                                          .visibility_off_outlined
+                                                      : Icons
+                                                          .visibility_outlined,
+                                                  color: _orange,
+                                                  size: 18),
+                                              onPressed: () => setState(() =>
+                                                  _obscurePassword =
+                                                      !_obscurePassword),
+                                            )),
+                                      ),
+                                      Align(
+                                          alignment: Alignment.centerRight,
+                                          child: TextButton(
+                                            onPressed: () {},
+                                            style: TextButton.styleFrom(
+                                                foregroundColor: _muted,
+                                                textStyle: const TextStyle(
+                                                    fontSize: 10)),
+                                            child: const Text(
+                                                'Forgot Your Password?'),
+                                          )),
+                                      SizedBox(height: compact ? 2 : 8),
+                                      SizedBox(
+                                          height: 45,
+                                          child: ElevatedButton(
+                                            onPressed: auth.status ==
+                                                    AuthStatus.authenticating
+                                                ? null
+                                                : _handleLogin,
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor: _orange,
+                                                foregroundColor: Colors.white,
+                                                elevation: 2,
+                                                shadowColor: _orange.withValues(
+                                                    alpha: .3),
+                                                padding: EdgeInsets.zero,
+                                                minimumSize: const Size(0, 45),
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            9))),
+                                            child: auth.status ==
+                                                    AuthStatus.authenticating
+                                                ? const SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                            color: Colors.white,
+                                                            strokeWidth: 2))
+                                                : const Text('Login',
+                                                    style: TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w700)),
+                                          )),
+                                      SizedBox(height: compact ? 10 : 18),
+                                      const Row(children: [
+                                        Expanded(
+                                            child: Divider(
+                                                color: SolarColors.border)),
+                                        Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 12),
+                                            child: Text('Or',
+                                                style: TextStyle(
+                                                    color: _muted,
+                                                    fontSize: 11))),
+                                        Expanded(
+                                            child: Divider(
+                                                color: SolarColors.border))
+                                      ]),
+                                      SizedBox(height: compact ? 10 : 16),
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            _SocialSquare(
+                                                child: const Text('G',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Color(0xFF4285F4),
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w900)),
+                                                onTap: () {}),
+                                            const SizedBox(width: 18),
+                                            _SocialSquare(
+                                                child: const Icon(
+                                                    Icons.facebook_rounded,
+                                                    color: Color(0xFF1877F2),
+                                                    size: 21),
+                                                onTap: () {}),
+                                            const SizedBox(width: 18),
+                                            _SocialSquare(
+                                                child: const Text('in',
+                                                    style: TextStyle(
+                                                        color:
+                                                            Color(0xFF0A66C2),
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w900)),
+                                                onTap: () {}),
+                                          ]),
+                                      SizedBox(height: compact ? 16 : 26),
+                                      const Center(
+                                          child: SizedBox(
+                                              width: 15,
+                                              child: Divider(
+                                                  color: _orange,
+                                                  thickness: 1.5))),
+                                      const Spacer(),
+                                      SizedBox(height: compact ? 14 : 22),
+                                      Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Text(
+                                                "Don't Have An Account, ",
+                                                style: TextStyle(
+                                                    color: _muted,
+                                                    fontSize: 10)),
+                                            GestureDetector(
+                                              onTap: () => Navigator.of(context)
+                                                  .push(MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          const RegisterScreen())),
+                                              child: const Text('Register',
+                                                  style: TextStyle(
+                                                      color: _orange,
+                                                      fontSize: 10,
+                                                      fontWeight:
+                                                          FontWeight.w700)),
+                                            ),
+                                          ]),
+                                    ])))))),
+          );
+        })),
+      ]),
+    );
+  }
+}
 
-                    if (auth.errorMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: const Color(0x26EF4444),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0x4DEF4444)),
-                        ),
-                        child: Text(
-                          auth.errorMessage!,
-                          style: const TextStyle(
-                              color: SolarColors.error, fontSize: 13),
-                        ),
-                      ),
+class _OrangeHeader extends StatelessWidget {
+  const _OrangeHeader();
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, size) {
+        final headerHeight = (size.maxWidth * .46).clamp(142.0, 182.0);
+        return ClipPath(
+          clipper: _HeaderClipper(),
+          child: Container(
+              height: headerHeight,
+              padding: const EdgeInsets.fromLTRB(21, 18, 21, 0),
+              decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [SolarColors.primary, _orange])),
+              child: const Align(
+                  alignment: Alignment.topLeft,
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.wb_sunny_outlined,
+                        color: Colors.white, size: 21),
+                    SizedBox(width: 5),
+                    Text('smartsolar.',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -.7)),
+                  ]))),
+        );
+      });
+}
 
-                    // Email
-                    SolarField(
-                      controller: _emailController,
-                      validator: Validators.email,
-                      keyboardType: TextInputType.emailAddress,
-                      autofillHints: const [AutofillHints.email],
-                      style: const TextStyle(color: SolarColors.text),
-                      decoration: InputDecoration(
-                        labelText: 'Email Address',
-                        labelStyle: const TextStyle(color: SolarColors.muted),
-                        prefixIcon: const Icon(Icons.email_outlined,
-                            color: SolarColors.muted),
-                        filled: true,
-                        fillColor: SolarColors.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: SolarColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: SolarColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: SolarColors.primary),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
+class _HeaderClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) => Path()
+    ..lineTo(0, size.height * .73)
+    ..quadraticBezierTo(
+        size.width * .26, size.height * .55, size.width * .51, size.height * .7)
+    ..quadraticBezierTo(
+        size.width * .76, size.height * .9, size.width, size.height * .59)
+    ..lineTo(size.width, 0)
+    ..close();
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
 
-                    // Password
-                    SolarField(
-                      controller: _passwordController,
-                      validator: Validators.required,
-                      textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) {
-                        if (auth.status != AuthStatus.authenticating) {
-                          _handleLogin();
-                        }
-                      },
-                      obscureText: _obscurePassword,
-                      style: const TextStyle(color: SolarColors.text),
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        labelStyle: const TextStyle(color: SolarColors.muted),
-                        prefixIcon: const Icon(Icons.lock_outline,
-                            color: SolarColors.muted),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off_outlined
-                                : Icons.visibility_outlined,
-                            color: SolarColors.muted,
-                          ),
-                          tooltip: _obscurePassword
-                              ? 'Show password'
-                              : 'Hide password',
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                        filled: true,
-                        fillColor: SolarColors.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: SolarColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: SolarColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              const BorderSide(color: SolarColors.primary),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Submit Button
-                    ElevatedButton(
-                      onPressed: auth.status == AuthStatus.authenticating
-                          ? null
-                          : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: SolarColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: auth.status == AuthStatus.authenticating
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                  color: SolarColors.onPrimary, strokeWidth: 2),
-                            )
-                          : const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: SolarColors.onPrimary),
-                            ),
-                    ),
-                    const SizedBox(height: 32),
-
-                    TextButton(
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => const RegisterScreen())),
-                        child: const Text('New homeowner? Create an account')),
-                  ],
-                )),
-          ),
-        ),
+class _AvatarBadge extends StatelessWidget {
+  const _AvatarBadge();
+  @override
+  Widget build(BuildContext context) {
+    final size = (MediaQuery.sizeOf(context).width * .30).clamp(96.0, 118.0);
+    return Container(
+      width: size + 8,
+      height: size + 8,
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+          color: SolarColors.surface,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+                color: _orange.withValues(alpha: .18),
+                blurRadius: 18,
+                offset: const Offset(0, 6))
+          ]),
+      child: Container(
+        decoration: const BoxDecoration(
+            color: SolarColors.surfaceSoft, shape: BoxShape.circle),
+        child: Icon(Icons.person_rounded,
+            color: SolarColors.primary, size: size * .76),
       ),
     );
   }
+}
+
+class _SocialSquare extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _SocialSquare({required this.child, required this.onTap});
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(5),
+        child: Container(
+            width: 35,
+            height: 35,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: SolarColors.surface,
+                border: Border.all(color: SolarColors.border),
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Color(0x14173E44),
+                      blurRadius: 7,
+                      offset: Offset(0, 2))
+                ]),
+            child: child),
+      );
 }

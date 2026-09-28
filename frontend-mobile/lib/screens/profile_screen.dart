@@ -31,10 +31,10 @@ class ProfileScreen extends StatelessWidget {
                   Center(
                       child: CircleAvatar(
                           radius: 46,
-                          backgroundColor: solarLime,
+                          backgroundColor: SolarColors.lime,
                           child: Text(initials,
                               style: const TextStyle(
-                                  color: solarForest,
+                                  color: SolarColors.primary,
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold)))),
                   const SizedBox(height: 18),
