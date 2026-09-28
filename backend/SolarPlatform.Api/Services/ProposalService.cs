@@ -343,15 +343,11 @@ public class ProposalService : IProposalService
                 proposal.RecommendedKw, proposal.PanelCount, proposal.InverterSizeKw,
                 proposal.EstimatedCostLkr, proposal.GridComplianceStatus, proposal.RequiresApproval);
 
-            // A senior engineer may explicitly accept technical review warnings. A blocked
-            // safety assessment remains a hard stop above; all other findings are retained
-            // on the approved proposal for traceability.
             if (!reValidation.Valid)
             {
-                _logger.LogWarning(
-                    "Proposal {ProposalId} is being approved with validation warnings: {Warnings}",
-                    proposalId,
-                    string.Join("; ", reValidation.Violations));
+                approvalBlocked = true;
+                throw new InvalidOperationException(
+                    $"Deterministic validation blocks approval: {string.Join("; ", reValidation.Violations)}");
             }
 
             // Step 3: Validate state transition
@@ -369,9 +365,7 @@ public class ProposalService : IProposalService
                 WorkflowId = proposal.WorkflowId,
                 UserId = engineerUserId,
                 Decision = ApprovalDecision.Approved,
-                Comment = string.IsNullOrWhiteSpace(comment) && !reValidation.Valid
-                    ? $"Approved with technical review warnings: {string.Join("; ", reValidation.Violations)}"
-                    : comment,
+                Comment = comment,
                 Timestamp = DateTime.UtcNow
             };
             _db.ApprovalAuditLogs.Add(auditLog);

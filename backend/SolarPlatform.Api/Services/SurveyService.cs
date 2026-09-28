@@ -161,6 +161,34 @@ public class SurveyService : ISurveyService
         workflow.ResultJson = result.Recommendation?.GetRawText();
         workflow.PlanJson = JsonSerializer.Serialize(result.Plan);
         workflow.ValidationJson = result.ValidationResults?.GetRawText();
+        workflow.CurrentStep = result.CurrentStepId;
+        workflow.ApprovalStatus = result.ApprovalStatus;
+        workflow.StateJson = JsonSerializer.Serialize(new
+        {
+            workflow_id = workflow.WorkflowId,
+            objective = workflow.Objective,
+            workflow_status = result.WorkflowStatus,
+            current_step_id = result.CurrentStepId,
+            approval_status = result.ApprovalStatus,
+            input_data = new
+            {
+                monthly_kwh = survey.MonthlyKwh,
+                roof_area_sqm = survey.RoofAreaSqm,
+                grid_type = survey.GridType.ToString(),
+                property_address = survey.PropertyAddress,
+            },
+            plan = result.Plan,
+            structured_plan = result.StructuredPlan,
+            completed_steps = result.Status == "completed" ? new[] { "planning", "solar-sizing" } : new[] { "planning" },
+            failed_steps = result.Status == "completed" ? Array.Empty<string>() : new[] { "solar-sizing" },
+            agent_outputs = new Dictionary<string, object?> { ["solar-sizing"] = result.Recommendation },
+            tool_results = new { },
+            validation_results = new Dictionary<string, object?> { ["solar-sizing"] = result.ValidationResults },
+            execution_logs = result.ExecutionLogs,
+            errors = result.Errors,
+            retry_count = 0,
+            final_outcome = result.Status == "completed" ? "Preliminary sizing completed; site inspection is required." : "Solar sizing processing failed.",
+        });
         workflow.ErrorMessage = result.Errors?.Count > 0 ? string.Join("; ", result.Errors) : null;
         var completedAt = DateTime.UtcNow;
         if (result.ExecutionLogs != null)
@@ -173,6 +201,7 @@ public class SurveyService : ISurveyService
                 {
                     AgentWorkflowId = workflow.Id, AgentName = log.AgentName, StepName = log.StepName,
                     Status = log.Status, StartedAt = startedAt, CompletedAt = logCompletedAt,
+                    TraceId = log.TraceId ?? workflow.WorkflowId, SpanId = log.SpanId, ToolName = log.ToolName,
                     DurationMs = Math.Max(0, (long)(logCompletedAt - startedAt).TotalMilliseconds),
                     OutputSummary = log.OutputSummary, ValidationResult = log.ValidationResult?.GetRawText(),
                     ErrorMessage = log.ErrorMessage, RetryCount = log.RetryCount

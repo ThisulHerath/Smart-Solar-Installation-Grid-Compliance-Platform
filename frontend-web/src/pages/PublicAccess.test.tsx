@@ -16,6 +16,7 @@ import { App } from '../App';
 import { api } from '../services/api';
 
 vi.mock('../services/api', () => ({
+  resolveAssetUrl: (value: string | null | undefined) => value ?? null,
   api: {
     getMe: vi.fn(),
     login: vi.fn(),
@@ -37,19 +38,19 @@ it(
 
     expect(
       await screen.findByRole('heading', {
-        name: /Good for your home/,
+        name: /Greening our future/,
       })
     ).toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole('link', {
-        name: 'Know your rooftop — open services',
+        name: /Explore solar planning/,
       })
     );
 
     expect(
       await screen.findByRole('heading', {
-        name: 'Sign in to Smart Solar',
+        name: 'Create your account',
       })
     ).toBeInTheDocument();
 
@@ -77,7 +78,7 @@ it.each([
 
   expect(
     await screen.findByRole('heading', {
-      name: 'Sign in to Smart Solar',
+      name: 'Welcome back',
     })
   ).toBeInTheDocument();
 });
@@ -139,7 +140,7 @@ it(
 
     expect(
       await screen.findByRole('heading', {
-        name: 'Sign in to Smart Solar',
+        name: 'Welcome back',
       })
     ).toBeInTheDocument();
 

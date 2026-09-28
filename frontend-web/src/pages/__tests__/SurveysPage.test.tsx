@@ -9,6 +9,7 @@ import { Survey } from '../../types/auth';
 
 // Mock the API service
 vi.mock('../../services/api', () => ({
+  resolveAssetUrl: (value: string | null | undefined) => value ?? null,
   api: {
     getSurveys: vi.fn(),
     getMe: vi.fn(),

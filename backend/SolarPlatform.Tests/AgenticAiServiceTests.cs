@@ -104,4 +104,43 @@ public class AgenticAiServiceTests
         Assert.Equal("failed", result.CurrentStep);
         Assert.NotEmpty(result.Errors);
     }
+
+    [Theory]
+    [InlineData(true, "/workflow/start")]
+    [InlineData(false, "/workflow/resume")]
+    public async Task StructuredWorkflow_UsesAuthenticatedStartAndResumeContracts(bool start, string expectedPath)
+    {
+        using var handler = new StructuredWorkflowContractHandler(expectedPath);
+        using var client = new HttpClient(handler) { BaseAddress = new Uri("http://localhost:8001") };
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["AgenticAi:InternalKey"] = "structured-test-key"
+        }).Build();
+        var service = new AgenticAiService(client, config, Mock.Of<ILogger<AgenticAiService>>());
+
+        var result = start
+            ? await service.StartStructuredWorkflowAsync(new { workflow_id = "wf-42", objective = "Prepare installation" })
+            : await service.ResumeStructuredWorkflowAsync(new { workflow_id = "wf-42", @event = "INSPECTION_COMPLETED", state = new { } });
+
+        Assert.NotNull(result);
+        Assert.Equal("wf-42", result.WorkflowId);
+        Assert.Equal("WAITING_FOR_INSPECTION", result.WorkflowStatus);
+        Assert.Equal("site-inspection", result.CurrentStepId);
+        Assert.Equal("NOT_REQUESTED", result.ApprovalStatus);
+    }
+
+    private sealed class StructuredWorkflowContractHandler(string expectedPath) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Assert.Equal(expectedPath, request.RequestUri!.AbsolutePath);
+            Assert.Equal("structured-test-key", request.Headers.GetValues("X-Internal-Key").Single());
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("""
+                    {"workflow_id":"wf-42","objective":"Prepare installation","workflow_type":"FULL_INSTALLATION","workflow_status":"WAITING_FOR_INSPECTION","current_step_id":"site-inspection","approval_status":"NOT_REQUESTED","plan":[],"structured_plan":[],"completed_steps":[],"failed_steps":[],"agent_outputs":{},"tool_results":{},"validation_results":{},"execution_logs":[],"errors":[],"retry_count":0,"final_outcome":""}
+                    """, System.Text.Encoding.UTF8, "application/json")
+            });
+        }
+    }
 }

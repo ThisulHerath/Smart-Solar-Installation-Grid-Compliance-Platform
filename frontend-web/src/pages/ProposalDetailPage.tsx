@@ -193,7 +193,9 @@ export const ProposalDetailPage: React.FC = () => {
   const isEngineeringStaff = Boolean(user?.roles.some(role => ['SENIOR_ENGINEER', 'ADMINISTRATOR'].includes(role)));
   const isPending = proposal?.proposalStatus === 'PendingApproval' && isEngineeringStaff;
   const missingCompliance = !proposal?.gridComplianceStatus || proposal.gridComplianceStatus.toUpperCase() === 'UNKNOWN';
-  const approvalBlocked = proposal?.safetyStatus.toUpperCase() === 'BLOCKED';
+  const approvalBlocked = proposal?.safetyStatus.toUpperCase() === 'BLOCKED'
+    || validationResult?.valid === false
+    || missingCompliance;
 
   async function handleAction(action: 'approve' | 'reject' | 'revise', comment: string) {
     if (!id) return;
@@ -373,7 +375,7 @@ export const ProposalDetailPage: React.FC = () => {
 
           {approvalBlocked && (
             <div className="alert alert--error">
-              Approval is blocked because the safety assessment requires corrective action. Request a revision or reject this proposal.
+              Approval is blocked because the safety or deterministic validation requires corrective action. Request a revision or reject this proposal.
             </div>
           )}
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>

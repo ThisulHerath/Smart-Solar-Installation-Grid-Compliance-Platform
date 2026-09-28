@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SolarPlatform.Api.Data;
@@ -11,9 +12,11 @@ using SolarPlatform.Api.Data;
 namespace SolarPlatform.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260928165159_StrengthenAgentWorkflowState")]
+    partial class StrengthenAgentWorkflowState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1060,73 +1063,6 @@ namespace SolarPlatform.Api.Migrations
                     b.ToTable("Supplier");
                 });
 
-            modelBuilder.Entity("SolarPlatform.Api.Models.SupportConversation", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("HomeownerId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("LastMessageAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("SolarSurveyId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("TechnicianId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SolarSurveyId")
-                        .IsUnique();
-
-                    b.HasIndex("HomeownerId", "LastMessageAt");
-
-                    b.HasIndex("TechnicianId", "LastMessageAt");
-
-                    b.ToTable("SupportConversations");
-                });
-
-            modelBuilder.Entity("SolarPlatform.Api.Models.SupportMessage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
-
-                    b.Property<Guid>("ConversationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SenderId");
-
-                    b.HasIndex("ConversationId", "CreatedAt");
-
-                    b.HasIndex("ConversationId", "ReadAt");
-
-                    b.ToTable("SupportMessages");
-                });
-
             modelBuilder.Entity("SolarPlatform.Api.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1505,52 +1441,6 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("SolarSurvey");
                 });
 
-            modelBuilder.Entity("SolarPlatform.Api.Models.SupportConversation", b =>
-                {
-                    b.HasOne("SolarPlatform.Api.Models.User", "Homeowner")
-                        .WithMany()
-                        .HasForeignKey("HomeownerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("SolarPlatform.Api.Models.SolarSurvey", "SolarSurvey")
-                        .WithMany()
-                        .HasForeignKey("SolarSurveyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SolarPlatform.Api.Models.User", "Technician")
-                        .WithMany()
-                        .HasForeignKey("TechnicianId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Homeowner");
-
-                    b.Navigation("SolarSurvey");
-
-                    b.Navigation("Technician");
-                });
-
-            modelBuilder.Entity("SolarPlatform.Api.Models.SupportMessage", b =>
-                {
-                    b.HasOne("SolarPlatform.Api.Models.SupportConversation", "Conversation")
-                        .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SolarPlatform.Api.Models.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("SolarPlatform.Api.Models.UserRole", b =>
                 {
                     b.HasOne("SolarPlatform.Api.Models.Role", "Role")
@@ -1616,11 +1506,6 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("Workflows");
-                });
-
-            modelBuilder.Entity("SolarPlatform.Api.Models.SupportConversation", b =>
-                {
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.User", b =>

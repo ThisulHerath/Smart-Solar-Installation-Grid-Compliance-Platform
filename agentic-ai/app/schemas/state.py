@@ -22,6 +22,10 @@ class SolarSizingResponse(BaseModel):
     workflow_id: str
     status: str
     plan: List[str] = Field(default_factory=list)
+    structured_plan: Dict[str, Any] = Field(default_factory=dict)
+    current_step_id: str = "solar-sizing"
+    workflow_status: str = "PROCESSING"
+    approval_status: str = "NOT_REQUESTED"
     recommendation: Optional[SolarSizingRecommendation] = None
     validation_results: Dict[str, Any] = Field(default_factory=dict)
     errors: List[str] = Field(default_factory=list)
@@ -33,6 +37,10 @@ class WorkflowStateDict(TypedDict, total=False):
     objective: str
     input_data: Dict[str, Any]
     plan: List[str]
+    structured_plan: Dict[str, Any]
+    workflow_type: str
+    workflow_status: str
+    current_step_id: str
     current_step: str
     completed_steps: List[str]
     tool_results: Dict[str, Any]
@@ -43,6 +51,9 @@ class WorkflowStateDict(TypedDict, total=False):
     execution_logs: List[Dict[str, Any]]
     final_result: Dict[str, Any]
     candidate_recommendation: Dict[str, Any]
+    agent_outputs: Dict[str, Any]
+    failed_steps: List[str]
+    retry_count: int
 
 class WorkflowExecutionRequest(BaseModel):
     objective: str = Field(..., description="Solar workflow objective or survey query")
@@ -54,6 +65,7 @@ class WorkflowExecutionResponse(BaseModel):
     customer_id: Optional[str] = None
     objective: str
     plan: List[str] = Field(default_factory=list)
+    structured_plan: Dict[str, Any] = Field(default_factory=dict)
     current_step: str = "completed"
     completed_steps: List[str] = Field(default_factory=list)
     tool_results: Dict[str, Any] = Field(default_factory=dict)

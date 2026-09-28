@@ -12,6 +12,8 @@ type WorkflowData = {
   plan?: string[];
   completedSteps: string[];
   errors: string[];
+  currentStep?: string;
+  structuredPlan?: { steps?: Array<{ step_id: string; title: string; agent_name: string; status: string; high_impact?: boolean }> };
 };
 
 const labels: Record<string, string> = {
@@ -67,7 +69,12 @@ export function WorkflowSummary({ surveyId }: { surveyId: string }) {
       <div className="workflow-summary__body">
         <div className="workflow-summary__plan">
           <h3>Installation plan</h3>
-          {data.plan?.length ? (
+          {data.structuredPlan?.steps?.length ? (
+            <ol>{data.structuredPlan.steps.map((step, index) => <li key={step.step_id}>
+              <span>{step.status === 'COMPLETED' ? '✓' : String(index + 1).padStart(2, '0')}</span>
+              <p><strong>{step.title}</strong><small>{displayLabel(step.agent_name)} · {displayLabel(step.status)}{step.high_impact ? ' · Human-controlled action' : ''}</small></p>
+            </li>)}</ol>
+          ) : data.plan?.length ? (
             <ol>{data.plan.map((step, index) => <li key={`${index}-${step}`}><span>{String(index + 1).padStart(2, '0')}</span><p>{step}</p></li>)}</ol>
           ) : <p className="workflow-summary__empty">A plan will appear once the assessment is completed.</p>}
         </div>

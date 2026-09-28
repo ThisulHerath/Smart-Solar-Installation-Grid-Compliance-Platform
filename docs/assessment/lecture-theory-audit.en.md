@@ -53,7 +53,7 @@ Status key: **✓ Existing** = found in the source; **✓ Added** = implemented 
 ### Lecture 5 part 1 — LLMs and agent fundamentals
 
 - **✓ Existing — structured contracts, specialist responsibilities, guardrails and human approval.** Pydantic validates Python input/output; backend DTOs and services independently control actions. These are useful foundations for an agent framework.
-- **△ Partial — actual agent autonomy (pp.22–25, 29, 32).** The lecture's LLM-directed loop observes tool results and chooses a next action. The present PlannerAgent emits a fixed eight-step roadmap. It does not reinterpret a goal, choose tools dynamically or replan after failure. Its docstring now states this honestly.
+- **✓ Added / △ Partial — controlled agency (pp.22–25, 29, 32).** PlannerAgent now classifies reviewed objectives into three workflow types and emits typed steps with dependencies, required inputs, allowed tools, status and high-impact markers. The master workflow pauses/resumes and returns failed evidence to a correction loop. Selection remains deterministic: there is no live LLM interpreting arbitrary goals or choosing arbitrary tools.
 - **✓ Existing / ✓ Added — simplest suitable workflow (p.25).** Deterministic arithmetic and explicit approval dependencies are preserved. No language model should replace stock arithmetic or authorize installation.
 - **△ Partial — six framework components (p.36).** Tools, some state/history, monitoring and orchestration exist. Model inference and runtime prompts for such inference are absent. Prompt files or class names alone do not establish model execution.
 
@@ -84,7 +84,7 @@ Status key: **✓ Existing** = found in the source; **✓ Added** = implemented 
 5. Replaced synthetic timing for sizing/compliance with measured stage events; retained failures and capped sizing graph steps.
 6. Added a single bounded retry for transient exchange-tool failures, without a made-up fallback rate.
 7. Rejected non-finite sizing values and stopped treating missing inverter-location evidence as suitable.
-8. Added focused regression tests, ADR-007 and these bilingual reports. No paid inference dependency, database migration, commit or push was added.
+8. Added focused regression tests, ADR-007, bilingual guidance and a migration for durable workflow state/trace fields. No paid inference dependency, commit or push was added.
 
 ## 4. How the complete workflow connects
 
@@ -125,7 +125,7 @@ This is test data and a calculation explanation, not a live installation recomme
 1. **Router:** choose one specialist based on the request. A future help request might route to billing or field support. Existing HTTP routing is not evidence of an LLM router.
 2. **Pipeline:** each stage feeds the next. This is the main implemented pattern, because approval must follow inspection/validation.
 3. **Parallel:** independent specialists run together, then results merge. It could suit independent document checks, but dependent approval/reservation stages should not be parallelized. No runtime parallel-agent workflow is claimed.
-4. **Supervisor:** a coordinator dynamically chooses specialists and next steps from results. The fixed PlannerAgent is not such a supervisor.
+4. **Supervisor:** a coordinator chooses specialists and next steps from results. The project now has a bounded deterministic coordinator with objective-specific plans and correction transitions; it is still not an LLM supervisor.
 
 These are coordination choices, not a rule that every project must implement all four.
 
@@ -136,7 +136,7 @@ These are coordination choices, not a rule that every project must implement all
 3. **SafetyGuardrailAgent:** proposal data → safety findings and escalation signals; cannot grant human approval.
 4. **EquipmentPricingAgent:** compatible equipment plus the exchange tool → structured equipment cost; cannot write inventory.
 
-PlannerAgent adds a fixed roadmap. Independent validators check outputs rather than relying only on the specialist that produced them. Four class names alone do not prove four LLM agents.
+PlannerAgent adds an objective-sensitive typed roadmap, and the resumable coordinator updates step state. Independent validators check outputs rather than relying only on the specialist that produced them. Four class names alone do not prove four LLM agents.
 
 ### Four memory types and six framework components
 
@@ -170,11 +170,11 @@ Each member should make genuine issues, commits, tests and peer reviews, and wri
 
 ## 7. Verification in this audit
 
-- **Python:** 55 tests passed. Includes six small retrieval cases, safe compliance failure, missing location evidence, measured sizing events, failed-stage retention and bounded tool retries. A dependency deprecation warning remains.
-- **ASP.NET:** 98 tests passed; 1 PostgreSQL integration test skipped. The skipped test is not a pass and provides no fresh database-concurrency proof.
+- **Python:** 63 tests passed. Includes typed planning, pause/resume, correction, tool permission denial, six small retrieval cases, safe compliance failure, missing evidence, measured events and bounded tool retries. A dependency deprecation warning remains.
+- **ASP.NET:** 105 tests passed; 1 PostgreSQL integration test skipped. The skipped test is not a pass and provides no fresh database-concurrency proof.
 - **React:** 47 tests passed across 12 files. The intentional error-boundary test causes expected development error output; an existing account-flow test also warns that its test router has no dashboard route.
 - **Web production build:** TypeScript and Vite succeeded; separate route chunks were emitted.
-- **Flutter (19 September):** 20 tests passed; `flutter analyze` reported no issues. No Flutter source was changed in this lecture audit. Package-update notices are informational, not analyzer failures.
+- **Flutter (28 September):** 20 tests passed; `flutter analyze` reported no issues. Package-update notices are informational, not analyzer failures.
 
 These are automated local checks. They do not establish production uptime, physical-device behavior, load capacity or a fresh browser-to-phone end-to-end run. Earlier evidence in `assignment-readiness.md` is dated separately and must not be relabelled as this run.
 
@@ -182,7 +182,7 @@ Useful reruns from the repository: `dotnet test backend/SolarPlatform.Tests -c R
 
 ## 8. What remains for a stronger submission
 
-1. Resolve agentic acceptance explicitly. If the lecturer expects LLM-selected tools, the current deterministic workflow is partial. An evaluated local model could satisfy no-paid-inference operation; it still needs resource planning, typed tool contracts, bounded steps, safe failure and actual evidence. Do not simply change labels.
+1. Present the strengthened acceptance evidence explicitly: objective-sensitive typed planning, least-privilege tools, persisted pause/resume state, correction loops, role-controlled human actions and correlated traces. If the lecturer specifically expects LLM-selected tools, the deterministic selection remains partial. Do not simply change labels.
 2. Extend trace consistency and durable interrupted-run recovery across all four components. Current measured timing improvements cover sizing and compliance, not the entire business process.
 3. Finish deployment security: protected image delivery, token lifecycle review, HTTPS, real configuration, least-privilege database access and recovery evidence.
 4. Run a clean end-to-end demonstration with the same survey ID through Flutter submission, React assignment/review, pricing/reservation and mobile status. Record negative cases as well as the happy path.

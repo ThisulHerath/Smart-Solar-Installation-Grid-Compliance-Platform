@@ -10,6 +10,10 @@ public class AgentWorkflow
     public string? PlanJson { get; set; }
     public string? ResultJson { get; set; }
     public string? ValidationJson { get; set; }
+    public string CurrentStep { get; set; } = "planning";
+    public string ApprovalStatus { get; set; } = "NOT_REQUESTED";
+    public string? StateJson { get; set; }
+    public int RetryCount { get; set; }
     public string? ErrorMessage { get; set; }
     public DateTime? StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

@@ -53,7 +53,7 @@
 ### Lecture 5 part 1 — LLM සහ agent පදනම
 
 - **✓ දැනට තිබේ — structured inputs/outputs, validation සහ human approval.** Pydantic schemas සහ backend DTOs මඟින් data contract පාලනය කරයි. Specialist output එක independent validator එකකින් පරීක්ෂා කරයි.
-- **△ අර්ධ වශයෙන් — සැබෑ autonomy, පිටු 22–25, 29, 32.** දේශනයේ agent එක tool result නිරීක්ෂණය කර ඊළඟ ක්‍රියාව model එකෙන් තෝරයි. මෙහි PlannerAgent එක දැනට පෙර ලියා ඇති පියවර අටක් ලබා දෙයි. එය dynamic supervisor හෝ ReAct agent එකක් නොවේ. Code comment එකත් එයට ගැළපෙන ලෙස නිවැරදි කර ඇත.
+- **✓ එක් කළා / △ අර්ධ වශයෙන් — controlled agency, පිටු 22–25, 29, 32.** PlannerAgent දැන් reviewed objective එක workflow වර්ග තුනකින් එකකට වෙන් කර dependencies, required inputs, allowed tools, status සහ high-impact markers ඇති typed plan එකක් හදයි. Master workflow එක pause/resume වන අතර fail වූ evidence correction loop එකට යවයි. මෙය තවම deterministic selection එකකි; arbitrary goals තේරුම්ගෙන tools තෝරන live LLM එකක් නැත.
 - **✓ යොදා ඇත — සරලම ගැළපෙන workflow එක තේරීම, පිටුව 25.** Cost calculation, stock update සහ approval වැනි අවදානම් ක්‍රියා සඳහා deterministic rules තබා ඇත. Model එකකට අනුමැතිය ලබා දීමට ඉඩ දී නැත.
 - **△ අර්ධ වශයෙන් — framework components, පිටුව 36.** දේශනයේ components හයක් ඇත. Tools, state/history, monitoring සහ orchestration යම් මට්ටමකින් තිබුණත් live model inference සහ එයට runtime prompts නැත.
 
@@ -84,7 +84,7 @@
 5. Sizing/compliance සඳහා සැබෑ stage timing සහ failed-event retention එක් කළා.
 6. Exchange tool එකට සීමිත transient retry එකක් එක් කළා; fake fallback rate එකක් නැත.
 7. NaN/Infinity වැනි sizing input ප්‍රතික්ෂේප කිරීම සහ missing inverter evidence වැරදි ලෙස pass නොවීම තහවුරු කළා.
-8. Regression tests, ADR-007 සහ මෙම භාෂා දෙකේ වාර්තා එක් කළා. Paid inference dependency, database migration, commit හෝ push එකක් නොකළා.
+8. Regression tests, ADR-007, භාෂා දෙකේ guidance සහ durable workflow state/trace fields සඳහා database migration එක එක් කළා. Paid inference dependency, commit හෝ push එකක් නොකළා.
 
 ## 4. සම්පූර්ණ workflow එක සම්බන්ධ වන ආකාරය
 
@@ -125,7 +125,7 @@ Engineer approval එක database තුළ සුරකින business pause �
 1. **Router:** request එකට ගැළපෙන specialist එක තෝරයි. සාමාන්‍ය HTTP routing තිබීම LLM router එකක් තිබීමේ සාක්ෂියක් නොවේ.
 2. **Pipeline:** පෙර stage output එක ඊළඟ stage එක භාවිත කරයි. ව්‍යාපෘතියේ ප්‍රධාන ක්‍රමය මෙයයි.
 3. **Parallel:** ස්වාධීන වැඩ කිහිපයක් එකවර කර ප්‍රතිඵල එකතු කරයි. Approval සහ stock reservation වැනි dependent stages එසේ එකවර කළ යුතු නැත. දැනට parallel-agent runtime එකක් කියා නොපෙන්වන්න.
-4. **Supervisor:** ප්‍රතිඵල අනුව ඊළඟ specialist/step එක තීරණය කරයි. Fixed PlannerAgent එක එවැනි dynamic supervisor එකක් නොවේ.
+4. **Supervisor:** ප්‍රතිඵල අනුව ඊළඟ specialist/step එක තීරණය කරයි. Project එකේ දැන් objective-specific plans සහ correction transitions ඇති bounded deterministic coordinator එකක් තිබේ; එය තවම LLM supervisor එකක් නොවේ.
 
 මේ patterns හතරම සෑම project එකකම තිබිය යුතු යැයි දේශනයෙන් අදහස් නොවේ.
 
@@ -136,7 +136,7 @@ Engineer approval එක database තුළ සුරකින business pause �
 3. **SafetyGuardrailAgent:** proposal risks සහ escalation flags ලබා දෙයි; human approval ලබා නොදෙයි.
 4. **EquipmentPricingAgent:** compatible equipment සහ exchange rate එකෙන් quotation ගණනය කරයි; stock ලියන්නේ නැත.
 
-PlannerAgent අමතර fixed roadmap එක ලබා දෙයි. Validators outputs පරීක්ෂා කරයි. Agent නම ඇති classes හතරක් තිබීම LLM agents හතරක් තිබීමේ සාක්ෂියක් නොවේ.
+PlannerAgent objective-sensitive typed roadmap එක ලබා දෙන අතර resumable coordinator එක step status update කරයි. Validators outputs පරීක්ෂා කරයි. Agent නම ඇති classes හතරක් තිබීම LLM agents හතරක් තිබීමේ සාක්ෂියක් නොවේ.
 
 ### Memory හතර සහ framework components හය
 
@@ -170,17 +170,17 @@ Catalog CRUD/search, stock, quotations, exchange tool, reservation/release ස�
 
 ## 7. පරීක්ෂණ සහ ඒවායේ සීමා
 
-- Python tests **55ක් pass** විය. Retrieval queries හය, safe failures, missing evidence, timing සහ bounded retries ඇතුළත් වේ. Dependency deprecation warning එකක් ඇත.
-- ASP.NET tests **98ක් pass**, PostgreSQL integration test **1ක් skip** විය. එය fresh database concurrency proof එකක් නොවේ.
+- Python tests **63ක් pass** විය. Typed planning, pause/resume, correction, tool permission denial, retrieval, safe failures, missing evidence, timing සහ bounded retries ඇතුළත් වේ. Dependency deprecation warning එකක් ඇත.
+- ASP.NET tests **105ක් pass**, PostgreSQL integration test **1ක් skip** විය. Python tests **63ක්**, React tests **47ක්** සහ Flutter tests **20ක්** pass විය. Skip වූ test එක fresh database concurrency proof එකක් නොවේ.
 - React tests **47ක් pass** විය. Error boundary test එක හිතාමතා render error එකක් ඇති කරයි. Account test router එකේ dashboard route නැති බවට පැරණි warning එකක්ද ඇත.
 - TypeScript/Vite production build සාර්ථක විය; lazy route chunks නිපදවිය.
-- Flutter සඳහා සැප්තැම්බර් 19 දින tests **20ක් pass** විය; `flutter analyze` එකේ issues නොමැත. Package-update notices analyzer failures නොවේ. මෙම lecture audit එකේ Flutter source වෙනස් කර නැත.
+- Flutter සඳහා සැප්තැම්බර් 28 දින tests **20ක් pass** විය; `flutter analyze` එකේ issues නොමැත. Package-update notices analyzer failures නොවේ.
 
 මෙම automated checks වලින් real-device permissions, public deployment, load capacity හෝ සම්පූර්ණ phone-to-browser demo එකක් තහවුරු නොවේ. කලින් දිනයක තිබූ test evidence මෙවර run එක ලෙස ඉදිරිපත් නොකරන්න.
 
 ## 8. වැඩි ලකුණු සඳහා තව අවශ්‍ය දේ
 
-1. Lecturer බලාපොරොත්තු වන්නේ LLM විසින් tools තෝරන agent එකක් නම් එම කොටස තව අර්ධ වශයෙන් බව පැහැදිලි කරන්න. No-paid-model constraint එකට local model එකක් ගැළපිය හැකි නමුත් එය නිසි contracts, resource limits සහ tests සමඟ වෙනම ක්‍රියාත්මක කළ යුතුය.
+1. Objective-sensitive typed planning, least-privilege tools, persisted pause/resume state, correction loops, role-controlled human actions සහ correlated traces presentation එකේ පෙන්වන්න. Lecturer බලාපොරොත්තු වන්නේ LLM විසින් tools තෝරන agent එකක් නම් deterministic selection එක තව අර්ධ වශයෙන් බව පැහැදිලි කරන්න.
 2. සියලු components සඳහා tracing සහ interrupted-run recovery එකඟ කරන්න. දැනට measured improvements sizing/compliance සඳහා පමණි.
 3. Photo protection, token lifecycle, HTTPS, database permissions සහ backup/recovery පරීක්ෂා කරන්න.
 4. එකම survey ID එකෙන් Flutter submit → React assignment/approval → pricing/reservation → mobile status යන demo එක record කරන්න. Failure cases ද පෙන්වන්න.
