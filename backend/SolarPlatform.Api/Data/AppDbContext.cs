@@ -26,6 +26,8 @@ public class AppDbContext : DbContext
     public DbSet<EngineeringProposal> EngineeringProposals => Set<EngineeringProposal>();
     public DbSet<ApprovalAuditLog> ApprovalAuditLogs => Set<ApprovalAuditLog>();
     public DbSet<ProposalLifecycleAuditEvent> ProposalLifecycleAuditEvents => Set<ProposalLifecycleAuditEvent>();
+    public DbSet<SupportConversation> SupportConversations => Set<SupportConversation>();
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -257,6 +259,27 @@ public class AppDbContext : DbContext
                 .WithMany(p => p.LifecycleEvents)
                   .HasForeignKey(a => a.EngineeringProposalId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SupportConversation>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.HasIndex(c => c.SolarSurveyId).IsUnique();
+            entity.HasIndex(c => new { c.HomeownerId, c.LastMessageAt });
+            entity.HasIndex(c => new { c.TechnicianId, c.LastMessageAt });
+            entity.HasOne(c => c.SolarSurvey).WithMany().HasForeignKey(c => c.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(c => c.Homeowner).WithMany().HasForeignKey(c => c.HomeownerId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(c => c.Technician).WithMany().HasForeignKey(c => c.TechnicianId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SupportMessage>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.HasIndex(m => new { m.ConversationId, m.CreatedAt });
+            entity.HasIndex(m => new { m.ConversationId, m.ReadAt });
+            entity.Property(m => m.Body).IsRequired().HasMaxLength(2000);
+            entity.HasOne(m => m.Conversation).WithMany(c => c.Messages).HasForeignKey(m => m.ConversationId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.Sender).WithMany().HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // Seed Foundation Data

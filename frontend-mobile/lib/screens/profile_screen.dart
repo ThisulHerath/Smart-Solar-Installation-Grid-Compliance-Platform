@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../theme/solar_theme.dart';
 import '../widgets/record_reference.dart';
 import 'account_screen.dart';
+import 'chat_inbox_screen.dart';
 import 'login_screen.dart';
 import 'welcome_screen.dart';
 
@@ -174,11 +175,13 @@ class ProfileScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const AccountScreen())),
               ),
               const SizedBox(height: 10),
-              const _ProfileAction(
+              _ProfileAction(
                 icon: Icons.support_agent_rounded,
                 iconColor: SolarColors.limeDark,
                 title: 'Help & support',
                 subtitle: 'Get assistance with your solar journey',
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const ChatInboxScreen())),
               ),
               const SizedBox(height: 20),
               _ProfileCard(

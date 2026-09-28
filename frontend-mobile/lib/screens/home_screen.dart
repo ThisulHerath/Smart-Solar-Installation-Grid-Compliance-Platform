@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,7 @@ import '../theme/solar_theme.dart';
 import '../utils/constants.dart';
 import '../widgets/solar_brand.dart';
 import 'login_screen.dart';
+import 'chat_inbox_screen.dart';
 import 'profile_screen.dart';
 import 'proposal_screen.dart';
 import 'survey_screen.dart';
@@ -31,6 +33,35 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
+  int _unreadMessages = 0;
+  Timer? _chatTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUnreadMessages();
+    _chatTimer = Timer.periodic(
+        const Duration(seconds: 12), (_) => _loadUnreadMessages());
+  }
+
+  @override
+  void dispose() {
+    _chatTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadUnreadMessages() async {
+    try {
+      final count = await ApiService().getChatUnreadCount();
+      if (mounted) setState(() => _unreadMessages = count);
+    } catch (_) {}
+  }
+
+  Future<void> _openMessages() async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const ChatInboxScreen()));
+    await _loadUnreadMessages();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
               sliver: SliverList.list(children: [
                 _Header(
                   name: user.fullName,
+                  unreadMessages: _unreadMessages,
+                  onNotifications: _openMessages,
                   onProfile: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ProfileScreen())),
                 ),
@@ -131,10 +164,10 @@ class _HomeScreenState extends State<HomeScreen> {
         bottomNavigationBar: _BottomNav(
           homeowner: homeowner,
           selectedIndex: homeowner ? _selectedTab : 0,
+          unreadMessages: _unreadMessages,
           onDashboard: () => setState(() => _selectedTab = 0),
           onProjects: () => setState(() => _selectedTab = 1),
-          onNewSurvey: () => Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => const SurveyScreen())),
+          onChat: _openMessages,
           onProfile: () => Navigator.of(context)
               .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
         ),
@@ -1043,15 +1076,41 @@ Color _projectStatusColor(String rawStatus) {
 class _Header extends StatelessWidget {
   final String name;
   final VoidCallback onProfile;
-  const _Header({required this.name, required this.onProfile});
+  final VoidCallback onNotifications;
+  final int unreadMessages;
+  const _Header(
+      {required this.name,
+      required this.onProfile,
+      required this.onNotifications,
+      required this.unreadMessages});
   @override
   Widget build(BuildContext context) => Row(children: [
         const SolarBrand(size: 18),
         const Spacer(),
-        IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none_rounded),
-            color: _muted),
+        Stack(clipBehavior: Clip.none, children: [
+          IconButton(
+              tooltip: 'Messages & notifications',
+              onPressed: onNotifications,
+              icon: const Icon(Icons.notifications_none_rounded),
+              color: _muted),
+          if (unreadMessages > 0)
+            Positioned(
+              right: 5,
+              top: 4,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                    color: SolarColors.error, shape: BoxShape.circle),
+                child: Text(unreadMessages > 99 ? '99+' : '$unreadMessages',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w800)),
+              ),
+            ),
+        ]),
         InkWell(
           onTap: onProfile,
           borderRadius: BorderRadius.circular(14),
@@ -1519,16 +1578,18 @@ class _Glass extends StatelessWidget {
 class _BottomNav extends StatelessWidget {
   final bool homeowner;
   final int selectedIndex;
+  final int unreadMessages;
   final VoidCallback onDashboard;
   final VoidCallback onProjects;
-  final VoidCallback onNewSurvey;
+  final VoidCallback onChat;
   final VoidCallback onProfile;
   const _BottomNav({
     required this.homeowner,
     required this.selectedIndex,
+    required this.unreadMessages,
     required this.onDashboard,
     required this.onProjects,
-    required this.onNewSurvey,
+    required this.onChat,
     required this.onProfile,
   });
 
@@ -1555,9 +1616,10 @@ class _BottomNav extends StatelessWidget {
                         selected: selectedIndex == 1,
                         onTap: onProjects),
                     _NavItem(
-                        icon: Icons.add_circle_outline_rounded,
-                        label: 'New Survey',
-                        onTap: onNewSurvey),
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
                     _NavItem(
                         icon: Icons.person_outline_rounded,
                         label: 'Profile',
@@ -1580,11 +1642,13 @@ class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final int badgeCount;
   final VoidCallback? onTap;
   const _NavItem(
       {required this.icon,
       required this.label,
       this.selected = false,
+      this.badgeCount = 0,
       this.onTap});
   @override
   Widget build(BuildContext context) => Expanded(
@@ -1594,7 +1658,12 @@ class _NavItem extends StatelessWidget {
           child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Icon(icon, color: selected ? _gold : _muted, size: 21),
+                Badge(
+                  isLabelVisible: badgeCount > 0,
+                  label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+                  backgroundColor: SolarColors.error,
+                  child: Icon(icon, color: selected ? _gold : _muted, size: 21),
+                ),
                 const SizedBox(height: 4),
                 Text(label,
                     maxLines: 1,
