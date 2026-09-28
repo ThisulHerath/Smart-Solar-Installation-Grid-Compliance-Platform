@@ -35,7 +35,7 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         if (activeQuote?.Status is "VALIDATED" or "RESERVED" or "RELEASED") completed.Add("EquipmentPricingAgent");
         if (activeQuote?.Status == "RESERVED") completed.Add("InventoryReservation");
         return Ok(new {
-            workflowId = survey.Id, objective = sizing?.Objective ?? "Assess rooftop solar suitability and prepare an approved equipment plan",
+            workflowId = sizing?.WorkflowId ?? survey.Id.ToString(), objective = sizing?.Objective ?? "Assess rooftop solar suitability and prepare an approved equipment plan",
             plan = ReadJson(sizing?.PlanJson), completedSteps = completed,
             currentStep = sizing?.CurrentStep,
             structuredPlan = ReadProperty(sizing?.StateJson, "structured_plan"),
