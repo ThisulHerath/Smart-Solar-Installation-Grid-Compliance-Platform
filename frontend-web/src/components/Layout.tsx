@@ -22,18 +22,16 @@ export const Layout: React.FC = () => {
 
   return (
     <div className={`workspace-shell${administrator || staffRole ? ' admin-layout' : ''}${staffRole && !administrator ? ' staff-layout' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Navbar />
       {administrator || staffRole ? (
         <div className={`admin-route-shell${profileRoute ? ' profile-route' : ''}`}>
           {!profileRoute && (administrator ? <AdminSidebar /> : <RoleSidebar role={staffRole!} />)}
-          <main className="admin-route-content"><Navbar /><Outlet /></main>
+          <main className="admin-route-content"><Outlet /></main>
         </div>
       ) : (
-        <>
-          <Navbar />
-          <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
-            <Outlet />
-          </main>
-        </>
+        <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
+          <Outlet />
+        </main>
       )}
       <footer style={{
         borderTop: '1px solid var(--border-color)',

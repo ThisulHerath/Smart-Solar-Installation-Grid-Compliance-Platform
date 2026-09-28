@@ -26,8 +26,12 @@ export const Navbar = () => {
   return (
     <>
       <header className="member-home-nav">
-        <Link className="member-home-brand" to="/" aria-label="Smart Solar home"><Sun size={24} /><span>smart <b>solar</b></span></Link>
-        <nav aria-label="Main navigation"><Link className={activeNav === 'home' ? 'is-active' : ''} to="/">Home</Link><Link className={activeNav === 'services' ? 'is-active' : ''} to="/#services">Services</Link><Link className={activeNav === 'projects' ? 'is-active' : ''} to="/dashboard">{workspaceStaff ? 'Dashboard' : 'Projects'}</Link><Link className={activeNav === 'process' ? 'is-active' : ''} to="/#process">How it works</Link></nav>
+        <Link className="member-home-brand" to="/" aria-label="Smart Solar home">
+          <Sun size={24} />
+            <span>smart</span>
+            <b>solar</b>
+        </Link>
+        <nav aria-label="Main navigation"><Link className={activeNav === 'home' ? 'is-active' : ''} to="/">Home</Link><Link className={activeNav === 'services' ? 'is-active' : ''} to="/#services">Services</Link><Link className={activeNav === 'projects' ? 'is-active' : ''} to="/dashboard">{user ? 'Dashboard' : 'Projects'}</Link><Link className={activeNav === 'process' ? 'is-active' : ''} to="/#process">How it works</Link></nav>
         {user ? <div className="member-home-account"><Link to="/profile" className="member-home-user" aria-label="Open my profile"><span className="member-home-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : initials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" onClick={() => setShowLogoutConfirm(true)}><LogOut size={17} /> Logout</button></div> : <Link className="member-home-login" to="/login">Login</Link>}
       </header>
 

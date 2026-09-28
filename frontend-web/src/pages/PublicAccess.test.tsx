@@ -83,6 +83,23 @@ it.each([
   ).toBeInTheDocument();
 });
 
+it('shows a direct dashboard link in the landing navigation for signed-in roles', async () => {
+  localStorage.setItem('smartsolar_token', 'test-token');
+  vi.mocked(api.getMe).mockResolvedValue({
+    id: 'admin',
+    fullName: 'System Administrator',
+    email: 'admin@smartsolar.local',
+    phoneNumber: '+94770000001',
+    roles: ['ADMINISTRATOR'],
+    createdAt: '2026-01-01T00:00:00Z',
+  });
+
+  render(<App />);
+
+  expect(await screen.findByRole('link', { name: 'Dashboard' })).toHaveAttribute('href', '/dashboard');
+  expect(screen.queryByRole('link', { name: 'Projects' })).not.toBeInTheDocument();
+});
+
 it(
   'loads the signed-in profile and links to separate security settings',
   async () => {

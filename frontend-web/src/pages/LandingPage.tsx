@@ -50,7 +50,7 @@ export function LandingPage() {
         <nav className={menuOpen ? 'is-open' : ''} aria-label="Main navigation">
           <a className={activeSection === 'home' ? 'is-active' : ''} href="#main-content" onClick={() => setMenuOpen(false)}>Home</a>
           <a className={activeSection === 'services' ? 'is-active' : ''} href="#services" onClick={() => setMenuOpen(false)}>Services</a>
-          <Link to="/dashboard" onClick={() => setMenuOpen(false)}>Projects</Link>
+          <Link to="/dashboard" onClick={() => setMenuOpen(false)}>{user ? 'Dashboard' : 'Projects'}</Link>
           <a className={activeSection === 'process' ? 'is-active' : ''} href="#process" onClick={() => setMenuOpen(false)}>How it works</a>
         </nav>
         <div className="nav-actions">{user ? <div className="landing-account-actions"><Link className="landing-user" to="/profile" aria-label="Open my profile"><span className="landing-user-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : userInitials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" className="landing-logout" onClick={logout}><LogOut size={17} /> Logout</button></div> : <><Search size={21} aria-hidden="true" /><Link to="/login">Login</Link></>}</div>
