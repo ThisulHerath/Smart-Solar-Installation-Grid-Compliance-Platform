@@ -129,6 +129,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 size: 18)),
                                       ),
                                       SolarField(
+                                        key: const ValueKey(
+                                            'login_password_field'),
                                         controller: _passwordController,
                                         validator: Validators.required,
                                         obscureText: _obscurePassword,
