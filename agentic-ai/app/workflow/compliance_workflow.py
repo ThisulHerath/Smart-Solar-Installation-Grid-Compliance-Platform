@@ -5,6 +5,7 @@ from app.schemas.compliance_schemas import ComplianceEvaluationInput, Compliance
 from app.agents.grid_compliance_agent import GridComplianceAgent
 from app.agents.compliance_validator import DeterministicComplianceValidator
 from app.tools.project_knowledge import retrieve_project_guidance
+from app.tools.tool_registry import call_tool
 from app.workflow.observability import trace_stage
 
 compliance_agent = GridComplianceAgent()
@@ -18,7 +19,10 @@ def run_compliance_evaluation(payload: Dict[str, Any]) -> ComplianceEvaluationRe
         with trace_stage(logs, workflow_id, "CompliancePlanner", "ingestion"):
             data = ComplianceEvaluationInput.model_validate(payload)
         with trace_stage(logs, workflow_id, "ProjectKnowledgeTool", "retrieve_guidance"):
-            evidence = retrieve_project_guidance("grid voltage frequency inspection measurements", 2)
+            evidence = call_tool(
+                "GridComplianceAgent", "ProjectKnowledgeTool",
+                retrieve_project_guidance, "grid voltage frequency inspection measurements", 2,
+            )
             if not evidence:
                 raise ValueError("Reviewed project guidance unavailable")
         with trace_stage(logs, workflow_id, "GridComplianceAgent", "evaluation"):

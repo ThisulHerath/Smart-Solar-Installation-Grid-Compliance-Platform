@@ -53,8 +53,10 @@ export function HomeownerWorkspace() {
   const [deleteError, setDeleteError] = useState('');
   const deleteDialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    if (deleteTarget) deleteDialog.current?.showModal();
-    else deleteDialog.current?.close();
+    const dialog = deleteDialog.current;
+    if (!dialog) return;
+    if (deleteTarget && typeof dialog.showModal === 'function' && !dialog.open) dialog.showModal();
+    else if (!deleteTarget && typeof dialog.close === 'function' && dialog.open) dialog.close();
   }, [deleteTarget]);
 
   const deleteProject = async () => {

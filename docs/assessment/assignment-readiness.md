@@ -1,5 +1,7 @@
 # SE3090 assignment readiness
 
+**28 September 2026 update.** The agentic strengthening requested after this audit is implemented. PlannerAgent now creates objective-sensitive typed plans; a persisted master workflow supports inspection, correction, engineering decision, pricing and inventory pause/resume events; a central registry restricts each specialist's tools; ASP.NET verifies database business state before accepting high-impact events; and correlated trace/tool fields are persisted through migration `StrengthenAgentWorkflowState`. Current automated results are 105 ASP.NET tests passed (one PostgreSQL integration test skipped), 63 Python tests passed, 47 React tests passed, and 20 Flutter tests passed. The older checklist below remains useful historical context, but its fixed-plan, missing-canonical-state and trace-gap items have been superseded. Live LLM reasoning and generative RAG are still deliberately absent under the no-paid-service decision.
+
 Follow-up, 19 September 2026: see [English lecture audit](lecture-theory-audit.en.md), [Sinhala lecture audit](lecture-theory-audit.si.md) and [bilingual presentation report](lecture-theory-report.html). They distinguish deterministic specialists from LLM agents, record later changes and report their own verification scope. The dated results below remain historical evidence.
 
 **15 September 2026.** Reviewed against the supplied 17-page assignment specification. Page references below refer to that document. This is a development audit, not a signed submission or an awarded grade.
@@ -39,19 +41,19 @@ Legend: `[x]` = verified at the stated scope; `PARTIAL` = implementation exists 
 
 - [x] Four different domain specialists: SolarSizingAgent, GridComplianceAgent, SafetyGuardrailAgent and EquipmentPricingAgent; PlannerAgent is an additional coordinator.
 - [x] Domain agents have identifiable responsibilities and input/output validation boundaries in `agentic-ai/app/agents`, `schemas` and `validators`.
-- [ ] PARTIAL — Consolidate evidence of each agent's contracts, permitted tools and participation. The coordinator's contract/planning is less developed than the specialist contracts.
+- [x] Typed specialist/coordinator contracts, per-agent tool permissions and participation evidence are implemented and documented.
 - [x] A domain objective can enter the workflow; the diagnostic route and sizing request now preserve it.
-- [ ] PARTIAL — PlannerAgent emits a fixed eight-step list. It does not analyse the objective to create structured step objects with dependencies, tool permissions and conditional delegation. Do not present it as an autonomous planner.
+- [x] PlannerAgent classifies reviewed objectives and creates structured step objects with dependencies, required inputs, tool permissions, high-impact markers and state. Selection is deterministic and must not be presented as live LLM reasoning.
 - [x] Specialist stages execute in the business process. Sizing, safety and pricing use LangGraph; compliance is a procedural pipeline.
 - [x] Pricing calls a real allowlisted USD/LKR tool with currency/rate/freshness validation, timeout, caching and structured output. No agent can directly mutate stock.
 - [x] Deterministic sizing, compliance, safety, price and availability checks run before outputs/actions are accepted.
 - [x] Proposals pause for authorized engineer approval; approval/rejection/revision and audit records exist. Homeowner approval was rejected live.
 - [x] Results and approvals persist in PostgreSQL and appear in an authorized overview.
-- [ ] PARTIAL — State is distributed across workflow, compliance, proposal and quote records. Some completed steps/outcomes are derived. Strengthen correlation and durable recovery; a canonical execution/step model would make acceptance easier to demonstrate.
-- [ ] PARTIAL — Logs exist but timing/retry/tool traces are inconsistent across stages. Some timestamps are generated after execution, so they are not measured agent latency.
+- [x] Canonical serialized workflow state, current step, approval status and retry count persist in AgentWorkflow and can be resumed through authenticated endpoints.
+- [x] Correlated trace/span/tool fields persist for structured workflow events. Zero-duration human transition events represent recorded decisions rather than model latency.
 - [x] Tested failures include invalid inputs, unsafe results, stale pricing, downstream errors and unauthorized actions. Internal endpoint authentication is enforced.
 - [ ] PARTIAL — Inert catalog-instruction text is tested; extend the golden evaluation to objective abuse, tool timeouts/rate limits, retry bounds and interrupted-run recovery.
-- [ ] PARTIAL — Overall minimum agentic acceptance: substantial working implementation, with planning, recovery and trace-completeness gaps. Do not claim full marks from class count alone.
+- [ ] PARTIAL — Strong deterministic agentic workflow evidence now exists, but live LLM reasoning/generative RAG remain absent. Confirm the lecturer's interpretation before claiming full agentic marks.
 
 ### Testing, CI, security and submission — pages 8–17
 

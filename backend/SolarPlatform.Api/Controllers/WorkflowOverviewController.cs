@@ -37,6 +37,8 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         return Ok(new {
             workflowId = survey.Id, objective = sizing?.Objective ?? "Assess rooftop solar suitability and prepare an approved equipment plan",
             plan = ReadJson(sizing?.PlanJson), completedSteps = completed,
+            currentStep = sizing?.CurrentStep,
+            structuredPlan = ReadProperty(sizing?.StateJson, "structured_plan"),
             status = activeQuote?.Status == "RESERVED" ? "COMPLETE" : proposal?.ProposalStatus.ToString() ?? survey.SurveyStatus.ToString(),
             approvalStatus = proposal?.ProposalStatus.ToString() ?? "NOT_REQUESTED",
             finalOutcome = activeQuote?.Status == "RESERVED" ? "Approved equipment reserved; ready for installation planning." : "Awaiting the next workflow stage.",
@@ -52,6 +54,19 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         });
     }
     private static JsonElement? ReadJson(string? value) => string.IsNullOrWhiteSpace(value) ? null : JsonSerializer.Deserialize<JsonElement>(value);
+    private static JsonElement? ReadProperty(string? value, string property)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        try
+        {
+            using var document = JsonDocument.Parse(value);
+            return document.RootElement.TryGetProperty(property, out var result) ? result.Clone() : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 
     private static bool HasCompletedAgentTrace(string? value, string agentName)
     {

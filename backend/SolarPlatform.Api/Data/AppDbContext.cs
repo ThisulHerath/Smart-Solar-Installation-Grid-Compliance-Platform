@@ -121,6 +121,8 @@ public class AppDbContext : DbContext
             entity.HasIndex(w => new { w.SolarSurveyId, w.Status });
             entity.Property(w => w.WorkflowId).IsRequired().HasMaxLength(100);
             entity.Property(w => w.Objective).IsRequired().HasMaxLength(500);
+            entity.Property(w => w.CurrentStep).IsRequired().HasMaxLength(100);
+            entity.Property(w => w.ApprovalStatus).IsRequired().HasMaxLength(50);
             entity.HasOne(w => w.SolarSurvey).WithMany(s => s.Workflows).HasForeignKey(w => w.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -130,6 +132,9 @@ public class AppDbContext : DbContext
             entity.HasIndex(l => new { l.AgentWorkflowId, l.StartedAt });
             entity.Property(l => l.AgentName).IsRequired().HasMaxLength(100);
             entity.Property(l => l.StepName).IsRequired().HasMaxLength(100);
+            entity.Property(l => l.ToolName).HasMaxLength(100);
+            entity.Property(l => l.TraceId).HasMaxLength(100);
+            entity.Property(l => l.SpanId).HasMaxLength(100);
             entity.Property(l => l.Status).IsRequired().HasMaxLength(50);
             entity.Property(l => l.OutputSummary).HasMaxLength(1000);
             entity.Property(l => l.ErrorMessage).HasMaxLength(1000);

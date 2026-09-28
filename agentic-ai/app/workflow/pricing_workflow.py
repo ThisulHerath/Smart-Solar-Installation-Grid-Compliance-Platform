@@ -5,6 +5,7 @@ from langgraph.graph import START, END, StateGraph
 from app.schemas.pricing_schemas import PricingRequest, ExchangeRate, PriceLine, PricingResponse
 from app.agents.equipment_pricing_agent import EquipmentPricingAgent
 from app.tools.exchange_rate import get_usd_to_lkr_exchange_rate, validate_rate
+from app.tools.tool_registry import call_tool
 
 
 def money(value: Decimal) -> Decimal:
@@ -33,7 +34,9 @@ def requirements(state: PricingState):
 
 
 def exchange(state: PricingState):
-    rate = get_usd_to_lkr_exchange_rate()
+    rate = call_tool(
+        "EquipmentPricingAgent", "ExchangeRateTool", get_usd_to_lkr_exchange_rate
+    )
     return {"rate": rate, "logs": state["logs"] + ["ExchangeRateTool: validated USD/LKR provider response"]}
 
 

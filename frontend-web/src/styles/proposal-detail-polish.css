@@ -44,6 +44,8 @@
 .workflow-summary__plan li { display: flex; align-items: flex-start; gap: 10px; }
 .workflow-summary__plan li > span { display: grid; flex: 0 0 25px; width: 25px; height: 25px; place-items: center; border: 1px solid #c3e0d5; border-radius: 50%; background: #edf8f4; color: #1a8067; font-size: 10px; font-weight: 800; }
 .workflow-summary__plan li p { margin: 3px 0 0; color: #536d72; font-size: 12px; line-height: 1.45; }
+.workflow-summary__plan li p strong { display: block; color: #315359; font-size: 12px; }
+.workflow-summary__plan li p small { display: block; margin-top: 2px; color: #789092; font-size: 10px; }
 .workflow-summary__progress li { display: flex; align-items: center; gap: 8px; color: #45686a; font-size: 12px; }
 .workflow-summary__progress li svg { color: #1c9a75; }
 .workflow-summary__outcome { display: flex; gap: 8px; margin-top: 17px; padding-top: 14px; border-top: 1px solid #e2ece7; color: #526e72; font-size: 12px; line-height: 1.5; }

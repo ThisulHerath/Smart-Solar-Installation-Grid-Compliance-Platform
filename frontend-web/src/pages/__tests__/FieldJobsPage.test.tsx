@@ -10,6 +10,7 @@ import { FieldJob } from '../../types/auth';
 
 // Mock API service
 vi.mock('../../services/api', () => ({
+  resolveAssetUrl: (value: string | null | undefined) => value ?? null,
   api: {
     getFieldJobs: vi.fn(),
     getFieldJob: vi.fn(),

@@ -23,7 +23,7 @@ export function SearchBox({ value, onChange, label, suggestions = [], loading = 
   return <div className="solar-search" onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}>
     <label htmlFor={id}>{label}</label><div className="solar-search-input"><Search size={18} aria-hidden="true" />
       <input id={id} ref={input} role="combobox" autoComplete="off" aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-list`} aria-activedescendant={open && active >= 0 ? `${id}-${active}` : undefined}
-        value={value} placeholder="Search by name or reference" spellCheck={false} onChange={e => { onChange(e.target.value); setOpen(false); setActive(-1); }}
+        value={value} placeholder="Search by name or reference" spellCheck={false} onFocus={() => setOpen(true)} onChange={e => { onChange(e.target.value); setOpen(true); setActive(-1); }}
         onKeyDown={e => {
           if (e.key === 'Escape') { setOpen(false); setActive(-1); }
           if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); setOpen(true); setActive(n => options.length ? (n + (e.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length : -1); }

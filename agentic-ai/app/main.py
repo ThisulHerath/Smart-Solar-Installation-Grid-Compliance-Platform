@@ -13,6 +13,8 @@ from app.workflow.compliance_workflow import run_compliance_evaluation
 from app.workflow.proposal_workflow import run_guardrail_workflow
 from app.schemas.pricing_schemas import PricingRequest, PricingResponse
 from app.workflow.pricing_workflow import run_pricing_workflow
+from app.schemas.plan_schemas import MasterWorkflowStartRequest, MasterWorkflowResumeRequest
+from app.workflow.master_workflow import start_master_workflow, resume_master_workflow
 
 load_dotenv()
 
@@ -66,6 +68,20 @@ def equipment_pricing(request: PricingRequest, x_internal_key: str = Header(None
     except Exception:
         raise HTTPException(status_code=503, detail="Exchange rate or pricing service unavailable. No inventory reserved.")
 
+
+@app.post("/workflow/start", tags=["Orchestration"])
+def start_workflow(request: MasterWorkflowStartRequest, x_internal_key: str = Header(None, alias="X-Internal-Key")):
+    """Create a typed plan, execute safe automatic stages, and return persistable state."""
+    _require_internal_key(x_internal_key)
+    return start_master_workflow(request.model_dump())
+
+
+@app.post("/workflow/resume", tags=["Orchestration"])
+def resume_workflow(request: MasterWorkflowResumeRequest, x_internal_key: str = Header(None, alias="X-Internal-Key")):
+    """Resume persisted state after an authorized backend event."""
+    _require_internal_key(x_internal_key)
+    return resume_master_workflow(request.workflow_state, request.event, request.event_data)
+
 @app.post("/workflow/test", response_model=WorkflowExecutionResponse, tags=["Workflow"])
 def test_workflow(
     request: WorkflowExecutionRequest,
@@ -85,6 +101,7 @@ def test_workflow(
             customer_id=raw_result.get("customer_id"),
             objective=raw_result.get("objective", request.objective),
             plan=raw_result.get("plan", []),
+            structured_plan=raw_result.get("structured_plan", {}),
             current_step=raw_result.get("current_step", "completed"),
             completed_steps=raw_result.get("completed_steps", []),
             tool_results=raw_result.get("tool_results", {}),

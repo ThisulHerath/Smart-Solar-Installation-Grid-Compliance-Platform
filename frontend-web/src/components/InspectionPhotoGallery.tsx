@@ -45,7 +45,7 @@ export function InspectionPhotoGallery({ surveyId, jobId }: { surveyId?: string;
             <span><Expand size={18} /> View photo</span>
           </button> : <div className="inspection-gallery__unavailable">Photo unavailable. Ask the technician to upload it again.</div>}
           <figcaption><strong>{label}</strong><span>{photo.technicianName}</span><time dateTime={photo.createdAt}>{new Date(photo.createdAt).toLocaleString()}</time>
-            <small>Job {photo.fieldJobId.slice(0, 8)} · {photo.fileName}</small>{url && !unavailable.includes(photo.id) && <a href={url.href} target="_blank" rel="noopener noreferrer">Open full-size photo ↗</a>}</figcaption>
+            <small>Job {photo.fieldJobId.slice(0, 8)} · {photo.fileName}</small>{url && !unavailable.includes(photo.id) && <a href={url.href} target="_blank" rel="noopener noreferrer" aria-label={`Open ${label.toLowerCase()} photo in full size`}>Open full-size photo ↗</a>}</figcaption>
         </figure>;
       })}</div>}
     {preview && <div className="inspection-photo-modal" role="dialog" aria-modal="true" aria-label={`${preview.label} photo preview`} onMouseDown={() => setPreview(null)}>
