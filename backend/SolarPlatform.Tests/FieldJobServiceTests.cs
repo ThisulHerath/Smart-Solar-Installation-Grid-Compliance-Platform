@@ -197,6 +197,16 @@ public class FieldJobServiceTests
         var telemetry = await service.RecordTelemetryAsync(job.Id, _techId, new RecordTelemetryDto(MeasurementType.GridVoltage, 230.5m, "V"));
         Assert.NotNull(telemetry);
         Assert.Equal(230.5m, telemetry.MeasurementValue);
+
+        var reloadedJob = await service.GetJobByIdAsync(job.Id, _techId);
+        Assert.NotNull(reloadedJob!.Inspection);
+        Assert.Equal(82.5m, reloadedJob.Inspection.RoofAreaMeasuredSqm);
+        Assert.Equal(15.0m, reloadedJob.Inspection.RoofTilt);
+        Assert.Equal(40.0m, reloadedJob.Inspection.MainBreakerRating);
+        Assert.Equal("Clear ladder access", reloadedJob.Inspection.SafetyNotes);
+        Assert.Contains(reloadedJob.Inspection.Telemetry,
+            reading => reading.MeasurementType == MeasurementType.GridVoltage &&
+                       reading.MeasurementValue == 230.5m);
     }
 
     [Fact]

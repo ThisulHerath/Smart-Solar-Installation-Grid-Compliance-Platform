@@ -128,6 +128,44 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   String _gridType = 'SinglePhase';
   bool _inverterLocationSuitable = true;
 
+  String _draftNumber(double? value) {
+    if (value == null) return '';
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
+  double? _latestReading(
+      SiteInspectionModel inspection, String measurementType) {
+    final readings = inspection.telemetry
+        .where((item) => item.measurementType == measurementType)
+        .toList()
+      ..sort((a, b) {
+        final aTime = a.recordedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bTime = b.recordedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bTime.compareTo(aTime);
+      });
+    return readings.isEmpty ? null : readings.first.measurementValue;
+  }
+
+  void _restoreInspectionDraft(SiteInspectionModel? inspection) {
+    if (inspection == null) return;
+    _roofAreaController.text = _draftNumber(inspection.roofAreaMeasuredSqm);
+    _roofTiltController.text = _draftNumber(inspection.roofTilt);
+    _mainBreakerController.text = _draftNumber(inspection.mainBreakerRating);
+    _safetyNotesController.text = inspection.safetyNotes ?? '';
+    _technicianNotesController.text = inspection.technicianNotes ?? '';
+    _roofOrientation = inspection.roofOrientation;
+    _gridType = inspection.gridTypeObserved;
+    _inverterLocationSuitable = inspection.inverterLocationSuitable ?? true;
+    _voltageController.text =
+        _draftNumber(_latestReading(inspection, 'GridVoltage'));
+    _frequencyController.text =
+        _draftNumber(_latestReading(inspection, 'GridFrequency'));
+    _vocController.text = _draftNumber(_latestReading(inspection, 'Voc'));
+    _iscController.text = _draftNumber(_latestReading(inspection, 'Isc'));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -157,8 +195,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     try {
       final data = await _api.getTechnicianJob(widget.jobId);
       if (!mounted) return;
+      final job = FieldJob.fromJson(data);
+      _restoreInspectionDraft(job.inspection);
       setState(() {
-        _job = FieldJob.fromJson(data);
+        _job = job;
         _gpsCheckInRecorded = _job!.checkInAt != null;
         for (final p in _job!.photos) {
           if (p.fileUrl.isNotEmpty) {

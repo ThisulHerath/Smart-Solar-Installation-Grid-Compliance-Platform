@@ -474,6 +474,11 @@ public class FieldJobService : IFieldJobService
 
         if (inspection == null) return null;
 
+        return ToInspectionDto(inspection);
+    }
+
+    private static SiteInspectionResponseDto ToInspectionDto(SiteInspection inspection)
+    {
         return new SiteInspectionResponseDto(
             inspection.Id,
             inspection.FieldJobId,
@@ -543,7 +548,8 @@ public class FieldJobService : IFieldJobService
                 j.Inspection.ComplianceAssessment.ValidationStatus,
                 j.Inspection.ComplianceAssessment.CreatedAt,
                 j.Inspection.ComplianceAssessment.UpdatedAt
-            )
+            ),
+            j.Inspection == null ? null : ToInspectionDto(j.Inspection)
         );
     }
 }
