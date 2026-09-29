@@ -140,6 +140,7 @@ export interface FieldJob {
   createdAt: string;
   updatedAt: string;
   hasInspection: boolean;
+  checkInAt?: string;
   inspectionStatus?: string;
   compliance?: ComplianceAssessment;
 }

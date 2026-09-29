@@ -15,6 +15,7 @@ class FieldJob {
   final DateTime assignedAt;
   final DateTime? scheduledAt;
   final bool hasInspection;
+  final DateTime? checkInAt;
   final String? inspectionStatus;
   final ComplianceAssessmentModel? compliance;
   final List<SitePhotoModel> photos;
@@ -36,6 +37,7 @@ class FieldJob {
     required this.assignedAt,
     this.scheduledAt,
     required this.hasInspection,
+    this.checkInAt,
     this.inspectionStatus,
     this.compliance,
     this.photos = const [],
@@ -63,6 +65,9 @@ class FieldJob {
           ? DateTime.parse(json['scheduledAt'] as String)
           : null,
       hasInspection: json['hasInspection'] as bool? ?? false,
+      checkInAt: json['checkInAt'] != null
+          ? DateTime.tryParse(json['checkInAt'] as String)
+          : null,
       inspectionStatus: json['inspectionStatus'] as String?,
       compliance: json['compliance'] != null
           ? ComplianceAssessmentModel.fromJson(

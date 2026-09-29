@@ -530,6 +530,7 @@ public class FieldJobService : IFieldJobService
             j.CreatedAt,
             j.UpdatedAt,
             j.Inspection != null,
+            j.Inspection?.CheckInAt,
             j.Inspection?.InspectionStatus,
             j.Inspection?.ComplianceAssessment == null ? null : new ComplianceAssessmentDto(
                 j.Inspection.ComplianceAssessment.Id,

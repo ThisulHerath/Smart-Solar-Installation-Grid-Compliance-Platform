@@ -35,7 +35,7 @@ sequenceDiagram
     Tech->>API: POST /api/technician/jobs/{id}/telemetry (Voltage, Freq, Voc, Isc)
     API->>DB: Insert SiteTelemetry
     Tech->>API: POST /api/technician/jobs/{id}/photos (Multipart)
-    API->>Storage: Save file to /uploads/site-photos/
+    API->>Storage: Save image through IFileStorageService (Cloudinary when hosted)
     API->>DB: Insert SitePhoto metadata
 
     Note over Tech,AI: Step 3: Submission & Grid Compliance

@@ -70,6 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = auth.user;
     if (user == null) return const LoginScreen();
     final homeowner = user.roles.contains(AppConstants.roleHomeowner);
+    final fieldTechnician =
+        user.roles.contains(AppConstants.roleFieldTechnician);
     final fieldStaff = user.roles.any([
       AppConstants.roleFieldTechnician,
       AppConstants.roleSeniorEngineer,
@@ -176,10 +178,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         bottomNavigationBar: _BottomNav(
           homeowner: homeowner,
+          fieldTechnician: fieldTechnician,
+          locationStaff: locationStaff,
           selectedIndex: homeowner ? _selectedTab : 0,
           unreadMessages: _unreadMessages,
           onDashboard: () => setState(() => _selectedTab = 0),
           onProjects: () => setState(() => _selectedTab = 1),
+          onJobs: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const TechnicianJobsScreen())),
+          onLocations: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const CustomerLocationsScreen())),
           onChat: _openMessages,
           onProfile: () => Navigator.of(context)
               .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
@@ -1598,18 +1606,26 @@ class _Glass extends StatelessWidget {
 
 class _BottomNav extends StatelessWidget {
   final bool homeowner;
+  final bool fieldTechnician;
+  final bool locationStaff;
   final int selectedIndex;
   final int unreadMessages;
   final VoidCallback onDashboard;
   final VoidCallback onProjects;
+  final VoidCallback onJobs;
+  final VoidCallback onLocations;
   final VoidCallback onChat;
   final VoidCallback onProfile;
   const _BottomNav({
     required this.homeowner,
+    required this.fieldTechnician,
+    required this.locationStaff,
     required this.selectedIndex,
     required this.unreadMessages,
     required this.onDashboard,
     required this.onProjects,
+    required this.onJobs,
+    required this.onLocations,
     required this.onChat,
     required this.onProfile,
   });
@@ -1645,11 +1661,40 @@ class _BottomNav extends StatelessWidget {
                         icon: Icons.person_outline_rounded,
                         label: 'Profile',
                         onTap: onProfile),
+                  ] else if (fieldTechnician) ...[
+                    _NavItem(
+                        icon: Icons.assignment_outlined,
+                        label: 'My Jobs',
+                        onTap: onJobs),
+                    _NavItem(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
+                    _NavItem(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Profile',
+                        onTap: onProfile),
+                  ] else if (locationStaff) ...[
+                    _NavItem(
+                        icon: Icons.map_outlined,
+                        label: 'Locations',
+                        onTap: onLocations),
+                    _NavItem(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
+                    _NavItem(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Profile',
+                        onTap: onProfile),
                   ] else ...[
-                    const _NavItem(
-                        icon: Icons.analytics_outlined, label: 'Analytics'),
-                    const _NavItem(
-                        icon: Icons.solar_power_outlined, label: 'Devices'),
+                    _NavItem(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
                     _NavItem(
                         icon: Icons.person_outline_rounded,
                         label: 'Profile',
@@ -1676,7 +1721,9 @@ class _NavItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Badge(
@@ -1694,7 +1741,9 @@ class _NavItem extends StatelessWidget {
                         fontSize: 9,
                         fontWeight:
                             selected ? FontWeight.w700 : FontWeight.w500))
-              ])),
+              ]),
+            ),
+          ),
         ),
       );
 }
