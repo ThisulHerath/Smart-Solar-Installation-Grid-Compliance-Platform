@@ -197,6 +197,16 @@ public class FieldJobServiceTests
         var telemetry = await service.RecordTelemetryAsync(job.Id, _techId, new RecordTelemetryDto(MeasurementType.GridVoltage, 230.5m, "V"));
         Assert.NotNull(telemetry);
         Assert.Equal(230.5m, telemetry.MeasurementValue);
+
+        var reloadedJob = await service.GetJobByIdAsync(job.Id, _techId);
+        Assert.NotNull(reloadedJob!.Inspection);
+        Assert.Equal(82.5m, reloadedJob.Inspection.RoofAreaMeasuredSqm);
+        Assert.Equal(15.0m, reloadedJob.Inspection.RoofTilt);
+        Assert.Equal(40.0m, reloadedJob.Inspection.MainBreakerRating);
+        Assert.Equal("Clear ladder access", reloadedJob.Inspection.SafetyNotes);
+        Assert.Contains(reloadedJob.Inspection.Telemetry,
+            reading => reading.MeasurementType == MeasurementType.GridVoltage &&
+                       reading.MeasurementValue == 230.5m);
     }
 
     [Fact]
@@ -284,5 +294,45 @@ public class FieldJobServiceTests
         Assert.Contains("GridComplianceAgent", error.Message);
         Assert.Empty(await _db.ComplianceAssessments.ToListAsync());
         Assert.Equal(FieldJobStatus.Failed, (await _db.FieldJobs.FindAsync(job.Id))!.Status);
+    }
+
+    [Fact]
+    public async Task FailedComplianceSubmission_CanBeRetriedWhenAgentRecovers()
+    {
+        _aiMock
+            .SetupSequence(x => x.ExecuteComplianceEvaluationAsync(
+                It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((EvaluateComplianceResponseDto?)null)
+            .ReturnsAsync(new EvaluateComplianceResponseDto(
+                WorkflowId: "wf-comp-retry",
+                GridCompliant: true,
+                ComplianceStatus: "COMPLIANT",
+                RiskLevel: "LOW",
+                Violations: new List<string>(),
+                Recommendations: new List<string> { "Retry completed" },
+                ValidationStatus: "PASSED",
+                Notes: "Agent recovered",
+                ExecutionLogs: new List<ComplianceExecutionLogDto>
+                {
+                    new("GridComplianceAgent", "evaluation", "completed", "Compliant", null, 1)
+                }
+            ));
+
+        var service = CreateService();
+        var job = await service.CreateOrAssignJobAsync(new CreateFieldJobDto(_surveyId, _techId, null));
+        await service.CheckInAsync(job.Id, _techId, new CheckInDto(6.9271m, 79.8612m));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.SubmitInspectionAsync(job.Id, _techId));
+        Assert.Equal(FieldJobStatus.Failed, (await _db.FieldJobs.FindAsync(job.Id))!.Status);
+
+        var result = await service.SubmitInspectionAsync(job.Id, _techId);
+
+        Assert.NotNull(result);
+        var completedJob = await service.GetJobByIdAsync(job.Id);
+        Assert.Equal(FieldJobStatus.ComplianceComplete, completedJob!.Status);
+        Assert.Equal("wf-comp-retry", completedJob.Compliance!.WorkflowId);
+        _aiMock.Verify(x => x.ExecuteComplianceEvaluationAsync(
+            It.IsAny<object>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }

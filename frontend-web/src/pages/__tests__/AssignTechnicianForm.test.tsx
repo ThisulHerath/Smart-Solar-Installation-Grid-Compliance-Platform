@@ -23,7 +23,7 @@ describe('Technician assignment', () => {
     expect(screen.getByLabelText('Customer survey')).toHaveFocus();
     expect(screen.getByLabelText('Customer survey')).toHaveAttribute('aria-invalid', 'true');
     fireEvent.change(screen.getByLabelText('Customer survey'), { target: { value: 'survey-1' } });
-    fireEvent.change(screen.getByLabelText('Technician'), { target: { value: 'tech-1' } });
+    fireEvent.change(screen.getByLabelText(/Field technician/), { target: { value: 'tech-1' } });
     fireEvent.change(screen.getByLabelText('Priority'), { target: { value: 'High' } });
     fireEvent.click(submit);
     await waitFor(() => expect(done).toHaveBeenCalledWith({ id: 'job-1' }));
@@ -35,7 +35,7 @@ describe('Technician assignment', () => {
     render(<AssignTechnicianForm onAssigned={done} onCancel={vi.fn()} />);
     await screen.findByLabelText('Customer survey');
     fireEvent.change(screen.getByLabelText('Customer survey'), { target: { value: 'survey-1' } });
-    fireEvent.change(screen.getByLabelText('Technician'), { target: { value: 'tech-1' } });
+    fireEvent.change(screen.getByLabelText(/Field technician/), { target: { value: 'tech-1' } });
     fireEvent.click(screen.getByRole('button', { name: 'Assign site visit' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Select an active field technician.');
     expect(screen.getByLabelText('Customer survey')).toHaveValue('survey-1');
@@ -47,5 +47,18 @@ describe('Technician assignment', () => {
     expect(await screen.findByText('No active field technicians are available.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Assign site visit' }));
     expect(api.createFieldJob).not.toHaveBeenCalled();
+  });
+
+  it('requires date and time together before creating an assignment', async () => {
+    vi.mocked(api.createFieldJob).mockResolvedValue({ id: 'job-1' } as any);
+    render(<AssignTechnicianForm onAssigned={vi.fn()} onCancel={vi.fn()} />);
+    await screen.findByLabelText('Customer survey');
+    fireEvent.change(screen.getByLabelText('Customer survey'), { target: { value: 'survey-1' } });
+    fireEvent.change(screen.getByLabelText(/Field technician/), { target: { value: 'tech-1' } });
+    fireEvent.change(screen.getByLabelText('Visit date'), { target: { value: '2099-10-10' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Assign site visit' }));
+    expect(api.createFieldJob).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Arrival time')).toHaveFocus();
+    expect(screen.getByLabelText('Arrival time')).toHaveAttribute('aria-invalid', 'true');
   });
 });

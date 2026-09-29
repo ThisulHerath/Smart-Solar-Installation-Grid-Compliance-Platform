@@ -2,7 +2,6 @@ import { SearchBox } from '../components/SearchBox';
 import React, { useEffect, useState, useCallback } from 'react'; 
 import { useNavigate } from 'react-router-dom'; 
 import { api } from '../services/api'; 
-import { AssignTechnicianForm } from '../components/AssignTechnicianForm'; 
 import { FieldJob } from '../types/auth'; 
 import { 
   CheckCircle2, 
@@ -32,12 +31,6 @@ export const FieldJobsPage: React.FC = () => {
 
   const [isRefreshing, setIsRefreshing] =
     useState(false);
-
-  const [assigning, setAssigning] =
-    useState(false);
-
-  const [notice, setNotice] =
-    useState('');
 
   const fetchJobs = useCallback(
     async (isSilent = false) => {
@@ -202,7 +195,7 @@ export const FieldJobsPage: React.FC = () => {
               marginBottom: '4px',
             }}
           >
-            Field Technician Operations & Compliance
+            Field jobs
           </h1>
 
           <p
@@ -211,9 +204,7 @@ export const FieldJobsPage: React.FC = () => {
               fontSize: '0.88rem',
             }}
           >
-            Technician Site Dispatches &bull; GPS
-            Check-in &bull; Electrical Telemetry &bull;
-            Grid Compliance Engine
+            Monitor assigned site visits, completed inspections, and compliance results.
           </p>
         </div>
 
@@ -237,56 +228,6 @@ export const FieldJobsPage: React.FC = () => {
             : 'Refresh Jobs'}
         </button>
       </div>
-
-      {/* Assign Technician */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          flexWrap: 'wrap',
-        }}
-      >
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            setAssigning(true);
-            setNotice('');
-          }}
-          disabled={assigning}
-        >
-          Assign technician
-        </button>
-
-        {notice && (
-          <p role="status">
-            {notice}
-          </p>
-        )}
-      </div>
-
-      {assigning && (
-        <AssignTechnicianForm
-          onCancel={() => setAssigning(false)}
-          onAssigned={(job) => {
-            setAssigning(false);
-            setStatusFilter('ALL');
-            setSearchQuery('');
-
-            setNotice(
-              `Site visit assigned to ${job.technicianName} for ${job.propertyAddress}.`
-            );
-
-            setJobs((current) => [
-              job,
-              ...current.filter(
-                (existing) =>
-                  existing.id !== job.id
-              ),
-            ]);
-          }}
-        />
-      )}
 
       {/* Filters and Search */}
       <div

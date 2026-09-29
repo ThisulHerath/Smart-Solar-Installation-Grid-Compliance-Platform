@@ -13,6 +13,7 @@ public class FieldJobStatusTransitionTests
     [InlineData(FieldJobStatus.ComplianceProcessing, FieldJobStatus.ComplianceComplete)]
     [InlineData(FieldJobStatus.ComplianceProcessing, FieldJobStatus.Failed)]
     [InlineData(FieldJobStatus.Failed, FieldJobStatus.Assigned)]
+    [InlineData(FieldJobStatus.Failed, FieldJobStatus.Submitted)]
     public void AllowedTransitions_ReturnTrue(FieldJobStatus from, FieldJobStatus to)
     {
         Assert.True(FieldJobStatusTransition.CanTransition(from, to));

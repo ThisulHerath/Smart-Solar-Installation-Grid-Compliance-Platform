@@ -1,6 +1,7 @@
 import '../widgets/solar_search.dart';
 import '../widgets/record_reference.dart';
 import '../widgets/solar_field.dart';
+import '../widgets/location_picker.dart';
 import '../utils/validators.dart';
 import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   bool _loading = false;
   bool _fetching = true;
   XFile? _attachedImage;
+  PropertyLocation? _propertyLocation;
   Timer? _pollTimer;
 
   @override
@@ -136,6 +138,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
         roofAreaSqm: roof,
         gridType: _gridType,
         propertyAddress: address,
+        latitude: _propertyLocation?.latitude,
+        longitude: _propertyLocation?.longitude,
       );
       final surveyId = created['id'] as String;
 
@@ -152,6 +156,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
       _usageController.clear();
       _roofController.clear();
       _addressController.clear();
+      _propertyLocation = null;
 
       await _loadSurveys();
 
@@ -393,7 +398,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
                                   hint: 'House number, street and city',
                                   icon: Icons.location_on_outlined),
                             ),
-                            const SizedBox(height: 6),
+                            LocationPicker(
+                              addressController: _addressController,
+                              value: _propertyLocation,
+                              disabled: _loading,
+                              onChanged: (location) =>
+                                  setState(() => _propertyLocation = location),
+                            ),
                             Material(
                               color: const Color(0x0F07536A),
                               borderRadius: BorderRadius.circular(13),

@@ -71,7 +71,7 @@ Legend: `[x]` = verified at the stated scope; `PARTIAL` = implementation exists 
 - [ ] UNVERIFIED — Cloud database least privilege, backups and evaluator-access settings were not audited.
 - [ ] TODO — Public ASP.NET health/Swagger and React URLs. Localhost does not meet deployment evidence requirements.
 - [ ] PARTIAL — Local AI operation is allowed on page 9; final startup and evaluator instructions need clean-machine verification.
-- [ ] PARTIAL — Protect bills/site photos with authorized access and durable storage before public deployment; static local uploads are intended for demo data.
+- [ ] PARTIAL — Durable Cloudinary storage is implemented for hosted uploads, with provider-neutral URLs retained in Neon. Authorized/private image delivery is still required before accepting real bills or property photos; use synthetic demonstration images meanwhile.
 - [ ] TODO — One consolidated PDF with group report, four individual reports, evidence and references.
 - [ ] TODO — Actual student AI-use logs, student-written reflections and signed declarations. `docs/AI-USAGE.md` is a draft, not four individuals' evidence.
 - [ ] TODO — Accessible ten-minute demo video; the user confirmed none exists yet.

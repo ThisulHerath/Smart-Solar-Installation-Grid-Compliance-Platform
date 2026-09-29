@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Trash2, ChevronLeft, ChevronRight, Search, ClipboardCheck, MapPinned, ShieldCheck } from 'lucide-react';
 
 import { ValidatedForm } from '../components/ValidatedForm';
+import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
+import { LocationPicker, SelectedLocation } from '../components/LocationPicker';
 import { api } from '../services/api';
 import { Survey } from '../types/auth';
 import projectSolarFacility from '../../images/project-solar-facility.png';
@@ -51,14 +53,6 @@ export function HomeownerWorkspace() {
   const [error, setError] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Survey | null>(null);
   const [deleteError, setDeleteError] = useState('');
-  const deleteDialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = deleteDialog.current;
-    if (!dialog) return;
-    if (deleteTarget && typeof dialog.showModal === 'function' && !dialog.open) dialog.showModal();
-    else if (!deleteTarget && typeof dialog.close === 'function' && dialog.open) dialog.close();
-  }, [deleteTarget]);
-
   const deleteProject = async () => {
     if (!deleteTarget || busy) return;
     setBusy(true);
@@ -86,6 +80,7 @@ export function HomeownerWorkspace() {
   const [kwh, setKwh] = useState('');
   const [area, setArea] = useState('');
   const [grid, setGrid] = useState('SinglePhase');
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation>();
 
   const [
     proposals,
@@ -230,6 +225,8 @@ export function HomeownerWorkspace() {
                   roofAreaSqm: Number(area),
                   gridType: grid,
                   propertyAddress: address,
+                  latitude: selectedLocation?.latitude,
+                  longitude: selectedLocation?.longitude,
                   roofOrientation: 'Unknown',
                 });
 
@@ -237,6 +234,7 @@ export function HomeownerWorkspace() {
                 setAddress('');
                 setKwh('');
                 setArea('');
+                setSelectedLocation(undefined);
               });
             }}
           >
@@ -264,6 +262,14 @@ export function HomeownerWorkspace() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               disabled={busy}
+            />
+
+            <LocationPicker
+              address={address}
+              location={selectedLocation}
+              disabled={busy}
+              onAddressChange={setAddress}
+              onLocationChange={setSelectedLocation}
             />
 
             <label htmlFor="monthly-use">
@@ -471,13 +477,19 @@ export function HomeownerWorkspace() {
           </nav>}
         </section>
       )}
-      {createPortal(<dialog ref={deleteDialog} className="project-delete-dialog" aria-labelledby="delete-project-title" onCancel={event => { if (busy) event.preventDefault(); else setDeleteTarget(null); }}>
-        <h2 id="delete-project-title">Delete project?</h2>
-        <p><strong>{deleteTarget?.propertyAddress}</strong></p>
+      <DestructiveConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete project?"
+        subject={deleteTarget?.propertyAddress}
+        confirmLabel="Delete project"
+        pendingLabel="Deleting..."
+        pending={busy}
+        error={deleteError}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void deleteProject()}
+      >
         <p>This permanently removes the project, proposals and inspection records. This cannot be undone.</p>
-        {deleteError && <p role="alert" className="project-delete-dialog__error">{deleteError}</p>}
-        <div><button type="button" disabled={busy} onClick={() => setDeleteTarget(null)}>Cancel</button><button type="button" className="project-delete-dialog__confirm" disabled={busy} onClick={() => void deleteProject()}>{busy ? 'Deleting...' : 'Delete project'}</button></div>
-      </dialog>, document.body)}
+      </DestructiveConfirmDialog>
     </section>
   );
 };

@@ -1311,6 +1311,12 @@
   border-color: #efc2c4 !important;
 }
 
+.workspace-shell .account-page .danger-card,
+.workspace-shell .account-page .danger-flow-card {
+  border-radius: 18px !important;
+  box-shadow: 0 14px 34px rgba(64, 35, 38, 0.09) !important;
+}
+
 .flow-header {
   margin-bottom: 24px;
   padding-bottom: 18px;

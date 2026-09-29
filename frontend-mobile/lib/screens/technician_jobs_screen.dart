@@ -75,6 +75,15 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
     }
   }
 
+  Future<void> _openJob(FieldJob job) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => JobDetailScreen(jobId: job.id),
+      ),
+    );
+    _loadJobs();
+  }
+
   @override
   Widget build(BuildContext context) {
     final visibleJobs = _jobs
@@ -216,15 +225,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                   margin: const EdgeInsets.only(bottom: 14),
                                   child: InkWell(
                                     borderRadius: BorderRadius.circular(14),
-                                    onTap: () async {
-                                      await Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              JobDetailScreen(jobId: job.id),
-                                        ),
-                                      );
-                                      _loadJobs();
-                                    },
+                                    onTap: () => _openJob(job),
                                     child: Padding(
                                       padding: const EdgeInsets.all(16),
                                       child: Column(
@@ -275,6 +276,35 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                               ),
                                             ],
                                           ),
+                                          const SizedBox(height: 7),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                job.latitude != null &&
+                                                        job.longitude != null
+                                                    ? Icons.check_circle_outline
+                                                    : Icons.info_outline,
+                                                size: 14,
+                                                color: job.latitude != null &&
+                                                        job.longitude != null
+                                                    ? SolarColors.primary
+                                                    : SolarColors.warning,
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  job.latitude != null &&
+                                                          job.longitude != null
+                                                      ? 'Homeowner map location confirmed'
+                                                      : 'Directions will use the property address',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: SolarColors.muted,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                           const SizedBox(height: 12),
                                           Row(
                                             mainAxisAlignment:
@@ -295,6 +325,28 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                                     color: SolarColors.muted),
                                               ),
                                             ],
+                                          ),
+                                          const SizedBox(height: 14),
+                                          SizedBox(
+                                            width: double.infinity,
+                                            height: 48,
+                                            child: OutlinedButton.icon(
+                                              onPressed: () => _openJob(job),
+                                              icon: const Icon(
+                                                  Icons.navigation_outlined),
+                                              label: const Text(
+                                                  'Open job and plan route'),
+                                              style: OutlinedButton.styleFrom(
+                                                foregroundColor:
+                                                    SolarColors.primary,
+                                                side: const BorderSide(
+                                                    color: SolarColors.primary),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),

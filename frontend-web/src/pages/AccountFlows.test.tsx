@@ -319,6 +319,12 @@ describe('Account security', () => {
       }),
     );
 
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Continue to verification',
+      }),
+    );
+
     expect(
       screen.getByText(
         /Installation, survey, safety and approval records/,

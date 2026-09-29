@@ -8,6 +8,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { InspectionPhotoGallery } from '../components/InspectionPhotoGallery';
 import { FieldJob } from '../types/auth';
+import { Navigation } from 'lucide-react';
+import { externalDirectionsUrl } from '../utils/maps';
 
 import {
   ArrowLeft, 
@@ -302,6 +304,15 @@ export const FieldJobDetailPage: React.FC = () => {
             alignItems: 'center',
           }}
         >
+          <a
+            href={externalDirectionsUrl(job.latitude, job.longitude, job.propertyAddress)}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-secondary"
+            style={{ padding: '8px 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Navigation size={14} /> Navigate to site
+          </a>
           <button
             onClick={handleEvaluateCompliance}
             disabled={evaluating}

@@ -74,6 +74,20 @@ public class SurveyServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() => Service().CreateAsync(_owner, request));
     }
 
+    [Fact] public async Task LocationCoordinates_AndCustomerName_AreReturnedToAuthorizedUsers()
+    {
+        var request = Request();
+        request.Latitude = 6.9271m;
+        request.Longitude = 79.8612m;
+
+        var created = await Service().CreateAsync(_owner, request);
+        var listed = Assert.Single(await Service().GetAllAsync());
+
+        Assert.Equal(6.9271m, created.Latitude);
+        Assert.Equal(79.8612m, created.Longitude);
+        Assert.Equal("Owner", listed.CustomerName);
+    }
+
     [Fact] public async Task Submission_RunsWorkflow_PersistsResultAndExecutionLogs()
     {
         var survey = await Service().CreateAsync(_owner, Request());

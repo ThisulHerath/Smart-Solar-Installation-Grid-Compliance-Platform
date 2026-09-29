@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useInventoryCatalog } from '../hooks/useInventoryCatalog';
 import { SearchBox } from '../components/SearchBox';
+import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 
 import { ValidatedForm } from '../components/ValidatedForm';
 
@@ -81,6 +82,8 @@ export function InventoryPage() {
   const [supplierOpen, setSupplierOpen] = useState(false);
   const [quotesLoading, setQuotesLoading] = useState(false);
   const [dialogError, setDialogError] = useState('');
+  const [deactivateTarget, setDeactivateTarget] = useState<InventoryItem | null>(null);
+  const [deactivateError, setDeactivateError] = useState('');
 
   const query = new URLSearchParams({
     search,
@@ -162,6 +165,25 @@ export function InventoryPage() {
       } else {
         setError((e as Error).message);
       }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deactivateItem() {
+    if (!deactivateTarget || busy) return;
+
+    setBusy(true);
+    setDeactivateError('');
+    setNotice('');
+
+    try {
+      await request(`/${deactivateTarget.id}`, 'DELETE');
+      setNotice('Equipment deactivated.');
+      setRevision((value) => value + 1);
+      setDeactivateTarget(null);
+    } catch (e) {
+      setDeactivateError(e instanceof Error ? e.message : 'Unable to deactivate this equipment.');
     } finally {
       setBusy(false);
     }
@@ -428,16 +450,10 @@ export function InventoryPage() {
                           <button
                             className="inventory-text-button"
                             disabled={busy}
-                            onClick={() =>
-                              act(
-                                () =>
-                                  request(
-                                    `/${item.id}`,
-                                    'DELETE'
-                                  ),
-                                'Equipment deactivated.'
-                              )
-                            }
+                            onClick={() => {
+                              setDeactivateError('');
+                              setDeactivateTarget(item);
+                            }}
                           >
                             Deactivate
                           </button>
@@ -964,6 +980,20 @@ export function InventoryPage() {
           </div>
         )}
       </section>
+
+      <DestructiveConfirmDialog
+        open={Boolean(deactivateTarget)}
+        title="Deactivate equipment?"
+        subject={deactivateTarget ? `${deactivateTarget.name} · ${deactivateTarget.sku}` : undefined}
+        confirmLabel="Deactivate equipment"
+        pendingLabel="Deactivating..."
+        pending={busy}
+        error={deactivateError}
+        onCancel={() => setDeactivateTarget(null)}
+        onConfirm={() => void deactivateItem()}
+      >
+        <p>This removes the item from active inventory choices. Existing reservation and pricing records remain available.</p>
+      </DestructiveConfirmDialog>
     </main>
   );
 };

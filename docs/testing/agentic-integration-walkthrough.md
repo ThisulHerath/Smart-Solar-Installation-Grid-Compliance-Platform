@@ -7,8 +7,8 @@ This walkthrough proves one continuous project across the homeowner, field techn
 Apply `StrengthenAgentWorkflowState` to the configured development database before starting the new backend. Then use four terminals from the repository root:
 
 ```powershell
-# Terminal 1 — deterministic agent service (the root .env currently points to port 8001)
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir agentic-ai --host 127.0.0.1 --port 8001
+# Terminal 1 — deterministic agent service
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir agentic-ai --host 127.0.0.1 --port 8000
 
 # Terminal 2 — ASP.NET API
 dotnet run --project backend/SolarPlatform.Api --urls http://0.0.0.0:5116
@@ -28,7 +28,7 @@ Open:
 - Flutter in Edge: `http://localhost:5190` (Flutter normally opens it automatically)
 - Swagger: `http://localhost:5116/swagger`
 - Backend health: `http://localhost:5116/api/health`
-- Agent health: `http://127.0.0.1:8001/health`
+- Agent health: `http://127.0.0.1:8000/health`
 
 All seeded accounts use `Password@123`:
 

@@ -72,6 +72,14 @@ class ApiService {
   Future<List<dynamic>> getSurveys() async =>
       List<dynamic>.from(await get('/api/surveys'));
 
+  Future<List<Map<String, dynamic>>> searchLocations(String query) async {
+    final response = List<dynamic>.from(await get(
+        '/api/locations/search?query=${Uri.encodeQueryComponent(query.trim())}'));
+    return response
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+  }
+
   Future<List<ChatConversation>> getChatConversations() async {
     final response = List<dynamic>.from(await get('/api/chat/conversations'));
     return response
@@ -114,12 +122,16 @@ class ApiService {
       {required double monthlyKwh,
       required double roofAreaSqm,
       required String gridType,
-      required String propertyAddress}) async {
+      required String propertyAddress,
+      double? latitude,
+      double? longitude}) async {
     final response = await post('/api/surveys', {
       'monthlyKwh': monthlyKwh,
       'roofAreaSqm': roofAreaSqm,
       'gridType': gridType,
       'propertyAddress': propertyAddress,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       'roofOrientation': 'Unknown',
     });
     return Map<String, dynamic>.from(response);

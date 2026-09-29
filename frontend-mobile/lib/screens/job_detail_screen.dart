@@ -1,11 +1,12 @@
 import '../widgets/record_reference.dart';
 import '../widgets/solar_field.dart';
 import '../utils/validators.dart';
-import 'dart:typed_data';
 import '../theme/solar_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/field_job.dart';
 import '../services/api_service.dart';
 import '../widgets/status_badge.dart';
@@ -26,11 +27,89 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   FieldJob? _job;
   bool _loading = true;
   bool _saving = false;
+  bool _locatingForNavigation = false;
+  bool _gpsCheckInRecorded = false;
   String? _error;
   String? _successMessage;
+  String? _gpsCheckInError;
+  Position? _navigationOrigin;
 
   final Map<String, Uint8List> _photoBytes = {};
   final Map<String, String> _photoUrls = {};
+
+  Future<void> _openDirections(FieldJob job) async {
+    final origin = _navigationOrigin;
+    if (origin == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content:
+              Text('Get your current location before opening the route.')));
+      return;
+    }
+    final destination = job.latitude != null && job.longitude != null
+        ? '${job.latitude},${job.longitude}'
+        : job.propertyAddress;
+    final uri = Uri.https('www.google.com', '/maps/dir/', {
+      'api': '1',
+      'origin': '${origin.latitude},${origin.longitude}',
+      'destination': destination,
+      'travelmode': 'driving',
+      'dir_action': 'navigate',
+    });
+    try {
+      final opened = await launchUrl(
+        uri,
+        mode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
+        webOnlyWindowName: kIsWeb ? '_self' : null,
+      );
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to open map directions.')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to open map directions.')));
+      }
+    }
+  }
+
+  Future<Position> _readCurrentPosition() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      throw Exception('Enable location services and try again.');
+    }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw Exception(
+          'Location permission is required. Allow location access in your browser or device settings.');
+    }
+    return Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 20)));
+  }
+
+  Future<void> _captureNavigationOrigin() async {
+    setState(() {
+      _locatingForNavigation = true;
+      _error = null;
+    });
+    try {
+      final position = await _readCurrentPosition();
+      if (!mounted) return;
+      setState(() => _navigationOrigin = position);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error =
+          'Location unavailable: ${e.toString().replaceAll('Exception: ', '')}');
+    } finally {
+      if (mounted) setState(() => _locatingForNavigation = false);
+    }
+  }
 
   // Controllers for site inspection
   final _roofAreaController = TextEditingController();
@@ -48,6 +127,44 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   String _roofOrientation = 'Unknown';
   String _gridType = 'SinglePhase';
   bool _inverterLocationSuitable = true;
+
+  String _draftNumber(double? value) {
+    if (value == null) return '';
+    return value == value.roundToDouble()
+        ? value.toInt().toString()
+        : value.toString();
+  }
+
+  double? _latestReading(
+      SiteInspectionModel inspection, String measurementType) {
+    final readings = inspection.telemetry
+        .where((item) => item.measurementType == measurementType)
+        .toList()
+      ..sort((a, b) {
+        final aTime = a.recordedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bTime = b.recordedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bTime.compareTo(aTime);
+      });
+    return readings.isEmpty ? null : readings.first.measurementValue;
+  }
+
+  void _restoreInspectionDraft(SiteInspectionModel? inspection) {
+    if (inspection == null) return;
+    _roofAreaController.text = _draftNumber(inspection.roofAreaMeasuredSqm);
+    _roofTiltController.text = _draftNumber(inspection.roofTilt);
+    _mainBreakerController.text = _draftNumber(inspection.mainBreakerRating);
+    _safetyNotesController.text = inspection.safetyNotes ?? '';
+    _technicianNotesController.text = inspection.technicianNotes ?? '';
+    _roofOrientation = inspection.roofOrientation;
+    _gridType = inspection.gridTypeObserved;
+    _inverterLocationSuitable = inspection.inverterLocationSuitable ?? true;
+    _voltageController.text =
+        _draftNumber(_latestReading(inspection, 'GridVoltage'));
+    _frequencyController.text =
+        _draftNumber(_latestReading(inspection, 'GridFrequency'));
+    _vocController.text = _draftNumber(_latestReading(inspection, 'Voc'));
+    _iscController.text = _draftNumber(_latestReading(inspection, 'Isc'));
+  }
 
   @override
   void initState() {
@@ -78,8 +195,11 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     try {
       final data = await _api.getTechnicianJob(widget.jobId);
       if (!mounted) return;
+      final job = FieldJob.fromJson(data);
+      _restoreInspectionDraft(job.inspection);
       setState(() {
-        _job = FieldJob.fromJson(data);
+        _job = job;
+        _gpsCheckInRecorded = _job!.checkInAt != null;
         for (final p in _job!.photos) {
           if (p.fileUrl.isNotEmpty) {
             _photoUrls[p.photoType] = p.fileUrl;
@@ -96,92 +216,96 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _handleGpsCheckIn() async {
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _gpsCheckInError = null;
+    });
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
-        throw Exception('Enable location services to record your arrival.');
-      }
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        throw Exception(
-            'Location permission is needed for check-in. Enable it in your device settings.');
-      }
-      final position = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 20)));
+      final position = await _readCurrentPosition();
       await _api.checkInJob(
           widget.jobId, position.latitude, position.longitude);
-      setState(() => _successMessage = 'GPS Check-in recorded successfully.');
+      if (!mounted) return;
+      setState(() {
+        _gpsCheckInRecorded = true;
+        _successMessage = null;
+      });
       await _loadJobDetails();
     } catch (e) {
-      setState(() => _error =
+      if (!mounted) return;
+      setState(() => _gpsCheckInError =
           'Check-in failed: ${e.toString().replaceAll('Exception: ', '')}');
     } finally {
       setState(() => _saving = false);
     }
   }
 
+  Future<void> _persistInspection() async {
+    final roofArea = double.tryParse(_roofAreaController.text.trim());
+    final roofTilt = double.tryParse(_roofTiltController.text.trim());
+    final mainBreaker = double.tryParse(_mainBreakerController.text.trim());
+
+    await _api.saveInspectionDraft(widget.jobId, {
+      'roofAreaMeasuredSqm': roofArea,
+      'roofOrientation': _roofOrientation,
+      'roofTilt': roofTilt,
+      'gridTypeObserved': _gridType,
+      'phaseCount': _gridType == 'ThreePhase' ? 3 : 1,
+      'mainBreakerRating': mainBreaker,
+      'inverterLocationSuitable': _inverterLocationSuitable,
+      'safetyNotes': _safetyNotesController.text.trim(),
+      'technicianNotes': _technicianNotesController.text.trim(),
+    });
+
+    if (_voltageController.text.isNotEmpty) {
+      final v = double.tryParse(_voltageController.text.trim());
+      if (v != null) {
+        await _api.recordTelemetry(widget.jobId, 'GridVoltage', v, 'V');
+      }
+    }
+    if (_frequencyController.text.isNotEmpty) {
+      final f = double.tryParse(_frequencyController.text.trim());
+      if (f != null) {
+        await _api.recordTelemetry(widget.jobId, 'GridFrequency', f, 'Hz');
+      }
+    }
+    if (_vocController.text.isNotEmpty) {
+      final voc = double.tryParse(_vocController.text.trim());
+      if (voc != null) {
+        await _api.recordTelemetry(widget.jobId, 'Voc', voc, 'V');
+      }
+    }
+    if (_iscController.text.isNotEmpty) {
+      final isc = double.tryParse(_iscController.text.trim());
+      if (isc != null) {
+        await _api.recordTelemetry(widget.jobId, 'Isc', isc, 'A');
+      }
+    }
+  }
+
   Future<bool> _handleSaveInspection() async {
     if (!_form.currentState!.validate()) return false;
-    setState(() => _saving = true);
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
     try {
-      final roofArea = double.tryParse(_roofAreaController.text.trim());
-      final roofTilt = double.tryParse(_roofTiltController.text.trim());
-      final mainBreaker = double.tryParse(_mainBreakerController.text.trim());
+      await _persistInspection();
 
-      await _api.saveInspectionDraft(widget.jobId, {
-        'roofAreaMeasuredSqm': roofArea,
-        'roofOrientation': _roofOrientation,
-        'roofTilt': roofTilt,
-        'gridTypeObserved': _gridType,
-        'phaseCount': _gridType == 'ThreePhase' ? 3 : 1,
-        'mainBreakerRating': mainBreaker,
-        'inverterLocationSuitable': _inverterLocationSuitable,
-        'safetyNotes': _safetyNotesController.text.trim(),
-        'technicianNotes': _technicianNotesController.text.trim(),
-      });
-
-      // Record Telemetry if entered
-      if (_voltageController.text.isNotEmpty) {
-        final v = double.tryParse(_voltageController.text.trim());
-        if (v != null) {
-          await _api.recordTelemetry(widget.jobId, 'GridVoltage', v, 'V');
-        }
-      }
-      if (_frequencyController.text.isNotEmpty) {
-        final f = double.tryParse(_frequencyController.text.trim());
-        if (f != null) {
-          await _api.recordTelemetry(widget.jobId, 'GridFrequency', f, 'Hz');
-        }
-      }
-      if (_vocController.text.isNotEmpty) {
-        final voc = double.tryParse(_vocController.text.trim());
-        if (voc != null) {
-          await _api.recordTelemetry(widget.jobId, 'Voc', voc, 'V');
-        }
-      }
-      if (_iscController.text.isNotEmpty) {
-        final isc = double.tryParse(_iscController.text.trim());
-        if (isc != null) {
-          await _api.recordTelemetry(widget.jobId, 'Isc', isc, 'A');
-        }
-      }
-
+      if (!mounted) return false;
       setState(
-          () => _successMessage = 'Site inspection draft & telemetry saved.');
+          () => _successMessage = 'Site inspection draft and readings saved.');
       await _loadJobDetails();
       return true;
     } catch (e) {
-      setState(() => _error =
-          'Failed to save: ${e.toString().replaceAll('Exception: ', '')}');
+      if (!mounted) return false;
+      final message =
+          'Failed to save: ${e.toString().replaceAll('Exception: ', '')}';
+      setState(() => _error = message);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
       return false;
     } finally {
-      setState(() => _saving = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
@@ -325,19 +449,138 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _handleSubmitInspection() async {
-    setState(() => _saving = true);
+    if (!_form.currentState!.validate()) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+      _successMessage = null;
+    });
     try {
-      if (!await _handleSaveInspection()) return;
+      await _persistInspection();
       await _api.submitInspection(widget.jobId);
+      if (!mounted) return;
       setState(() => _successMessage =
-          'Inspection submitted! Compliance analysis completed.');
+          'Inspection submitted. Grid compliance evaluation completed.');
       await _loadJobDetails();
     } catch (e) {
-      setState(() => _error =
-          'Submission failed: ${e.toString().replaceAll('Exception: ', '')}');
+      if (!mounted) return;
+      final message =
+          'Submission failed: ${e.toString().replaceAll('Exception: ', '')}';
+      setState(() => _error = message);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
     } finally {
-      setState(() => _saving = false);
+      if (mounted) setState(() => _saving = false);
     }
+  }
+
+  Widget _buildInspectionActions() {
+    final status = _job?.status.toLowerCase() ?? '';
+    final evaluationInProgress = status == 'complianceprocessing';
+    final evaluationComplete = status == 'compliancecomplete';
+    final retrying = status == 'failed';
+    final submitEnabled =
+        !_saving && !evaluationInProgress && !evaluationComplete;
+    final submitLabel = evaluationInProgress
+        ? 'Evaluation in progress'
+        : evaluationComplete
+            ? 'Compliance complete'
+            : retrying
+                ? 'Retry compliance'
+                : 'Submit for compliance';
+
+    return Material(
+      color: SolarColors.surface,
+      elevation: 3,
+      shadowColor: const Color(0x22173E44),
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+          child: LayoutBuilder(builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            final saveButton = OutlinedButton.icon(
+              onPressed: _saving ? null : _handleSaveInspection,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: SolarColors.surfaceSoft,
+                foregroundColor: SolarColors.primary,
+                disabledBackgroundColor: const Color(0xFFE4E9E2),
+                disabledForegroundColor: SolarColors.muted,
+                side: const BorderSide(color: SolarColors.border),
+                minimumSize: const Size.fromHeight(48),
+              ),
+              icon: const Icon(Icons.save_outlined, size: 19),
+              label: const Text('Save Draft',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+            );
+            final submitButton = FilledButton.icon(
+              onPressed: submitEnabled ? _handleSubmitInspection : null,
+              icon: Icon(
+                  retrying ? Icons.refresh_rounded : Icons.verified_outlined,
+                  size: 19),
+              label: Text(_saving ? 'Processing…' : submitLabel),
+              style: FilledButton.styleFrom(
+                backgroundColor: SolarColors.primary,
+                foregroundColor: SolarColors.onPrimary,
+                disabledBackgroundColor:
+                    SolarColors.primary.withValues(alpha: 0.45),
+                disabledForegroundColor: SolarColors.onPrimary,
+                minimumSize: const Size.fromHeight(48),
+              ),
+            );
+
+            final buttons = compact
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      saveButton,
+                      const SizedBox(height: 8),
+                      submitButton
+                    ],
+                  )
+                : Row(children: [
+                    Expanded(child: saveButton),
+                    const SizedBox(width: 10),
+                    Expanded(child: submitButton),
+                  ]);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buttons,
+                if (_error != null) ...[
+                  const SizedBox(height: 8),
+                  Semantics(
+                    liveRegion: true,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFECE8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE5A094)),
+                      ),
+                      child: Row(children: [
+                        const Icon(Icons.error_outline,
+                            size: 18, color: Color(0xFFB42318)),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(_error!,
+                              style: const TextStyle(
+                                  color: Color(0xFF8A1C13), fontSize: 12)),
+                        ),
+                      ]),
+                    ),
+                  ),
+                ],
+              ],
+            );
+          }),
+        ),
+      ),
+    );
   }
 
   @override
@@ -376,647 +619,796 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
               color: SolarColors.text),
         ),
       ),
-      body: SingleChildScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.all(16),
-        child: Form(
-            key: _form,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Status & Customer Card
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: SolarColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: SolarColors.border),
-                  ),
+      body: Column(
+        children: [
+          _buildInspectionActions(),
+          Expanded(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+              child: Form(
+                  key: _form,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(child: Text(job.customerName,
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: SolarColors.text))),
-                          StatusBadge(label: job.status),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      RecordReference(label: 'Job reference', value: job.id),
-                      RecordReference(
-                          label: 'Survey reference', value: job.solarSurveyId),
-                      Text('Phone: ${job.customerPhone}',
-                          style: const TextStyle(
-                              color: SolarColors.muted, fontSize: 13)),
-                      Text('Monthly electricity use: ${job.monthlyKwh} kWh',
-                          style: const TextStyle(
-                              color: SolarColors.warning,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                if (_successMessage != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                        color: const Color(0x2010B981),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: SolarColors.primary)),
-                    child: Text(_successMessage!,
-                        style: const TextStyle(
-                            color: SolarColors.primary, fontSize: 13)),
-                  ),
-
-                if (_error != null)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                        color: const Color(0x20EF4444),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: SolarColors.error)),
-                    child: Text(_error!,
-                        style: const TextStyle(
-                            color: SolarColors.error, fontSize: 13)),
-                  ),
-
-                // Step 1: GPS Check-In
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: SolarColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: SolarColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('1. GPS Check-in (Site Arrival)',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: SolarColors.info)),
-                      const SizedBox(height: 8),
-                      const Text(
-                          'Confirm physical presence at survey site using device GPS coordinates.',
-                          style: TextStyle(
-                              fontSize: 12, color: SolarColors.muted)),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: _saving ? null : _handleGpsCheckIn,
-                        icon: const Icon(Icons.location_on, size: 16),
-                        label: const Text('Record GPS Check-in'),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: SolarColors.info,
-                            foregroundColor: SolarColors.onPrimary),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Step 2: Site & Electrical Measurements
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: SolarColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: SolarColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('2. Roof & Electrical Inspection',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: SolarColors.primary)),
-                      const SizedBox(height: 12),
-                      SolarField(
-                        controller: _roofAreaController,
-                        inputFormatters: [solarDecimalFormatter],
-                        validator: (v) => Validators.number(v,
-                            min: 0.01, max: 100000, optional: true),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                            labelText: 'Measured Roof Area (m²)',
-                            border: OutlineInputBorder()),
-                      ),
-                      const SizedBox(height: 10),
-                      SolarField(
-                        controller: _roofTiltController,
-                        inputFormatters: [solarDecimalFormatter],
-                        validator: (v) => Validators.number(v,
-                            min: 0, max: 90, optional: true),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                            labelText: 'Roof Tilt Angle (degrees)',
-                            border: OutlineInputBorder()),
-                      ),
-                      const SizedBox(height: 10),
-                      SolarField(
-                        controller: _mainBreakerController,
-                        inputFormatters: [solarDecimalFormatter],
-                        validator: (v) => Validators.number(v,
-                            min: 0.01, max: 100000, optional: true),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                            labelText: 'Main Breaker Rating (Amps)',
-                            border: OutlineInputBorder()),
-                      ),
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                          initialValue: _gridType,
-                          decoration: const InputDecoration(
-                              labelText: 'Observed grid connection'),
-                          items: const [
-                            DropdownMenuItem(
-                                value: 'SinglePhase',
-                                child: Text('Single phase')),
-                            DropdownMenuItem(
-                                value: 'ThreePhase', child: Text('Three phase'))
+                      // Status & Customer Card
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: SolarColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                    child: Text(job.customerName,
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: SolarColors.text))),
+                                StatusBadge(label: job.status),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            RecordReference(
+                                label: 'Job reference', value: job.id),
+                            RecordReference(
+                                label: 'Survey reference',
+                                value: job.solarSurveyId),
+                            Text('Phone: ${job.customerPhone}',
+                                style: const TextStyle(
+                                    color: SolarColors.muted, fontSize: 13)),
+                            Text(
+                                'Monthly electricity use: ${job.monthlyKwh} kWh',
+                                style: const TextStyle(
+                                    color: SolarColors.warning,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600)),
                           ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _gridType = value);
-                            }
-                          }),
+                        ),
+                      ),
                       const SizedBox(height: 12),
-                      DropdownButtonFormField<String>(
-                          initialValue: _roofOrientation,
-                          decoration: const InputDecoration(
-                              labelText: 'Roof orientation'),
-                          items: [
-                            'Unknown',
-                            'North',
-                            'South',
-                            'East',
-                            'West',
-                            'NorthEast',
-                            'NorthWest',
-                            'SouthEast',
-                            'SouthWest'
-                          ]
-                              .map((value) => DropdownMenuItem(
-                                  value: value, child: Text(value)))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _roofOrientation = value);
-                            }
-                          }),
-                      SwitchListTile(
-                        title: const Text('Inverter Location Suitable',
-                            style: TextStyle(
-                                color: SolarColors.text, fontSize: 14)),
-                        subtitle: const Text(
-                            'Adequate airflow, sheltered, fire safety compliant',
-                            style: TextStyle(
-                                color: SolarColors.muted, fontSize: 12)),
-                        value: _inverterLocationSuitable,
-                        activeThumbColor: SolarColors.primary,
-                        onChanged: (val) =>
-                            setState(() => _inverterLocationSuitable = val),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: SolarColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text('Travel to customer',
+                                style: TextStyle(
+                                    color: SolarColors.text,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700)),
+                            const SizedBox(height: 5),
+                            Text(job.propertyAddress,
+                                style: const TextStyle(
+                                    color: SolarColors.muted, fontSize: 12)),
+                            const SizedBox(height: 10),
+                            Row(children: [
+                              Icon(
+                                  _navigationOrigin == null
+                                      ? Icons.location_searching
+                                      : Icons.check_circle,
+                                  size: 17,
+                                  color: _navigationOrigin == null
+                                      ? SolarColors.warning
+                                      : SolarColors.success),
+                              const SizedBox(width: 7),
+                              Expanded(
+                                  child: Text(
+                                _navigationOrigin == null
+                                    ? 'Your starting location has not been captured.'
+                                    : 'Starting location confirmed (±${_navigationOrigin!.accuracy.round()} m).',
+                                style: const TextStyle(
+                                    color: SolarColors.muted, fontSize: 12),
+                              )),
+                            ]),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 48,
+                              child: OutlinedButton.icon(
+                                onPressed: _locatingForNavigation
+                                    ? null
+                                    : _captureNavigationOrigin,
+                                icon: _locatingForNavigation
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2))
+                                    : const Icon(Icons.my_location_rounded),
+                                label: Text(_locatingForNavigation
+                                    ? 'Getting your location…'
+                                    : _navigationOrigin == null
+                                        ? '1. Get my current location'
+                                        : 'Update my current location'),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 48,
+                              child: FilledButton.icon(
+                                onPressed: _navigationOrigin == null
+                                    ? null
+                                    : () => _openDirections(job),
+                                icon: const Icon(Icons.navigation_rounded),
+                                label:
+                                    const Text('2. Navigate to customer home'),
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: SolarColors.primary,
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                // Step 3: Electrical Telemetry
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: SolarColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: SolarColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('3. Measured electrical readings',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: SolarColors.warning)),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SolarField(
-                              controller: _voltageController,
-                              inputFormatters: [solarDecimalFormatter],
-                              validator: (v) => Validators.number(v,
-                                  min: 0.01, max: 100000, optional: true),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              style: const TextStyle(color: SolarColors.text),
-                              decoration: const InputDecoration(
-                                  labelText: 'Grid Voltage (V)',
-                                  border: OutlineInputBorder()),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: SolarField(
-                              controller: _frequencyController,
-                              inputFormatters: [solarDecimalFormatter],
-                              validator: (v) => Validators.number(v,
-                                  min: 0.01, max: 100000, optional: true),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              style: const TextStyle(color: SolarColors.text),
-                              decoration: const InputDecoration(
-                                  labelText: 'Grid Freq (Hz)',
-                                  border: OutlineInputBorder()),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: SolarField(
-                              controller: _vocController,
-                              inputFormatters: [solarDecimalFormatter],
-                              validator: (v) => Validators.number(v,
-                                  min: 0.01, max: 100000, optional: true),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              style: const TextStyle(color: SolarColors.text),
-                              decoration: const InputDecoration(
-                                  labelText: 'Voc (V)',
-                                  border: OutlineInputBorder()),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: SolarField(
-                              controller: _iscController,
-                              inputFormatters: [solarDecimalFormatter],
-                              validator: (v) => Validators.number(v,
-                                  min: 0.01, max: 100000, optional: true),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true),
-                              style: const TextStyle(color: SolarColors.text),
-                              decoration: const InputDecoration(
-                                  labelText: 'Isc (A)',
-                                  border: OutlineInputBorder()),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+                      if (_successMessage != null)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                              color: const Color(0x2010B981),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: SolarColors.primary)),
+                          child: Text(_successMessage!,
+                              style: const TextStyle(
+                                  color: SolarColors.primary, fontSize: 13)),
+                        ),
 
-                // Step 4: Photo Capture & Previews
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: SolarColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: SolarColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            '4. Site Evidence Photographs',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: SolarColors.text),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: const Color(0x18287247),
-                              borderRadius: BorderRadius.circular(10),
-                              border:
-                                  Border.all(color: const Color(0x33287247)),
+                      // Step 1: GPS Check-In
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: SolarColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Text('1. GPS Check-in (Site Arrival)',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                          color: SolarColors.info)),
+                                ),
+                                if (_gpsCheckInRecorded)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 9, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: SolarColors.success
+                                          .withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(999),
+                                      border: Border.all(
+                                          color: SolarColors.success
+                                              .withValues(alpha: 0.35)),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.check_circle,
+                                            size: 15,
+                                            color: SolarColors.success),
+                                        SizedBox(width: 5),
+                                        Text('GPS checked in',
+                                            style: TextStyle(
+                                                color: SolarColors.success,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700)),
+                                      ],
+                                    ),
+                                  ),
+                              ],
                             ),
-                            child: Text(
-                              '${[
+                            const SizedBox(height: 8),
+                            Text(
+                                _gpsCheckInRecorded
+                                    ? 'Your site arrival location has been recorded successfully.'
+                                    : 'Confirm physical presence at survey site using device GPS coordinates.',
+                                style: const TextStyle(
+                                    fontSize: 12, color: SolarColors.muted)),
+                            if (_gpsCheckInError != null) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color:
+                                      SolarColors.error.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                      color: SolarColors.error
+                                          .withValues(alpha: 0.3)),
+                                ),
+                                child: Row(children: [
+                                  const Icon(Icons.error_outline,
+                                      size: 17, color: SolarColors.error),
+                                  const SizedBox(width: 7),
+                                  Expanded(
+                                      child: Text(_gpsCheckInError!,
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: SolarColors.error))),
+                                ]),
+                              ),
+                            ],
+                            if (!_gpsCheckInRecorded) ...[
+                              const SizedBox(height: 12),
+                              ElevatedButton.icon(
+                                onPressed: _saving ? null : _handleGpsCheckIn,
+                                icon: const Icon(Icons.location_on, size: 16),
+                                label: const Text('Record GPS Check-in'),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: SolarColors.info,
+                                    foregroundColor: SolarColors.onPrimary),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Step 2: Site & Electrical Measurements
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: SolarColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('2. Roof & Electrical Inspection',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: SolarColors.primary)),
+                            const SizedBox(height: 12),
+                            SolarField(
+                              controller: _roofAreaController,
+                              inputFormatters: [solarDecimalFormatter],
+                              validator: (v) => Validators.number(v,
+                                  min: 0.01, max: 100000, optional: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: const InputDecoration(
+                                  labelText: 'Measured Roof Area (m²)',
+                                  border: OutlineInputBorder()),
+                            ),
+                            const SizedBox(height: 10),
+                            SolarField(
+                              controller: _roofTiltController,
+                              inputFormatters: [solarDecimalFormatter],
+                              validator: (v) => Validators.number(v,
+                                  min: 0, max: 90, optional: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: const InputDecoration(
+                                  labelText: 'Roof Tilt Angle (degrees)',
+                                  border: OutlineInputBorder()),
+                            ),
+                            const SizedBox(height: 10),
+                            SolarField(
+                              controller: _mainBreakerController,
+                              inputFormatters: [solarDecimalFormatter],
+                              validator: (v) => Validators.number(v,
+                                  min: 0.01, max: 100000, optional: true),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: const InputDecoration(
+                                  labelText: 'Main Breaker Rating (Amps)',
+                                  border: OutlineInputBorder()),
+                            ),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<String>(
+                                initialValue: _gridType,
+                                decoration: const InputDecoration(
+                                    labelText: 'Observed grid connection'),
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: 'SinglePhase',
+                                      child: Text('Single phase')),
+                                  DropdownMenuItem(
+                                      value: 'ThreePhase',
+                                      child: Text('Three phase'))
+                                ],
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _gridType = value);
+                                  }
+                                }),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<String>(
+                                initialValue: _roofOrientation,
+                                decoration: const InputDecoration(
+                                    labelText: 'Roof orientation'),
+                                items: [
+                                  'Unknown',
+                                  'North',
+                                  'South',
+                                  'East',
+                                  'West',
+                                  'NorthEast',
+                                  'NorthWest',
+                                  'SouthEast',
+                                  'SouthWest'
+                                ]
+                                    .map((value) => DropdownMenuItem(
+                                        value: value, child: Text(value)))
+                                    .toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    setState(() => _roofOrientation = value);
+                                  }
+                                }),
+                            Material(
+                              color: Colors.transparent,
+                              child: SwitchListTile(
+                                title: const Text('Inverter Location Suitable',
+                                    style: TextStyle(
+                                        color: SolarColors.text, fontSize: 14)),
+                                subtitle: const Text(
+                                    'Adequate airflow, sheltered, fire safety compliant',
+                                    style: TextStyle(
+                                        color: SolarColors.muted,
+                                        fontSize: 12)),
+                                value: _inverterLocationSuitable,
+                                activeThumbColor: SolarColors.primary,
+                                onChanged: (val) => setState(
+                                    () => _inverterLocationSuitable = val),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Step 3: Electrical Telemetry
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: SolarColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('3. Measured electrical readings',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: SolarColors.warning)),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SolarField(
+                                    controller: _voltageController,
+                                    inputFormatters: [solarDecimalFormatter],
+                                    validator: (v) => Validators.number(v,
+                                        min: 0.01, max: 100000, optional: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    style: const TextStyle(
+                                        color: SolarColors.text),
+                                    decoration: const InputDecoration(
+                                        labelText: 'Grid Voltage (V)',
+                                        border: OutlineInputBorder()),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: SolarField(
+                                    controller: _frequencyController,
+                                    inputFormatters: [solarDecimalFormatter],
+                                    validator: (v) => Validators.number(v,
+                                        min: 0.01, max: 100000, optional: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    style: const TextStyle(
+                                        color: SolarColors.text),
+                                    decoration: const InputDecoration(
+                                        labelText: 'Grid Freq (Hz)',
+                                        border: OutlineInputBorder()),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SolarField(
+                                    controller: _vocController,
+                                    inputFormatters: [solarDecimalFormatter],
+                                    validator: (v) => Validators.number(v,
+                                        min: 0.01, max: 100000, optional: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    style: const TextStyle(
+                                        color: SolarColors.text),
+                                    decoration: const InputDecoration(
+                                        labelText: 'Voc (V)',
+                                        border: OutlineInputBorder()),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: SolarField(
+                                    controller: _iscController,
+                                    inputFormatters: [solarDecimalFormatter],
+                                    validator: (v) => Validators.number(v,
+                                        min: 0.01, max: 100000, optional: true),
+                                    keyboardType:
+                                        const TextInputType.numberWithOptions(
+                                            decimal: true),
+                                    style: const TextStyle(
+                                        color: SolarColors.text),
+                                    decoration: const InputDecoration(
+                                        labelText: 'Isc (A)',
+                                        border: OutlineInputBorder()),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Step 4: Photo Capture & Previews
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: SolarColors.border),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  '4. Site Evidence Photographs',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: SolarColors.text),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x18287247),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: const Color(0x33287247)),
+                                  ),
+                                  child: Text(
+                                    '${[
+                                      'Roof',
+                                      'Meter',
+                                      'ElectricalPanel',
+                                      'InverterLocation'
+                                    ].where(_hasPhoto).length}/4 Attached',
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: SolarColors.success),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Action Buttons with completion ticks
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
                                 'Roof',
                                 'Meter',
                                 'ElectricalPanel',
                                 'InverterLocation'
-                              ].where(_hasPhoto).length}/4 Attached',
-                              style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: SolarColors.success),
+                              ].map((type) {
+                                final uploaded = _hasPhoto(type);
+                                return OutlinedButton.icon(
+                                  onPressed: _saving
+                                      ? null
+                                      : () => _handleUploadPhoto(type),
+                                  icon: Icon(
+                                    uploaded
+                                        ? Icons.check_circle_rounded
+                                        : Icons.camera_alt,
+                                    size: 15,
+                                    color: uploaded
+                                        ? SolarColors.success
+                                        : SolarColors.muted,
+                                  ),
+                                  label: Text(
+                                    uploaded ? '$type ✓' : type,
+                                    style: TextStyle(
+                                      color: uploaded
+                                          ? SolarColors.success
+                                          : SolarColors.text,
+                                      fontWeight: uploaded
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: uploaded
+                                        ? const Color(0x14287247)
+                                        : Colors.transparent,
+                                    side: BorderSide(
+                                      color: uploaded
+                                          ? SolarColors.success
+                                          : SolarColors.border,
+                                      width: uploaded ? 1.5 : 1,
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                  ),
+                                );
+                              }).toList(),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
 
-                      // Action Buttons with completion ticks
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          'Roof',
-                          'Meter',
-                          'ElectricalPanel',
-                          'InverterLocation'
-                        ].map((type) {
-                          final uploaded = _hasPhoto(type);
-                          return OutlinedButton.icon(
-                            onPressed:
-                                _saving ? null : () => _handleUploadPhoto(type),
-                            icon: Icon(
-                              uploaded
-                                  ? Icons.check_circle_rounded
-                                  : Icons.camera_alt,
-                              size: 15,
-                              color: uploaded
-                                  ? SolarColors.success
-                                  : SolarColors.muted,
-                            ),
-                            label: Text(
-                              uploaded ? '$type ✓' : type,
-                              style: TextStyle(
-                                color: uploaded
-                                    ? SolarColors.success
-                                    : SolarColors.text,
-                                fontWeight: uploaded
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                            // Previews section
+                            if ([
+                              'Roof',
+                              'Meter',
+                              'ElectricalPanel',
+                              'InverterLocation'
+                            ].any(_hasPhoto)) ...[
+                              const SizedBox(height: 16),
+                              const Divider(
+                                  height: 1, color: SolarColors.border),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Attached Photo Previews',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                    color: SolarColors.text),
                               ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: uploaded
-                                  ? const Color(0x14287247)
-                                  : Colors.transparent,
-                              side: BorderSide(
-                                color: uploaded
-                                    ? SolarColors.success
-                                    : SolarColors.border,
-                                width: uploaded ? 1.5 : 1,
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-
-                      // Previews section
-                      if ([
-                        'Roof',
-                        'Meter',
-                        'ElectricalPanel',
-                        'InverterLocation'
-                      ].any(_hasPhoto)) ...[
-                        const SizedBox(height: 16),
-                        const Divider(height: 1, color: SolarColors.border),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Attached Photo Previews',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                              color: SolarColors.text),
-                        ),
-                        const SizedBox(height: 10),
-                        GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio: 1.15,
-                          children: [
-                            'Roof',
-                            'Meter',
-                            'ElectricalPanel',
-                            'InverterLocation'
-                          ].map((type) {
-                            final hasPhoto = _hasPhoto(type);
-                            final previewWidget = _buildPreviewImage(type);
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: SolarColors.background,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: hasPhoto
-                                      ? SolarColors.success
-                                          .withValues(alpha: 0.4)
-                                      : SolarColors.border,
-                                ),
-                              ),
-                              child: hasPhoto && previewWidget != null
-                                  ? Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(11),
-                                          child: GestureDetector(
-                                            onTap: () => _viewFullPhoto(type),
-                                            child: previewWidget,
-                                          ),
-                                        ),
-                                        // Gradient overlay & badges
-                                        Positioned(
-                                          bottom: 0,
-                                          left: 0,
-                                          right: 0,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 5),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black
-                                                  .withValues(alpha: 0.7),
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                bottomLeft: Radius.circular(11),
-                                                bottomRight:
-                                                    Radius.circular(11),
+                              const SizedBox(height: 10),
+                              GridView.count(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                childAspectRatio: 1.15,
+                                children: [
+                                  'Roof',
+                                  'Meter',
+                                  'ElectricalPanel',
+                                  'InverterLocation'
+                                ].map((type) {
+                                  final hasPhoto = _hasPhoto(type);
+                                  final previewWidget =
+                                      _buildPreviewImage(type);
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: SolarColors.background,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: hasPhoto
+                                            ? SolarColors.success
+                                                .withValues(alpha: 0.4)
+                                            : SolarColors.border,
+                                      ),
+                                    ),
+                                    child: hasPhoto && previewWidget != null
+                                        ? Stack(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(11),
+                                                child: GestureDetector(
+                                                  onTap: () =>
+                                                      _viewFullPhoto(type),
+                                                  child: previewWidget,
+                                                ),
                                               ),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    type,
-                                                    style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                              // Gradient overlay & badges
+                                              Positioned(
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 5),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black
+                                                        .withValues(alpha: 0.7),
+                                                    borderRadius:
+                                                        const BorderRadius.only(
+                                                      bottomLeft:
+                                                          Radius.circular(11),
+                                                      bottomRight:
+                                                          Radius.circular(11),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                          type,
+                                                          style: const TextStyle(
+                                                              color:
+                                                                  Colors.white,
+                                                              fontSize: 11,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ),
+                                                      const Icon(
+                                                          Icons.check_circle,
+                                                          color:
+                                                              Color(0xFFD4EF83),
+                                                          size: 14),
+                                                    ],
                                                   ),
                                                 ),
-                                                const Icon(Icons.check_circle,
-                                                    color: Color(0xFFD4EF83),
-                                                    size: 14),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        // Retake button
-                                        Positioned(
-                                          top: 4,
-                                          right: 4,
-                                          child: InkWell(
+                                              ),
+                                              // Retake button
+                                              Positioned(
+                                                top: 4,
+                                                right: 4,
+                                                child: InkWell(
+                                                  onTap: _saving
+                                                      ? null
+                                                      : () =>
+                                                          _handleUploadPhoto(
+                                                              type),
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(5),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black
+                                                          .withValues(
+                                                              alpha: 0.65),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: const Icon(
+                                                        Icons.edit,
+                                                        color: Colors.white,
+                                                        size: 13),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : InkWell(
                                             onTap: _saving
                                                 ? null
                                                 : () =>
                                                     _handleUploadPhoto(type),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(5),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black
-                                                    .withValues(alpha: 0.65),
-                                                shape: BoxShape.circle,
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            child: Center(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(
+                                                      Icons
+                                                          .add_a_photo_outlined,
+                                                      color: SolarColors.muted,
+                                                      size: 22),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    'Add $type',
+                                                    style: const TextStyle(
+                                                        color:
+                                                            SolarColors.muted,
+                                                        fontSize: 11),
+                                                  ),
+                                                ],
                                               ),
-                                              child: const Icon(Icons.edit,
-                                                  color: Colors.white,
-                                                  size: 13),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    )
-                                  : InkWell(
-                                      onTap: _saving
-                                          ? null
-                                          : () => _handleUploadPhoto(type),
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                                Icons.add_a_photo_outlined,
-                                                color: SolarColors.muted,
-                                                size: 22),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Add $type',
-                                              style: const TextStyle(
-                                                  color: SolarColors.muted,
-                                                  fontSize: 11),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                            );
-                          }).toList(),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ],
                         ),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
+                      ),
+                      const SizedBox(height: 20),
 
-                // Submit Buttons
-                ElevatedButton(
-                  onPressed: _saving ? null : _handleSaveInspection,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: SolarColors.surfaceSoft,
-                    foregroundColor: SolarColors.onPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Save Inspection Draft'),
-                ),
-                const SizedBox(height: 10),
-                FilledButton.icon(
-                  onPressed: _saving ? null : _handleSubmitInspection,
-                  icon: const Icon(Icons.check_circle),
-                  label: const Text(
-                      'Submit Inspection for Grid Compliance Evaluation'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: SolarColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Compliance Assessment View
-                if (job.compliance != null)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: job.compliance!.gridCompliant
-                          ? const Color(0x1510B981)
-                          : const Color(0x15EF4444),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                          color: job.compliance!.gridCompliant
-                              ? SolarColors.primary
-                              : SolarColors.error),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Grid Compliance Assessment',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: SolarColors.text)),
-                            StatusBadge(
-                                label: job.compliance!.complianceStatus,
+                      // Compliance Assessment View
+                      if (job.compliance != null)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: job.compliance!.gridCompliant
+                                ? const Color(0x1510B981)
+                                : const Color(0x15EF4444),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
                                 color: job.compliance!.gridCompliant
                                     ? SolarColors.primary
                                     : SolarColors.error),
-                          ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Grid Compliance Assessment',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: SolarColors.text)),
+                                  StatusBadge(
+                                      label: job.compliance!.complianceStatus,
+                                      color: job.compliance!.gridCompliant
+                                          ? SolarColors.primary
+                                          : SolarColors.error),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text('Risk Level: ${job.compliance!.riskLevel}',
+                                  style: const TextStyle(
+                                      color: SolarColors.warning,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold)),
+                              if (job.compliance!.complianceNotes != null) ...[
+                                const SizedBox(height: 6),
+                                Text(job.compliance!.complianceNotes!,
+                                    style: const TextStyle(
+                                        color: SolarColors.muted,
+                                        fontSize: 12,
+                                        height: 1.4)),
+                              ],
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Text('Risk Level: ${job.compliance!.riskLevel}',
-                            style: const TextStyle(
-                                color: SolarColors.warning,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold)),
-                        if (job.compliance!.complianceNotes != null) ...[
-                          const SizedBox(height: 6),
-                          Text(job.compliance!.complianceNotes!,
-                              style: const TextStyle(
-                                  color: SolarColors.muted,
-                                  fontSize: 12,
-                                  height: 1.4)),
-                        ],
-                      ],
-                    ),
-                  ),
-              ],
-            )),
+                    ],
+                  )),
+            ),
+          ),
+        ],
       ),
     );
   }

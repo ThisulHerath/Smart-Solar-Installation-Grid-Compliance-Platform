@@ -193,6 +193,18 @@ AGENTIC_AI_BASE_URL=http://localhost:8000
 AGENTIC_AI_INTERNAL_KEY=...
 ```
 
+Image uploads use the local `wwwroot/uploads` directory during development. To test the same durable storage used by a hosted API, create a Cloudinary account and add these values without committing them:
+
+```env
+FILE_STORAGE_PROVIDER=cloudinary
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+CLOUDINARY_ROOT_FOLDER=smart-solar
+```
+
+Restart the API after changing the provider. New profile, survey and technician inspection images are then uploaded by the API to Cloudinary over HTTPS, while Neon stores their HTTPS URLs and metadata. Existing `/uploads/...` records stay local and require a separate migration if they must be retained after hosting.
+
 ### 2. Install dependencies
 
 ```powershell

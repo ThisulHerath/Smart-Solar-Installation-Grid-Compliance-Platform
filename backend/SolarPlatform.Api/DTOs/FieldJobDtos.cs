@@ -24,8 +24,10 @@ public record FieldJobResponseDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     bool HasInspection,
+    DateTime? CheckInAt,
     InspectionStatus? InspectionStatus,
-    ComplianceAssessmentDto? Compliance
+    ComplianceAssessmentDto? Compliance,
+    SiteInspectionResponseDto? Inspection
 );
 
 public record CreateFieldJobDto(

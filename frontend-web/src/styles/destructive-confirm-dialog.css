@@ -1,0 +1,132 @@
+.destructive-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 43, 53, 0.64);
+  backdrop-filter: blur(3px);
+  animation: destructive-dialog-fade-in 160ms ease-out;
+}
+
+.destructive-dialog-card {
+  width: min(100%, 500px);
+  box-sizing: border-box;
+  padding: 30px;
+  border: 1px solid #dce5e3;
+  border-radius: 18px;
+  background: #fff;
+  color: #304143;
+  box-shadow: 0 24px 70px rgba(10, 36, 43, 0.28);
+  animation: destructive-dialog-scale-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.destructive-dialog-card h2 {
+  margin: 0 0 20px;
+  color: #26383b;
+  font-size: 25px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.destructive-dialog-subject {
+  margin-bottom: 14px;
+  color: #304143;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.destructive-dialog-description {
+  color: #43575a;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.destructive-dialog-description p { margin: 0; }
+
+.destructive-dialog-error {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #efc2c4;
+  border-radius: 10px;
+  background: #fff4f4;
+  color: #a23d43;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.destructive-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.destructive-dialog-actions button {
+  min-height: 44px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.destructive-dialog-cancel {
+  border: 1px solid #ccd9d5;
+  background: #fff;
+  color: #304143;
+}
+
+.destructive-dialog-cancel:hover:not(:disabled) {
+  border-color: #9fb5af;
+  background: #f6faf9;
+}
+
+.destructive-dialog-confirm {
+  border: 1px solid #b33838;
+  background: #b33838;
+  color: #fff;
+}
+
+.destructive-dialog-confirm:hover:not(:disabled) {
+  border-color: #982f2f;
+  background: #982f2f;
+  transform: translateY(-1px);
+}
+
+.destructive-dialog-actions button:focus-visible {
+  outline: 3px solid rgba(179, 56, 56, 0.22);
+  outline-offset: 2px;
+}
+
+.destructive-dialog-actions button:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
+@media (max-width: 520px) {
+  .destructive-dialog-backdrop { padding: 14px; }
+  .destructive-dialog-card { padding: 24px 20px; border-radius: 16px; }
+  .destructive-dialog-actions { flex-direction: column-reverse; }
+  .destructive-dialog-actions button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .destructive-dialog-backdrop,
+  .destructive-dialog-card { animation: none; }
+}
+
+@keyframes destructive-dialog-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes destructive-dialog-scale-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

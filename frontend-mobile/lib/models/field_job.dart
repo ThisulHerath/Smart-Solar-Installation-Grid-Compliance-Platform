@@ -15,7 +15,9 @@ class FieldJob {
   final DateTime assignedAt;
   final DateTime? scheduledAt;
   final bool hasInspection;
+  final DateTime? checkInAt;
   final String? inspectionStatus;
+  final SiteInspectionModel? inspection;
   final ComplianceAssessmentModel? compliance;
   final List<SitePhotoModel> photos;
 
@@ -36,12 +38,19 @@ class FieldJob {
     required this.assignedAt,
     this.scheduledAt,
     required this.hasInspection,
+    this.checkInAt,
     this.inspectionStatus,
+    this.inspection,
     this.compliance,
     this.photos = const [],
   });
 
   factory FieldJob.fromJson(Map<String, dynamic> json) {
+    final inspectionJson = json['inspection'];
+    final inspection = inspectionJson is Map
+        ? SiteInspectionModel.fromJson(
+            Map<String, dynamic>.from(inspectionJson))
+        : null;
     return FieldJob(
       id: json['id'] as String,
       solarSurveyId: json['solarSurveyId'] as String,
@@ -56,17 +65,97 @@ class FieldJob {
       longitude: (json['longitude'] as num?)?.toDouble(),
       status: json['status'] as String? ?? 'Assigned',
       priority: json['priority'] as String? ?? 'Medium',
-      assignedAt: json['assignedAt'] != null ? DateTime.parse(json['assignedAt'] as String) : DateTime.now(),
-      scheduledAt: json['scheduledAt'] != null ? DateTime.parse(json['scheduledAt'] as String) : null,
-      hasInspection: json['hasInspection'] as bool? ?? false,
-      inspectionStatus: json['inspectionStatus'] as String?,
-      compliance: json['compliance'] != null
-          ? ComplianceAssessmentModel.fromJson(json['compliance'] as Map<String, dynamic>)
+      assignedAt: json['assignedAt'] != null
+          ? DateTime.parse(json['assignedAt'] as String)
+          : DateTime.now(),
+      scheduledAt: json['scheduledAt'] != null
+          ? DateTime.parse(json['scheduledAt'] as String)
           : null,
-      photos: (json['photos'] as List<dynamic>?)
-          ?.map((e) => SitePhotoModel.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList() ??
+      hasInspection: json['hasInspection'] as bool? ?? false,
+      checkInAt: json['checkInAt'] != null
+          ? DateTime.tryParse(json['checkInAt'] as String)
+          : null,
+      inspectionStatus: json['inspectionStatus'] as String?,
+      inspection: inspection,
+      compliance: json['compliance'] != null
+          ? ComplianceAssessmentModel.fromJson(
+              json['compliance'] as Map<String, dynamic>)
+          : null,
+      photos: ((json['photos'] as List<dynamic>?) ??
+                  (inspectionJson is Map
+                      ? inspectionJson['photos'] as List<dynamic>?
+                      : null))
+              ?.map((e) =>
+                  SitePhotoModel.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList() ??
           const [],
+    );
+  }
+}
+
+class SiteInspectionModel {
+  final double? roofAreaMeasuredSqm;
+  final String roofOrientation;
+  final double? roofTilt;
+  final String gridTypeObserved;
+  final int? phaseCount;
+  final double? mainBreakerRating;
+  final bool? inverterLocationSuitable;
+  final String? safetyNotes;
+  final String? technicianNotes;
+  final List<SiteTelemetryModel> telemetry;
+
+  const SiteInspectionModel({
+    this.roofAreaMeasuredSqm,
+    required this.roofOrientation,
+    this.roofTilt,
+    required this.gridTypeObserved,
+    this.phaseCount,
+    this.mainBreakerRating,
+    this.inverterLocationSuitable,
+    this.safetyNotes,
+    this.technicianNotes,
+    this.telemetry = const [],
+  });
+
+  factory SiteInspectionModel.fromJson(Map<String, dynamic> json) {
+    return SiteInspectionModel(
+      roofAreaMeasuredSqm: (json['roofAreaMeasuredSqm'] as num?)?.toDouble(),
+      roofOrientation: json['roofOrientation'] as String? ?? 'Unknown',
+      roofTilt: (json['roofTilt'] as num?)?.toDouble(),
+      gridTypeObserved: json['gridTypeObserved'] as String? ?? 'SinglePhase',
+      phaseCount: (json['phaseCount'] as num?)?.toInt(),
+      mainBreakerRating: (json['mainBreakerRating'] as num?)?.toDouble(),
+      inverterLocationSuitable: json['inverterLocationSuitable'] as bool?,
+      safetyNotes: json['safetyNotes'] as String?,
+      technicianNotes: json['technicianNotes'] as String?,
+      telemetry: (json['telemetry'] as List<dynamic>?)
+              ?.map((item) => SiteTelemetryModel.fromJson(
+                  Map<String, dynamic>.from(item as Map)))
+              .toList() ??
+          const [],
+    );
+  }
+}
+
+class SiteTelemetryModel {
+  final String measurementType;
+  final double measurementValue;
+  final DateTime? recordedAt;
+
+  const SiteTelemetryModel({
+    required this.measurementType,
+    required this.measurementValue,
+    this.recordedAt,
+  });
+
+  factory SiteTelemetryModel.fromJson(Map<String, dynamic> json) {
+    return SiteTelemetryModel(
+      measurementType: json['measurementType'] as String? ?? '',
+      measurementValue: (json['measurementValue'] as num?)?.toDouble() ?? 0,
+      recordedAt: json['recordedAt'] != null
+          ? DateTime.tryParse(json['recordedAt'] as String)
+          : null,
     );
   }
 }
@@ -95,7 +184,9 @@ class SitePhotoModel {
       photoType: json['photoType'] as String? ?? '',
       fileUrl: json['fileUrl'] as String? ?? '',
       fileName: json['fileName'] as String? ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String)
+          : null,
     );
   }
 }

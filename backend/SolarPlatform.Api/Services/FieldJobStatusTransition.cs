@@ -12,7 +12,12 @@ public static class FieldJobStatusTransition
         [FieldJobStatus.Submitted] = new() { FieldJobStatus.ComplianceProcessing, FieldJobStatus.InProgress, FieldJobStatus.Failed },
         [FieldJobStatus.ComplianceProcessing] = new() { FieldJobStatus.ComplianceComplete, FieldJobStatus.Failed },
         [FieldJobStatus.ComplianceComplete] = new() { FieldJobStatus.Failed }, // Terminal or re-assessment
-        [FieldJobStatus.Failed] = new() { FieldJobStatus.Assigned, FieldJobStatus.InProgress } // Allow retry / re-dispatch
+        [FieldJobStatus.Failed] = new()
+        {
+            FieldJobStatus.Assigned,
+            FieldJobStatus.InProgress,
+            FieldJobStatus.Submitted
+        } // Allow re-dispatch, inspection correction, or compliance retry
     };
 
     public static bool CanTransition(FieldJobStatus from, FieldJobStatus to)

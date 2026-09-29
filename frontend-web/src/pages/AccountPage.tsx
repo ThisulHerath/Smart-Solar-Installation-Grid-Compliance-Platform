@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 
 import { EmailCodeForm } from '../components/EmailCodeForm';
+import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import { useAuth } from '../context/AuthContext';
 import {
   accountApi,
@@ -51,6 +52,7 @@ export function AccountPage() {
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Password validation criteria
   const hasMinLength = password.length >= 12 && password.length <= 64;
@@ -376,7 +378,7 @@ export function AccountPage() {
 
             <button
               className="btn btn-danger security-action-btn"
-              onClick={() => setAction('account-deletion')}
+              onClick={() => setShowDeleteConfirm(true)}
             >
               <Trash2 size={16} />
               <span>Delete account</span>
@@ -731,6 +733,20 @@ export function AccountPage() {
           )}
         </section>
       )}
+
+      <DestructiveConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete account?"
+        subject={user?.email}
+        confirmLabel="Continue to verification"
+        onCancel={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          setShowDeleteConfirm(false);
+          setAction('account-deletion');
+        }}
+      >
+        <p>This permanently removes your sign-in access and profile details. You will review retained compliance records and verify this action by email next.</p>
+      </DestructiveConfirmDialog>
     </main>
   );
 }

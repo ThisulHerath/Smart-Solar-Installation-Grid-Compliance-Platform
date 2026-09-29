@@ -52,6 +52,18 @@ const FieldJobDetailPage = lazy(() =>
   }))
 );
 
+const AssignTechnicianPage = lazy(() =>
+  import('./pages/AssignTechnicianPage').then((module) => ({
+    default: module.AssignTechnicianPage,
+  }))
+);
+
+const CustomerLocationsPage = lazy(() =>
+  import('./pages/CustomerLocationsPage').then((module) => ({
+    default: module.CustomerLocationsPage,
+  }))
+);
+
 const ProposalsPage = lazy(() =>
   import('./pages/ProposalsPage').then((module) => ({
     default: module.ProposalsPage,
@@ -180,6 +192,11 @@ export const App: React.FC = () => {
                     />
 
                     <Route
+                      path="/field-jobs/assign"
+                      element={<AssignTechnicianPage />}
+                    />
+
+                    <Route
                       path="/field-jobs/:jobId"
                       element={<FieldJobDetailPage />}
                     />
@@ -192,6 +209,11 @@ export const App: React.FC = () => {
                     <Route
                       path="/proposals/pending"
                       element={<PendingApprovalsPage />}
+                    />
+
+                    <Route
+                      path="/customer-locations"
+                      element={<CustomerLocationsPage />}
                     />
                   </Route>
 

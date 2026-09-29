@@ -15,6 +15,7 @@ import 'proposal_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
 import 'welcome_screen.dart';
+import 'customer_locations_screen.dart';
 
 const _bg = SolarColors.background;
 const _panel = SolarColors.surface;
@@ -69,8 +70,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = auth.user;
     if (user == null) return const LoginScreen();
     final homeowner = user.roles.contains(AppConstants.roleHomeowner);
+    final fieldTechnician =
+        user.roles.contains(AppConstants.roleFieldTechnician);
     final fieldStaff = user.roles.any([
       AppConstants.roleFieldTechnician,
+      AppConstants.roleSeniorEngineer,
+      AppConstants.roleAdministrator,
+    ].contains);
+    final locationStaff = user.roles.any([
       AppConstants.roleSeniorEngineer,
       AppConstants.roleAdministrator,
     ].contains);
@@ -141,6 +148,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const TechnicianJobsScreen())),
                   ),
+                if (locationStaff)
+                  _ActionTile(
+                    icon: Icons.map_rounded,
+                    title: 'Customer location map',
+                    subtitle: 'View confirmed solar installation sites',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const CustomerLocationsScreen())),
+                  ),
                 if (!homeowner || _selectedTab == 0)
                   _ActionTile(
                     icon: Icons.person_outline_rounded,
@@ -163,10 +178,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         bottomNavigationBar: _BottomNav(
           homeowner: homeowner,
+          fieldTechnician: fieldTechnician,
+          locationStaff: locationStaff,
           selectedIndex: homeowner ? _selectedTab : 0,
           unreadMessages: _unreadMessages,
           onDashboard: () => setState(() => _selectedTab = 0),
           onProjects: () => setState(() => _selectedTab = 1),
+          onJobs: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const TechnicianJobsScreen())),
+          onLocations: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => const CustomerLocationsScreen())),
           onChat: _openMessages,
           onProfile: () => Navigator.of(context)
               .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
@@ -1457,41 +1478,49 @@ class _GenerationCard extends StatelessWidget {
           ]),
           const SizedBox(height: 18),
           SizedBox(
-              height: 100,
-              child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(7, (i) {
-                    const solar = [66.0, 78.0, 58.0, 88.0, 73.0, 94.0, 82.0];
-                    const grid = [28.0, 22.0, 35.0, 18.0, 27.0, 13.0, 20.0];
-                    return Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                    width: 8,
-                                    height: solar[i],
-                                    decoration: BoxDecoration(
-                                        color: _gold,
-                                        borderRadius:
-                                            BorderRadius.circular(6))),
-                                const SizedBox(width: 3),
-                                Container(
-                                    width: 8,
-                                    height: grid[i],
-                                    decoration: BoxDecoration(
-                                        color: _cyan,
-                                        borderRadius:
-                                            BorderRadius.circular(6))),
-                              ]),
-                          const SizedBox(height: 6),
-                          Text(['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-                              style:
-                                  const TextStyle(color: _muted, fontSize: 8)),
-                        ]);
-                  }))),
+              height: 112,
+              child: LayoutBuilder(builder: (context, constraints) {
+                const solar = [66.0, 78.0, 58.0, 88.0, 73.0, 94.0, 82.0];
+                const grid = [28.0, 22.0, 35.0, 18.0, 27.0, 13.0, 20.0];
+                const tallestValue = 94.0;
+                final availableBarHeight = constraints.maxHeight - 18;
+
+                double scaledHeight(double value) =>
+                    value / tallestValue * availableBarHeight;
+
+                return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(7, (i) {
+                      return Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                      width: 8,
+                                      height: scaledHeight(solar[i]),
+                                      decoration: BoxDecoration(
+                                          color: _gold,
+                                          borderRadius:
+                                              BorderRadius.circular(6))),
+                                  const SizedBox(width: 3),
+                                  Container(
+                                      width: 8,
+                                      height: scaledHeight(grid[i]),
+                                      decoration: BoxDecoration(
+                                          color: _cyan,
+                                          borderRadius:
+                                              BorderRadius.circular(6))),
+                                ]),
+                            const SizedBox(height: 6),
+                            Text(['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+                                style: const TextStyle(
+                                    color: _muted, fontSize: 8)),
+                          ]);
+                    }));
+              })),
           const SizedBox(height: 13),
           const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             CircleAvatar(radius: 3, backgroundColor: _gold),
@@ -1577,18 +1606,26 @@ class _Glass extends StatelessWidget {
 
 class _BottomNav extends StatelessWidget {
   final bool homeowner;
+  final bool fieldTechnician;
+  final bool locationStaff;
   final int selectedIndex;
   final int unreadMessages;
   final VoidCallback onDashboard;
   final VoidCallback onProjects;
+  final VoidCallback onJobs;
+  final VoidCallback onLocations;
   final VoidCallback onChat;
   final VoidCallback onProfile;
   const _BottomNav({
     required this.homeowner,
+    required this.fieldTechnician,
+    required this.locationStaff,
     required this.selectedIndex,
     required this.unreadMessages,
     required this.onDashboard,
     required this.onProjects,
+    required this.onJobs,
+    required this.onLocations,
     required this.onChat,
     required this.onProfile,
   });
@@ -1624,11 +1661,40 @@ class _BottomNav extends StatelessWidget {
                         icon: Icons.person_outline_rounded,
                         label: 'Profile',
                         onTap: onProfile),
+                  ] else if (fieldTechnician) ...[
+                    _NavItem(
+                        icon: Icons.assignment_outlined,
+                        label: 'My Jobs',
+                        onTap: onJobs),
+                    _NavItem(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
+                    _NavItem(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Profile',
+                        onTap: onProfile),
+                  ] else if (locationStaff) ...[
+                    _NavItem(
+                        icon: Icons.map_outlined,
+                        label: 'Locations',
+                        onTap: onLocations),
+                    _NavItem(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
+                    _NavItem(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Profile',
+                        onTap: onProfile),
                   ] else ...[
-                    const _NavItem(
-                        icon: Icons.analytics_outlined, label: 'Analytics'),
-                    const _NavItem(
-                        icon: Icons.solar_power_outlined, label: 'Devices'),
+                    _NavItem(
+                        icon: Icons.chat_bubble_outline_rounded,
+                        label: 'Chat',
+                        badgeCount: unreadMessages,
+                        onTap: onChat),
                     _NavItem(
                         icon: Icons.person_outline_rounded,
                         label: 'Profile',
@@ -1655,7 +1721,9 @@ class _NavItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Badge(
@@ -1673,7 +1741,9 @@ class _NavItem extends StatelessWidget {
                         fontSize: 9,
                         fontWeight:
                             selected ? FontWeight.w700 : FontWeight.w500))
-              ])),
+              ]),
+            ),
+          ),
         ),
       );
 }

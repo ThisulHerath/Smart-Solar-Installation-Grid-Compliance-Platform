@@ -105,6 +105,40 @@ public class AgenticAiServiceTests
         Assert.NotEmpty(result.Errors);
     }
 
+    [Fact]
+    public async Task ComplianceWorkflow_AcceptsMeasuredFractionalDuration()
+    {
+        using var handler = new ComplianceContractHandler();
+        using var client = new HttpClient(handler) { BaseAddress = new Uri("http://localhost:8000") };
+        var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["AgenticAi:InternalKey"] = "test-key"
+        }).Build();
+        var service = new AgenticAiService(client, config, Mock.Of<ILogger<AgenticAiService>>());
+
+        var result = await service.ExecuteComplianceEvaluationAsync(new { field_job_id = Guid.NewGuid() });
+
+        Assert.NotNull(result);
+        Assert.Equal("completed", Assert.Single(result.ExecutionLogs).Status);
+        Assert.Equal(1.234d, result.ExecutionLogs[0].DurationMs);
+    }
+
+    private sealed class ComplianceContractHandler : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Assert.Equal("/workflow/compliance", request.RequestUri!.AbsolutePath);
+            Assert.Equal("test-key", request.Headers.GetValues("X-Internal-Key").Single());
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("""
+                    {"workflow_id":"wf-compliance","grid_compliant":true,"compliance_status":"COMPLIANT","risk_level":"LOW","violations":[],"recommendations":[],"validation_status":"PASSED","notes":"ok","execution_logs":[{"agent_name":"GridComplianceAgent","step_name":"evaluate","status":"completed","output_summary":"done","error_message":null,"duration_ms":1.234}]}
+                    """, System.Text.Encoding.UTF8, "application/json")
+            });
+        }
+    }
+
     [Theory]
     [InlineData(true, "/workflow/start")]
     [InlineData(false, "/workflow/resume")]
