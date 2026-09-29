@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
   Link,
   Navigate,
@@ -14,10 +15,12 @@ import { api } from '../services/api';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   const { login, user } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,21 +30,35 @@ export function LoginPage() {
 
   return (
     <AuthShell>
-      <h2>Sign in to Smart Solar</h2>
+      <p className="eyebrow">
+        WELCOME BACK
+      </p>
+
+      <h2>Welcome back</h2>
 
       <p className="auth-intro">
-        Access your solar project workspace and updates.
+        Your solar project, all in one place.
+        Sign in to continue managing your
+        installation and project updates.
       </p>
 
       {location.state?.message && (
-        <p className="account-success" role="status">
-          {location.state.message}
+        <p
+          className="account-success"
+          role="status"
+        >
+          <span>✓</span>
+          <span>{location.state.message}</span>
         </p>
       )}
 
       {error && (
-        <p className="account-error" role="alert">
-          {error}
+        <p
+          className="account-error"
+          role="alert"
+        >
+          <span>!</span>
+          <span>{error}</span>
         </p>
       )}
 
@@ -59,7 +76,10 @@ export function LoginPage() {
               password
             );
 
-            login(result.token, result.user);
+            login(
+              result.token,
+              result.user
+            );
 
             navigate('/dashboard', {
               replace: true,
@@ -68,7 +88,7 @@ export function LoginPage() {
             setError(
               err instanceof Error
                 ? err.message
-                : 'Unable to sign in. Please try again.'
+                : 'Unable to sign in. Please check your details and try again.'
             );
           } finally {
             setBusy(false);
@@ -83,7 +103,9 @@ export function LoginPage() {
           autoComplete="email"
           placeholder="you@example.com"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
           required
           maxLength={254}
           disabled={busy}
@@ -97,16 +119,35 @@ export function LoginPage() {
           autoComplete="current-password"
           placeholder="Enter your password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
           required
           disabled={busy}
         />
 
         <div className="login-options">
+          <label className="remember-me">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) =>
+                setRememberMe(
+                  event.target.checked
+                )
+              }
+              disabled={busy}
+            />
+
+            <span>Remember me</span>
+          </label>
+
           <button
             className="forgot-password"
             type="button"
-            onClick={() => navigate('/forgot-password')}
+            onClick={() =>
+              navigate('/forgot-password')
+            }
             disabled={busy}
           >
             Forgot password?
@@ -116,14 +157,19 @@ export function LoginPage() {
         <button
           className="btn btn-primary"
           disabled={busy}
+          type="submit"
         >
-          {busy ? 'Signing in…' : 'Sign in'}
+          {busy
+            ? 'Signing in…'
+            : 'Sign in'}
         </button>
       </AuthForm>
 
       <p className="auth-switch">
         New to Smart Solar?{' '}
-        <Link to="/register">Create an account</Link>
+        <Link to="/register">
+          Create an account
+        </Link>
       </p>
     </AuthShell>
   );
