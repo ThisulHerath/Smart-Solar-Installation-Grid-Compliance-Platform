@@ -42,6 +42,7 @@ export interface WorkflowResult {
 export interface Survey {
   id: string;
   customerId: string;
+  customerName?: string;
   monthlyKwh: number;
   roofAreaSqm: number;
   gridType: string;
@@ -56,6 +57,12 @@ export interface Survey {
   updatedAt: string;
   images: { id: string; imageType: string; fileUrl: string; fileName: string }[];
   workflows: { workflowId: string; status: string; resultJson?: string; validationJson?: string; errorMessage?: string }[];
+}
+
+export interface LocationSearchResult {
+  displayName: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface ComplianceAssessment {

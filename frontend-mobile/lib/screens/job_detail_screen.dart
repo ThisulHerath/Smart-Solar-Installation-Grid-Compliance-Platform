@@ -6,6 +6,7 @@ import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/field_job.dart';
 import '../services/api_service.dart';
 import '../widgets/status_badge.dart';
@@ -31,6 +32,19 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
 
   final Map<String, Uint8List> _photoBytes = {};
   final Map<String, String> _photoUrls = {};
+
+  Future<void> _openDirections(FieldJob job) async {
+    final destination = job.latitude != null && job.longitude != null
+        ? '${job.latitude},${job.longitude}'
+        : job.propertyAddress;
+    final uri = Uri.https('www.google.com', '/maps/dir/',
+        {'api': '1', 'destination': destination});
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
+        mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to open map directions.')));
+    }
+  }
 
   // Controllers for site inspection
   final _roofAreaController = TextEditingController();
@@ -398,11 +412,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(child: Text(job.customerName,
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: SolarColors.text))),
+                          Expanded(
+                              child: Text(job.customerName,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: SolarColors.text))),
                           StatusBadge(label: job.status),
                         ],
                       ),
@@ -419,6 +434,19 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                               fontSize: 13,
                               fontWeight: FontWeight.w600)),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 50,
+                  child: FilledButton.icon(
+                    onPressed: () => _openDirections(job),
+                    icon: const Icon(Icons.navigation_rounded),
+                    label: const Text('Navigate to customer home'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: SolarColors.primary,
+                      foregroundColor: Colors.white,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),

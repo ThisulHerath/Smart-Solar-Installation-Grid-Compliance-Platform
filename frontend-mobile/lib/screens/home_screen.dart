@@ -15,6 +15,7 @@ import 'proposal_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
 import 'welcome_screen.dart';
+import 'customer_locations_screen.dart';
 
 const _bg = SolarColors.background;
 const _panel = SolarColors.surface;
@@ -71,6 +72,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final homeowner = user.roles.contains(AppConstants.roleHomeowner);
     final fieldStaff = user.roles.any([
       AppConstants.roleFieldTechnician,
+      AppConstants.roleSeniorEngineer,
+      AppConstants.roleAdministrator,
+    ].contains);
+    final locationStaff = user.roles.any([
       AppConstants.roleSeniorEngineer,
       AppConstants.roleAdministrator,
     ].contains);
@@ -140,6 +145,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     subtitle: 'View assigned field work',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const TechnicianJobsScreen())),
+                  ),
+                if (locationStaff)
+                  _ActionTile(
+                    icon: Icons.map_rounded,
+                    title: 'Customer location map',
+                    subtitle: 'View confirmed solar installation sites',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const CustomerLocationsScreen())),
                   ),
                 if (!homeowner || _selectedTab == 0)
                   _ActionTile(

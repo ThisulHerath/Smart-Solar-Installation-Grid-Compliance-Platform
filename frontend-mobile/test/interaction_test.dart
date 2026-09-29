@@ -5,7 +5,9 @@ import 'package:smart_solar_mobile/widgets/solar_search.dart';
 import 'package:smart_solar_mobile/widgets/solar_field.dart';
 
 void main() {
-  test('shared validators reject invalid values and preserve decimal measurements', () {
+  test(
+      'shared validators reject invalid values and preserve decimal measurements',
+      () {
     expect(Validators.email('bad'), isNotNull);
     expect(Validators.email('solar@example.com'), isNull);
     expect(Validators.number('12.5', min: 1), isNull);
@@ -16,11 +18,21 @@ void main() {
     expect(Validators.code('123456'), isNull);
     expect(Validators.password('short'), isNotNull);
     expect(Validators.confirm('different', 'password'), isNotNull);
-    expect(solarDecimalFormatter.formatEditUpdate(const TextEditingValue(text: '12.5'), const TextEditingValue(text: '12.5.')).text, '12.5');
+    expect(
+        solarDecimalFormatter
+            .formatEditUpdate(const TextEditingValue(text: '12.5'),
+                const TextEditingValue(text: '12.5.'))
+            .text,
+        '12.5');
   });
-  testWidgets('search debounces, submits immediately and cancels after disposal', (tester) async {
+  testWidgets(
+      'search debounces, submits immediately and cancels after disposal',
+      (tester) async {
     final values = <String>[];
-    await tester.pumpWidget(MaterialApp(home: Scaffold(body: SolarSearch(label: 'Search surveys', onChanged: values.add))));
+    await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+            body:
+                SolarSearch(label: 'Search surveys', onChanged: values.add))));
     await tester.enterText(find.byType(TextField), 'Col');
     await tester.pump(const Duration(milliseconds: 200));
     await tester.enterText(find.byType(TextField), 'Colombo');

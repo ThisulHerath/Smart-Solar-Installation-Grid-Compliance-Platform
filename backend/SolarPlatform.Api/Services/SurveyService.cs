@@ -226,7 +226,7 @@ public class SurveyService : ISurveyService
         return await GetAsync(userId, surveyId);
     }
 
-    private IQueryable<SolarSurvey> Query() => _db.SolarSurveys.Include(s => s.Images).Include(s => s.Workflows).AsNoTracking();
+    private IQueryable<SolarSurvey> Query() => _db.SolarSurveys.Include(s => s.Customer).Include(s => s.Images).Include(s => s.Workflows).AsNoTracking();
     private async Task<CustomerProfile> GetOrCreateProfileAsync(Guid userId)
     {
         var profile = await _db.CustomerProfiles.SingleOrDefaultAsync(p => p.UserId == userId);
@@ -252,5 +252,5 @@ public class SurveyService : ISurveyService
     }
 
     private static ProfileDto ToProfile(CustomerProfile p) => new(p.Id, p.FullName, p.PhoneNumber, p.Address);
-    private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList());
+    private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList()) { CustomerName = s.Customer?.FullName };
 }

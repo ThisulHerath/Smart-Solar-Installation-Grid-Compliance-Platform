@@ -117,6 +117,14 @@ builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<IFieldJobService, FieldJobService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
 builder.Services.AddScoped<InventoryService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<IGeocodingService, NominatimGeocodingService>(client =>
+{
+    client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("SmartSolarUniversityProject/1.0");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+});
 
 // 4. Agentic AI Service Client
 var agenticAiBaseUrl = Environment.GetEnvironmentVariable("AGENTIC_AI_BASE_URL")

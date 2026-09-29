@@ -347,6 +347,8 @@
 .technician-job-grid p svg { flex: 0 0 auto; color: #4b9477; }
 .technician-job-grid strong { display: block; margin-top: 15px; color: #a16c14; font-size: 12px; }
 .technician-job-note { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; color: #347f64; font-size: 12px; font-weight: 800; }
+.technician-job-directions { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; margin-top: 16px; padding: 0 13px; border-radius: 7px; background: #07536a; color: #fff; font-size: 12px; font-weight: 800; text-decoration: none; }
+.technician-job-directions:hover { background: #06475a; color: #fff; }
 
 @media (max-width: 900px) {
   .admin-route-content .operations-page { padding: 26px 20px 48px; }

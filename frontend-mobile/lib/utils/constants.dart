@@ -6,8 +6,10 @@ class AppConstants {
   static String get defaultApiBaseUrl =>
       const String.fromEnvironment('API_BASE_URL', defaultValue: '') != ''
           ? const String.fromEnvironment('API_BASE_URL')
-          : kIsWeb ? 'http://localhost:5116' : 'http://10.0.2.2:5116';
-  
+          : kIsWeb
+              ? 'http://localhost:5116'
+              : 'http://10.0.2.2:5116';
+
   static const String roleAdministrator = 'ADMINISTRATOR';
   static const String roleSeniorEngineer = 'SENIOR_ENGINEER';
   static const String roleFieldTechnician = 'FIELD_TECHNICIAN';

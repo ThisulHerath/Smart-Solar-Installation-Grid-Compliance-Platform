@@ -1,4 +1,4 @@
-import { AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment } from '../types/auth';
+import { AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment, LocationSearchResult } from '../types/auth';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
 
@@ -124,6 +124,18 @@ class ApiService {
   async getSurvey(id: string): Promise<Survey> {
     const res = await fetch(`${API_BASE_URL}/api/surveys/${id}`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error(`Unable to load survey (${res.status}).`);
+    return res.json();
+  }
+
+  async searchLocations(query: string, signal?: AbortSignal): Promise<LocationSearchResult[]> {
+    const res = await fetch(`${API_BASE_URL}/api/locations/search?query=${encodeURIComponent(query)}`, {
+      headers: this.getHeaders(),
+      signal,
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'Unable to search for that address.');
+    }
     return res.json();
   }
 

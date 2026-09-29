@@ -56,16 +56,22 @@ class FieldJob {
       longitude: (json['longitude'] as num?)?.toDouble(),
       status: json['status'] as String? ?? 'Assigned',
       priority: json['priority'] as String? ?? 'Medium',
-      assignedAt: json['assignedAt'] != null ? DateTime.parse(json['assignedAt'] as String) : DateTime.now(),
-      scheduledAt: json['scheduledAt'] != null ? DateTime.parse(json['scheduledAt'] as String) : null,
+      assignedAt: json['assignedAt'] != null
+          ? DateTime.parse(json['assignedAt'] as String)
+          : DateTime.now(),
+      scheduledAt: json['scheduledAt'] != null
+          ? DateTime.parse(json['scheduledAt'] as String)
+          : null,
       hasInspection: json['hasInspection'] as bool? ?? false,
       inspectionStatus: json['inspectionStatus'] as String?,
       compliance: json['compliance'] != null
-          ? ComplianceAssessmentModel.fromJson(json['compliance'] as Map<String, dynamic>)
+          ? ComplianceAssessmentModel.fromJson(
+              json['compliance'] as Map<String, dynamic>)
           : null,
       photos: (json['photos'] as List<dynamic>?)
-          ?.map((e) => SitePhotoModel.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList() ??
+              ?.map((e) =>
+                  SitePhotoModel.fromJson(Map<String, dynamic>.from(e as Map)))
+              .toList() ??
           const [],
     );
   }
@@ -95,7 +101,9 @@ class SitePhotoModel {
       photoType: json['photoType'] as String? ?? '',
       fileUrl: json['fileUrl'] as String? ?? '',
       fileName: json['fileName'] as String? ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String)
+          : null,
     );
   }
 }

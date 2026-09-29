@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HomeownerWorkspace } from './HomeownerWorkspace';
 import { StaffDashboard } from '../components/StaffDashboard';
+import { CustomerLocationMap } from '../components/CustomerLocationMap';
 
 type Report = {
   surveyCount: number;
@@ -90,6 +91,7 @@ export function OperationsDashboard() {
                   <span key={row.status}>{row.status}: {row.count}</span>
                 )) : <span>No proposals yet.</span>}
               </section>
+              <CustomerLocationMap />
             </>
           )}
       </section>
@@ -97,7 +99,10 @@ export function OperationsDashboard() {
   }
 
   if (user && !user.roles.includes('HOMEOWNER')) {
-    return <StaffDashboard user={user} report={report} error={error} />;
+    return <>
+      <StaffDashboard user={user} report={report} error={error} />
+      {user.roles.includes('SENIOR_ENGINEER') && <CustomerLocationMap />}
+    </>;
   }
 
   return (

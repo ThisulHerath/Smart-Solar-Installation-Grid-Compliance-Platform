@@ -35,7 +35,8 @@ class EngineeringProposalModel {
     required this.auditLogs,
   });
 
-  factory EngineeringProposalModel.fromJson(Map<String, dynamic> json) => EngineeringProposalModel(
+  factory EngineeringProposalModel.fromJson(Map<String, dynamic> json) =>
+      EngineeringProposalModel(
         id: json['id']?.toString() ?? '',
         solarSurveyId: json['solarSurveyId']?.toString() ?? '',
         workflowId: json['workflowId']?.toString(),
@@ -43,7 +44,8 @@ class EngineeringProposalModel {
         panelCount: (json['panelCount'] as num?)?.toInt() ?? 0,
         inverterSizeKw: (json['inverterSizeKw'] as num?)?.toDouble() ?? 0.0,
         estimatedCostLkr: (json['estimatedCostLkr'] as num?)?.toDouble() ?? 0.0,
-        gridComplianceStatus: json['gridComplianceStatus']?.toString() ?? 'PENDING',
+        gridComplianceStatus:
+            json['gridComplianceStatus']?.toString() ?? 'PENDING',
         riskLevel: json['riskLevel']?.toString() ?? 'MEDIUM',
         safetyStatus: json['safetyStatus']?.toString() ?? 'REQUIRES_APPROVAL',
         proposalStatus: json['proposalStatus']?.toString() ?? 'Draft',

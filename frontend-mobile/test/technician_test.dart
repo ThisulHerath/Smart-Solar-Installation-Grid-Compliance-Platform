@@ -4,7 +4,9 @@ import 'package:smart_solar_mobile/models/user.dart';
 
 void main() {
   group('FieldJob & Compliance Model Tests', () {
-    test('FieldJob parses job details, inspection status, and compliance results', () {
+    test(
+        'FieldJob parses job details, inspection status, and compliance results',
+        () {
       final json = {
         'id': 'job-001',
         'solarSurveyId': 'survey-100',
@@ -29,7 +31,8 @@ void main() {
           'gridCompliant': true,
           'complianceStatus': 'COMPLIANT',
           'riskLevel': 'LOW',
-          'complianceNotes': 'Voltage 230V stable and compliant with CEB standards.',
+          'complianceNotes':
+              'Voltage 230V stable and compliant with CEB standards.',
           'validationStatus': 'PASSED',
         },
       };
@@ -67,7 +70,8 @@ void main() {
           'gridCompliant': false,
           'complianceStatus': 'NON_COMPLIANT',
           'riskLevel': 'HIGH',
-          'complianceNotes': 'Grid voltage 258V exceeds +6% CEB statutory ceiling.',
+          'complianceNotes':
+              'Grid voltage 258V exceeds +6% CEB statutory ceiling.',
           'validationStatus': 'PASSED',
         },
       };

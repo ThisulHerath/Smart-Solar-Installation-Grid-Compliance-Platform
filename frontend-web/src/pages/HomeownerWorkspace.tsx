@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Trash2, ChevronLeft, ChevronRight, Search, ClipboardCheck, MapPinned, ShieldCheck } from 'lucide-react';
 
 import { ValidatedForm } from '../components/ValidatedForm';
+import { LocationPicker, SelectedLocation } from '../components/LocationPicker';
 import { api } from '../services/api';
 import { Survey } from '../types/auth';
 import projectSolarFacility from '../../images/project-solar-facility.png';
@@ -86,6 +87,7 @@ export function HomeownerWorkspace() {
   const [kwh, setKwh] = useState('');
   const [area, setArea] = useState('');
   const [grid, setGrid] = useState('SinglePhase');
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation>();
 
   const [
     proposals,
@@ -230,6 +232,8 @@ export function HomeownerWorkspace() {
                   roofAreaSqm: Number(area),
                   gridType: grid,
                   propertyAddress: address,
+                  latitude: selectedLocation?.latitude,
+                  longitude: selectedLocation?.longitude,
                   roofOrientation: 'Unknown',
                 });
 
@@ -237,6 +241,7 @@ export function HomeownerWorkspace() {
                 setAddress('');
                 setKwh('');
                 setArea('');
+                setSelectedLocation(undefined);
               });
             }}
           >
@@ -264,6 +269,14 @@ export function HomeownerWorkspace() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               disabled={busy}
+            />
+
+            <LocationPicker
+              address={address}
+              location={selectedLocation}
+              disabled={busy}
+              onAddressChange={setAddress}
+              onLocationChange={setSelectedLocation}
             />
 
             <label htmlFor="monthly-use">
