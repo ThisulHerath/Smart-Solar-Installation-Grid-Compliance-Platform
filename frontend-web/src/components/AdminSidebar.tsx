@@ -1,18 +1,20 @@
-import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, LogOut, Sun, UsersRound } from 'lucide-react';
+import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, MapPinned, Sun, UserRoundPlus, UsersRound } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function AdminSidebar() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   if (!user) return null;
 
   const links = [
     { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/surveys', label: 'Surveys', icon: ClipboardList },
-    { to: '/field-jobs', label: 'F Operations', icon: HardHat },
+    { to: '/field-jobs/assign', label: 'Assign technician', icon: UserRoundPlus },
+    { to: '/field-jobs', label: 'Field jobs', icon: HardHat },
     { to: '/proposals', label: 'Proposals', icon: FileText },
     { to: '/proposals/pending', label: 'Approvals', icon: FileCheck2 },
+    { to: '/customer-locations', label: 'Customer locations', icon: MapPinned },
     { to: '/inventory', label: 'Inventory', icon: Box },
     { to: '/users', label: 'User management', icon: UsersRound },
   ];
@@ -29,7 +31,7 @@ export function AdminSidebar() {
           <NavLink
             key={to}
             to={to}
-            end={to === '/dashboard'}
+            end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals'}
             className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}
           >
             <Icon size={20} />
@@ -38,10 +40,6 @@ export function AdminSidebar() {
         ))}
       </nav>
 
-      <button className="admin-sidebar-logout" type="button" onClick={logout}>
-        <LogOut size={20} />
-        <span>Log out</span>
-      </button>
     </aside>
   );
 }

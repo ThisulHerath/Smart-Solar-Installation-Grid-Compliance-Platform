@@ -76,7 +76,7 @@ describe('FieldJobsPage & FieldJobDetailPage Tests', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Field Technician Operations & Compliance/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Field jobs' })).toBeInTheDocument();
       expect(screen.getByText('Kamal Perera')).toBeInTheDocument();
       expect(screen.getByText('45 Galle Road, Colombo 03')).toBeInTheDocument();
       expect(screen.getByText('Lead Field Technician')).toBeInTheDocument();

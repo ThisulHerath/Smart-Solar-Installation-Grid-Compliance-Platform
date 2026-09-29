@@ -1,6 +1,5 @@
-import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, LogOut, Sun } from 'lucide-react';
+import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, MapPinned, Sun, UserRoundPlus } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
 type StaffRole = 'SENIOR_ENGINEER' | 'FIELD_TECHNICIAN' | 'INVENTORY_OFFICER';
 
@@ -11,9 +10,11 @@ const roleSettings: Record<StaffRole, { label: string; className: string; links:
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { to: '/surveys', label: 'Surveys', icon: ClipboardList },
-      { to: '/field-jobs', label: 'F Operations', icon: HardHat },
+      { to: '/field-jobs/assign', label: 'Assign technician', icon: UserRoundPlus },
+      { to: '/field-jobs', label: 'Field jobs', icon: HardHat },
       { to: '/proposals', label: 'Proposals', icon: FileText },
       { to: '/proposals/pending', label: 'Approvals', icon: FileCheck2 },
+      { to: '/customer-locations', label: 'Customer locations', icon: MapPinned },
     ],
   },
   FIELD_TECHNICIAN: {
@@ -35,7 +36,6 @@ const roleSettings: Record<StaffRole, { label: string; className: string; links:
 };
 
 export function RoleSidebar({ role }: { role: StaffRole }) {
-  const { logout } = useAuth();
   const settings = roleSettings[role];
 
   return (
@@ -47,16 +47,12 @@ export function RoleSidebar({ role }: { role: StaffRole }) {
       <p className="role-sidebar-label">{settings.label}</p>
       <nav className="admin-sidebar-nav">
         {settings.links.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} end={to === '/dashboard'} className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}>
+          <NavLink key={to} to={to} end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals'} className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}>
             <Icon size={20} />
             <span>{label}</span>
           </NavLink>
         ))}
       </nav>
-      <button className="admin-sidebar-logout" type="button" onClick={logout}>
-        <LogOut size={20} />
-        <span>Log out</span>
-      </button>
     </aside>
   );
 }

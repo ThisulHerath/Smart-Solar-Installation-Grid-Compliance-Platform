@@ -101,7 +101,6 @@ export function OperationsDashboard() {
   if (user && !user.roles.includes('HOMEOWNER')) {
     return <>
       <StaffDashboard user={user} report={report} error={error} />
-      {user.roles.includes('SENIOR_ENGINEER') && <CustomerLocationMap />}
     </>;
   }
 
