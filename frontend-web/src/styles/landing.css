@@ -246,3 +246,78 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Subtle motion and depth for the illustrated rooftop scene. */
+.landing-art::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  opacity: .38;
+  background: repeating-conic-gradient(from -12deg at 72% 19%, transparent 0deg 11deg, rgba(255,255,255,.2) 11.3deg 11.8deg, transparent 12deg 23deg);
+  mask-image: radial-gradient(circle at 72% 19%, #000 0, transparent 42%);
+  pointer-events: none;
+}
+.art-sun { animation: landing-sun-breathe 7s ease-in-out infinite; }
+.art-orbit { animation: landing-orbit-drift 34s linear infinite; transform-origin: center; }
+.orbit-two { animation-direction: reverse; animation-duration: 42s; }
+.art-note { transition: transform .25s ease, box-shadow .25s ease; }
+.landing-art:hover .art-note { transform: translateY(-4px); box-shadow: 0 20px 38px rgba(34,61,37,.2); }
+.landing-skip:focus { border-radius: 10px; box-shadow: 0 8px 24px rgba(24,60,48,.14); }
+
+@keyframes landing-sun-breathe {
+  0%, 100% { box-shadow: 0 0 0 14px rgba(248,255,207,.2), 0 0 58px rgba(255,255,201,.76); }
+  50% { box-shadow: 0 0 0 20px rgba(248,255,207,.15), 0 0 78px rgba(255,255,201,.92); }
+}
+@keyframes landing-orbit-drift { to { rotate: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .art-sun, .art-orbit { animation: none !important; }
+  .landing-art:hover .art-note { transform: none; }
+}
+
+.landing-section-heading .landing-kicker { margin-bottom: 17px; }
+.hero-energy-flow {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.hero-energy-flow .energy-track {
+  fill: none;
+  stroke: rgba(255,255,255,.62);
+  stroke-width: 2;
+  stroke-dasharray: 3 7;
+}
+.hero-energy-flow .energy-track--home { stroke: rgba(120,146,82,.62); }
+.hero-energy-flow .energy-pulse {
+  fill: none;
+  stroke: url(#energy-line);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 2 18;
+  filter: url(#energy-glow);
+  animation: energy-flow 1.8s linear infinite;
+}
+.hero-energy-flow .energy-pulse--home {
+  stroke: #789252;
+  animation-duration: 2.2s;
+  animation-direction: reverse;
+}
+.hero-energy-flow .energy-battery rect:first-child {
+  fill: #183c30;
+  stroke: #d8ee8a;
+  stroke-width: 1.5;
+}
+.hero-energy-flow .energy-battery rect:not(:first-child) { fill: #a9c56f; }
+.hero-energy-flow .energy-battery path { fill: #f4e2a0; }
+.art-sun, .art-caption, .art-note, .art-coordinate { z-index: 2; }
+@keyframes energy-flow { to { stroke-dashoffset: -40; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-energy-flow .energy-pulse { animation: none; }
+}

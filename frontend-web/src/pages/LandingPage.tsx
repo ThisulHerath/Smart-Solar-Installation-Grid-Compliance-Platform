@@ -32,6 +32,23 @@ export function LandingPage() {
           <span className="art-caption">MORE POSSIBILITY.<br />SAME ROOFTOP.</span>
           <div className="art-land" /><div className="art-house"><div className="house-front"><i /><i /><b /></div><div className="house-side" /><div className="house-roof"><div className="roof-panels">{Array.from({ length: 12 }, (_, i) => <span key={i} />)}</div></div></div>
           <div className="art-tree tree-one" /><div className="art-tree tree-two" />
+          <svg className="hero-energy-flow" viewBox="0 0 500 520" aria-hidden="true">
+            <defs>
+              <linearGradient id="energy-line" x1="1" y1="0" x2="0" y2="1"><stop stopColor="#f5c85b" /><stop offset="1" stopColor="#d8ee8a" /></linearGradient>
+              <filter id="energy-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="3.5" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+            </defs>
+            <path className="energy-track" d="M405 105 C358 143 329 181 293 208" />
+            <path className="energy-track energy-track--home" d="M250 263 C250 302 282 325 349 342" />
+            <path className="energy-pulse" d="M405 105 C358 143 329 181 293 208" />
+            <path className="energy-pulse energy-pulse--home" d="M250 263 C250 302 282 325 349 342" />
+            <g className="energy-battery" transform="translate(374 320)">
+              <rect x="0" y="0" width="34" height="54" rx="8" />
+              <rect x="6" y="8" width="22" height="7" rx="3" />
+              <rect x="6" y="19" width="22" height="7" rx="3" />
+              <rect x="6" y="30" width="22" height="7" rx="3" />
+              <path d="m19 40-5 7h5l-2 5 7-8h-5l2-4z" />
+            </g>
+          </svg>
           <div className="art-note"><span><Leaf size={22} /></span><div><strong>Your roof. New potential.</strong><small>Make room for cleaner energy.</small></div></div>
           <div className="art-coordinate">SRI LANKA <span>7° N · 81° E</span></div>
         </div>
