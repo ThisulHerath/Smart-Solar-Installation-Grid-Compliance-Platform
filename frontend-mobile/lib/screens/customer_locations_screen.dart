@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -55,10 +56,23 @@ class _CustomerLocationsScreenState extends State<CustomerLocationsScreen> {
       'api': '1',
       'destination': '${survey.latitude},${survey.longitude}',
     });
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
-        mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to open map directions.')));
+    try {
+      final opened = await launchUrl(
+        uri,
+        mode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
+        webOnlyWindowName: kIsWeb ? '_self' : null,
+      );
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to open map directions.')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to open map directions.')));
+      }
     }
   }
 

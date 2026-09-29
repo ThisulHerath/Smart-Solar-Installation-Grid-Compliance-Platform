@@ -1,8 +1,8 @@
 import '../widgets/record_reference.dart';
 import '../widgets/solar_field.dart';
 import '../utils/validators.dart';
-import 'dart:typed_data';
 import '../theme/solar_theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
@@ -27,22 +27,89 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   FieldJob? _job;
   bool _loading = true;
   bool _saving = false;
+  bool _locatingForNavigation = false;
   String? _error;
   String? _successMessage;
+  Position? _navigationOrigin;
 
   final Map<String, Uint8List> _photoBytes = {};
   final Map<String, String> _photoUrls = {};
 
   Future<void> _openDirections(FieldJob job) async {
+    final origin = _navigationOrigin;
+    if (origin == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content:
+              Text('Get your current location before opening the route.')));
+      return;
+    }
     final destination = job.latitude != null && job.longitude != null
         ? '${job.latitude},${job.longitude}'
         : job.propertyAddress;
-    final uri = Uri.https('www.google.com', '/maps/dir/',
-        {'api': '1', 'destination': destination});
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
-        mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to open map directions.')));
+    final uri = Uri.https('www.google.com', '/maps/dir/', {
+      'api': '1',
+      'origin': '${origin.latitude},${origin.longitude}',
+      'destination': destination,
+      'travelmode': 'driving',
+      'dir_action': 'navigate',
+    });
+    try {
+      final opened = await launchUrl(
+        uri,
+        mode: kIsWeb
+            ? LaunchMode.platformDefault
+            : LaunchMode.externalApplication,
+        webOnlyWindowName: kIsWeb ? '_self' : null,
+      );
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to open map directions.')));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Unable to open map directions.')));
+      }
+    }
+  }
+
+  Future<Position> _readCurrentPosition() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      throw Exception('Enable location services and try again.');
+    }
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw Exception(
+          'Location permission is required. Allow location access in your browser or device settings.');
+    }
+    return Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high, timeLimit: Duration(seconds: 20)));
+  }
+
+  Future<void> _captureNavigationOrigin() async {
+    setState(() {
+      _locatingForNavigation = true;
+      _error = null;
+    });
+    try {
+      final position = await _readCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _navigationOrigin = position;
+        _successMessage =
+            'Current location confirmed. Your route is ready to open.';
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error =
+          'Location unavailable: ${e.toString().replaceAll('Exception: ', '')}');
+    } finally {
+      if (mounted) setState(() => _locatingForNavigation = false);
     }
   }
 
@@ -112,22 +179,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   Future<void> _handleGpsCheckIn() async {
     setState(() => _saving = true);
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
-        throw Exception('Enable location services to record your arrival.');
-      }
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        throw Exception(
-            'Location permission is needed for check-in. Enable it in your device settings.');
-      }
-      final position = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              timeLimit: Duration(seconds: 20)));
+      final position = await _readCurrentPosition();
       await _api.checkInJob(
           widget.jobId, position.latitude, position.longitude);
       setState(() => _successMessage = 'GPS Check-in recorded successfully.');
@@ -437,16 +489,82 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                SizedBox(
-                  height: 50,
-                  child: FilledButton.icon(
-                    onPressed: () => _openDirections(job),
-                    icon: const Icon(Icons.navigation_rounded),
-                    label: const Text('Navigate to customer home'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: SolarColors.primary,
-                      foregroundColor: Colors.white,
-                    ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: SolarColors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: SolarColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text('Travel to customer',
+                          style: TextStyle(
+                              color: SolarColors.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 5),
+                      Text(job.propertyAddress,
+                          style: const TextStyle(
+                              color: SolarColors.muted, fontSize: 12)),
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        Icon(
+                            _navigationOrigin == null
+                                ? Icons.location_searching
+                                : Icons.check_circle,
+                            size: 17,
+                            color: _navigationOrigin == null
+                                ? SolarColors.warning
+                                : SolarColors.success),
+                        const SizedBox(width: 7),
+                        Expanded(
+                            child: Text(
+                          _navigationOrigin == null
+                              ? 'Your starting location has not been captured.'
+                              : 'Starting location confirmed (±${_navigationOrigin!.accuracy.round()} m).',
+                          style: const TextStyle(
+                              color: SolarColors.muted, fontSize: 12),
+                        )),
+                      ]),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: _locatingForNavigation
+                              ? null
+                              : _captureNavigationOrigin,
+                          icon: _locatingForNavigation
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.my_location_rounded),
+                          label: Text(_locatingForNavigation
+                              ? 'Getting your location…'
+                              : _navigationOrigin == null
+                                  ? '1. Get my current location'
+                                  : 'Update my current location'),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 48,
+                        child: FilledButton.icon(
+                          onPressed: _navigationOrigin == null
+                              ? null
+                              : () => _openDirections(job),
+                          icon: const Icon(Icons.navigation_rounded),
+                          label: const Text('2. Navigate to customer home'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: SolarColors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -608,18 +726,21 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                               setState(() => _roofOrientation = value);
                             }
                           }),
-                      SwitchListTile(
-                        title: const Text('Inverter Location Suitable',
-                            style: TextStyle(
-                                color: SolarColors.text, fontSize: 14)),
-                        subtitle: const Text(
-                            'Adequate airflow, sheltered, fire safety compliant',
-                            style: TextStyle(
-                                color: SolarColors.muted, fontSize: 12)),
-                        value: _inverterLocationSuitable,
-                        activeThumbColor: SolarColors.primary,
-                        onChanged: (val) =>
-                            setState(() => _inverterLocationSuitable = val),
+                      Material(
+                        color: Colors.transparent,
+                        child: SwitchListTile(
+                          title: const Text('Inverter Location Suitable',
+                              style: TextStyle(
+                                  color: SolarColors.text, fontSize: 14)),
+                          subtitle: const Text(
+                              'Adequate airflow, sheltered, fire safety compliant',
+                              style: TextStyle(
+                                  color: SolarColors.muted, fontSize: 12)),
+                          value: _inverterLocationSuitable,
+                          activeThumbColor: SolarColors.primary,
+                          onChanged: (val) =>
+                              setState(() => _inverterLocationSuitable = val),
+                        ),
                       ),
                     ],
                   ),

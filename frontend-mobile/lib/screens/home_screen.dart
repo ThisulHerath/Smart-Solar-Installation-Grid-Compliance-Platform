@@ -1470,41 +1470,49 @@ class _GenerationCard extends StatelessWidget {
           ]),
           const SizedBox(height: 18),
           SizedBox(
-              height: 100,
-              child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(7, (i) {
-                    const solar = [66.0, 78.0, 58.0, 88.0, 73.0, 94.0, 82.0];
-                    const grid = [28.0, 22.0, 35.0, 18.0, 27.0, 13.0, 20.0];
-                    return Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Container(
-                                    width: 8,
-                                    height: solar[i],
-                                    decoration: BoxDecoration(
-                                        color: _gold,
-                                        borderRadius:
-                                            BorderRadius.circular(6))),
-                                const SizedBox(width: 3),
-                                Container(
-                                    width: 8,
-                                    height: grid[i],
-                                    decoration: BoxDecoration(
-                                        color: _cyan,
-                                        borderRadius:
-                                            BorderRadius.circular(6))),
-                              ]),
-                          const SizedBox(height: 6),
-                          Text(['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-                              style:
-                                  const TextStyle(color: _muted, fontSize: 8)),
-                        ]);
-                  }))),
+              height: 112,
+              child: LayoutBuilder(builder: (context, constraints) {
+                const solar = [66.0, 78.0, 58.0, 88.0, 73.0, 94.0, 82.0];
+                const grid = [28.0, 22.0, 35.0, 18.0, 27.0, 13.0, 20.0];
+                const tallestValue = 94.0;
+                final availableBarHeight = constraints.maxHeight - 18;
+
+                double scaledHeight(double value) =>
+                    value / tallestValue * availableBarHeight;
+
+                return Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(7, (i) {
+                      return Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                      width: 8,
+                                      height: scaledHeight(solar[i]),
+                                      decoration: BoxDecoration(
+                                          color: _gold,
+                                          borderRadius:
+                                              BorderRadius.circular(6))),
+                                  const SizedBox(width: 3),
+                                  Container(
+                                      width: 8,
+                                      height: scaledHeight(grid[i]),
+                                      decoration: BoxDecoration(
+                                          color: _cyan,
+                                          borderRadius:
+                                              BorderRadius.circular(6))),
+                                ]),
+                            const SizedBox(height: 6),
+                            Text(['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+                                style: const TextStyle(
+                                    color: _muted, fontSize: 8)),
+                          ]);
+                    }));
+              })),
           const SizedBox(height: 13),
           const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             CircleAvatar(radius: 3, backgroundColor: _gold),

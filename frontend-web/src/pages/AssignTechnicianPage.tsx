@@ -1,8 +1,9 @@
-import { CheckCircle2, HardHat, UserRoundPlus } from 'lucide-react';
+import { CheckCircle2, HardHat, MapPin, Navigation, UserRoundPlus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AssignTechnicianForm } from '../components/AssignTechnicianForm';
 import { FieldJob } from '../types/auth';
+import { externalDirectionsUrl } from '../utils/maps';
 
 export function AssignTechnicianPage() {
   const navigate = useNavigate();
@@ -25,8 +26,22 @@ export function AssignTechnicianPage() {
           <div>
             <p className="eyebrow">ASSIGNMENT CREATED</p>
             <h2>{assignedJob.technicianName} is assigned</h2>
-            <p>{assignedJob.propertyAddress}</p>
+            <p className="assignment-success__address"><MapPin size={17} /> {assignedJob.propertyAddress}</p>
+            <p className="assignment-success__location">
+              <CheckCircle2 size={16} />
+              {assignedJob.latitude != null && assignedJob.longitude != null
+                ? 'Homeowner map location included in the technician assignment.'
+                : 'No map pin was saved; navigation will use the property address.'}
+            </p>
             <div>
+              <a
+                className="btn btn-secondary"
+                href={externalDirectionsUrl(assignedJob.latitude, assignedJob.longitude, assignedJob.propertyAddress)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Navigation size={17} /> Open customer location
+              </a>
               <button className="btn btn-primary" type="button" onClick={() => setAssignedJob(null)}>
                 <UserRoundPlus size={17} /> Assign another technician
               </button>

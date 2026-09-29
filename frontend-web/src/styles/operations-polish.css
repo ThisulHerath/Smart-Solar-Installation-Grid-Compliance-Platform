@@ -349,6 +349,15 @@
 .technician-job-note { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; color: #347f64; font-size: 12px; font-weight: 800; }
 .technician-job-directions { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; margin-top: 16px; padding: 0 13px; border-radius: 7px; background: #07536a; color: #fff; font-size: 12px; font-weight: 800; text-decoration: none; }
 .technician-job-directions:hover { background: #06475a; color: #fff; }
+.technician-job-directions--disabled,
+.technician-job-directions--disabled:hover { border: 0; background: #dce5e1; color: #768682; cursor: not-allowed; }
+.technician-job-location-state { display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; color: #4f7b45; font-size: 11px; font-weight: 750; }
+.technician-route-origin { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; margin-top: 18px; padding: 18px 20px; border: 1px solid #cfe0c9; border-radius: 10px; background: #fff; box-shadow: 0 8px 20px #173e440a; }
+.technician-route-origin__icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 10px; background: #edf7e7; color: #599d34; }
+.technician-route-origin h2 { margin: 2px 0 4px; color: #344b4d; font-size: 17px; }
+.technician-route-origin p:last-child { margin: 0; color: #718581; font-size: 12px; }
+.technician-route-origin .btn { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
+.technician-route-origin .technician-route-origin__error { margin-top: 7px; color: #a94646; }
 
 .assignment-page { display: grid; gap: 22px; }
 .assignment-page__header { display: flex; align-items: flex-start; gap: 16px; padding: 26px 28px; border: 1px solid var(--border-color); border-left: 5px solid var(--solar-emerald); border-radius: 12px; background: #fff; box-shadow: 0 10px 28px rgba(26, 65, 59, .07); }
@@ -357,6 +366,9 @@
 .assignment-success h2 { margin: 2px 0 7px; }
 .assignment-page__header p:last-child,
 .assignment-success p { margin: 0; color: var(--text-secondary); }
+.assignment-success .assignment-success__address,
+.assignment-success .assignment-success__location { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+.assignment-success .assignment-success__location { color: #4f7b45; font-size: 12px; font-weight: 750; }
 .assignment-page > .glass-panel { max-width: 980px; }
 .assignment-form-card { overflow: hidden; padding: 0 !important; }
 .assignment-form-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px; border-bottom: 1px solid #e1ebdd; background: linear-gradient(120deg, #fff, #f7fbf4); }
@@ -419,4 +431,7 @@
   .assignment-preview { margin-inline: 20px; }
   .assignment-form-actions { padding-inline: 20px; }
   .assignment-form-actions .btn { width: 100%; }
+  .technician-route-origin { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .technician-route-origin .btn { grid-column: 1 / -1; width: 100%; }
+  .technician-job-directions { width: 100%; box-sizing: border-box; }
 }

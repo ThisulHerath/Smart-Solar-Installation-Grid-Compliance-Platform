@@ -7,7 +7,14 @@ export const solarMapMarkerIcon = divIcon({
   iconAnchor: [17, 30],
 });
 
-export function externalDirectionsUrl(latitude?: number, longitude?: number, address?: string) {
+type RouteOrigin = { latitude: number; longitude: number };
+
+export function externalDirectionsUrl(latitude?: number, longitude?: number, address?: string, origin?: RouteOrigin) {
   const destination = latitude != null && longitude != null ? `${latitude},${longitude}` : address || '';
-  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+  let parameters = `api=1&destination=${encodeURIComponent(destination)}`;
+  if (origin) {
+    parameters += `&origin=${encodeURIComponent(`${origin.latitude},${origin.longitude}`)}`;
+    parameters += '&travelmode=driving&dir_action=navigate';
+  }
+  return `https://www.google.com/maps/dir/?${parameters}`;
 }
