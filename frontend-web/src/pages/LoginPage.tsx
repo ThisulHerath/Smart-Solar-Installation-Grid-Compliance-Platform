@@ -27,10 +27,10 @@ export function LoginPage() {
 
   return (
     <AuthShell>
-      <h2>Welcome back</h2>
+      <h2>Sign in to Smart Solar</h2>
 
       <p className="auth-intro">
-        Your solar project, all in one place.
+        Access your solar project workspace and updates.
       </p>
 
       {location.state?.message && (
