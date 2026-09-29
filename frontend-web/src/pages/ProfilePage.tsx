@@ -12,6 +12,7 @@ import {
 
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { DestructiveConfirmDialog } from '../components/DestructiveConfirmDialog';
 import '../styles/profile.css';
 
 export function ProfilePage() {
@@ -22,6 +23,7 @@ export function ProfilePage() {
   const [hasPhotoDraft, setHasPhotoDraft] = useState(false);
   const [photoError, setPhotoError] = useState('');
   const [savingPhoto, setSavingPhoto] = useState(false);
+  const [showRemovePhotoConfirm, setShowRemovePhotoConfirm] = useState(false);
 
   useEffect(() => {
     setDraftPhoto(profilePhoto);
@@ -71,6 +73,7 @@ export function ProfilePage() {
     setDraftFile(null);
     setHasPhotoDraft(true);
     setPhotoError('');
+    setShowRemovePhotoConfirm(false);
   };
 
   const savePhoto = async () => {
@@ -139,7 +142,7 @@ export function ProfilePage() {
           </div>
 
           {photo && (
-            <button className="profile-photo-remove" type="button" onClick={removePhoto}>
+            <button className="profile-photo-remove" type="button" onClick={() => setShowRemovePhotoConfirm(true)}>
               <Trash2 size={14} /> Remove photo
             </button>
           )}
@@ -255,6 +258,17 @@ export function ProfilePage() {
           <ArrowUpRight size={17} />
         </Link>
       </section>
+
+      <DestructiveConfirmDialog
+        open={showRemovePhotoConfirm}
+        title="Remove profile photo?"
+        subject={user.fullName}
+        confirmLabel="Remove photo"
+        onCancel={() => setShowRemovePhotoConfirm(false)}
+        onConfirm={removePhoto}
+      >
+        <p>Your current photo will be removed after you save the profile changes.</p>
+      </DestructiveConfirmDialog>
     </div>
   );
 };
