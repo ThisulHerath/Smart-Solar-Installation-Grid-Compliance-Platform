@@ -1723,3 +1723,355 @@
     transition: none !important;
   }
 }
+
+/* Auth page layout refinements: keep the existing solar palette and flows. */
+.auth-shell .auth-card-frame {
+  width: min(1160px, 100%);
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  border-color: rgba(188, 201, 177, 0.62);
+  border-radius: 28px;
+  box-shadow:
+    0 34px 88px rgba(23, 61, 46, 0.13),
+    0 10px 30px rgba(23, 61, 46, 0.07);
+}
+
+.auth-shell .auth-form-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 52px clamp(34px, 4.2vw, 58px) !important;
+}
+
+.auth-shell .auth-form-content {
+  width: 100%;
+  max-width: 430px;
+}
+
+.auth-shell .auth-visual {
+  min-height: 680px;
+  isolation: isolate;
+  background: #173d2e;
+}
+
+.auth-shell .auth-visual-image {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 72% 17%, rgba(216, 238, 138, .92) 0 4.2%, transparent 4.5%),
+    linear-gradient(180deg, rgba(16, 45, 35, .02) 30%, rgba(16, 45, 35, .68) 100%),
+    linear-gradient(160deg, #dce8c5 0%, #a9c56f 44%, #315b40 44.5%, #173d2e 100%);
+}
+
+.auth-shell .auth-visual-image::before {
+  top: 31%;
+  left: 12%;
+  width: 76%;
+  height: 34%;
+  transform: perspective(700px) rotateX(10deg) skewY(-10deg) rotate(-3deg);
+  border: 5px solid rgba(236, 244, 217, .92);
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.09), transparent 48%),
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(169,197,111,.68) 32px 34px),
+    repeating-linear-gradient(90deg, #173d2e 0 52px, #789252 53px 55px);
+  box-shadow: 16px 22px 0 rgba(23, 61, 46, .38), 0 30px 65px rgba(16, 45, 35, .24);
+}
+
+.auth-shell .auth-visual-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(16,45,35,.08), transparent 35%, rgba(16,45,35,.78));
+  pointer-events: none;
+}
+
+.auth-shell .auth-visual-top,
+.auth-shell .auth-visual-bottom {
+  z-index: 2;
+}
+
+.auth-shell .auth-visual-top {
+  top: 30px;
+  left: 32px;
+  right: 32px;
+}
+
+.auth-shell .visual-brand-icon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.24);
+  background: rgba(255,255,255,.14);
+  backdrop-filter: blur(10px);
+}
+
+.auth-shell .visual-pill {
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(16,45,35,.18);
+  color: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+}
+
+.auth-shell .auth-visual-bottom {
+  right: 42px;
+  bottom: 40px;
+  left: 42px;
+}
+
+.auth-shell .auth-visual-bottom h3 {
+  max-width: 470px;
+  font-size: clamp(32px, 3.3vw, 46px);
+  line-height: 1.06;
+  letter-spacing: -.045em;
+}
+
+.auth-shell .auth-visual-bottom p {
+  max-width: 390px;
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.auth-shell .visual-progress {
+  max-width: 390px;
+  margin-top: 30px;
+  padding-top: 17px;
+  border-top: 1px solid rgba(255,255,255,.2);
+}
+
+.auth-shell .visual-progress-line {
+  background: rgba(255,255,255,.25);
+}
+
+.auth-shell .visual-corner-mark {
+  z-index: 3;
+  right: 24px;
+  bottom: 24px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  background: rgba(255,255,255,.1);
+  backdrop-filter: blur(8px);
+}
+
+.auth-shell .auth-card-close {
+  position: absolute;
+  z-index: 2;
+  top: 20px;
+  right: 22px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--solar-border);
+  border-radius: 50%;
+  color: var(--solar-muted);
+  text-decoration: none;
+  transition: background .18s ease, color .18s ease;
+}
+
+.auth-shell .auth-card-close:hover {
+  background: var(--solar-soft);
+  color: var(--solar-deep);
+}
+
+.auth-shell .account-form-field {
+  min-width: 0;
+}
+
+.auth-shell .auth-form-content .account-form {
+  gap: 15px;
+}
+
+.auth-shell .auth-form-content .account-form label {
+  margin-bottom: 6px;
+}
+
+.auth-shell .auth-form-content .input-field {
+  min-height: 50px;
+}
+
+.auth-shell .auth-form-content :is(a, button, input):focus-visible {
+  outline: 3px solid rgba(120, 146, 82, 0.38);
+  outline-offset: 3px;
+}
+
+.auth-shell .remember-me {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 9px;
+  margin: 0 !important;
+  color: var(--solar-muted) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.auth-shell .remember-me input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--solar-green);
+}
+
+.auth-shell .login-options {
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-shell .auth-switch {
+  margin-top: 24px;
+  color: var(--solar-muted);
+}
+
+.auth-shell .auth-switch a {
+  color: var(--solar-deep);
+  font-weight: 750;
+  text-underline-offset: 3px;
+}
+
+.auth-shell--register .auth-form-card {
+  padding: 42px clamp(30px, 3.5vw, 48px) 34px !important;
+}
+
+.auth-shell--register .auth-content-header h2 {
+  font-size: clamp(29px, 2.6vw, 36px);
+}
+
+.auth-shell--register .register-progress {
+  margin-bottom: 22px;
+}
+
+.auth-shell--register .account-form {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px !important;
+}
+
+.auth-shell--register .auth-form-content .input-field {
+  min-height: 46px;
+}
+
+.auth-shell--register .account-form-field {
+  gap: 5px;
+}
+
+.auth-shell--register .field-message:empty {
+  display: none;
+}
+
+.auth-shell--register .verification-info {
+  padding: 11px 12px;
+}
+
+.auth-shell--register .account-form > :nth-last-child(2),
+.auth-shell--register .account-form > .auth-submit-btn {
+  grid-column: 1 / -1;
+}
+
+.auth-shell--register .verification-info {
+  align-self: stretch;
+}
+
+.auth-shell--register .auth-divider {
+  margin-top: 19px;
+}
+
+.auth-shell--register .auth-secondary-btn {
+  min-height: 44px;
+}
+
+.auth-shell--register .auth-security-note {
+  margin-top: 13px;
+}
+
+@media (max-width: 900px) {
+  .auth-shell .auth-card-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-shell .auth-form-card {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 48px 34px 40px !important;
+  }
+
+  .auth-shell .auth-visual {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 420px;
+  }
+
+  .auth-shell .auth-visual-image::before {
+    top: 16%;
+    left: 22%;
+    width: 58%;
+    height: 36%;
+  }
+
+  .auth-shell .auth-visual-bottom {
+    right: 32px;
+    bottom: 30px;
+    left: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-shell .auth-form-panel {
+    padding: 22px 14px 54px;
+  }
+
+  .auth-shell .auth-card-frame {
+    border-radius: 20px;
+  }
+
+  .auth-shell .auth-form-card,
+  .auth-shell--register .auth-form-card {
+    padding: 46px 22px 30px !important;
+  }
+
+  .auth-shell--register .account-form {
+    grid-template-columns: 1fr;
+    gap: 13px !important;
+  }
+
+  .auth-shell--register .account-form > :nth-last-child(2),
+  .auth-shell--register .account-form > .auth-submit-btn {
+    grid-column: auto;
+  }
+
+  .auth-shell .login-options {
+    flex-wrap: wrap;
+  }
+
+  .auth-shell .auth-visual {
+    min-height: 330px !important;
+  }
+
+  .auth-shell .auth-visual-image::before {
+    top: 14%;
+    left: 21%;
+    width: 62%;
+    height: 34%;
+  }
+
+  .auth-shell .auth-visual-top {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+  }
+
+  .auth-shell .auth-visual-bottom {
+    right: 22px;
+    bottom: 22px;
+    left: 22px;
+  }
+
+  .auth-shell .auth-visual-bottom h3 {
+    font-size: 30px;
+  }
+
+  .auth-shell .visual-progress {
+    margin-top: 18px;
+  }
+}
