@@ -12,6 +12,7 @@ public record FieldJobResponseDto(
     string TechnicianName,
     string CustomerName,
     string CustomerPhone,
+    string ProjectName,
     string PropertyAddress,
     decimal MonthlyKwh,
     decimal RoofAreaSqm,

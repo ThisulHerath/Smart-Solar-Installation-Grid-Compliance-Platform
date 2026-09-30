@@ -43,6 +43,7 @@ export interface Survey {
   id: string;
   customerId: string;
   customerName?: string;
+  projectName: string;
   monthlyKwh: number;
   roofAreaSqm: number;
   gridType: string;
@@ -128,6 +129,7 @@ export interface FieldJob {
   technicianName: string;
   customerName: string;
   customerPhone: string;
+  projectName: string;
   propertyAddress: string;
   monthlyKwh: number;
   roofAreaSqm: number;

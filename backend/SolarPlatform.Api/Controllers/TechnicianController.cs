@@ -83,18 +83,32 @@ public class TechnicianController : ControllerBase
         }
 
         var userId = GetUserId();
-        var result = await _fieldJobService.CheckInAsync(jobId, userId, dto);
-        if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
-        return Ok(result);
+        try
+        {
+            var result = await _fieldJobService.CheckInAsync(jobId, userId, dto);
+            if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPut("{jobId:guid}/inspection")]
     public async Task<ActionResult<SiteInspectionResponseDto>> SaveInspectionDraft(Guid jobId, [FromBody] SaveSiteInspectionDto dto)
     {
         var userId = GetUserId();
-        var result = await _fieldJobService.SaveInspectionDraftAsync(jobId, userId, dto);
-        if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
-        return Ok(result);
+        try
+        {
+            var result = await _fieldJobService.SaveInspectionDraftAsync(jobId, userId, dto);
+            if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("{jobId:guid}/telemetry")]
@@ -106,9 +120,16 @@ public class TechnicianController : ControllerBase
         }
 
         var userId = GetUserId();
-        var result = await _fieldJobService.RecordTelemetryAsync(jobId, userId, dto);
-        if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
-        return Ok(result);
+        try
+        {
+            var result = await _fieldJobService.RecordTelemetryAsync(jobId, userId, dto);
+            if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("{jobId:guid}/photos")]
@@ -133,9 +154,16 @@ public class TechnicianController : ControllerBase
 
         var userId = GetUserId();
         using var stream = file.OpenReadStream();
-        var result = await _fieldJobService.UploadPhotoAsync(jobId, userId, photoType, stream, file.FileName);
-        if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
-        return Ok(result);
+        try
+        {
+            var result = await _fieldJobService.UploadPhotoAsync(jobId, userId, photoType, stream, file.FileName);
+            if (result == null) return NotFound(new { message = $"Job {jobId} not found." });
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpPost("{jobId:guid}/submit")]

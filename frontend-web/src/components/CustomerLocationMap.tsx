@@ -38,7 +38,7 @@ export function CustomerLocationMap() {
         <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <FitLocations surveys={located} />
         {located.map(survey => <Marker key={survey.id} position={[survey.latitude!, survey.longitude!]} icon={solarMapMarkerIcon}>
-          <Popup><div className="customer-map-popup"><strong>{survey.customerName || 'Solar customer'}</strong><span>{survey.propertyAddress}</span><span>Status: {survey.surveyStatus}</span><code>Survey: {survey.id}</code><a href={externalDirectionsUrl(survey.latitude!, survey.longitude!)} target="_blank" rel="noreferrer">Open directions</a></div></Popup>
+          <Popup><div className="customer-map-popup"><strong>{survey.projectName || survey.propertyAddress}</strong><span>{survey.customerName || 'Solar customer'}</span><span>{survey.propertyAddress}</span><span>Status: {survey.surveyStatus}</span><code>Survey: {survey.id}</code><a href={externalDirectionsUrl(survey.latitude!, survey.longitude!)} target="_blank" rel="noreferrer">Open directions</a></div></Popup>
         </Marker>)}
       </MapContainer>
     </div>}

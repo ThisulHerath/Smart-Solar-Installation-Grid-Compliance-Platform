@@ -55,6 +55,12 @@ it('lets a homeowner create a draft with their actual survey inputs', async () =
     },
   });
 
+  fireEvent.change(screen.getByLabelText('Project name'), {
+    target: {
+      value: 'Test Home Solar',
+    },
+  });
+
   fireEvent.change(
     screen.getByLabelText('Monthly electricity use (kWh)'),
     {
@@ -86,6 +92,7 @@ it('lets a homeowner create a draft with their actual survey inputs', async () =
   expect(
     JSON.parse(fetchMock.mock.calls[0][1].body)
   ).toMatchObject({
+    projectName: 'Test Home Solar',
     monthlyKwh: 600,
     roofAreaSqm: 80,
     gridType: 'SinglePhase',

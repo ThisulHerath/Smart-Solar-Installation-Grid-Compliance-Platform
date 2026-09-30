@@ -27,6 +27,7 @@ const mockJobs: FieldJob[] = [
     technicianName: 'Lead Field Technician',
     customerName: 'Kamal Perera',
     customerPhone: '+94771234567',
+    projectName: 'Perera Home Solar',
     propertyAddress: '45 Galle Road, Colombo 03',
     monthlyKwh: 1200,
     roofAreaSqm: 85,

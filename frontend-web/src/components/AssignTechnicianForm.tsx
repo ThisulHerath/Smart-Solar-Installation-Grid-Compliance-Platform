@@ -116,7 +116,7 @@ export function AssignTechnicianForm({ onAssigned, onCancel }: {
                 <option value="">Select a customer survey</option>
                 {surveys.map(survey => (
                   <option key={survey.id} value={survey.id}>
-                    {survey.customerName || 'Customer'} · {survey.propertyAddress} · ID {survey.id.slice(0, 8)} · {survey.surveyStatus}
+                    {survey.projectName || survey.propertyAddress} · {survey.customerName || 'Customer'} · ID {survey.id.slice(0, 8)} · {survey.surveyStatus}
                   </option>
                 ))}
               </select>
@@ -170,7 +170,7 @@ export function AssignTechnicianForm({ onAssigned, onCancel }: {
           {(selectedSurvey || selectedTechnician) && (
             <aside className="assignment-preview" aria-label="Assignment summary">
               <strong>Assignment summary</strong>
-              <span>{selectedSurvey ? `${selectedSurvey.customerName || 'Customer'} · ${selectedSurvey.propertyAddress}` : 'Select a customer survey'}</span>
+              <span>{selectedSurvey ? `${selectedSurvey.projectName || selectedSurvey.propertyAddress} · ${selectedSurvey.customerName || 'Customer'} · ${selectedSurvey.propertyAddress}` : 'Select a customer survey'}</span>
               <span>{selectedTechnician ? `${selectedTechnician.fullName} · ${priority} priority` : 'Select a field technician'}</span>
             </aside>
           )}

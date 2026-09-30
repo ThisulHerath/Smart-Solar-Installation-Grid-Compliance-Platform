@@ -170,11 +170,15 @@ class _ProposalScreenState extends State<ProposalScreen> {
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 1.1)),
                                 const SizedBox(height: 3),
-                                Text('Proposal #$reference',
+                                Text(proposal.projectName,
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w800)),
+                                Text('Proposal #$reference',
+                                    style: const TextStyle(
+                                        color: Color(0xFFD8E7E4),
+                                        fontSize: 10)),
                               ]),
                         ),
                         StatusBadge(

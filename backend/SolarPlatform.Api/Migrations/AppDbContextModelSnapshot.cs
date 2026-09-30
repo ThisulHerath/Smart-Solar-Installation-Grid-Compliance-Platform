@@ -975,6 +975,11 @@ namespace SolarPlatform.Api.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<string>("ProjectName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
                     b.Property<decimal>("RoofAreaSqm")
                         .HasPrecision(12, 2)
                         .HasColumnType("numeric(12,2)");

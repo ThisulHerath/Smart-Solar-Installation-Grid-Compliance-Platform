@@ -49,7 +49,9 @@ public class InventoryServiceTests
     [Fact] public async Task FailedPricingIsPersistedAndDoesNotReserve()
     {
         await using var db = Db(); var proposal = new EngineeringProposal { ProposalStatus = ProposalStatus.Approved, RecommendedKw = 5 };
-        db.Add(proposal); await db.SaveChangesAsync(); var service = new InventoryService(db, Mock.Of<IEquipmentPricingClient>());
+        db.Add(proposal);
+        db.Add(new ProposalLifecycleAuditEvent { EngineeringProposalId = proposal.Id, Event = ProposalLifecycleEvent.PRICING_REQUESTED });
+        await db.SaveChangesAsync(); var service = new InventoryService(db, Mock.Of<IEquipmentPricingClient>());
         var quote = await service.PriceAsync(proposal.Id, default);
         Assert.Equal("FAILED", quote.Status); Assert.Empty(db.Set<InventoryReservation>());
         Assert.Contains("panels", quote.Error);
@@ -58,6 +60,14 @@ public class InventoryServiceTests
     {
         await using var db = Db(); var proposal = new EngineeringProposal(); db.Add(proposal); await db.SaveChangesAsync();
         await Assert.ThrowsAsync<InvalidOperationException>(() => new InventoryService(db, Mock.Of<IEquipmentPricingClient>()).PriceAsync(proposal.Id, default));
+        Assert.Empty(db.Set<EquipmentQuote>());
+    }
+    [Fact] public async Task ApprovedProposalRequiresEngineerInventoryRequestBeforePricing()
+    {
+        await using var db = Db(); var proposal = new EngineeringProposal { ProposalStatus = ProposalStatus.Approved, RecommendedKw = 5 };
+        db.Add(proposal); await db.SaveChangesAsync();
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() => new InventoryService(db, Mock.Of<IEquipmentPricingClient>()).PriceAsync(proposal.Id, default));
+        Assert.Contains("engineer must request", error.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Empty(db.Set<EquipmentQuote>());
     }
     [Fact] public async Task ReservationRefusesNonTransactionalDatabase()

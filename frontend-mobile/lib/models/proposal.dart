@@ -2,6 +2,9 @@ class EngineeringProposalModel {
   final String id;
   final String solarSurveyId;
   final String? workflowId;
+  final String projectName;
+  final String? customerName;
+  final String? propertyAddress;
   final double recommendedKw;
   final int panelCount;
   final double inverterSizeKw;
@@ -20,6 +23,9 @@ class EngineeringProposalModel {
     required this.id,
     required this.solarSurveyId,
     this.workflowId,
+    required this.projectName,
+    this.customerName,
+    this.propertyAddress,
     required this.recommendedKw,
     required this.panelCount,
     required this.inverterSizeKw,
@@ -40,6 +46,9 @@ class EngineeringProposalModel {
         id: json['id']?.toString() ?? '',
         solarSurveyId: json['solarSurveyId']?.toString() ?? '',
         workflowId: json['workflowId']?.toString(),
+        projectName: json['projectName']?.toString() ?? 'Solar project',
+        customerName: json['customerName']?.toString(),
+        propertyAddress: json['propertyAddress']?.toString(),
         recommendedKw: (json['recommendedKw'] as num?)?.toDouble() ?? 0.0,
         panelCount: (json['panelCount'] as num?)?.toInt() ?? 0,
         inverterSizeKw: (json['inverterSizeKw'] as num?)?.toDouble() ?? 0.0,

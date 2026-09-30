@@ -159,6 +159,9 @@ export const FieldJobsPage: React.FC = () => {
       job.customerName
         .toLowerCase()
         .includes(query) ||
+      (job.projectName || '')
+        .toLowerCase()
+        .includes(query) ||
       job.propertyAddress
         .toLowerCase()
         .includes(query) ||
@@ -285,6 +288,7 @@ export const FieldJobsPage: React.FC = () => {
           value={searchQuery}
           onChange={setSearchQuery}
           suggestions={jobs.flatMap((job) => [
+            job.projectName,
             job.customerName,
             job.propertyAddress,
             job.technicianName,
@@ -418,7 +422,7 @@ export const FieldJobsPage: React.FC = () => {
                       color: '#344548',
                     }}
                   >
-                    {job.customerName}
+                    {job.projectName || job.customerName}
                   </div>
 
                   {getStatusBadge(job.status)}
@@ -447,7 +451,9 @@ export const FieldJobsPage: React.FC = () => {
                       textOverflow: 'ellipsis',
                     }}
                   >
-                    {job.propertyAddress}
+                    <span>{job.customerName}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span>{job.propertyAddress}</span>
                   </span>
                 </div>
 

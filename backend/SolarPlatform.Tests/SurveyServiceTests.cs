@@ -44,7 +44,7 @@ public class SurveyServiceTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => Service().DeleteAsync(_owner, survey.Id));
         Assert.True(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
     }
-    private static SurveyRequestDto Request() => new() { MonthlyKwh = 900, RoofAreaSqm = 75, GridType = GridType.SinglePhase, PropertyAddress = "10 Solar Lane" };
+    private static SurveyRequestDto Request() => new() { ProjectName = "Family rooftop", MonthlyKwh = 900, RoofAreaSqm = 75, GridType = GridType.SinglePhase, PropertyAddress = "10 Solar Lane" };
     private static SolarSizingResponseDto Success() => new()
     {
         Status = "completed", Recommendation = JsonDocument.Parse("{\"recommended_kw\":7.5,\"estimated_panel_count\":19,\"estimated_inverter_kw\":7.5}").RootElement,
@@ -74,6 +74,12 @@ public class SurveyServiceTests
         await Assert.ThrowsAsync<ArgumentException>(() => Service().CreateAsync(_owner, request));
     }
 
+    [Fact] public async Task BlankProjectName_IsRejected()
+    {
+        var request = Request(); request.ProjectName = "   ";
+        await Assert.ThrowsAsync<ArgumentException>(() => Service().CreateAsync(_owner, request));
+    }
+
     [Fact] public async Task LocationCoordinates_AndCustomerName_AreReturnedToAuthorizedUsers()
     {
         var request = Request();
@@ -85,6 +91,8 @@ public class SurveyServiceTests
 
         Assert.Equal(6.9271m, created.Latitude);
         Assert.Equal(79.8612m, created.Longitude);
+        Assert.Equal("Family rooftop", created.ProjectName);
+        Assert.Equal("Family rooftop", listed.ProjectName);
         Assert.Equal("Owner", listed.CustomerName);
     }
 

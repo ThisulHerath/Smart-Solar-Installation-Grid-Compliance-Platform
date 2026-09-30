@@ -20,6 +20,7 @@ const mockSurveys: Survey[] = [
   {
     id: 'survey-101',
     customerId: 'cust-1',
+    projectName: 'Colombo Home Solar',
     monthlyKwh: 1200,
     roofAreaSqm: 80,
     gridType: 'SinglePhase',

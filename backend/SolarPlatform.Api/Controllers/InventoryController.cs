@@ -50,8 +50,60 @@ public class InventoryController(AppDbContext db, InventoryService service) : Co
         var supplier = new Supplier { Name = dto.Name.Trim(), ContactEmail = dto.ContactEmail, Phone = dto.Phone }; db.Add(supplier); await db.SaveChangesAsync(ct); return Ok(supplier);
     }
     [HttpGet("proposals"), Authorize(Roles = Readers)]
-    public async Task<IActionResult> Proposals(CancellationToken ct) => Ok(await db.EngineeringProposals.AsNoTracking().Where(x => x.ProposalStatus == ProposalStatus.Approved)
-        .Select(x => new { x.Id, x.RecommendedKw, x.CreatedAt }).OrderByDescending(x => x.CreatedAt).ToListAsync(ct));
+    public async Task<IActionResult> Proposals(CancellationToken ct) => Ok(await db.EngineeringProposals.AsNoTracking()
+        .Where(x => x.ProposalStatus == ProposalStatus.Approved)
+        .Select(x => new
+        {
+            x.Id,
+            x.SolarSurveyId,
+            x.SolarSurvey.ProjectName,
+            x.SolarSurvey.Customer.FullName,
+            x.SolarSurvey.PropertyAddress,
+            x.RecommendedKw,
+            x.CreatedAt,
+            InventoryRequestStatus = db.Set<InventoryReservation>().Any(r => r.EngineeringProposalId == x.Id && r.Status == ReservationStatus.RESERVED)
+                ? "RESERVED"
+                : x.LifecycleEvents.Any(e => e.Event == ProposalLifecycleEvent.PRICING_REQUESTED) ? "REQUESTED" : "NOT_REQUESTED",
+            InventoryRequestedAt = x.LifecycleEvents.Where(e => e.Event == ProposalLifecycleEvent.PRICING_REQUESTED)
+                .Select(e => (DateTime?)e.Timestamp).Max()
+        })
+        .OrderByDescending(x => x.InventoryRequestedAt)
+        .ThenBy(x => x.FullName)
+        .ThenByDescending(x => x.CreatedAt)
+        .ToListAsync(ct));
+
+    [HttpPost("proposals/{id:guid}/request"), Authorize(Roles = "SENIOR_ENGINEER,ADMINISTRATOR")]
+    public async Task<IActionResult> RequestInventory(Guid id, CancellationToken ct)
+    {
+        var proposal = await db.EngineeringProposals.Include(x => x.LifecycleEvents)
+            .SingleOrDefaultAsync(x => x.Id == id, ct);
+        if (proposal == null) return NotFound(new { message = "Proposal not found." });
+        if (proposal.ProposalStatus != ProposalStatus.Approved)
+            return Conflict(new { message = "Approve the proposal before requesting equipment." });
+        if (await db.Set<InventoryReservation>().AnyAsync(x => x.EngineeringProposalId == id && x.Status == ReservationStatus.RESERVED, ct))
+            return Conflict(new { message = "Equipment is already reserved for this proposal." });
+
+        var existing = proposal.LifecycleEvents
+            .Where(x => x.Event == ProposalLifecycleEvent.PRICING_REQUESTED)
+            .OrderByDescending(x => x.Timestamp)
+            .FirstOrDefault();
+        if (existing != null)
+            return Ok(new { status = "REQUESTED", requestedAt = existing.Timestamp, alreadyRequested = true });
+
+        var requestedAt = DateTime.UtcNow;
+        var requestedBy = await db.Users.AsNoTracking().Where(x => x.Id == Actor).Select(x => x.FullName).SingleOrDefaultAsync(ct)
+            ?? "Senior Engineer";
+        db.ProposalLifecycleAuditEvents.Add(new ProposalLifecycleAuditEvent
+        {
+            EngineeringProposalId = proposal.Id,
+            WorkflowId = proposal.WorkflowId,
+            Event = ProposalLifecycleEvent.PRICING_REQUESTED,
+            Details = $"Inventory preparation requested by {requestedBy}.",
+            Timestamp = requestedAt
+        });
+        await db.SaveChangesAsync(ct);
+        return Ok(new { status = "REQUESTED", requestedAt, alreadyRequested = false });
+    }
     [HttpPost("proposals/{id:guid}/price"), Authorize(Roles = Writers)]
     public async Task<IActionResult> Price(Guid id, CancellationToken ct) => Ok(QuoteView(await service.PriceAsync(id, ct)));
     [HttpGet("proposals/{id:guid}/equipment")]

@@ -47,7 +47,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     }
     final destination = job.latitude != null && job.longitude != null
         ? '${job.latitude},${job.longitude}'
-        : job.propertyAddress;
+        : job.projectName;
     final uri = Uri.https('www.google.com', '/maps/dir/', {
       'api': '1',
       'origin': '${origin.latitude},${origin.longitude}',
@@ -127,6 +127,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   String _roofOrientation = 'Unknown';
   String _gridType = 'SinglePhase';
   bool _inverterLocationSuitable = true;
+
+  bool get _inspectionLocked =>
+      _job?.status.toLowerCase() == 'compliancecomplete';
 
   String _draftNumber(double? value) {
     if (value == null) return '';
@@ -310,6 +313,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _handleUploadPhoto(String photoType) async {
+    if (_inspectionLocked) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'This inspection is locked because compliance is complete.')));
+      return;
+    }
     try {
       final source = await showModalBottomSheet<ImageSource>(
           context: context,
@@ -501,7 +510,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
           child: LayoutBuilder(builder: (context, constraints) {
             final compact = constraints.maxWidth < 360;
             final saveButton = OutlinedButton.icon(
-              onPressed: _saving ? null : _handleSaveInspection,
+              onPressed:
+                  _saving || _inspectionLocked ? null : _handleSaveInspection,
               style: OutlinedButton.styleFrom(
                 backgroundColor: SolarColors.surfaceSoft,
                 foregroundColor: SolarColors.primary,
@@ -573,6 +583,29 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                         ),
                       ]),
                     ),
+                  ),
+                ],
+                if (_inspectionLocked) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF4F6),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFF9FC4CC)),
+                    ),
+                    child: const Row(children: [
+                      Icon(Icons.lock_outline,
+                          size: 18, color: SolarColors.info),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Inspection locked. Compliance can only run after you press Submit for compliance.',
+                          style:
+                              TextStyle(color: SolarColors.info, fontSize: 12),
+                        ),
+                      ),
+                    ]),
                   ),
                 ],
               ],
@@ -851,7 +884,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                             if (!_gpsCheckInRecorded) ...[
                               const SizedBox(height: 12),
                               ElevatedButton.icon(
-                                onPressed: _saving ? null : _handleGpsCheckIn,
+                                onPressed: _saving || _inspectionLocked
+                                    ? null
+                                    : _handleGpsCheckIn,
                                 icon: const Icon(Icons.location_on, size: 16),
                                 label: const Text('Record GPS Check-in'),
                                 style: ElevatedButton.styleFrom(
@@ -883,6 +918,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                             const SizedBox(height: 12),
                             SolarField(
                               controller: _roofAreaController,
+                              enabled: !_inspectionLocked,
                               inputFormatters: [solarDecimalFormatter],
                               validator: (v) => Validators.number(v,
                                   min: 0.01, max: 100000, optional: true),
@@ -897,6 +933,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                             const SizedBox(height: 10),
                             SolarField(
                               controller: _roofTiltController,
+                              enabled: !_inspectionLocked,
                               inputFormatters: [solarDecimalFormatter],
                               validator: (v) => Validators.number(v,
                                   min: 0, max: 90, optional: true),
@@ -911,6 +948,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                             const SizedBox(height: 10),
                             SolarField(
                               controller: _mainBreakerController,
+                              enabled: !_inspectionLocked,
                               inputFormatters: [solarDecimalFormatter],
                               validator: (v) => Validators.number(v,
                                   min: 0.01, max: 100000, optional: true),
@@ -935,11 +973,13 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                       value: 'ThreePhase',
                                       child: Text('Three phase'))
                                 ],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _gridType = value);
-                                  }
-                                }),
+                                onChanged: _inspectionLocked
+                                    ? null
+                                    : (value) {
+                                        if (value != null) {
+                                          setState(() => _gridType = value);
+                                        }
+                                      }),
                             const SizedBox(height: 12),
                             DropdownButtonFormField<String>(
                                 initialValue: _roofOrientation,
@@ -959,11 +999,14 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                     .map((value) => DropdownMenuItem(
                                         value: value, child: Text(value)))
                                     .toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _roofOrientation = value);
-                                  }
-                                }),
+                                onChanged: _inspectionLocked
+                                    ? null
+                                    : (value) {
+                                        if (value != null) {
+                                          setState(
+                                              () => _roofOrientation = value);
+                                        }
+                                      }),
                             Material(
                               color: Colors.transparent,
                               child: SwitchListTile(
@@ -977,8 +1020,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                         fontSize: 12)),
                                 value: _inverterLocationSuitable,
                                 activeThumbColor: SolarColors.primary,
-                                onChanged: (val) => setState(
-                                    () => _inverterLocationSuitable = val),
+                                onChanged: _inspectionLocked
+                                    ? null
+                                    : (val) => setState(
+                                        () => _inverterLocationSuitable = val),
                               ),
                             ),
                           ],
@@ -1008,6 +1053,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                 Expanded(
                                   child: SolarField(
                                     controller: _voltageController,
+                                    enabled: !_inspectionLocked,
                                     inputFormatters: [solarDecimalFormatter],
                                     validator: (v) => Validators.number(v,
                                         min: 0.01, max: 100000, optional: true),
@@ -1025,6 +1071,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                 Expanded(
                                   child: SolarField(
                                     controller: _frequencyController,
+                                    enabled: !_inspectionLocked,
                                     inputFormatters: [solarDecimalFormatter],
                                     validator: (v) => Validators.number(v,
                                         min: 0.01, max: 100000, optional: true),
@@ -1046,6 +1093,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                 Expanded(
                                   child: SolarField(
                                     controller: _vocController,
+                                    enabled: !_inspectionLocked,
                                     inputFormatters: [solarDecimalFormatter],
                                     validator: (v) => Validators.number(v,
                                         min: 0.01, max: 100000, optional: true),
@@ -1063,6 +1111,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                 Expanded(
                                   child: SolarField(
                                     controller: _iscController,
+                                    enabled: !_inspectionLocked,
                                     inputFormatters: [solarDecimalFormatter],
                                     validator: (v) => Validators.number(v,
                                         min: 0.01, max: 100000, optional: true),
@@ -1142,7 +1191,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                               ].map((type) {
                                 final uploaded = _hasPhoto(type);
                                 return OutlinedButton.icon(
-                                  onPressed: _saving
+                                  onPressed: _saving || _inspectionLocked
                                       ? null
                                       : () => _handleUploadPhoto(type),
                                   icon: Icon(
@@ -1294,7 +1343,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                                 top: 4,
                                                 right: 4,
                                                 child: InkWell(
-                                                  onTap: _saving
+                                                  onTap: _saving ||
+                                                          _inspectionLocked
                                                       ? null
                                                       : () =>
                                                           _handleUploadPhoto(
@@ -1318,7 +1368,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                             ],
                                           )
                                         : InkWell(
-                                            onTap: _saving
+                                            onTap: _saving || _inspectionLocked
                                                 ? null
                                                 : () =>
                                                     _handleUploadPhoto(type),

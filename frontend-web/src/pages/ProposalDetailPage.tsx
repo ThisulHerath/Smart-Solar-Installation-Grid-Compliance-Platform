@@ -232,7 +232,8 @@ export const ProposalDetailPage: React.FC = () => {
           <button onClick={() => navigate('/proposals')} className="btn btn-ghost" style={{ marginBottom: '8px' }}>
             ← Back to Proposals
           </button>
-          <h1 className="page-title">Engineering Proposal</h1>
+          <h1 className="page-title">{proposal.projectName || 'Engineering Proposal'}</h1>
+          <p className="page-subtitle">Engineering proposal</p>
           <div className="page-subtitle" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
             <RecordReference label="Proposal reference" value={proposal.id} /><RecordReference label="Survey reference" value={proposal.solarSurveyId} />
           </div>
@@ -266,6 +267,7 @@ export const ProposalDetailPage: React.FC = () => {
         {/* Customer / Site Summary */}
         <div className="detail-card">
           <h2 className="detail-card__title">📍 Customer & Site</h2>
+          <div className="detail-row"><span>Project</span><strong>{proposal.projectName || 'Solar project'}</strong></div>
           <div className="detail-row"><span>Customer</span><strong>{proposal.customerName || '—'}</strong></div>
           <div className="detail-row"><span>Property</span><strong>{proposal.propertyAddress || '—'}</strong></div>
 

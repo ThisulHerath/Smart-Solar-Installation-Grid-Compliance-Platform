@@ -60,7 +60,9 @@ public class InventoryPostgresTests
             var result = new PricingResult("VALIDATED", 300, DateTime.UtcNow, "USD", "LKR", 1620000, lines, new());
             var q1 = new EquipmentQuote { EngineeringProposalId = p1.Id, Status = "VALIDATED", ResultJson = JsonSerializer.Serialize(result) };
             var q2 = new EquipmentQuote { EngineeringProposalId = p2.Id, Status = "VALIDATED", ResultJson = JsonSerializer.Serialize(result) };
-            await using (var db = new AppDbContext(options)) { db.AddRange(profile, survey, p1, p2, panel, inverter, q1, q2); await db.SaveChangesAsync(); }
+            var r1 = new ProposalLifecycleAuditEvent { EngineeringProposalId = p1.Id, Event = ProposalLifecycleEvent.PRICING_REQUESTED };
+            var r2 = new ProposalLifecycleAuditEvent { EngineeringProposalId = p2.Id, Event = ProposalLifecycleEvent.PRICING_REQUESTED };
+            await using (var db = new AppDbContext(options)) { db.AddRange(profile, survey, p1, p2, panel, inverter, q1, q2, r1, r2); await db.SaveChangesAsync(); }
             async Task<bool> Reserve(Guid id)
             {
                 await using var db = new AppDbContext(options);
