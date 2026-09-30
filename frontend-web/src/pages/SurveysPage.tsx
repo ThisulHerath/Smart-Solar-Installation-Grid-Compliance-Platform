@@ -177,8 +177,9 @@ export const SurveysPage: React.FC = () => {
                   }}
                 >
                   <div style={{ fontWeight: 600, fontSize: '0.92rem', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {s.propertyAddress || 'Unnamed Property'}
+                    {s.projectName || s.propertyAddress || 'Unnamed project'}
                   </div>
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{s.propertyAddress}</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                     {s.monthlyKwh} kWh/mo &bull; {s.roofAreaSqm} m² &bull; {s.gridType}
                   </div>
@@ -200,7 +201,8 @@ export const SurveysPage: React.FC = () => {
               <div className="glass-panel staff-survey-detail-card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
-                    <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{selectedSurvey.propertyAddress}</h2>
+                    <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{selectedSurvey.projectName || selectedSurvey.propertyAddress}</h2>
+                    <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{selectedSurvey.propertyAddress}</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                       Survey ID: {selectedSurvey.id} &bull; Customer ID: {selectedSurvey.customerId}
                     </div>

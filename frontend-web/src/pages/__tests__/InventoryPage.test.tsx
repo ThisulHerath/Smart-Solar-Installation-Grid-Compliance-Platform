@@ -76,11 +76,27 @@ describe('Inventory workflows', () => {
     expect(trigger).toHaveFocus();
   });
   it('displays a failed quote and offers no reservation', async () => {
-    request.mockImplementation(async path => path.startsWith('?') ? { items: [], total: 0 } : path === '/proposals' ? [{ id: 'approved', recommendedKw: 5 }] : path.includes('/equipment') ? [{ id: 'q', status: 'FAILED', error: 'Exchange service unavailable', createdAt: new Date().toISOString() }] : []);
+    request.mockImplementation(async path => path.startsWith('?') ? { items: [], total: 0 } : path === '/proposals' ? [{ id: 'approved', solarSurveyId: 'survey', projectName: 'Colombo Home Solar', fullName: 'Sample Homeowner', propertyAddress: 'Colombo', recommendedKw: 5, inventoryRequestStatus: 'REQUESTED', inventoryRequestedAt: new Date().toISOString() }] : path.includes('/equipment') ? [{ id: 'q', status: 'FAILED', error: 'Exchange service unavailable', createdAt: new Date().toISOString() }] : []);
     render(<InventoryPage />);
-    await screen.findByRole('option', { name: 'approved · 5 kW' });
+    await screen.findByRole('option', { name: 'Colombo Home Solar · Sample Homeowner · 5 kW · approved' });
     fireEvent.change(screen.getByLabelText('Approved proposal'), { target: { value: 'approved' } });
     expect(await screen.findByText('Exchange service unavailable')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Reserve this equipment' })).not.toBeInTheDocument();
+  });
+
+  it('shows the customer context and lets an engineer request inventory preparation', async () => {
+    vi.mocked(useAuth).mockReturnValue({ user: { roles: ['SENIOR_ENGINEER'] } } as ReturnType<typeof useAuth>);
+    const proposal = { id: 'proposal-12345678', solarSurveyId: 'survey', projectName: 'Malabe Family Solar', fullName: 'Nimali Perera', propertyAddress: 'Malabe rooftop', recommendedKw: 5, inventoryRequestStatus: 'NOT_REQUESTED', inventoryRequestedAt: null };
+    request.mockImplementation(async path => path.startsWith('?') ? { items: [], total: 0 } : path === '/proposals' ? [proposal] : []);
+    render(<InventoryPage />);
+    await screen.findByRole('option', { name: 'Malabe Family Solar · Nimali Perera · 5 kW · proposal' });
+    fireEvent.change(screen.getByLabelText('Approved proposal'), { target: { value: proposal.id } });
+    expect(screen.getByLabelText('Selected customer and proposal')).toHaveTextContent('Nimali Perera');
+    expect(screen.getByLabelText('Selected customer and proposal')).toHaveTextContent('Malabe rooftop');
+    const requestButton = screen.getByRole('button', { name: 'Request inventory preparation' });
+    await waitFor(() => expect(requestButton).toBeEnabled());
+    fireEvent.click(requestButton);
+    await waitFor(() => expect(request).toHaveBeenCalledWith(`/proposals/${proposal.id}/request`, 'POST'));
+    expect(screen.queryByRole('button', { name: 'Calculate equipment price' })).not.toBeInTheDocument();
   });
 });

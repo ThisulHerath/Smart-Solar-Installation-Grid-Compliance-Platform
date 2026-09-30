@@ -166,6 +166,10 @@ public class FieldJobService : IFieldJobService
 
         if (job == null) return null;
 
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "This inspection is locked because grid compliance is complete.");
+
         var inspection = job.Inspection;
         if (inspection == null)
         {
@@ -206,6 +210,10 @@ public class FieldJobService : IFieldJobService
 
         if (job == null) return null;
 
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "This inspection is locked because grid compliance is complete.");
+
         var inspection = job.Inspection;
         if (inspection == null)
         {
@@ -239,6 +247,10 @@ public class FieldJobService : IFieldJobService
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
+
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "Readings cannot be changed after grid compliance is complete.");
 
         var inspection = job.Inspection;
         if (inspection == null)
@@ -281,6 +293,10 @@ public class FieldJobService : IFieldJobService
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
+
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "Photos cannot be changed after grid compliance is complete.");
 
         var inspection = job.Inspection;
         if (inspection == null)
@@ -523,6 +539,7 @@ public class FieldJobService : IFieldJobService
             j.Technician?.FullName ?? "Unassigned",
             j.SolarSurvey?.Customer?.FullName ?? "Unknown Customer",
             j.SolarSurvey?.Customer?.PhoneNumber ?? string.Empty,
+            j.SolarSurvey?.ProjectName ?? "Solar project",
             j.SolarSurvey?.PropertyAddress ?? string.Empty,
             j.SolarSurvey?.MonthlyKwh ?? 0,
             j.SolarSurvey?.RoofAreaSqm ?? 0,

@@ -9,6 +9,7 @@ public class SolarSurvey
     public GridType GridType { get; set; }
     public RoofOrientation RoofOrientation { get; set; } = RoofOrientation.Unknown;
     public decimal? RoofTilt { get; set; }
+    public string ProjectName { get; set; } = "Solar project";
     public string PropertyAddress { get; set; } = string.Empty;
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }

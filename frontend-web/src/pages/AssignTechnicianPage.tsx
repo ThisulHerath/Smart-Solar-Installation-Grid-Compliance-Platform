@@ -26,6 +26,7 @@ export function AssignTechnicianPage() {
           <div>
             <p className="eyebrow">ASSIGNMENT CREATED</p>
             <h2>{assignedJob.technicianName} is assigned</h2>
+            <h3>{assignedJob.projectName || 'Solar project'}</h3>
             <p className="assignment-success__address"><MapPin size={17} /> {assignedJob.propertyAddress}</p>
             <p className="assignment-success__location">
               <CheckCircle2 size={16} />

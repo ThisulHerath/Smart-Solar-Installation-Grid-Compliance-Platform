@@ -20,6 +20,7 @@ class SurveyScreen extends StatefulWidget {
 
 class _SurveyScreenState extends State<SurveyScreen> {
   final _form = GlobalKey<FormState>();
+  final _projectNameController = TextEditingController();
   final _usageController = TextEditingController();
   final _roofController = TextEditingController();
   final _addressController = TextEditingController();
@@ -46,6 +47,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   @override
   void dispose() {
     _pollTimer?.cancel();
+    _projectNameController.dispose();
     _usageController.dispose();
     _roofController.dispose();
     _addressController.dispose();
@@ -111,6 +113,12 @@ class _SurveyScreenState extends State<SurveyScreen> {
     final usage = double.tryParse(_usageController.text.trim());
     final roof = double.tryParse(_roofController.text.trim());
     final address = _addressController.text.trim();
+    final projectName = _projectNameController.text.trim();
+
+    if (projectName.length < 3) {
+      setState(() => _error = 'Enter a project name with at least 3 characters.');
+      return;
+    }
 
     if (usage == null || usage <= 0) {
       setState(
@@ -134,6 +142,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     try {
       // Step 1: Create Draft Survey
       final created = await _api.createSurvey(
+        projectName: projectName,
         monthlyKwh: usage,
         roofAreaSqm: roof,
         gridType: _gridType,
@@ -153,6 +162,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
       // Reset Form State
       _attachedImage = null;
+      _projectNameController.clear();
       _usageController.clear();
       _roofController.clear();
       _addressController.clear();
@@ -327,6 +337,25 @@ class _SurveyScreenState extends State<SurveyScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            _fieldLabel('Project name',
+                                'A memorable name for you and the project team'),
+                            SolarField(
+                              controller: _projectNameController,
+                              validator: (value) {
+                                final text = value?.trim() ?? '';
+                                if (text.length < 3) {
+                                  return 'Enter at least 3 characters';
+                                }
+                                return null;
+                              },
+                              maxLength: 120,
+                              textInputAction: TextInputAction.next,
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: _fieldDecoration(
+                                  hint: 'e.g. Perera Home Solar',
+                                  icon: Icons.home_work_outlined),
+                            ),
+                            const SizedBox(height: 17),
                             _fieldLabel('Monthly electricity use',
                                 'Check a recent electricity bill'),
                             SolarField(
@@ -579,7 +608,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 if (!_fetching &&
                     _surveys.isNotEmpty &&
                     !_surveys.any((s) =>
-                        (s.propertyAddress.toLowerCase().contains(_search) ||
+                        (s.projectName.toLowerCase().contains(_search) ||
+                            s.propertyAddress.toLowerCase().contains(_search) ||
                             s.id.toLowerCase().contains(_search)) &&
                         (_statusFilter.isEmpty ||
                             s.surveyStatus == _statusFilter)))
@@ -605,7 +635,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 else
                   ..._surveys
                       .where((survey) =>
-                          (survey.propertyAddress
+                          (survey.projectName.toLowerCase().contains(_search) ||
+                              survey.propertyAddress
                                   .toLowerCase()
                                   .contains(_search) ||
                               survey.id.toLowerCase().contains(_search)) &&
@@ -640,9 +671,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
             children: [
               Expanded(
                 child: Text(
-                  survey.propertyAddress.isNotEmpty
-                      ? survey.propertyAddress
-                      : 'Solar Survey',
+                  survey.projectName,
                   style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
@@ -669,6 +698,10 @@ class _SurveyScreenState extends State<SurveyScreen> {
             ],
           ),
           const SizedBox(height: 8),
+
+          Text(survey.propertyAddress,
+              style: const TextStyle(fontSize: 12, color: SolarColors.muted)),
+          const SizedBox(height: 6),
 
           Text(
             '${survey.monthlyKwh} kWh/mo · ${survey.roofAreaSqm} m² · ${survey.gridType}',

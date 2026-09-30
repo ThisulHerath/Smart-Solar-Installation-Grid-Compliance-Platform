@@ -930,9 +930,7 @@ class _ProjectCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                            survey.propertyAddress.isEmpty
-                                ? 'Solar project'
-                                : survey.propertyAddress,
+                            survey.projectName,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

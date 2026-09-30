@@ -397,7 +397,7 @@ export const FieldJobDetailPage: React.FC = () => {
                   fontSize: '1.4rem',
                 }}
               >
-                Field visit overview
+                {job.projectName || 'Field visit overview'}
               </h1>
 
               {getStatusBadge(job.status)}
@@ -406,6 +406,8 @@ export const FieldJobDetailPage: React.FC = () => {
             <p className="field-job-address">
               {job.propertyAddress}
             </p>
+
+            <p className="field-job-records">{job.customerName}</p>
 
             <p
               className="field-job-records"

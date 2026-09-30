@@ -1,4 +1,4 @@
-import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, MapPinned, Sun, UserRoundPlus } from 'lucide-react';
+import { Boxes, ClipboardCheck, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, MapPinned, PackageCheck, Sun, UserRoundPlus } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 
 type StaffRole = 'SENIOR_ENGINEER' | 'FIELD_TECHNICIAN' | 'INVENTORY_OFFICER';
@@ -30,7 +30,10 @@ const roleSettings: Record<StaffRole, { label: string; className: string; links:
     className: 'role-sidebar--inventory',
     links: [
       { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/inventory', label: 'Inventory', icon: Box },
+      { to: '/inventory', label: 'Inventory overview', icon: Boxes },
+      { to: '/inventory#catalog', label: 'Stock catalogue', icon: ClipboardList },
+      { to: '/inventory#requests', label: 'Engineer requests', icon: ClipboardCheck },
+      { to: '/inventory#reservations', label: 'Reservations', icon: PackageCheck },
     ],
   },
 };
@@ -46,12 +49,25 @@ export function RoleSidebar({ role }: { role: StaffRole }) {
       </Link>
       <p className="role-sidebar-label">{settings.label}</p>
       <nav className="admin-sidebar-nav">
-        {settings.links.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals'} className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}>
-            <Icon size={20} />
-            <span>{label}</span>
-          </NavLink>
-        ))}
+        {settings.links.map(({ to, label, icon: Icon }) => {
+          if (to.startsWith('/inventory')) {
+            const [pathname, hash] = to.split('#');
+            const active = window.location.pathname === pathname && (hash ? window.location.hash === `#${hash}` : !window.location.hash);
+            return (
+              <Link key={to} to={to} className={`admin-sidebar-link${active ? ' active' : ''}`}>
+                <Icon size={20} />
+                <span>{label}</span>
+              </Link>
+            );
+          }
+
+          return (
+            <NavLink key={to} to={to} end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals' || to === '/inventory'} className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}>
+              <Icon size={20} />
+              <span>{label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
     </aside>
   );

@@ -246,6 +246,30 @@ public class FieldJobServiceTests
     }
 
     [Fact]
+    public async Task ComplianceCompleteJob_LocksInspectionEvidenceAndReadings()
+    {
+        var service = CreateService();
+        var job = await service.CreateOrAssignJobAsync(
+            new CreateFieldJobDto(_surveyId, _techId, null));
+        await service.CheckInAsync(job.Id, _techId,
+            new CheckInDto(6.9271m, 79.8612m));
+        await service.SubmitInspectionAsync(job.Id, _techId);
+
+        var draft = new SaveSiteInspectionDto(
+            80, RoofOrientation.South, 15, GridType.SinglePhase,
+            1, 40, true, "Safe", "Complete");
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.SaveInspectionDraftAsync(job.Id, _techId, draft));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.RecordTelemetryAsync(job.Id, _techId,
+                new RecordTelemetryDto(MeasurementType.GridVoltage, 230, "V")));
+        await using var photo = new MemoryStream(new byte[] { 1, 2, 3 });
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UploadPhotoAsync(job.Id, _techId,
+                SitePhotoType.Roof, photo, "roof.jpg"));
+    }
+
+    [Fact]
     public async Task NonCompliantTelemetry_TransitionsJobToFailed()
     {
         _aiMock

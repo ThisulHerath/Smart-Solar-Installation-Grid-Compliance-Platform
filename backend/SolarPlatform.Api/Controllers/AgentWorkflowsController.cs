@@ -69,6 +69,7 @@ public class AgentWorkflowsController : ControllerBase
                 monthly_kwh = survey.MonthlyKwh,
                 roof_area_sqm = survey.RoofAreaSqm,
                 grid_type = survey.GridType.ToString(),
+                project_name = survey.ProjectName,
                 property_address = survey.PropertyAddress,
             },
         }, cancellationToken);
@@ -127,7 +128,8 @@ public class AgentWorkflowsController : ControllerBase
         if (User.IsInRole(RoleConstants.Administrator)) return true;
         if (eventName == "INSPECTION_COMPLETED") return User.IsInRole(RoleConstants.FieldTechnician);
         if (eventName is "ENGINEER_APPROVED" or "ENGINEER_REJECTED" or "REVISION_REQUESTED") return User.IsInRole(RoleConstants.SeniorEngineer);
-        if (eventName is "PRICING_REQUESTED" or "INVENTORY_RESERVED") return User.IsInRole(RoleConstants.InventoryOfficer);
+        if (eventName == "PRICING_REQUESTED") return User.IsInRole(RoleConstants.SeniorEngineer);
+        if (eventName == "INVENTORY_RESERVED") return User.IsInRole(RoleConstants.InventoryOfficer);
         return false;
     }
 

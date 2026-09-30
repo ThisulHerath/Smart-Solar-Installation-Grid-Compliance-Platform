@@ -6,6 +6,20 @@ type PhotoPreview = { url: string; label: string; fileName: string };
 const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
 const categories: Record<string, string> = { Roof: 'Roof', Meter: 'Electricity meter', ElectricalPanel: 'Electrical panel', InverterLocation: 'Inverter location', SafetyIssue: 'Safety concern', Other: 'Other evidence' };
 
+function resolvePhotoUrl(fileUrl: string): URL | undefined {
+  try {
+    const candidate = new URL(fileUrl, base);
+    const apiOrigin = new URL(base).origin;
+    const localUpload = candidate.origin === apiOrigin && candidate.pathname.startsWith('/uploads/');
+    const cloudinaryUpload = candidate.protocol === 'https:'
+      && candidate.hostname === 'res.cloudinary.com'
+      && /^\/[^/]+\/image\/upload\//.test(candidate.pathname);
+    return localUpload || cloudinaryUpload ? candidate : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function InspectionPhotoGallery({ surveyId, jobId }: { surveyId?: string; jobId?: string }) {
   const [photos, setPhotos] = useState<Photo[]>([]), [loading, setLoading] = useState(true), [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0), [unavailable, setUnavailable] = useState<string[]>([]);
@@ -36,8 +50,7 @@ export function InspectionPhotoGallery({ surveyId, jobId }: { surveyId?: string;
     {loading ? <p role="status">Loading site photos…</p> : error ? <p role="alert">{error}</p> : !photos.length ?
       <p className="inspection-gallery__empty">No technician photos have been uploaded for this {jobId ? 'field job' : 'survey'} yet. Ask the technician to upload the site evidence, then refresh.</p> :
       <div className="inspection-gallery__grid">{photos.map(photo => {
-        let url: URL | undefined;
-        try { const candidate = new URL(photo.fileUrl, base); if (candidate.origin === new URL(base).origin && candidate.pathname.startsWith('/uploads/')) url = candidate; } catch { /* Invalid stored URLs are shown as unavailable. */ }
+        const url = resolvePhotoUrl(photo.fileUrl);
         const label = categories[photo.photoType] || 'Site evidence';
         return <figure key={photo.id} className="inspection-gallery__photo">
           {url && !unavailable.includes(photo.id) ? <button type="button" className="inspection-gallery__thumbnail" onClick={() => setPreview({ url: url.href, label, fileName: photo.fileName })} aria-label={`View ${label.toLowerCase()} photo in full size`}>

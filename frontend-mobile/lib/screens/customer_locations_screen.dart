@@ -96,7 +96,7 @@ class _CustomerLocationsScreenState extends State<CustomerLocationsScreen> {
             const SizedBox(height: 5),
             Align(
                 alignment: Alignment.centerLeft,
-                child: Text(survey.propertyAddress,
+                child: Text(survey.projectName,
                     style: const TextStyle(color: SolarColors.muted))),
             const SizedBox(height: 10),
             RecordReference(label: 'Survey ID', value: survey.id),
@@ -166,7 +166,7 @@ class _CustomerLocationsScreenState extends State<CustomerLocationsScreen> {
                                     child: Semantics(
                                       button: true,
                                       label:
-                                          '${survey.customerName ?? 'Customer'} at ${survey.propertyAddress}',
+                                          '${survey.projectName} · ${survey.customerName ?? 'Customer'} at ${survey.propertyAddress}',
                                       child: GestureDetector(
                                         onTap: () => _showSurvey(survey),
                                         child: const Icon(Icons.location_pin,

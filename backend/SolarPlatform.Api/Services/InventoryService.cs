@@ -61,6 +61,8 @@ public class InventoryService(AppDbContext db, IEquipmentPricingClient pricing)
     {
         var proposal = await db.EngineeringProposals.SingleOrDefaultAsync(x => x.Id == proposalId, ct) ?? throw new KeyNotFoundException("Proposal not found.");
         if (proposal.ProposalStatus != ProposalStatus.Approved) throw new InvalidOperationException("Only approved proposals can be priced.");
+        if (!await db.ProposalLifecycleAuditEvents.AnyAsync(x => x.EngineeringProposalId == proposalId && x.Event == ProposalLifecycleEvent.PRICING_REQUESTED, ct))
+            throw new InvalidOperationException("The engineer must request inventory preparation before equipment can be priced.");
         var quote = new EquipmentQuote { EngineeringProposalId = proposalId };
         db.Add(quote); await db.SaveChangesAsync(ct);
         try
@@ -118,6 +120,8 @@ public class InventoryService(AppDbContext db, IEquipmentPricingClient pricing)
         if (quote.Status == "RESERVED") return; // Safe replay after a lost response.
         if (quote.Status != "VALIDATED" || quote.ExpiresAt <= DateTime.UtcNow || quote.EngineeringProposal.ProposalStatus != ProposalStatus.Approved)
             throw new InvalidOperationException("Quote must be current and validated for an approved proposal.");
+        if (!await db.ProposalLifecycleAuditEvents.AnyAsync(x => x.EngineeringProposalId == quote.EngineeringProposalId && x.Event == ProposalLifecycleEvent.PRICING_REQUESTED, ct))
+            throw new InvalidOperationException("The engineer must request inventory preparation before equipment can be reserved.");
         if (await db.Set<InventoryReservation>().AnyAsync(x => x.EngineeringProposalId == quote.EngineeringProposalId && x.Status == ReservationStatus.RESERVED, ct))
             throw new InvalidOperationException("Proposal already has reserved equipment. Release it before reserving a new quote.");
         var result = JsonSerializer.Deserialize<PricingResult>(quote.ResultJson) ?? throw new InvalidOperationException("Invalid quote.");
@@ -141,6 +145,14 @@ public class InventoryService(AppDbContext db, IEquipmentPricingClient pricing)
             db.Add(reservation); Audit(item.Id, line.Quantity, StockTransactionType.RESERVATION, reservation.Id, actor, "Approved proposal reservation");
         }
         quote.Status = "RESERVED";
+        db.ProposalLifecycleAuditEvents.Add(new ProposalLifecycleAuditEvent
+        {
+            EngineeringProposalId = quote.EngineeringProposalId,
+            WorkflowId = quote.EngineeringProposal.WorkflowId,
+            Event = ProposalLifecycleEvent.INVENTORY_RESERVED,
+            Details = "Inventory officer reserved the validated equipment set.",
+            Timestamp = DateTime.UtcNow
+        });
         await db.SaveChangesAsync(ct); await transaction.CommitAsync(ct);
     }
 

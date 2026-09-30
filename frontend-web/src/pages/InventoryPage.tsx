@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Boxes, ClipboardCheck, PackageCheck, Truck } from 'lucide-react';
 
 import { useInventoryCatalog } from '../hooks/useInventoryCatalog';
 import { SearchBox } from '../components/SearchBox';
@@ -20,6 +21,17 @@ import { EquipmentEstimate } from '../components/EquipmentEstimate';
 import './InventoryPage.css';
 
 type Draft = Partial<InventoryItem>;
+
+type InventoryProposal = {
+  id: string;
+  solarSurveyId: string;
+  projectName: string;
+  fullName: string;
+  propertyAddress: string;
+  recommendedKw: number;
+  inventoryRequestStatus: 'NOT_REQUESTED' | 'REQUESTED' | 'RESERVED';
+  inventoryRequestedAt: string | null;
+};
 
 const empty: Draft = {
   sku: '',
@@ -47,6 +59,9 @@ export function InventoryPage() {
   const canWrite = user?.roles.some((role) =>
     ['ADMINISTRATOR', 'INVENTORY_OFFICER'].includes(role)
   );
+  const canRequestInventory = user?.roles.some((role) =>
+    ['ADMINISTRATOR', 'SENIOR_ENGINEER'].includes(role)
+  );
 
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
@@ -55,15 +70,14 @@ export function InventoryPage() {
   const [page, setPage] = useState(1);
 
   const [busy, setBusy] = useState(false);
+  const [workspaceLoading, setWorkspaceLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
   const [draft, setDraft] = useState<Draft | null>(null);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
-  const [proposals, setProposals] = useState<
-    { id: string; recommendedKw: number }[]
-  >([]);
+  const [proposals, setProposals] = useState<InventoryProposal[]>([]);
   const [proposal, setProposal] = useState('');
   const [quotes, setQuotes] = useState<Quote[]>([]);
 
@@ -84,6 +98,9 @@ export function InventoryPage() {
   const [dialogError, setDialogError] = useState('');
   const [deactivateTarget, setDeactivateTarget] = useState<InventoryItem | null>(null);
   const [deactivateError, setDeactivateError] = useState('');
+  const selectedProposal = proposals.find((item) => item.id === proposal);
+  const readyRequestCount = proposals.filter((item) => item.inventoryRequestStatus === 'REQUESTED').length;
+  const activeReservationCount = reservations.filter((item) => item.status === 'RESERVED').length;
 
   const query = new URLSearchParams({
     search,
@@ -102,6 +119,24 @@ export function InventoryPage() {
   } = useInventoryCatalog(query, revision);
 
   useEffect(() => {
+    let frame = 0;
+    const scrollToSection = () => {
+      if (!window.location.hash) return;
+      frame = window.requestAnimationFrame(() => {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    };
+
+    window.addEventListener('hashchange', scrollToSection);
+    scrollToSection();
+    return () => {
+      window.removeEventListener('hashchange', scrollToSection);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  useEffect(() => {
+    setWorkspaceLoading(true);
     Promise.all([
       request<Supplier[]>('/suppliers'),
       request<typeof proposals>('/proposals'),
@@ -112,7 +147,8 @@ export function InventoryPage() {
         setProposals(p);
         setReservations(r);
       })
-      .catch((e) => setError(e.message));
+      .catch((e) => setError(e.message))
+      .finally(() => setWorkspaceLoading(false));
   }, [revision]);
 
   useEffect(() => {
@@ -199,7 +235,7 @@ export function InventoryPage() {
             EQUIPMENT & PROCUREMENT
           </p>
 
-          <h1>Inventory</h1>
+          <h1>Inventory operations</h1>
 
           <p>
             Manage equipment, review pricing, and reserve
@@ -252,9 +288,51 @@ export function InventoryPage() {
         </p>
       )}
 
+      <section id="overview" className="inventory-overview" aria-labelledby="inventory-overview-title">
+        <div className="inventory-overview-heading">
+          <div>
+            <p className="eyebrow">WORK QUEUE</p>
+            <h2 id="inventory-overview-title">What needs your attention</h2>
+            <p>Start with engineer requests, confirm stock, then reserve the approved equipment.</p>
+          </div>
+          <ol className="inventory-workflow-steps" aria-label="Inventory workflow">
+            <li><span>1</span>Review request</li>
+            <li><span>2</span>Prepare pricing</li>
+            <li><span>3</span>Reserve stock</li>
+          </ol>
+        </div>
+
+        <div className="inventory-overview-grid">
+          <a href="#requests" className={readyRequestCount > 0 ? 'needs-attention' : ''}>
+            <span className="inventory-overview-icon"><ClipboardCheck size={22} /></span>
+            <small>Engineer requests</small>
+            <strong>{workspaceLoading ? '—' : readyRequestCount}</strong>
+            <p>{workspaceLoading ? 'Checking work queue…' : readyRequestCount > 0 ? 'Ready for pricing' : 'No requests waiting'}</p>
+          </a>
+          <a href="#catalog">
+            <span className="inventory-overview-icon"><Boxes size={22} /></span>
+            <small>Equipment records</small>
+            <strong>{loading ? '—' : total}</strong>
+            <p>{loading ? 'Loading catalogue…' : 'Open stock catalogue'}</p>
+          </a>
+          <a href="#reservations">
+            <span className="inventory-overview-icon"><PackageCheck size={22} /></span>
+            <small>Currently reserved lines</small>
+            <strong>{workspaceLoading ? '—' : activeReservationCount}</strong>
+            <p>{workspaceLoading ? 'Checking reservations…' : 'Review allocated stock'}</p>
+          </a>
+          <a href="#catalog">
+            <span className="inventory-overview-icon"><Truck size={22} /></span>
+            <small>Active suppliers</small>
+            <strong>{workspaceLoading ? '—' : suppliers.length}</strong>
+            <p>{workspaceLoading ? 'Loading suppliers…' : 'Maintain supplier records'}</p>
+          </a>
+        </div>
+      </section>
+
       {/* Equipment Catalog */}
 
-      <section className="inventory-panel">
+      <section id="catalog" className="inventory-panel inventory-anchor-section">
         <div className="inventory-section-heading">
           <div>
             <h2>Equipment catalog</h2>
@@ -806,7 +884,7 @@ export function InventoryPage() {
 
       {/* Proposal Equipment & Pricing */}
 
-      <section className="inventory-panel">
+      <section id="requests" className="inventory-panel inventory-anchor-section">
         <div className="inventory-section-heading">
           <div>
             <p className="eyebrow">
@@ -814,12 +892,12 @@ export function InventoryPage() {
             </p>
 
             <h2>
-              Proposal equipment & pricing
+              Engineer equipment requests
             </h2>
 
             <p>
-              Choose an approved solar proposal to
-              prepare an itemized equipment estimate.
+              Engineers request equipment preparation first. Inventory staff
+              then calculate pricing and reserve the approved equipment set.
             </p>
           </div>
         </div>
@@ -844,14 +922,28 @@ export function InventoryPage() {
                   key={p.id}
                   value={p.id}
                 >
-                  {p.id.slice(0, 8)} ·{' '}
-                  {p.recommendedKw} kW
+                  {p.projectName || p.propertyAddress} · {p.fullName} ·{' '}
+                  {p.recommendedKw} kW · {p.id.slice(0, 8)}
                 </option>
               ))}
             </select>
           </label>
 
-          {canWrite && (
+          {canRequestInventory && selectedProposal?.inventoryRequestStatus === 'NOT_REQUESTED' && (
+            <button
+              disabled={busy || quotesLoading}
+              onClick={() =>
+                act(
+                  () => request(`/proposals/${proposal}/request`, 'POST'),
+                  'Inventory request sent. The inventory team can now prepare pricing.'
+                )
+              }
+            >
+              Request inventory preparation
+            </button>
+          )}
+
+          {canWrite && selectedProposal?.inventoryRequestStatus === 'REQUESTED' && (
             <button
               disabled={
                 !proposal ||
@@ -874,6 +966,41 @@ export function InventoryPage() {
           )}
         </div>
 
+        {selectedProposal && (
+          <div className="inventory-project-summary" aria-label="Selected customer and proposal">
+            <div>
+              <span>Project</span>
+              <strong>{selectedProposal.projectName || selectedProposal.propertyAddress}</strong>
+            </div>
+            <div>
+              <span>Customer</span>
+              <strong>{selectedProposal.fullName}</strong>
+            </div>
+            <div>
+              <span>Property</span>
+              <strong>{selectedProposal.propertyAddress}</strong>
+            </div>
+            <div>
+              <span>System</span>
+              <strong>{selectedProposal.recommendedKw} kW</strong>
+            </div>
+            <div>
+              <span>Inventory workflow</span>
+              <strong className={`request-state request-state-${selectedProposal.inventoryRequestStatus.toLowerCase()}`}>
+                {selectedProposal.inventoryRequestStatus === 'NOT_REQUESTED'
+                  ? 'Awaiting engineer request'
+                  : selectedProposal.inventoryRequestStatus === 'REQUESTED'
+                    ? 'Requested · ready for inventory team'
+                    : 'Equipment reserved'}
+              </strong>
+            </div>
+            <div>
+              <span>Proposal reference</span>
+              <code>{selectedProposal.id}</code>
+            </div>
+          </div>
+        )}
+
         {quotesLoading ? (
           <p role="status">
             Loading equipment estimates…
@@ -885,8 +1012,11 @@ export function InventoryPage() {
           </div>
         ) : quotes.length === 0 ? (
           <div className="inventory-empty">
-            No estimate yet. Calculate an equipment
-            price to review the itemized costs.
+            {selectedProposal?.inventoryRequestStatus === 'NOT_REQUESTED'
+              ? canRequestInventory
+                ? 'Send the inventory request to hand this approved proposal to the inventory team.'
+                : 'Waiting for the engineer to request inventory preparation.'
+              : 'The request is ready. Inventory staff can calculate an itemized equipment estimate.'}
           </div>
         ) : (
           quotes.map((quote) => (
@@ -938,7 +1068,7 @@ export function InventoryPage() {
 
       {/* Reservations */}
 
-      <section className="inventory-panel inventory-reservations-panel">
+      <section id="reservations" className="inventory-panel inventory-reservations-panel inventory-anchor-section">
         <div className="inventory-section-heading">
           <div>
             <p className="eyebrow">ALLOCATED EQUIPMENT</p>
@@ -946,7 +1076,7 @@ export function InventoryPage() {
             <p>Track stock that is already committed to approved proposals.</p>
           </div>
           <span className="inventory-count">
-            {reservations.length} active reservations
+            {activeReservationCount} currently reserved · {reservations.length} records
           </span>
         </div>
 

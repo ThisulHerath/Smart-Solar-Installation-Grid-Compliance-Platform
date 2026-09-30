@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -89,5 +90,34 @@ public class InventoryApiTests
         Assert.Equal(HttpStatusCode.NotFound, (await owner.GetAsync($"/api/inventory/proposals/{proposalId}/equipment")).StatusCode);
         using var anonymous = factory.Client();
         Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync($"/api/inventory/proposals/{proposalId}/equipment")).StatusCode);
+    }
+
+    [Fact]
+    public async Task EngineerRequestsNamedCustomerProposalBeforeInventoryTeamProcessesIt()
+    {
+        using var factory = new Factory();
+        Guid proposalId;
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var profile = new CustomerProfile { UserId = Guid.NewGuid(), FullName = "Nimali Perera" };
+            var survey = new SolarSurvey { Customer = profile, PropertyAddress = "Malabe rooftop" };
+            var proposal = new EngineeringProposal { SolarSurvey = survey, ProposalStatus = ProposalStatus.Approved, RecommendedKw = 5 };
+            proposalId = proposal.Id;
+            db.Add(proposal); await db.SaveChangesAsync();
+        }
+
+        using var inventoryOfficer = factory.Client("INVENTORY_OFFICER");
+        Assert.Equal(HttpStatusCode.Forbidden, (await inventoryOfficer.PostAsync($"/api/inventory/proposals/{proposalId}/request", null)).StatusCode);
+
+        using var engineer = factory.Client("SENIOR_ENGINEER");
+        var response = await engineer.PostAsync($"/api/inventory/proposals/{proposalId}/request", null);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        using var document = JsonDocument.Parse(await engineer.GetStringAsync("/api/inventory/proposals"));
+        var option = document.RootElement.EnumerateArray().Single(x => x.GetProperty("id").GetGuid() == proposalId);
+        Assert.Equal("Nimali Perera", option.GetProperty("fullName").GetString());
+        Assert.Equal("Malabe rooftop", option.GetProperty("propertyAddress").GetString());
+        Assert.Equal("REQUESTED", option.GetProperty("inventoryRequestStatus").GetString());
     }
 }

@@ -159,6 +159,8 @@ export const PendingApprovalsPage: React.FC = () => {
                 </div>
 
                 <div className="card__body">
+                  <h2 style={{ margin: '0 0 4px' }}>{p.projectName || 'Solar project'}</h2>
+                  <p style={{ margin: '0 0 18px' }}>{p.customerName || 'Customer'}</p>
                   <div className="spec-grid">
                     <div className="spec-item">
                       <span className="spec-label">

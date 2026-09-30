@@ -24,4 +24,35 @@ describe('Site inspection photos', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Refresh photos' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load site photos');
   });
+
+  it('displays Cloudinary evidence while rejecting unrelated external URLs', async () => {
+    const request = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => [
+        {
+          id: 'cloudinary-photo', fieldJobId: 'job-1', technicianName: 'Site technician',
+          photoType: 'Roof',
+          fileUrl: 'https://res.cloudinary.com/demo-cloud/image/upload/v1/smart-solar/site-photos/roof.png',
+          fileName: 'roof.png', createdAt: '2026-09-30T04:35:00Z'
+        },
+        {
+          id: 'untrusted-photo', fieldJobId: 'job-1', technicianName: 'Site technician',
+          photoType: 'Other', fileUrl: 'https://example.com/not-approved.jpg',
+          fileName: 'not-approved.jpg', createdAt: '2026-09-30T04:36:00Z'
+        }
+      ]
+    });
+    vi.stubGlobal('fetch', request);
+
+    render(<InspectionPhotoGallery jobId="job-1" />);
+
+    const cloudinaryLink = await screen.findByRole('link', {
+      name: /Open roof photo in full size/i
+    });
+    expect(cloudinaryLink).toHaveAttribute(
+      'href',
+      'https://res.cloudinary.com/demo-cloud/image/upload/v1/smart-solar/site-photos/roof.png'
+    );
+    expect(screen.getByText(/Photo unavailable/)).toBeInTheDocument();
+  });
 });

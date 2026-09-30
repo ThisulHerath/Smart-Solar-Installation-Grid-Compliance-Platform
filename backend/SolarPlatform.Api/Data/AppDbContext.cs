@@ -103,6 +103,7 @@ public class AppDbContext : DbContext
             entity.Property(s => s.RoofAreaSqm).HasPrecision(12, 2).IsRequired();
             entity.Property(s => s.Latitude).HasPrecision(9, 6);
             entity.Property(s => s.Longitude).HasPrecision(9, 6);
+            entity.Property(s => s.ProjectName).IsRequired().HasMaxLength(120);
             entity.Property(s => s.PropertyAddress).IsRequired().HasMaxLength(500);
             entity.HasOne(s => s.Customer).WithMany(p => p.Surveys).HasForeignKey(s => s.CustomerId).OnDelete(DeleteBehavior.Cascade);
         });

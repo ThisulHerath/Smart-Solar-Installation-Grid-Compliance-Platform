@@ -119,13 +119,15 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createSurvey(
-      {required double monthlyKwh,
+      {required String projectName,
+      required double monthlyKwh,
       required double roofAreaSqm,
       required String gridType,
       required String propertyAddress,
       double? latitude,
       double? longitude}) async {
     final response = await post('/api/surveys', {
+      'projectName': projectName,
       'monthlyKwh': monthlyKwh,
       'roofAreaSqm': roofAreaSqm,
       'gridType': gridType,

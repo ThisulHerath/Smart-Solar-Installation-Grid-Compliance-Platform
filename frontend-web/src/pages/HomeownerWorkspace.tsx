@@ -69,13 +69,14 @@ export function HomeownerWorkspace() {
   };
   const [projectSearch, setProjectSearch] = useState('');
   const [projectPage, setProjectPage] = useState(1);
-  const filteredSurveys = surveys.filter(survey => (survey.propertyAddress || '').toLowerCase().includes(projectSearch.trim().toLowerCase()));
+  const filteredSurveys = surveys.filter(survey => `${survey.projectName || ''} ${survey.propertyAddress || ''} ${survey.id}`.toLowerCase().includes(projectSearch.trim().toLowerCase()));
   const pageCount = Math.max(1, Math.ceil(filteredSurveys.length / 5));
   const currentPage = Math.min(projectPage, pageCount);
   const pageStart = (currentPage - 1) * 5;
   const visibleSurveys = filteredSurveys.slice(pageStart, pageStart + 5);
 
   const [showForm, setShowForm] = useState(false);
+  const [projectName, setProjectName] = useState('');
   const [address, setAddress] = useState('');
   const [kwh, setKwh] = useState('');
   const [area, setArea] = useState('');
@@ -221,6 +222,7 @@ export function HomeownerWorkspace() {
 
               void act(async () => {
                 await request('surveys', {
+                  projectName,
                   monthlyKwh: Number(kwh),
                   roofAreaSqm: Number(area),
                   gridType: grid,
@@ -231,6 +233,7 @@ export function HomeownerWorkspace() {
                 });
 
                 setShowForm(false);
+                setProjectName('');
                 setAddress('');
                 setKwh('');
                 setArea('');
@@ -248,6 +251,24 @@ export function HomeownerWorkspace() {
             </button>
 
             <h3 id="assessment-modal-title">Tell us about your home</h3>
+
+            <label htmlFor="project-name">
+              Project name
+            </label>
+
+            <input
+              id="project-name"
+              className="input-field"
+              placeholder="e.g. Perera Home Solar"
+              required
+              minLength={3}
+              maxLength={120}
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              disabled={busy}
+            />
+
+            <p className="field-help">Use a memorable name that your engineer and inventory team can recognize.</p>
 
             <label htmlFor="site-address">
               Property address
@@ -364,7 +385,7 @@ export function HomeownerWorkspace() {
         <section className="project-list" aria-label="Your projects">
           <div className="project-list__toolbar">
             <h3>Projects <span>{surveys.length}</span></h3>
-            <label className="project-list__search"><Search size={18} aria-hidden="true" /><input type="search" aria-label="Search projects" placeholder="Search by address" value={projectSearch} onChange={event => { setProjectSearch(event.target.value); setProjectPage(1); }} /></label>
+            <label className="project-list__search"><Search size={18} aria-hidden="true" /><input type="search" aria-label="Search projects" placeholder="Search by project name or address" value={projectSearch} onChange={event => { setProjectSearch(event.target.value); setProjectPage(1); }} /></label>
           </div>
           {!filteredSurveys.length && <p role="status">No projects match your search.</p>}
         <div className="project-list__cards">{visibleSurveys.map((survey) => (
@@ -372,7 +393,7 @@ export function HomeownerWorkspace() {
             className="project-survey-card"
             key={survey.id}
           >
-            <button type="button" className="project-delete" title="Delete project" aria-label={`Delete project ${survey.propertyAddress}`} disabled={busy || survey.surveyStatus === 'Processing'} onClick={() => {
+            <button type="button" className="project-delete" title="Delete project" aria-label={`Delete project ${survey.projectName || survey.propertyAddress}`} disabled={busy || survey.surveyStatus === 'Processing'} onClick={() => {
               setDeleteError('');
               setDeleteTarget(survey);
             }}><Trash2 size={17} /></button>
@@ -384,8 +405,10 @@ export function HomeownerWorkspace() {
             </span>
 
             <h3 style={{ marginTop: 16 }}>
-              {survey.propertyAddress}
+              {survey.projectName || survey.propertyAddress}
             </h3>
+
+            <p className="field-help">{survey.propertyAddress}</p>
 
             <p>
               {survey.monthlyKwh} kWh / month ·{' '}
@@ -480,7 +503,7 @@ export function HomeownerWorkspace() {
       <DestructiveConfirmDialog
         open={Boolean(deleteTarget)}
         title="Delete project?"
-        subject={deleteTarget?.propertyAddress}
+        subject={deleteTarget?.projectName || deleteTarget?.propertyAddress}
         confirmLabel="Delete project"
         pendingLabel="Deleting..."
         pending={busy}

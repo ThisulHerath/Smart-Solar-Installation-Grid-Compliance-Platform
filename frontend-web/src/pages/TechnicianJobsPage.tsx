@@ -12,6 +12,7 @@ import { externalDirectionsUrl } from '../utils/maps';
 
 type TechnicianJob = {
   id: string;
+  projectName: string;
   propertyAddress: string;
   customerName: string;
   status: string;
@@ -126,7 +127,8 @@ export function TechnicianJobsPage() {
             return (
               <article key={job.id}>
                 <span className="technician-job-status">{job.status.replace(/_/g, ' ')}</span>
-                <h2>{job.customerName}</h2>
+                <h2>{job.projectName || job.customerName}</h2>
+                {job.projectName && <p>{job.customerName}</p>}
                 <p><MapPin size={15} />{job.propertyAddress}</p>
                 <span className="technician-job-location-state">
                   <CheckCircle2 size={14} />

@@ -269,12 +269,14 @@ public class ProposalService : IProposalService
 
     public async Task<List<EngineeringProposalSummaryDto>> GetAllAsync(CancellationToken ct = default)
         => await _db.EngineeringProposals
+            .Include(p => p.SolarSurvey).ThenInclude(s => s.Customer)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => ToSummaryDto(p))
             .ToListAsync(ct);
 
     public async Task<List<EngineeringProposalSummaryDto>> GetPendingAsync(CancellationToken ct = default)
         => await _db.EngineeringProposals
+            .Include(p => p.SolarSurvey).ThenInclude(s => s.Customer)
             .Where(p => p.ProposalStatus == ProposalStatus.PendingApproval)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => ToSummaryDto(p))
@@ -284,6 +286,7 @@ public class ProposalService : IProposalService
         Guid surveyId, Guid requestingUserId, bool isStaff, CancellationToken ct = default)
     {
         var query = _db.EngineeringProposals
+            .Include(p => p.SolarSurvey).ThenInclude(s => s.Customer)
             .Where(p => p.SolarSurveyId == surveyId);
 
         if (!isStaff)
@@ -516,7 +519,8 @@ public class ProposalService : IProposalService
     private static EngineeringProposalSummaryDto ToSummaryDto(EngineeringProposal p) => new(
         p.Id, p.SolarSurveyId, p.WorkflowId, p.RecommendedKw, p.PanelCount,
         p.InverterSizeKw, p.EstimatedCostLkr, p.GridComplianceStatus, p.RiskLevel,
-        p.SafetyStatus, p.ProposalStatus.ToString(), p.RequiresApproval, p.CreatedAt, p.UpdatedAt
+        p.SafetyStatus, p.ProposalStatus.ToString(), p.RequiresApproval, p.CreatedAt, p.UpdatedAt,
+        p.SolarSurvey.ProjectName, p.SolarSurvey.Customer.FullName
     );
 
     private static EngineeringProposalDto ToDetailDto(EngineeringProposal p) => new(
@@ -534,6 +538,7 @@ public class ProposalService : IProposalService
             a.Id, a.Event.ToString(), a.Details, a.WorkflowId, a.Timestamp
         )).ToList(),
         p.SolarSurvey?.Customer?.FullName,
+        p.SolarSurvey?.ProjectName,
         p.SolarSurvey?.PropertyAddress
     );
 

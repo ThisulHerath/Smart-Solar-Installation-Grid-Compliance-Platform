@@ -143,7 +143,7 @@ public class SurveyService : ISurveyService
 
     private async Task CompleteAnalysisAsync(SolarSurvey survey, AgentWorkflow workflow)
     {
-        var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, objective = workflow.Objective, customer_id = survey.CustomerId.ToString(), monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
+        var result = await _agenticAi.ExecuteSolarSizingAsync(new { workflow_id = workflow.WorkflowId, objective = workflow.Objective, customer_id = survey.CustomerId.ToString(), project_name = survey.ProjectName, monthly_kwh = survey.MonthlyKwh, roof_area_sqm = survey.RoofAreaSqm, grid_type = survey.GridType.ToString(), property_address = survey.PropertyAddress });
         var completedBySizingAgent =
             string.Equals(result.Status, "completed", StringComparison.OrdinalIgnoreCase) &&
             result.Recommendation.HasValue &&
@@ -172,6 +172,7 @@ public class SurveyService : ISurveyService
             approval_status = result.ApprovalStatus,
             input_data = new
             {
+                project_name = survey.ProjectName,
                 monthly_kwh = survey.MonthlyKwh,
                 roof_area_sqm = survey.RoofAreaSqm,
                 grid_type = survey.GridType.ToString(),
@@ -239,6 +240,7 @@ public class SurveyService : ISurveyService
     }
     private static void ValidateRequest(SurveyRequestDto request)
     {
+        if (string.IsNullOrWhiteSpace(request.ProjectName) || request.ProjectName.Trim().Length < 3) throw new ArgumentException("Project name must contain at least 3 characters.");
         if (request.MonthlyKwh <= 0) throw new ArgumentException("Monthly electricity usage must be greater than zero.");
         if (request.RoofAreaSqm <= 0 || request.RoofAreaSqm > 100000) throw new ArgumentException("Roof area must be within a reasonable positive range.");
         if (request.GridType == GridType.Unknown) throw new ArgumentException("A supported grid type is required.");
@@ -246,11 +248,11 @@ public class SurveyService : ISurveyService
     }
     private static void Apply(SolarSurvey survey, SurveyRequestDto request)
     {
-        survey.MonthlyKwh = request.MonthlyKwh; survey.RoofAreaSqm = request.RoofAreaSqm; survey.GridType = request.GridType;
+        survey.ProjectName = request.ProjectName.Trim(); survey.MonthlyKwh = request.MonthlyKwh; survey.RoofAreaSqm = request.RoofAreaSqm; survey.GridType = request.GridType;
         survey.RoofOrientation = request.RoofOrientation; survey.RoofTilt = request.RoofTilt; survey.PropertyAddress = request.PropertyAddress.Trim();
         survey.Latitude = request.Latitude; survey.Longitude = request.Longitude; survey.Notes = request.Notes?.Trim();
     }
 
     private static ProfileDto ToProfile(CustomerProfile p) => new(p.Id, p.FullName, p.PhoneNumber, p.Address);
-    private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList()) { CustomerName = s.Customer?.FullName };
+    private static SurveyDto ToDto(SolarSurvey s) => new(s.Id, s.CustomerId, s.ProjectName, s.MonthlyKwh, s.RoofAreaSqm, s.GridType, s.RoofOrientation, s.RoofTilt, s.PropertyAddress, s.Latitude, s.Longitude, s.SurveyStatus, s.Notes, s.CreatedAt, s.UpdatedAt, s.Images.Select(i => new SurveyImageDto(i.Id, i.ImageType, i.FileUrl, i.FileName)).ToList(), s.Workflows.Select(w => new WorkflowDto(w.WorkflowId, w.Status, w.ResultJson, w.ValidationJson, w.ErrorMessage, w.StartedAt, w.CompletedAt)).ToList()) { CustomerName = s.Customer?.FullName };
 }
