@@ -119,6 +119,45 @@ public class FieldJobServiceTests
         new(_db, _aiMock.Object, _fileStorageMock.Object, _loggerMock.Object);
 
     [Fact]
+    public async Task CreateJob_NotifiesAssignedTechnician()
+    {
+        var notifications = new NotificationService(_db);
+        var service = new FieldJobService(_db, _aiMock.Object, _fileStorageMock.Object, _loggerMock.Object, notifications);
+
+        var job = await service.CreateOrAssignJobAsync(new CreateFieldJobDto(_surveyId, _techId, null));
+
+        var item = Assert.Single(await notifications.GetForUserAsync(_techId));
+        Assert.Equal("FIELD_JOB_ASSIGNED", item.Type);
+        Assert.Equal(job.Id, item.EntityId);
+        Assert.False(item.IsRead);
+    }
+
+    [Fact]
+    public async Task VisitLifecycle_NotifiesCustomerAtEachImportantStage()
+    {
+        var notifications = new NotificationService(_db);
+        var service = new FieldJobService(
+            _db, _aiMock.Object, _fileStorageMock.Object, _loggerMock.Object, notifications);
+        var scheduledAt = DateTime.UtcNow.AddDays(1);
+
+        var job = await service.CreateOrAssignJobAsync(
+            new CreateFieldJobDto(_surveyId, _techId, scheduledAt));
+        await service.UpdateJobStatusAsync(job.Id, _techId, FieldJobStatus.Accepted);
+        await service.UpdateJobStatusAsync(job.Id, _techId, FieldJobStatus.InProgress);
+        await service.CheckInAsync(job.Id, _techId, new CheckInDto(6.9271m, 79.8612m));
+        await service.CheckInAsync(job.Id, _techId, new CheckInDto(6.9272m, 79.8613m));
+
+        var customerNotifications = await notifications.GetForUserAsync(_customerId);
+        Assert.Contains(customerNotifications, item =>
+            item.Type == "FIELD_VISIT_SCHEDULED" &&
+            item.Message.Contains("Technician One") &&
+            item.Message.Contains("Sri Lanka time"));
+        Assert.Contains(customerNotifications, item => item.Type == "VISIT_CONFIRMED");
+        Assert.Contains(customerNotifications, item => item.Type == "TECHNICIAN_ON_THE_WAY");
+        Assert.Single(customerNotifications.Where(item => item.Type == "TECHNICIAN_ARRIVED"));
+    }
+
+    [Fact]
     public async Task InspectionGallery_ReturnsUploadedPhotoOnlyForMatchingSurveyAndJob()
     {
         var service = CreateService();

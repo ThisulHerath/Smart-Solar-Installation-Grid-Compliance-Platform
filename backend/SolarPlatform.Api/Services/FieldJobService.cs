@@ -13,17 +13,20 @@ public class FieldJobService : IFieldJobService
     private readonly IAgenticAiService _agenticAi;
     private readonly IFileStorageService _fileStorage;
     private readonly ILogger<FieldJobService> _logger;
+    private readonly INotificationService? _notifications;
 
     public FieldJobService(
         AppDbContext db,
         IAgenticAiService agenticAi,
         IFileStorageService fileStorage,
-        ILogger<FieldJobService> logger)
+        ILogger<FieldJobService> logger,
+        INotificationService? notifications = null)
     {
         _db = db;
         _agenticAi = agenticAi;
         _fileStorage = fileStorage;
         _logger = logger;
+        _notifications = notifications;
     }
 
     public async Task<IReadOnlyList<TechnicianOptionDto>> GetAvailableTechniciansAsync() =>
@@ -125,12 +128,25 @@ public class FieldJobService : IFieldJobService
         _db.FieldJobs.Add(job);
         await _db.SaveChangesAsync();
 
+        if (_notifications != null)
+        {
+            await _notifications.NotifyUserAsync(
+                job.TechnicianId,
+                "FIELD_JOB_ASSIGNED",
+                "New site visit assigned",
+                $"You were assigned to {survey.ProjectName} at {survey.PropertyAddress}.",
+                "/technician-jobs",
+                "FieldJob",
+                job.Id);
+            await NotifyCustomerOfAssignmentAsync(survey, job.TechnicianId, job.ScheduledAt);
+        }
+
         return await GetJobByIdAsync(job.Id) ?? throw new InvalidOperationException("Failed to retrieve created job.");
     }
 
     public async Task<FieldJobResponseDto?> AssignJobAsync(Guid jobId, AssignFieldJobDto dto)
     {
-        var job = await _db.FieldJobs.FindAsync(jobId);
+        var job = await _db.FieldJobs.Include(item => item.SolarSurvey).ThenInclude(survey => survey.Customer).FirstOrDefaultAsync(item => item.Id == jobId);
         if (job == null) return null;
 
         await ValidateTechnicianAsync(dto.TechnicianId);
@@ -142,12 +158,27 @@ public class FieldJobService : IFieldJobService
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
+        if (_notifications != null)
+        {
+            await _notifications.NotifyUserAsync(
+                job.TechnicianId,
+                "FIELD_JOB_ASSIGNED",
+                "Site visit assigned to you",
+                $"You were assigned to {job.SolarSurvey.ProjectName} at {job.SolarSurvey.PropertyAddress}.",
+                "/technician-jobs",
+                "FieldJob",
+                job.Id);
+            await NotifyCustomerOfAssignmentAsync(job.SolarSurvey, job.TechnicianId, job.ScheduledAt);
+        }
         return await GetJobByIdAsync(jobId);
     }
 
     public async Task<FieldJobResponseDto?> UpdateJobStatusAsync(Guid jobId, Guid technicianId, FieldJobStatus newStatus)
     {
-        var job = await _db.FieldJobs.FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
+        var job = await _db.FieldJobs
+            .Include(item => item.SolarSurvey).ThenInclude(survey => survey.Customer)
+            .Include(item => item.Technician)
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
         if (job == null) return null;
 
         FieldJobStatusTransition.ValidateTransition(job.Status, newStatus);
@@ -155,6 +186,24 @@ public class FieldJobService : IFieldJobService
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
+        if (_notifications != null && newStatus == FieldJobStatus.Accepted)
+        {
+            await _notifications.NotifyUserAsync(
+                job.SolarSurvey.Customer.UserId,
+                "VISIT_CONFIRMED",
+                "Your technician confirmed the visit",
+                $"{job.Technician.FullName} accepted the visit for {job.SolarSurvey.ProjectName}.",
+                "/dashboard", "SolarSurvey", job.SolarSurveyId);
+        }
+        else if (_notifications != null && newStatus == FieldJobStatus.InProgress)
+        {
+            await _notifications.NotifyUserAsync(
+                job.SolarSurvey.Customer.UserId,
+                "TECHNICIAN_ON_THE_WAY",
+                "Your technician is on the way",
+                $"{job.Technician.FullName} is travelling to {job.SolarSurvey.PropertyAddress} for your solar site visit.",
+                "/dashboard", "SolarSurvey", job.SolarSurveyId);
+        }
         return await GetJobByIdAsync(jobId);
     }
 
@@ -162,6 +211,8 @@ public class FieldJobService : IFieldJobService
     {
         var job = await _db.FieldJobs
             .Include(j => j.Inspection)
+            .Include(j => j.SolarSurvey).ThenInclude(survey => survey.Customer)
+            .Include(j => j.Technician)
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
@@ -171,6 +222,7 @@ public class FieldJobService : IFieldJobService
                 "This inspection is locked because grid compliance is complete.");
 
         var inspection = job.Inspection;
+        var firstCheckIn = inspection?.CheckInAt == null;
         if (inspection == null)
         {
             inspection = new SiteInspection
@@ -199,7 +251,31 @@ public class FieldJobService : IFieldJobService
         }
 
         await _db.SaveChangesAsync();
+        if (_notifications != null && firstCheckIn)
+        {
+            await _notifications.NotifyUserAsync(
+                job.SolarSurvey.Customer.UserId,
+                "TECHNICIAN_ARRIVED",
+                "Your technician has arrived",
+                $"{job.Technician.FullName} checked in at {job.SolarSurvey.PropertyAddress} and is ready to begin the inspection.",
+                "/dashboard", "SolarSurvey", job.SolarSurveyId);
+        }
         return await GetInspectionDtoAsync(inspection.Id);
+    }
+
+    private async Task NotifyCustomerOfAssignmentAsync(SolarSurvey survey, Guid technicianId, DateTime? scheduledAt)
+    {
+        if (_notifications == null) return;
+        var technicianName = await _db.Users.AsNoTracking().Where(user => user.Id == technicianId).Select(user => user.FullName).SingleAsync();
+        var schedule = scheduledAt.HasValue
+            ? $" on {scheduledAt.Value.ToUniversalTime().AddHours(5.5):dddd, dd MMM yyyy 'at' h:mm tt} (Sri Lanka time)"
+            : "; the technician will contact you to confirm the date and time";
+        await _notifications.NotifyUserAsync(
+            survey.Customer.UserId,
+            "FIELD_VISIT_SCHEDULED",
+            "Solar site visit arranged",
+            $"{technicianName} was assigned to visit {survey.PropertyAddress}{schedule}.",
+            "/dashboard", "SolarSurvey", survey.Id);
     }
 
     public async Task<SiteInspectionResponseDto?> SaveInspectionDraftAsync(Guid jobId, Guid technicianId, SaveSiteInspectionDto dto)

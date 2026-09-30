@@ -41,6 +41,23 @@ describe('Technician assignment', () => {
     expect(screen.getByLabelText('Customer survey')).toHaveValue('survey-1');
     expect(done).not.toHaveBeenCalled();
   });
+  it('filters surveys and presents the selected customer site clearly', async () => {
+    vi.mocked(api.getSurveys).mockResolvedValue([
+      { id: 'survey-1', propertyAddress: '12 Lake Road, Malabe', projectName: 'Lake Road solar', customerName: 'Pasan Janadeepa', surveyStatus: 'AnalysisComplete' },
+      { id: 'survey-2', propertyAddress: '44 Hill Street, Kandy', projectName: 'Hill Street solar', customerName: 'Nethsara Silva', surveyStatus: 'Failed' },
+    ] as any);
+    render(<AssignTechnicianForm onAssigned={vi.fn()} onCancel={vi.fn()} />);
+    await screen.findByLabelText('Customer survey');
+    fireEvent.change(screen.getByLabelText('Search customer surveys'), { target: { value: 'Pasan' } });
+    expect(screen.getByRole('option', { name: /12 Lake Road.*Pasan Janadeepa.*Analysis Complete/i })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /44 Hill Street/i })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Customer survey'), { target: { value: 'survey-1' } });
+    const summary = screen.getByRole('article', { name: 'Selected survey details' });
+    expect(summary).toHaveTextContent('12 Lake Road, Malabe');
+    expect(summary).toHaveTextContent('Pasan Janadeepa');
+    expect(summary).toHaveTextContent('SURVEY-1');
+    expect(summary).toHaveTextContent('Analysis Complete');
+  });
   it('explains an empty technician list', async () => {
     vi.mocked(api.getTechnicians).mockResolvedValue([]);
     render(<AssignTechnicianForm onAssigned={vi.fn()} onCancel={vi.fn()} />);

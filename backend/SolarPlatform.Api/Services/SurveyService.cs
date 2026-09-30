@@ -27,7 +27,8 @@ public class SurveyService : ISurveyService
 {
     private readonly AppDbContext _db;
     private readonly IAgenticAiService _agenticAi;
-    public SurveyService(AppDbContext db, IAgenticAiService agenticAi) { _db = db; _agenticAi = agenticAi; }
+    private readonly INotificationService? _notifications;
+    public SurveyService(AppDbContext db, IAgenticAiService agenticAi, INotificationService? notifications = null) { _db = db; _agenticAi = agenticAi; _notifications = notifications; }
 
     public async Task<ProfileDto> GetProfileAsync(Guid userId)
     {
@@ -122,6 +123,17 @@ public class SurveyService : ISurveyService
         _db.AgentWorkflows.Add(workflow);
         SurveyStatusTransition.Move(survey, SurveyStatus.Processing);
         await _db.SaveChangesAsync();
+        if (_notifications != null)
+        {
+            await _notifications.NotifyRoleAsync(
+                RoleConstants.SeniorEngineer,
+                "SURVEY_SUBMITTED",
+                "New customer survey submitted",
+                $"{profile.FullName} submitted {survey.ProjectName} for {survey.PropertyAddress}.",
+                "/surveys",
+                "SolarSurvey",
+                survey.Id);
+        }
         await CompleteAnalysisAsync(survey, workflow);
         return ToDto(survey);
     }

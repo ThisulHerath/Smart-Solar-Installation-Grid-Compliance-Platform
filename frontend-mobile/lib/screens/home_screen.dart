@@ -16,6 +16,7 @@ import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
 import 'welcome_screen.dart';
 import 'customer_locations_screen.dart';
+import 'notifications_screen.dart';
 
 const _bg = SolarColors.background;
 const _panel = SolarColors.surface;
@@ -35,20 +36,37 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
   int _unreadMessages = 0;
-  Timer? _chatTimer;
+  int _unreadNotifications = 0;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _loadUnreadMessages();
-    _chatTimer = Timer.periodic(
-        const Duration(seconds: 12), (_) => _loadUnreadMessages());
+    _loadUnreadNotifications();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _loadUnreadMessages();
+      _loadUnreadNotifications();
+    });
   }
 
   @override
   void dispose() {
-    _chatTimer?.cancel();
+    _refreshTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadUnreadNotifications() async {
+    try {
+      final count = await ApiService().getNotificationUnreadCount();
+      if (mounted) setState(() => _unreadNotifications = count);
+    } catch (_) {}
+  }
+
+  Future<void> _openNotifications() async {
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+    await _loadUnreadNotifications();
   }
 
   Future<void> _loadUnreadMessages() async {
@@ -97,8 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
               sliver: SliverList.list(children: [
                 _Header(
                   name: user.fullName,
-                  unreadMessages: _unreadMessages,
-                  onNotifications: _openMessages,
+                  unreadMessages: _unreadNotifications,
+                  onNotifications: _openNotifications,
                   onProfile: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ProfileScreen())),
                 ),
@@ -929,8 +947,7 @@ class _ProjectCard extends StatelessWidget {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                            survey.projectName,
+                        Text(survey.projectName,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(

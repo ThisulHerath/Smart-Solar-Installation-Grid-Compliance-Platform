@@ -15,5 +15,6 @@ public class User
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public ICollection<UserNotification> Notifications { get; set; } = new List<UserNotification>();
     public CustomerProfile? CustomerProfile { get; set; }
 }

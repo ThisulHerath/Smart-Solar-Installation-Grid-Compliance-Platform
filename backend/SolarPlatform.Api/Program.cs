@@ -113,6 +113,7 @@ builder.Services.AddScoped<IOtpEmailSender, OtpEmailSender>();
 builder.Services.AddScoped<EmailVerificationService>();
 builder.Services.AddHostedService<EmailChallengeCleanup>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 var storageProvider = (Environment.GetEnvironmentVariable("FILE_STORAGE_PROVIDER")
     ?? (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing") ? "local" : "cloudinary"))
     .Trim().ToLowerInvariant();

@@ -1,4 +1,4 @@
-import { AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment, LocationSearchResult } from '../types/auth';
+import { AppNotification, AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment, LocationSearchResult } from '../types/auth';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
 
@@ -55,6 +55,28 @@ class ApiService {
       throw new Error('Failed to fetch user session.');
     }
     return res.json();
+  }
+
+  async getNotifications(limit = 30): Promise<AppNotification[]> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications?limit=${limit}`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to load notifications.');
+    return res.json();
+  }
+
+  async getNotificationUnreadCount(): Promise<number> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to load notification count.');
+    return (await res.json()).count ?? 0;
+  }
+
+  async markNotificationRead(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, { method: 'POST', headers: this.getHeaders() });
+    if (!res.ok && res.status !== 204) throw new Error('Unable to update notification.');
+  }
+
+  async markAllNotificationsRead(): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/read-all`, { method: 'POST', headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to update notifications.');
   }
 
   async uploadProfileImage(file: File): Promise<{ profileImageUrl: string }> {

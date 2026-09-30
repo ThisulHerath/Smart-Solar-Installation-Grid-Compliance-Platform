@@ -1,4 +1,4 @@
-import { CalendarDays, ClipboardList, ShieldCheck, UserRound } from 'lucide-react';
+import { CalendarDays, ClipboardList, MapPin, Search, ShieldCheck, UserRound } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../services/api';
 import { FieldJob, Survey } from '../types/auth';
@@ -18,11 +18,20 @@ function scheduleValidation(date: string, time: string) {
   return '';
 }
 
+function readableStatus(status?: string) {
+  return (status || 'Unknown').replace(/([a-z])([A-Z])/g, '$1 $2');
+}
+
+function surveyTitle(survey: Survey) {
+  return survey.propertyAddress || survey.projectName || 'Unnamed customer site';
+}
+
 export function AssignTechnicianForm({ onAssigned, onCancel }: {
   onAssigned: (job: FieldJob) => void;
   onCancel: () => void;
 }) {
   const [surveys, setSurveys] = useState<Survey[]>([]);
+  const [surveyQuery, setSurveyQuery] = useState('');
   const [technicians, setTechnicians] = useState<TechnicianOption[]>([]);
   const [surveyId, setSurveyId] = useState('');
   const [technicianId, setTechnicianId] = useState('');
@@ -39,6 +48,16 @@ export function AssignTechnicianForm({ onAssigned, onCancel }: {
   const scheduleError = scheduleTouched ? scheduleValidation(visitDate, visitTime) : '';
   const selectedSurvey = surveys.find(survey => survey.id === surveyId);
   const selectedTechnician = technicians.find(technician => technician.id === technicianId);
+  const visibleSurveys = useMemo(() => {
+    const query = surveyQuery.trim().toLocaleLowerCase();
+    return [...surveys]
+      .sort((left, right) => new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime())
+      .filter(survey => {
+        if (!query || survey.id === surveyId) return true;
+        return [survey.propertyAddress, survey.projectName, survey.customerName, survey.id, survey.surveyStatus]
+          .some(value => value?.toLocaleLowerCase().includes(query));
+      });
+  }, [surveyId, surveyQuery, surveys]);
 
   useEffect(() => {
     let active = true;
@@ -110,17 +129,51 @@ export function AssignTechnicianForm({ onAssigned, onCancel }: {
               <span><ClipboardList size={18} /></span>
               <div><h3 id="assignment-project-heading">Customer project</h3><p>Choose the survey that requires a site inspection.</p></div>
             </div>
-            <label>
-              Customer survey <span aria-hidden="true">*</span>
-              <select aria-label="Customer survey" className="input-field" required value={surveyId} disabled={saving} onChange={event => setSurveyId(event.target.value)}>
-                <option value="">Select a customer survey</option>
-                {surveys.map(survey => (
+            <div className="survey-picker">
+              <label className="survey-picker__search">
+                Find a survey
+                <span className="survey-picker__search-field">
+                  <Search size={17} aria-hidden="true" />
+                  <input
+                    aria-label="Search customer surveys"
+                    type="search"
+                    placeholder="Search address, homeowner, project or survey ID"
+                    value={surveyQuery}
+                    disabled={saving || !surveys.length}
+                    onChange={event => setSurveyQuery(event.target.value)}
+                  />
+                </span>
+              </label>
+              <label>
+                Customer survey <span aria-hidden="true">*</span>
+                <select aria-label="Customer survey" className="input-field survey-picker__select" required value={surveyId} disabled={saving || !surveys.length} onChange={event => setSurveyId(event.target.value)}>
+                  <option value="">Choose a customer site ({visibleSurveys.length} available)</option>
+                  {visibleSurveys.map(survey => (
                   <option key={survey.id} value={survey.id}>
-                    {survey.projectName || survey.propertyAddress} · {survey.customerName || 'Customer'} · ID {survey.id.slice(0, 8)} · {survey.surveyStatus}
+                    {surveyTitle(survey)} — {survey.customerName || 'Unknown homeowner'} — {readableStatus(survey.surveyStatus)}
                   </option>
-                ))}
-              </select>
-            </label>
+                  ))}
+                </select>
+              </label>
+              {surveyQuery && !visibleSurveys.length && (
+                <p className="assignment-empty" role="status">No surveys match “{surveyQuery}”. Try an address, homeowner name, or survey ID.</p>
+              )}
+              {selectedSurvey && (
+                <article className="survey-picker__selection" aria-label="Selected survey details">
+                  <div className="survey-picker__selection-icon"><MapPin size={20} aria-hidden="true" /></div>
+                  <div className="survey-picker__selection-main">
+                    <span className="survey-picker__selection-label">Selected customer site</span>
+                    <strong>{surveyTitle(selectedSurvey)}</strong>
+                    {selectedSurvey.projectName && selectedSurvey.projectName !== selectedSurvey.propertyAddress && <small>{selectedSurvey.projectName}</small>}
+                  </div>
+                  <dl>
+                    <div><dt>Homeowner</dt><dd>{selectedSurvey.customerName || 'Not provided'}</dd></div>
+                    <div><dt>Survey ID</dt><dd>{selectedSurvey.id.slice(0, 8).toUpperCase()}</dd></div>
+                    <div><dt>Status</dt><dd><span className={`survey-picker__status survey-picker__status--${selectedSurvey.surveyStatus?.toLocaleLowerCase() || 'unknown'}`}>{readableStatus(selectedSurvey.surveyStatus)}</span></dd></div>
+                  </dl>
+                </article>
+              )}
+            </div>
             {!surveys.length && <p className="assignment-empty">No customer surveys are currently available.</p>}
           </section>
 

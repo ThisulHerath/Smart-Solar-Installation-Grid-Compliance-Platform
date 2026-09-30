@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<ProposalLifecycleAuditEvent> ProposalLifecycleAuditEvents => Set<ProposalLifecycleAuditEvent>();
     public DbSet<SupportConversation> SupportConversations => Set<SupportConversation>();
     public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
+    public DbSet<UserNotification> UserNotifications => Set<UserNotification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +57,18 @@ public class AppDbContext : DbContext
             entity.Property(u => u.ProfileImageUrl).HasMaxLength(1000);
             entity.Property(u => u.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(u => u.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<UserNotification>(entity =>
+        {
+            entity.HasKey(notification => notification.Id);
+            entity.HasIndex(notification => new { notification.UserId, notification.IsRead, notification.CreatedAt });
+            entity.Property(notification => notification.Type).IsRequired().HasMaxLength(50);
+            entity.Property(notification => notification.Title).IsRequired().HasMaxLength(160);
+            entity.Property(notification => notification.Message).IsRequired().HasMaxLength(600);
+            entity.Property(notification => notification.ActionUrl).HasMaxLength(500);
+            entity.Property(notification => notification.EntityType).HasMaxLength(50);
+            entity.HasOne(notification => notification.User).WithMany(user => user.Notifications).HasForeignKey(notification => notification.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // Role Configuration

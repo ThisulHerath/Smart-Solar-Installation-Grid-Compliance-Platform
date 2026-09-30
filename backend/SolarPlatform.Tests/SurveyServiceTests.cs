@@ -25,6 +25,24 @@ public class SurveyServiceTests
     }
 
     private SurveyService Service() => new(_db, _ai.Object);
+    [Fact] public async Task Submit_NotifiesActiveEngineers()
+    {
+        var engineer = new User { Email = "engineer@test.local", FullName = "Solar Engineer", PasswordHash = "x" };
+        var role = new Role { Name = RoleConstants.SeniorEngineer };
+        engineer.UserRoles.Add(new UserRole { User = engineer, Role = role });
+        _db.Users.Add(engineer);
+        await _db.SaveChangesAsync();
+        var notifications = new NotificationService(_db);
+        var service = new SurveyService(_db, _ai.Object, notifications);
+        var survey = await service.CreateAsync(_owner, Request());
+
+        await service.SubmitAsync(_owner, survey.Id);
+
+        var item = Assert.Single(await notifications.GetForUserAsync(engineer.Id));
+        Assert.Equal("SURVEY_SUBMITTED", item.Type);
+        Assert.Equal(survey.Id, item.EntityId);
+        Assert.False(item.IsRead);
+    }
     [Fact] public async Task Delete_RequiresOwnership_AndRemovesProject()
     {
         var survey = await Service().CreateAsync(_owner, Request());

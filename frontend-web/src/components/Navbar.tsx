@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Sun, LogOut, LayoutDashboard, ClipboardList, HardHat, FileText, FileCheck2, Package, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { LogoutConfirmDialog } from './LogoutConfirmDialog';
+import { NotificationBell } from './NotificationBell';
 import '../styles/navigation.css';
 import '../styles/member-home-nav.css';
 
@@ -41,7 +42,7 @@ export const Navbar = () => {
             <b>solar</b>
         </Link>
         <nav aria-label="Main navigation"><Link className={activeNav === 'home' ? 'is-active' : ''} to="/">Home</Link><Link className={activeNav === 'services' ? 'is-active' : ''} to="/#services">Services</Link><Link className={activeNav === 'process' ? 'is-active' : ''} to="/#process">How it works</Link><Link className={activeNav === 'projects' ? 'is-active' : ''} to="/dashboard">{user ? 'Dashboard' : 'Projects'}</Link></nav>
-        {user ? <div className="member-home-account"><Link to="/profile" className={`member-home-user${profileRoute ? ' is-active' : ''}`} aria-current={profileRoute ? 'page' : undefined} aria-label="Open my profile"><span className="member-home-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : initials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button type="button" onClick={() => setShowLogoutConfirm(true)}><LogOut size={17} /> Logout</button></div> : <Link className="member-home-login" to="/login">Login</Link>}
+        {user ? <div className="member-home-account"><NotificationBell /><Link to="/profile" className={`member-home-user${profileRoute ? ' is-active' : ''}`} aria-current={profileRoute ? 'page' : undefined} aria-label="Open my profile"><span className="member-home-avatar">{profilePhoto ? <img src={profilePhoto} alt="" /> : initials}</span><span><strong>{user.fullName}</strong><small>{userRole}</small></span></Link><button className="member-home-logout" type="button" onClick={() => setShowLogoutConfirm(true)}><LogOut size={17} /> Logout</button></div> : <Link className="member-home-login" to="/login">Login</Link>}
       </header>
 
       {user && false && <>

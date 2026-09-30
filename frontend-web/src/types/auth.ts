@@ -24,6 +24,19 @@ export interface HealthResponse {
   details: Record<string, string>;
 }
 
+export interface AppNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  actionUrl?: string;
+  entityType?: string;
+  entityId?: string;
+  isRead: boolean;
+  readAt?: string;
+  createdAt: string;
+}
+
 export interface WorkflowResult {
   workflow_id: string;
   customer_id?: string;

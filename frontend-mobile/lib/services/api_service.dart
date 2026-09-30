@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 import '../models/proposal.dart';
 import '../models/chat.dart';
+import '../models/app_notification.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -116,6 +117,29 @@ class ApiService {
     final response =
         Map<String, dynamic>.from(await get('/api/chat/unread-count'));
     return (response['count'] as num?)?.toInt() ?? 0;
+  }
+
+  Future<List<AppNotification>> getNotifications() async {
+    final response =
+        List<dynamic>.from(await get('/api/notifications?limit=50'));
+    return response
+        .map((item) =>
+            AppNotification.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  Future<int> getNotificationUnreadCount() async {
+    final response =
+        Map<String, dynamic>.from(await get('/api/notifications/unread-count'));
+    return (response['count'] as num?)?.toInt() ?? 0;
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await post('/api/notifications/$id/read', {});
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await post('/api/notifications/read-all', {});
   }
 
   Future<Map<String, dynamic>> createSurvey(
