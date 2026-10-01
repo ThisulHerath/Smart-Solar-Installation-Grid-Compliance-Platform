@@ -6,6 +6,9 @@ class SolarSurvey {
   final double roofAreaSqm;
   final String gridType;
   final String propertyAddress;
+  final String? customerName;
+  final double? latitude;
+  final double? longitude;
   final String surveyStatus;
   final List<dynamic> workflows;
 
@@ -15,6 +18,9 @@ class SolarSurvey {
     required this.roofAreaSqm,
     required this.gridType,
     required this.propertyAddress,
+    this.customerName,
+    this.latitude,
+    this.longitude,
     required this.surveyStatus,
     required this.workflows,
   });
@@ -25,6 +31,9 @@ class SolarSurvey {
         roofAreaSqm: (json['roofAreaSqm'] as num?)?.toDouble() ?? 0.0,
         gridType: json['gridType']?.toString() ?? 'SinglePhase',
         propertyAddress: json['propertyAddress']?.toString() ?? '',
+        customerName: json['customerName']?.toString(),
+        latitude: (json['latitude'] as num?)?.toDouble(),
+        longitude: (json['longitude'] as num?)?.toDouble(),
         surveyStatus: json['surveyStatus']?.toString() ?? 'Draft',
         workflows: json['workflows'] ?? [],
       );
@@ -32,7 +41,9 @@ class SolarSurvey {
   Map<String, dynamic>? get latestWorkflow {
     if (workflows.isEmpty) return null;
     final item = workflows.last;
-    return item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item as Map);
+    return item is Map<String, dynamic>
+        ? item
+        : Map<String, dynamic>.from(item as Map);
   }
 
   Map<String, dynamic>? get parsedResult {
@@ -85,7 +96,9 @@ class SolarSurvey {
 
   String? get errorMessage {
     final wf = latestWorkflow;
-    if (wf != null && wf['errorMessage'] != null && wf['errorMessage'].toString().isNotEmpty) {
+    if (wf != null &&
+        wf['errorMessage'] != null &&
+        wf['errorMessage'].toString().isNotEmpty) {
       return wf['errorMessage'].toString();
     }
     return null;

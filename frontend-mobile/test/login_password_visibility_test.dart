@@ -3,9 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_solar_mobile/providers/auth_provider.dart';
 import 'package:smart_solar_mobile/screens/login_screen.dart';
+import 'package:smart_solar_mobile/widgets/solar_field.dart';
 
 void main() {
-  testWidgets('login screen toggles password visibility when eye icon is tapped', (tester) async {
+  testWidgets(
+      'login screen toggles password visibility when eye icon is tapped',
+      (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -16,13 +19,13 @@ void main() {
       ),
     );
 
-    final passwordFieldFinder = find.byWidgetPredicate(
-      (widget) => widget is TextField && widget.decoration?.labelText == 'Password',
-    );
+    final passwordFieldFinder =
+        find.byKey(const ValueKey('login_password_field'));
     expect(passwordFieldFinder, findsOneWidget);
-
-    TextField passwordField = tester.widget<TextField>(passwordFieldFinder);
-    expect(passwordField.obscureText, isTrue);
+    expect(
+      tester.widget<SolarField>(passwordFieldFinder).obscureText,
+      isTrue,
+    );
 
     final toggleFinder = find.byTooltip('Show password');
     expect(toggleFinder, findsOneWidget);
@@ -30,8 +33,11 @@ void main() {
     await tester.tap(toggleFinder);
     await tester.pump();
 
-    passwordField = tester.widget<TextField>(passwordFieldFinder);
-    expect(passwordField.obscureText, isFalse);
+    expect(passwordFieldFinder, findsOneWidget);
+    expect(
+      tester.widget<SolarField>(passwordFieldFinder).obscureText,
+      isFalse,
+    );
 
     final hideToggleFinder = find.byTooltip('Hide password');
     expect(hideToggleFinder, findsOneWidget);
@@ -39,7 +45,10 @@ void main() {
     await tester.tap(hideToggleFinder);
     await tester.pump();
 
-    passwordField = tester.widget<TextField>(passwordFieldFinder);
-    expect(passwordField.obscureText, isTrue);
+    expect(passwordFieldFinder, findsOneWidget);
+    expect(
+      tester.widget<SolarField>(passwordFieldFinder).obscureText,
+      isTrue,
+    );
   });
 }

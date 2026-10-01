@@ -2,7 +2,12 @@ import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 
-enum AuthStatus { uninitialized, authenticated, unauthenticated, authenticating }
+enum AuthStatus {
+  uninitialized,
+  authenticated,
+  unauthenticated,
+  authenticating
+}
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService;

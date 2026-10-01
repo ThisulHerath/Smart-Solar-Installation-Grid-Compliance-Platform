@@ -4,6 +4,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 import '../models/proposal.dart';
+import '../models/chat.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -68,26 +69,87 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  Future<List<dynamic>> getSurveys() async => List<dynamic>.from(await get('/api/surveys'));
+  Future<List<dynamic>> getSurveys() async =>
+      List<dynamic>.from(await get('/api/surveys'));
 
-  Future<Map<String, dynamic>> createSurvey({required double monthlyKwh, required double roofAreaSqm, required String gridType, required String propertyAddress}) async {
+  Future<List<Map<String, dynamic>>> searchLocations(String query) async {
+    final response = List<dynamic>.from(await get(
+        '/api/locations/search?query=${Uri.encodeQueryComponent(query.trim())}'));
+    return response
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+  }
+
+  Future<List<ChatConversation>> getChatConversations() async {
+    final response = List<dynamic>.from(await get('/api/chat/conversations'));
+    return response
+        .map((item) =>
+            ChatConversation.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  Future<ChatConversation> createChatConversation(String surveyId) async =>
+      ChatConversation.fromJson(Map<String, dynamic>.from(
+          await post('/api/chat/conversations', {'surveyId': surveyId})
+              as Map));
+
+  Future<List<ChatMessage>> getChatMessages(String conversationId) async {
+    final response = List<dynamic>.from(
+        await get('/api/chat/conversations/$conversationId/messages'));
+    return response
+        .map((item) =>
+            ChatMessage.fromJson(Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  Future<ChatMessage> sendChatMessage(
+          String conversationId, String body) async =>
+      ChatMessage.fromJson(Map<String, dynamic>.from(await post(
+          '/api/chat/conversations/$conversationId/messages',
+          {'body': body}) as Map));
+
+  Future<void> markChatRead(String conversationId) async {
+    await post('/api/chat/conversations/$conversationId/read', {});
+  }
+
+  Future<int> getChatUnreadCount() async {
+    final response =
+        Map<String, dynamic>.from(await get('/api/chat/unread-count'));
+    return (response['count'] as num?)?.toInt() ?? 0;
+  }
+
+  Future<Map<String, dynamic>> createSurvey(
+      {required double monthlyKwh,
+      required double roofAreaSqm,
+      required String gridType,
+      required String propertyAddress,
+      double? latitude,
+      double? longitude}) async {
     final response = await post('/api/surveys', {
-      'monthlyKwh': monthlyKwh, 'roofAreaSqm': roofAreaSqm, 'gridType': gridType,
-      'propertyAddress': propertyAddress, 'roofOrientation': 'Unknown',
+      'monthlyKwh': monthlyKwh,
+      'roofAreaSqm': roofAreaSqm,
+      'gridType': gridType,
+      'propertyAddress': propertyAddress,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      'roofOrientation': 'Unknown',
     });
     return Map<String, dynamic>.from(response);
   }
 
-  Future<Map<String, dynamic>> submitSurvey(String id) async => Map<String, dynamic>.from(await post('/api/surveys/$id/submit', {}));
+  Future<Map<String, dynamic>> submitSurvey(String id) async =>
+      Map<String, dynamic>.from(await post('/api/surveys/$id/submit', {}));
 
   // Proposal endpoints
   Future<Map<String, dynamic>> createProposal(String surveyId) async =>
-      Map<String, dynamic>.from(await post('/api/proposals', {'solarSurveyId': surveyId}));
+      Map<String, dynamic>.from(
+          await post('/api/proposals', {'solarSurveyId': surveyId}));
 
   Future<Map<String, dynamic>> getProposal(String proposalId) async =>
       Map<String, dynamic>.from(await get('/api/proposals/$proposalId'));
 
-  Future<List<Map<String, dynamic>>> getProposalForSurvey(String surveyId) async {
+  Future<List<Map<String, dynamic>>> getProposalForSurvey(
+      String surveyId) async {
     final response = await get('/api/proposals/survey/$surveyId');
     return parseProposalList(response);
   }
@@ -101,31 +163,43 @@ class ApiService {
   Future<Map<String, dynamic>> getTechnicianJob(String id) async =>
       Map<String, dynamic>.from(await get('/api/technician/jobs/$id'));
 
-  Future<Map<String, dynamic>> updateJobStatus(String id, String newStatus) async =>
-      Map<String, dynamic>.from(await put('/api/technician/jobs/$id/status', {'newStatus': newStatus}));
+  Future<Map<String, dynamic>> updateJobStatus(
+          String id, String newStatus) async =>
+      Map<String, dynamic>.from(await put(
+          '/api/technician/jobs/$id/status', {'newStatus': newStatus}));
 
-  Future<Map<String, dynamic>> checkInJob(String id, double latitude, double longitude) async =>
-      Map<String, dynamic>.from(await post('/api/technician/jobs/$id/check-in', {'latitude': latitude, 'longitude': longitude}));
+  Future<Map<String, dynamic>> checkInJob(
+          String id, double latitude, double longitude) async =>
+      Map<String, dynamic>.from(await post('/api/technician/jobs/$id/check-in',
+          {'latitude': latitude, 'longitude': longitude}));
 
-  Future<Map<String, dynamic>> saveInspectionDraft(String id, Map<String, dynamic> data) async =>
-      Map<String, dynamic>.from(await put('/api/technician/jobs/$id/inspection', data));
+  Future<Map<String, dynamic>> saveInspectionDraft(
+          String id, Map<String, dynamic> data) async =>
+      Map<String, dynamic>.from(
+          await put('/api/technician/jobs/$id/inspection', data));
 
-  Future<Map<String, dynamic>> recordTelemetry(String id, String measurementType, double measurementValue, String unit) async =>
-      Map<String, dynamic>.from(await post('/api/technician/jobs/$id/telemetry', {
+  Future<Map<String, dynamic>> recordTelemetry(String id,
+          String measurementType, double measurementValue, String unit) async =>
+      Map<String, dynamic>.from(
+          await post('/api/technician/jobs/$id/telemetry', {
         'measurementType': measurementType,
         'measurementValue': measurementValue,
         'unit': unit,
       }));
 
   Future<Map<String, dynamic>> submitInspection(String id) async =>
-      Map<String, dynamic>.from(await post('/api/technician/jobs/$id/submit', {}));
+      Map<String, dynamic>.from(
+          await post('/api/technician/jobs/$id/submit', {}));
 
   Future<Map<String, dynamic>> getJobCompliance(String id) async =>
-      Map<String, dynamic>.from(await get('/api/technician/jobs/$id/compliance'));
+      Map<String, dynamic>.from(
+          await get('/api/technician/jobs/$id/compliance'));
 
-  Future<dynamic> uploadInspectionPhoto(String id, XFile photo, String photoType) async {
+  Future<dynamic> uploadInspectionPhoto(
+      String id, XFile photo, String photoType) async {
     final token = await _storageService.getToken();
-    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/technician/jobs/$id/photos'));
+    final request = http.MultipartRequest(
+        'POST', Uri.parse('$baseUrl/api/technician/jobs/$id/photos'));
     if (token != null) request.headers['Authorization'] = 'Bearer $token';
     request.fields['photoType'] = photoType;
     final bytes = await photo.readAsBytes();
@@ -142,9 +216,11 @@ class ApiService {
 
   /// Upload an [XFile] as bytes so this works on Flutter Web as well as mobile.
   /// `MultipartFile.fromPath` depends on dart:io and fails in a browser.
-  Future<dynamic> uploadSurveyImage(String id, XFile image, String imageType) async {
+  Future<dynamic> uploadSurveyImage(
+      String id, XFile image, String imageType) async {
     final token = await _storageService.getToken();
-    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/api/surveys/$id/images'));
+    final request = http.MultipartRequest(
+        'POST', Uri.parse('$baseUrl/api/surveys/$id/images'));
     if (token != null) request.headers['Authorization'] = 'Bearer $token';
     request.fields['imageType'] = imageType;
     final bytes = await image.readAsBytes();
@@ -174,7 +250,8 @@ class ApiService {
       if (response.body.isEmpty) return null;
       return jsonDecode(response.body);
     } else {
-      String errorMessage = 'Request failed with status: ${response.statusCode}';
+      String errorMessage =
+          'Request failed with status: ${response.statusCode}';
       try {
         final errorData = jsonDecode(response.body);
         if (errorData is Map && errorData.containsKey('message')) {

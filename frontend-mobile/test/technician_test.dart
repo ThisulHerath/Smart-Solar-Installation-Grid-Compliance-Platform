@@ -4,7 +4,9 @@ import 'package:smart_solar_mobile/models/user.dart';
 
 void main() {
   group('FieldJob & Compliance Model Tests', () {
-    test('FieldJob parses job details, inspection status, and compliance results', () {
+    test(
+        'FieldJob parses job details, inspection status, and compliance results',
+        () {
       final json = {
         'id': 'job-001',
         'solarSurveyId': 'survey-100',
@@ -29,7 +31,8 @@ void main() {
           'gridCompliant': true,
           'complianceStatus': 'COMPLIANT',
           'riskLevel': 'LOW',
-          'complianceNotes': 'Voltage 230V stable and compliant with CEB standards.',
+          'complianceNotes':
+              'Voltage 230V stable and compliant with CEB standards.',
           'validationStatus': 'PASSED',
         },
       };
@@ -67,7 +70,8 @@ void main() {
           'gridCompliant': false,
           'complianceStatus': 'NON_COMPLIANT',
           'riskLevel': 'HIGH',
-          'complianceNotes': 'Grid voltage 258V exceeds +6% CEB statutory ceiling.',
+          'complianceNotes':
+              'Grid voltage 258V exceeds +6% CEB statutory ceiling.',
           'validationStatus': 'PASSED',
         },
       };
@@ -120,6 +124,54 @@ void main() {
       expect(job.photos[0].photoType, 'Roof');
       expect(job.photos[0].fileUrl, '/uploads/site-photos/roof1.jpg');
       expect(job.photos[1].photoType, 'Meter');
+    });
+
+    test('FieldJob restores a saved incomplete inspection draft', () {
+      final json = {
+        'id': 'job-draft',
+        'solarSurveyId': 'survey-draft',
+        'technicianId': 'tech-100',
+        'technicianName': 'Lead Field Technician',
+        'customerName': 'Draft Customer',
+        'customerPhone': '+94770000000',
+        'propertyAddress': 'Colombo',
+        'monthlyKwh': 450,
+        'roofAreaSqm': 70,
+        'status': 'InProgress',
+        'priority': 'Medium',
+        'assignedAt': '2026-09-29T08:00:00Z',
+        'hasInspection': true,
+        'inspectionStatus': 'Draft',
+        'inspection': {
+          'roofAreaMeasuredSqm': 63.5,
+          'roofOrientation': 'South',
+          'roofTilt': null,
+          'gridTypeObserved': 'ThreePhase',
+          'phaseCount': 3,
+          'mainBreakerRating': 63,
+          'inverterLocationSuitable': true,
+          'safetyNotes': 'Access checked',
+          'technicianNotes': null,
+          'telemetry': [
+            {
+              'measurementType': 'GridVoltage',
+              'measurementValue': 400,
+              'recordedAt': '2026-09-29T08:10:00Z'
+            }
+          ],
+          'photos': []
+        }
+      };
+
+      final job = FieldJob.fromJson(json);
+
+      expect(job.inspection, isNotNull);
+      expect(job.inspection!.roofAreaMeasuredSqm, 63.5);
+      expect(job.inspection!.roofTilt, isNull);
+      expect(job.inspection!.gridTypeObserved, 'ThreePhase');
+      expect(job.inspection!.mainBreakerRating, 63);
+      expect(job.inspection!.telemetry.single.measurementType, 'GridVoltage');
+      expect(job.inspection!.telemetry.single.measurementValue, 400);
     });
 
     test('Field Technician role is identified properly', () {

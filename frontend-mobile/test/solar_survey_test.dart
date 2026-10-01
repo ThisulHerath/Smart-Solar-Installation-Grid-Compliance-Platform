@@ -8,10 +8,13 @@ void main() {
     test('SolarSurvey parses basic survey data and status', () {
       final json = {
         'id': 'survey-123',
+        'customerName': 'Sample Homeowner',
         'monthlyKwh': 1200.0,
         'roofAreaSqm': 80.0,
         'gridType': 'SinglePhase',
         'propertyAddress': '45 Park Road, Colombo',
+        'latitude': 6.9271,
+        'longitude': 79.8612,
         'surveyStatus': 'AnalysisComplete',
         'workflows': [],
       };
@@ -24,9 +27,14 @@ void main() {
       expect(survey.gridType, 'SinglePhase');
       expect(survey.propertyAddress, '45 Park Road, Colombo');
       expect(survey.surveyStatus, 'AnalysisComplete');
+      expect(survey.customerName, 'Sample Homeowner');
+      expect(survey.latitude, 6.9271);
+      expect(survey.longitude, 79.8612);
     });
 
-    test('SolarSurvey parses AI sizing recommendation and validation results correctly', () {
+    test(
+        'SolarSurvey parses AI sizing recommendation and validation results correctly',
+        () {
       final json = {
         'id': 'survey-456',
         'monthlyKwh': 1200.0,
@@ -38,8 +46,10 @@ void main() {
           {
             'workflowId': 'wf-789',
             'status': 'Completed',
-            'resultJson': '{"recommended_kw": 10.0, "estimated_panel_count": 25, "estimated_inverter_kw": 10.0, "reason": "Sizing complete"}',
-            'validationJson': '{"valid": true, "checks": {"monthly_kwh_valid": true, "roof_area_valid": true}}',
+            'resultJson':
+                '{"recommended_kw": 10.0, "estimated_panel_count": 25, "estimated_inverter_kw": 10.0, "reason": "Sizing complete"}',
+            'validationJson':
+                '{"valid": true, "checks": {"monthly_kwh_valid": true, "roof_area_valid": true}}',
             'errorMessage': null,
           }
         ],
@@ -54,7 +64,9 @@ void main() {
       expect(survey.errorMessage, null);
     });
 
-    test('SolarSurvey handles workflow failure state and safe error message without crashing', () {
+    test(
+        'SolarSurvey handles workflow failure state and safe error message without crashing',
+        () {
       final json = {
         'id': 'survey-789',
         'monthlyKwh': 500.0,
@@ -108,7 +120,9 @@ void main() {
   });
 
   group('Survey Form Validation Logic', () {
-    test('Validates positive monthly usage, roof area, and non-empty property address', () {
+    test(
+        'Validates positive monthly usage, roof area, and non-empty property address',
+        () {
       double? usage = double.tryParse('1200');
       double? roof = double.tryParse('80');
       String address = '   123 Solar Street   ';

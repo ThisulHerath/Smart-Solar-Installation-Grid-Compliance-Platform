@@ -5,13 +5,17 @@ import 'package:smart_solar_mobile/providers/auth_provider.dart';
 import 'package:smart_solar_mobile/screens/welcome_screen.dart';
 
 void main() {
-  testWidgets('welcome page sends guests to manual login without demo shortcuts', (tester) async {
+  testWidgets(
+      'welcome page sends guests to manual login without demo shortcuts',
+      (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(ChangeNotifierProvider(create: (_) => AuthProvider(), child: const MaterialApp(home: WelcomeScreen())));
+    await tester.pumpWidget(ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: const MaterialApp(home: WelcomeScreen())));
     expect(find.text('Your rooftop.\nA brighter tomorrow.'), findsOneWidget);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Log in'));
+    await tester.tap(find.text('Login'));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNWidgets(2));
     expect(find.byType(ActionChip), findsNothing);

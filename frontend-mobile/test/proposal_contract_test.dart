@@ -12,7 +12,9 @@ void main() {
     expect(parseProposalList({'id': 'not-a-list'}), isEmpty);
   });
 
-  test('all Phase 4 proposal statuses deserialize without client-side approval controls', () {
+  test(
+      'all Phase 4 proposal statuses deserialize without client-side approval controls',
+      () {
     const statuses = [
       'PENDING_APPROVAL',
       'APPROVED',

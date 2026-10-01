@@ -1,6 +1,7 @@
 import '../widgets/solar_search.dart';
 import '../widgets/record_reference.dart';
 import '../widgets/solar_field.dart';
+import '../widgets/location_picker.dart';
 import '../utils/validators.dart';
 import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   bool _loading = false;
   bool _fetching = true;
   XFile? _attachedImage;
+  PropertyLocation? _propertyLocation;
   Timer? _pollTimer;
 
   @override
@@ -136,6 +138,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
         roofAreaSqm: roof,
         gridType: _gridType,
         propertyAddress: address,
+        latitude: _propertyLocation?.latitude,
+        longitude: _propertyLocation?.longitude,
       );
       final surveyId = created['id'] as String;
 
@@ -152,6 +156,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
       _usageController.clear();
       _roofController.clear();
       _addressController.clear();
+      _propertyLocation = null;
 
       await _loadSurveys();
 
@@ -197,207 +202,380 @@ class _SurveyScreenState extends State<SurveyScreen> {
     }
   }
 
+  InputDecoration _fieldDecoration({
+    required String hint,
+    required IconData icon,
+    String? suffix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      counterText: '',
+      prefixIcon: Icon(icon, color: SolarColors.primary, size: 20),
+      suffixText: suffix,
+      suffixStyle: const TextStyle(
+          color: SolarColors.muted, fontSize: 11, fontWeight: FontWeight.w600),
+      filled: true,
+      fillColor: SolarColors.background,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
+    );
+  }
+
+  Widget _fieldLabel(String label, String helper) => Padding(
+        padding: const EdgeInsets.only(left: 2, bottom: 7),
+        child: Row(children: [
+          Text(label,
+              style: const TextStyle(
+                  color: SolarColors.text,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700)),
+          const SizedBox(width: 6),
+          Expanded(
+              child: Text(helper,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      const TextStyle(color: SolarColors.muted, fontSize: 10))),
+        ]),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SolarColors.background,
       appBar: AppBar(
         backgroundColor: SolarColors.surface,
-        title: const Text('My solar surveys',
+        title: const Text('Solar projects',
             style: TextStyle(
-                fontWeight: FontWeight.bold, color: SolarColors.text)),
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                color: SolarColors.text)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: SolarColors.muted),
+            tooltip: 'Refresh projects',
+            icon: const Icon(Icons.refresh_rounded, color: SolarColors.primary),
             onPressed: () => _loadSurveys(),
           ),
         ],
       ),
       body: SingleChildScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 34),
         child: Form(
             key: _form,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Create New Survey Card
                 Container(
-                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: SolarColors.surface,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(22),
                     border: Border.all(color: SolarColors.border),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: Color(0x12173E44),
+                          blurRadius: 24,
+                          offset: Offset(0, 9)),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.add_location_alt,
-                              color: SolarColors.primary, size: 22),
-                          SizedBox(width: 8),
-                          Text(
-                            'New solar assessment',
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: SolarColors.text),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: const BoxDecoration(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(21)),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              SolarColors.primary,
+                              SolarColors.heroEnd,
+                            ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      SolarField(
-                        controller: _usageController,
-                        inputFormatters: [solarDecimalFormatter],
-                        validator: (v) => Validators.number(v, min: 0.01),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                          labelText: 'Monthly Consumption (kWh)',
-                          labelStyle: TextStyle(color: SolarColors.muted),
-                          prefixIcon:
-                              Icon(Icons.bolt, color: SolarColors.warning),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.border)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.primary)),
                         ),
+                        child: const Row(children: [
+                          CircleAvatar(
+                            radius: 23,
+                            backgroundColor: SolarColors.lime,
+                            child: Icon(Icons.roofing_rounded,
+                                color: SolarColors.primary, size: 24),
+                          ),
+                          SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('New solar assessment',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800)),
+                                  SizedBox(height: 4),
+                                  Text(
+                                      'Tell us about your home to calculate the right solar system.',
+                                      style: TextStyle(
+                                          color: SolarColors.heroText,
+                                          fontSize: 11,
+                                          height: 1.35)),
+                                ]),
+                          ),
+                        ]),
                       ),
-                      const SizedBox(height: 14),
-
-                      SolarField(
-                        controller: _roofController,
-                        inputFormatters: [solarDecimalFormatter],
-                        validator: (v) => Validators.number(v, min: 1),
-                        keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                          labelText: 'Roof Surface Area (m²)',
-                          labelStyle: TextStyle(color: SolarColors.muted),
-                          prefixIcon:
-                              Icon(Icons.square_foot, color: SolarColors.info),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.border)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.primary)),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-
-                      DropdownButtonFormField<String>(
-                        initialValue: _gridType,
-                        dropdownColor: SolarColors.surfaceSoft,
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                          labelText: 'Grid Connection Type',
-                          labelStyle: TextStyle(color: SolarColors.muted),
-                          prefixIcon:
-                              Icon(Icons.power, color: SolarColors.primary),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.border)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.primary)),
-                        ),
-                        items: const [
-                          DropdownMenuItem(
-                              value: 'SinglePhase',
-                              child: Text('Single Phase (230V)')),
-                          DropdownMenuItem(
-                              value: 'ThreePhase',
-                              child: Text('Three Phase (400V)')),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) setState(() => _gridType = val);
-                        },
-                      ),
-                      const SizedBox(height: 14),
-
-                      SolarField(
-                        controller: _addressController,
-                        validator: Validators.required,
-                        maxLength: 500,
-                        style: const TextStyle(color: SolarColors.text),
-                        decoration: const InputDecoration(
-                          labelText: 'Property Address',
-                          labelStyle: TextStyle(color: SolarColors.muted),
-                          prefixIcon:
-                              Icon(Icons.home, color: SolarColors.muted),
-                          enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.border)),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: SolarColors.primary)),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Image picker button
-                      OutlinedButton.icon(
-                        onPressed: _loading ? null : _pickImage,
-                        icon: Icon(
-                            _attachedImage == null
-                                ? Icons.camera_alt
-                                : Icons.check_circle,
-                            color: SolarColors.info),
-                        label: Text(
-                          _attachedImage == null
-                              ? 'Attach Site Photo (Optional)'
-                              : 'Photo Attached (${_attachedImage!.name})',
-                          style: const TextStyle(color: SolarColors.info),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0x3338BDF8)),
-                          minimumSize: const Size(double.infinity, 48),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Submit button
-                      ElevatedButton.icon(
-                        onPressed: _loading ? null : _createAndSubmitSurvey,
-                        icon: _loading
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: SolarColors.onPrimary))
-                            : const Icon(Icons.send_rounded),
-                        label: Text(_loading
-                            ? 'Analysing your survey…'
-                            : 'Submit for solar analysis'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: SolarColors.primary,
-                          foregroundColor: SolarColors.onPrimary,
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-
-                      if (_error != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 14),
-                          child: Text(_error!,
+                      Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _fieldLabel('Monthly electricity use',
+                                'Check a recent electricity bill'),
+                            SolarField(
+                              controller: _usageController,
+                              inputFormatters: [solarDecimalFormatter],
+                              validator: (v) => Validators.number(v, min: 0.01),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: _fieldDecoration(
+                                  hint: 'e.g. 450',
+                                  icon: Icons.bolt_rounded,
+                                  suffix: 'kWh / month'),
+                            ),
+                            const SizedBox(height: 5),
+                            _fieldLabel('Usable roof area',
+                                'Approximate measurement is enough'),
+                            SolarField(
+                              controller: _roofController,
+                              inputFormatters: [solarDecimalFormatter],
+                              validator: (v) => Validators.number(v, min: 1),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: _fieldDecoration(
+                                  hint: 'e.g. 80',
+                                  icon: Icons.square_foot_rounded,
+                                  suffix: 'm²'),
+                            ),
+                            const SizedBox(height: 5),
+                            _fieldLabel('Grid connection',
+                                'Select the supply available at your home'),
+                            DropdownButtonFormField<String>(
+                              initialValue: _gridType,
+                              dropdownColor: SolarColors.surface,
+                              icon: const Icon(Icons.expand_more_rounded),
                               style: const TextStyle(
-                                  color: SolarColors.error, fontSize: 13)),
+                                  color: SolarColors.text, fontSize: 13),
+                              decoration: _fieldDecoration(
+                                  hint: 'Select connection type',
+                                  icon: Icons.electrical_services_rounded),
+                              items: const [
+                                DropdownMenuItem(
+                                    value: 'SinglePhase',
+                                    child: Text('Single Phase (230V)')),
+                                DropdownMenuItem(
+                                    value: 'ThreePhase',
+                                    child: Text('Three Phase (400V)')),
+                              ],
+                              onChanged: _loading
+                                  ? null
+                                  : (val) {
+                                      if (val != null) {
+                                        setState(() => _gridType = val);
+                                      }
+                                    },
+                            ),
+                            const SizedBox(height: 17),
+                            _fieldLabel('Property address',
+                                'The site where solar will be installed'),
+                            SolarField(
+                              controller: _addressController,
+                              validator: Validators.required,
+                              maxLength: 500,
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: _fieldDecoration(
+                                  hint: 'House number, street and city',
+                                  icon: Icons.location_on_outlined),
+                            ),
+                            LocationPicker(
+                              addressController: _addressController,
+                              value: _propertyLocation,
+                              disabled: _loading,
+                              onChanged: (location) =>
+                                  setState(() => _propertyLocation = location),
+                            ),
+                            Material(
+                              color: const Color(0x0F07536A),
+                              borderRadius: BorderRadius.circular(13),
+                              child: InkWell(
+                                onTap: _loading ? null : _pickImage,
+                                borderRadius: BorderRadius.circular(13),
+                                child: Container(
+                                  padding: const EdgeInsets.all(14),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(13),
+                                      border: Border.all(
+                                          color: const Color(0x3372B83E))),
+                                  child: Row(children: [
+                                    Container(
+                                      width: 38,
+                                      height: 38,
+                                      decoration: BoxDecoration(
+                                          color: SolarColors.surface,
+                                          borderRadius:
+                                              BorderRadius.circular(11)),
+                                      child: Icon(
+                                          _attachedImage == null
+                                              ? Icons.add_a_photo_outlined
+                                              : Icons.check_circle_rounded,
+                                          color: _attachedImage == null
+                                              ? SolarColors.primary
+                                              : SolarColors.success,
+                                          size: 20),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                                _attachedImage == null
+                                                    ? 'Add a roof photo'
+                                                    : 'Roof photo attached',
+                                                style: const TextStyle(
+                                                    color: SolarColors.text,
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w700)),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                                _attachedImage?.name ??
+                                                    'Optional · JPG or PNG',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                    color: SolarColors.muted,
+                                                    fontSize: 10)),
+                                          ]),
+                                    ),
+                                    const Icon(Icons.chevron_right_rounded,
+                                        color: SolarColors.muted),
+                                  ]),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              height: 52,
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    _loading ? null : _createAndSubmitSurvey,
+                                icon: _loading
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: SolarColors.primary))
+                                    : const Icon(Icons.auto_awesome_rounded,
+                                        size: 19),
+                                label: Text(_loading
+                                    ? 'Analysing your survey…'
+                                    : 'Create my solar project'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: SolarColors.lime,
+                                  foregroundColor: SolarColors.primary,
+                                  disabledBackgroundColor:
+                                      SolarColors.surfaceSoft,
+                                  elevation: 0,
+                                  textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w800),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(13)),
+                                ),
+                              ),
+                            ),
+                            if (_error != null)
+                              Container(
+                                margin: const EdgeInsets.only(top: 13),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                    color: SolarColors.errorSoft,
+                                    borderRadius: BorderRadius.circular(11)),
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.error_outline_rounded,
+                                          color: SolarColors.error, size: 18),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                          child: Text(_error!,
+                                              style: const TextStyle(
+                                                  color: SolarColors.error,
+                                                  fontSize: 11,
+                                                  height: 1.4))),
+                                    ]),
+                              ),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-
+                const SizedBox(height: 28),
+                Row(children: [
+                  const Expanded(
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Your projects',
+                              style: TextStyle(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w800,
+                                  color: SolarColors.text)),
+                          SizedBox(height: 3),
+                          Text('Track submitted assessments and proposals',
+                              style: TextStyle(
+                                  color: SolarColors.muted, fontSize: 11)),
+                        ]),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        color: const Color(0x1872B83E),
+                        borderRadius: BorderRadius.circular(20)),
+                    child: Text('${_surveys.length} total',
+                        style: const TextStyle(
+                            color: SolarColors.limeDark,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800)),
+                  ),
+                ]),
+                const SizedBox(height: 14),
+                SolarSearch(
+                    label: 'Search your projects',
+                    onChanged: (value) =>
+                        setState(() => _search = value.toLowerCase())),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                    initialValue: _statusFilter,
+                    isExpanded: true,
+                    decoration: _fieldDecoration(
+                        hint: 'Filter by status', icon: Icons.tune_rounded),
+                    onChanged: (value) =>
+                        setState(() => _statusFilter = value ?? ''),
+                    items: [
+                      const DropdownMenuItem(
+                          value: '', child: Text('All project statuses')),
+                      ..._surveys.map((s) => s.surveyStatus).toSet().map(
+                          (status) => DropdownMenuItem(
+                              value: status, child: Text(status))),
+                    ]),
+                const SizedBox(height: 14),
                 if (!_fetching &&
                     _surveys.isNotEmpty &&
                     !_surveys.any((s) =>
@@ -409,32 +587,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
                       padding: EdgeInsets.all(16),
                       child: Text(
                           'No matching surveys. Try another address or reference, or select all statuses.')),
-                // Survey History List
-                SolarSearch(
-                    label: 'Search surveys',
-                    onChanged: (value) =>
-                        setState(() => _search = value.toLowerCase())),
-                DropdownButton<String>(
-                    value: _statusFilter,
-                    isExpanded: true,
-                    onChanged: (value) =>
-                        setState(() => _statusFilter = value ?? ''),
-                    items: [
-                      const DropdownMenuItem(
-                          value: '', child: Text('All statuses')),
-                      ..._surveys.map((s) => s.surveyStatus).toSet().map(
-                          (status) => DropdownMenuItem(
-                              value: status, child: Text(status))),
-                    ]),
-                const Text(
-                  'Your solar assessments',
-                  style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      color: SolarColors.text),
-                ),
-                const SizedBox(height: 12),
-
                 if (_fetching && _surveys.isEmpty)
                   const Center(
                       child: Padding(

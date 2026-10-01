@@ -9,7 +9,7 @@ class StatusBadge extends StatelessWidget {
   const StatusBadge({
     super.key,
     required this.label,
-    this.color = const Color(0x2610B981),
+    this.color = SolarColors.success,
     this.textColor = SolarColors.success,
   });
 
