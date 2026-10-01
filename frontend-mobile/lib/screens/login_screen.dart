@@ -103,12 +103,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         Container(
                                             padding: const EdgeInsets.all(11),
                                             decoration: BoxDecoration(
-                                                color: const Color(0xFFFFEEEE),
+                                                color: SolarColors.errorSoft,
                                                 borderRadius:
                                                     BorderRadius.circular(9)),
                                             child: Text(auth.errorMessage!,
                                                 style: const TextStyle(
-                                                    color: Color(0xFFB33838),
+                                                    color: SolarColors.error,
                                                     fontSize: 11))),
                                         const SizedBox(height: 11),
                                       ],
@@ -207,84 +207,34 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         fontWeight:
                                                             FontWeight.w700)),
                                           )),
-                                      SizedBox(height: compact ? 10 : 18),
-                                      const Row(children: [
-                                        Expanded(
-                                            child: Divider(
-                                                color: SolarColors.border)),
-                                        Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 12),
-                                            child: Text('Or',
-                                                style: TextStyle(
-                                                    color: _muted,
-                                                    fontSize: 11))),
-                                        Expanded(
-                                            child: Divider(
-                                                color: SolarColors.border))
-                                      ]),
-                                      SizedBox(height: compact ? 10 : 16),
-                                      Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            _SocialSquare(
-                                                child: const Text('G',
-                                                    style: TextStyle(
-                                                        color:
-                                                            Color(0xFF4285F4),
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w900)),
-                                                onTap: () {}),
-                                            const SizedBox(width: 18),
-                                            _SocialSquare(
-                                                child: const Icon(
-                                                    Icons.facebook_rounded,
-                                                    color: Color(0xFF1877F2),
-                                                    size: 21),
-                                                onTap: () {}),
-                                            const SizedBox(width: 18),
-                                            _SocialSquare(
-                                                child: const Text('in',
-                                                    style: TextStyle(
-                                                        color:
-                                                            Color(0xFF0A66C2),
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w900)),
-                                                onTap: () {}),
-                                          ]),
-                                      SizedBox(height: compact ? 16 : 26),
-                                      const Center(
-                                          child: SizedBox(
-                                              width: 15,
-                                              child: Divider(
-                                                  color: _orange,
-                                                  thickness: 1.5))),
-                                      const Spacer(),
-                                      SizedBox(height: compact ? 14 : 22),
-                                      Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                      SizedBox(height: compact ? 14 : 20),
+                                      const Divider(
+                                          color: SolarColors.border,
+                                          thickness: 1),
+                                      SizedBox(height: compact ? 6 : 10),
+                                      Wrap(
+                                          alignment: WrapAlignment.center,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           children: [
                                             const Text(
-                                                "Don't Have An Account, ",
+                                                "Don't have an account?",
                                                 style: TextStyle(
                                                     color: _muted,
-                                                    fontSize: 10)),
-                                            GestureDetector(
-                                              onTap: () => Navigator.of(context)
-                                                  .push(MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          const RegisterScreen())),
-                                              child: const Text('Register',
-                                                  style: TextStyle(
-                                                      color: _orange,
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.w700)),
-                                            ),
+                                                    fontSize: 12)),
+                                            TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context).push(
+                                                        MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                const RegisterScreen())),
+                                                style: TextButton.styleFrom(
+                                                    foregroundColor: _orange,
+                                                    textStyle: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w700)),
+                                                child: const Text('Register')),
                                           ]),
                                     ])))))),
           );

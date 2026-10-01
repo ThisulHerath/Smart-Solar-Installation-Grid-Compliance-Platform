@@ -7,6 +7,7 @@ import '../models/solar_survey.dart';
 import '../services/api_service.dart';
 import '../theme/solar_theme.dart';
 import '../widgets/record_reference.dart';
+import '../widgets/workspace_header.dart';
 
 class CustomerLocationsScreen extends StatefulWidget {
   const CustomerLocationsScreen({super.key});
@@ -96,7 +97,7 @@ class _CustomerLocationsScreenState extends State<CustomerLocationsScreen> {
             const SizedBox(height: 5),
             Align(
                 alignment: Alignment.centerLeft,
-                child: Text(survey.projectName,
+                child: Text(survey.propertyAddress,
                     style: const TextStyle(color: SolarColors.muted))),
             const SizedBox(height: 10),
             RecordReference(label: 'Survey ID', value: survey.id),
@@ -123,6 +124,12 @@ class _CustomerLocationsScreenState extends State<CustomerLocationsScreen> {
       appBar: AppBar(
         backgroundColor: SolarColors.surface,
         title: const Text('Customer locations'),
+        actions: [
+          IconButton(
+              tooltip: 'Refresh locations',
+              onPressed: _loading ? null : _load,
+              icon: const Icon(Icons.refresh_rounded))
+        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -145,45 +152,64 @@ class _CustomerLocationsScreenState extends State<CustomerLocationsScreen> {
                             style: TextStyle(color: SolarColors.muted)),
                       ),
                     )
-                  : FlutterMap(
-                      options: const MapOptions(
-                        initialCenter: LatLng(7.8731, 80.7718),
-                        initialZoom: 8,
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                          userAgentPackageName: 'lk.smartsolar.platform',
-                        ),
-                        MarkerLayer(
-                          markers: _surveys
-                              .map((survey) => Marker(
-                                    width: 50,
-                                    height: 50,
-                                    point: LatLng(
-                                        survey.latitude!, survey.longitude!),
-                                    child: Semantics(
-                                      button: true,
-                                      label:
-                                          '${survey.projectName} · ${survey.customerName ?? 'Customer'} at ${survey.propertyAddress}',
-                                      child: GestureDetector(
-                                        onTap: () => _showSurvey(survey),
-                                        child: const Icon(Icons.location_pin,
-                                            color: SolarColors.primary,
-                                            size: 46),
-                                      ),
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
-                        RichAttributionWidget(attributions: [
-                          TextSourceAttribution('OpenStreetMap contributors',
-                              onTap: () => launchUrl(Uri.parse(
-                                  'https://www.openstreetmap.org/copyright'))),
-                        ]),
-                      ],
-                    ),
+                  : Column(children: [
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          child: WorkspaceHeader(
+                              eyebrow: 'Customer sites',
+                              title: '${_surveys.length} confirmed locations',
+                              description:
+                                  'Tap a site to view the customer and open directions.',
+                              icon: Icons.map_outlined)),
+                      Expanded(
+                          child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(24)),
+                              child: FlutterMap(
+                                options: const MapOptions(
+                                  initialCenter: LatLng(7.8731, 80.7718),
+                                  initialZoom: 8,
+                                ),
+                                children: [
+                                  TileLayer(
+                                    urlTemplate:
+                                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                    userAgentPackageName:
+                                        'lk.smartsolar.platform',
+                                  ),
+                                  MarkerLayer(
+                                    markers: _surveys
+                                        .map((survey) => Marker(
+                                              width: 50,
+                                              height: 50,
+                                              point: LatLng(survey.latitude!,
+                                                  survey.longitude!),
+                                              child: Semantics(
+                                                button: true,
+                                                label:
+                                                    '${survey.customerName ?? 'Customer'} at ${survey.propertyAddress}',
+                                                child: GestureDetector(
+                                                  onTap: () =>
+                                                      _showSurvey(survey),
+                                                  child: const Icon(
+                                                      Icons.location_pin,
+                                                      color:
+                                                          SolarColors.primary,
+                                                      size: 46),
+                                                ),
+                                              ),
+                                            ))
+                                        .toList(),
+                                  ),
+                                  RichAttributionWidget(attributions: [
+                                    TextSourceAttribution(
+                                        'OpenStreetMap contributors',
+                                        onTap: () => launchUrl(Uri.parse(
+                                            'https://www.openstreetmap.org/copyright'))),
+                                  ]),
+                                ],
+                              ))),
+                    ]),
     );
   }
 }

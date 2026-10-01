@@ -154,7 +154,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 width: double.infinity,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                color: const Color(0xFFFFEEEE),
+                color: SolarColors.errorSoft,
                 child: Text(_error!,
                     textAlign: TextAlign.center,
                     style:

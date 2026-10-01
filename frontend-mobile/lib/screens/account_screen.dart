@@ -151,7 +151,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       gradient: const LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [SolarColors.primary, Color(0xFF214F50)],
+                        colors: [SolarColors.primary, SolarColors.heroEnd],
                       ),
                     ),
                     child: Row(children: [
@@ -181,7 +181,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                      color: Color(0xFFD8E7E4), fontSize: 10)),
+                                      color: SolarColors.heroText,
+                                      fontSize: 10)),
                             ]),
                       ),
                     ]),
@@ -359,7 +360,7 @@ class _AccountScreenState extends State<AccountScreen> {
           Container(
             padding: const EdgeInsets.all(11),
             decoration: BoxDecoration(
-                color: const Color(0xFFFFEEEE),
+                color: SolarColors.errorSoft,
                 borderRadius: BorderRadius.circular(10)),
             child: Text(_error!,
                 style: const TextStyle(

@@ -1,4 +1,5 @@
 import '../widgets/solar_search.dart';
+import '../widgets/workspace_header.dart';
 import '../widgets/record_reference.dart';
 import '../theme/solar_theme.dart';
 import 'package:flutter/material.dart';
@@ -105,6 +106,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Refresh site jobs',
             icon: const Icon(Icons.refresh, color: SolarColors.muted),
             onPressed: _loadJobs,
           ),
@@ -153,7 +155,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                       _loadJobs();
                     },
                     backgroundColor: SolarColors.surface,
-                    selectedColor: SolarColors.lime,
+                    selectedColor: SolarColors.surfaceSoft,
                     checkmarkColor: SolarColors.text,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -212,9 +214,22 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                               keyboardDismissBehavior:
                                   ScrollViewKeyboardDismissBehavior.onDrag,
                               padding: const EdgeInsets.all(16),
-                              itemCount: visibleJobs.length,
+                              itemCount: visibleJobs.length + 1,
                               itemBuilder: (context, idx) {
-                                final job = visibleJobs[idx];
+                                if (idx == 0) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 20),
+                                    child: WorkspaceHeader(
+                                      eyebrow: 'Site inspections',
+                                      title:
+                                          '${visibleJobs.length} ${visibleJobs.length == 1 ? 'job' : 'jobs'} in view',
+                                      description:
+                                          'Plan your visit, capture site evidence and track inspection progress.',
+                                      icon: Icons.engineering_outlined,
+                                    ),
+                                  );
+                                }
+                                final job = visibleJobs[idx - 1];
                                 return Card(
                                   color: SolarColors.surface,
                                   shape: RoundedRectangleBorder(

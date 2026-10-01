@@ -300,7 +300,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                             end: Alignment.bottomRight,
                             colors: [
                               SolarColors.primary,
-                              Color(0xFF176D72),
+                              SolarColors.heroEnd,
                             ],
                           ),
                         ),
@@ -325,7 +325,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                                   Text(
                                       'Tell us about your home to calculate the right solar system.',
                                       style: TextStyle(
-                                          color: Color(0xFFD8E7E4),
+                                          color: SolarColors.heroText,
                                           fontSize: 11,
                                           height: 1.35)),
                                 ]),
@@ -337,25 +337,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _fieldLabel('Project name',
-                                'A memorable name for you and the project team'),
-                            SolarField(
-                              controller: _projectNameController,
-                              validator: (value) {
-                                final text = value?.trim() ?? '';
-                                if (text.length < 3) {
-                                  return 'Enter at least 3 characters';
-                                }
-                                return null;
-                              },
-                              maxLength: 120,
-                              textInputAction: TextInputAction.next,
-                              style: const TextStyle(color: SolarColors.text),
-                              decoration: _fieldDecoration(
-                                  hint: 'e.g. Perera Home Solar',
-                                  icon: Icons.home_work_outlined),
-                            ),
-                            const SizedBox(height: 17),
                             _fieldLabel('Monthly electricity use',
                                 'Check a recent electricity bill'),
                             SolarField(
@@ -531,7 +512,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                                 margin: const EdgeInsets.only(top: 13),
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                    color: const Color(0xFFFFEEEE),
+                                    color: SolarColors.errorSoft,
                                     borderRadius: BorderRadius.circular(11)),
                                 child: Row(
                                     crossAxisAlignment:
@@ -608,8 +589,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 if (!_fetching &&
                     _surveys.isNotEmpty &&
                     !_surveys.any((s) =>
-                        (s.projectName.toLowerCase().contains(_search) ||
-                            s.propertyAddress.toLowerCase().contains(_search) ||
+                        (s.propertyAddress.toLowerCase().contains(_search) ||
                             s.id.toLowerCase().contains(_search)) &&
                         (_statusFilter.isEmpty ||
                             s.surveyStatus == _statusFilter)))

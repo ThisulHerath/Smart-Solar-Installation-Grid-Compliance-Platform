@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/solar_survey.dart';
@@ -9,19 +8,18 @@ import '../theme/solar_theme.dart';
 import '../utils/constants.dart';
 import '../widgets/solar_brand.dart';
 import 'login_screen.dart';
+import '../widgets/staff_dashboard.dart';
 import 'chat_inbox_screen.dart';
 import 'profile_screen.dart';
 import 'proposal_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
-import 'welcome_screen.dart';
 import 'customer_locations_screen.dart';
-import 'notifications_screen.dart';
 
 const _bg = SolarColors.background;
 const _panel = SolarColors.surface;
 const _gold = SolarColors.lime;
-const _cyan = Color(0xFF087D75);
+const _cyan = SolarColors.primary;
 const _text = SolarColors.text;
 const _muted = SolarColors.muted;
 const _line = SolarColors.border;
@@ -36,37 +34,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
   int _unreadMessages = 0;
-  int _unreadNotifications = 0;
-  Timer? _refreshTimer;
+  Timer? _chatTimer;
 
   @override
   void initState() {
     super.initState();
     _loadUnreadMessages();
-    _loadUnreadNotifications();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (_) {
-      _loadUnreadMessages();
-      _loadUnreadNotifications();
-    });
+    _chatTimer = Timer.periodic(
+        const Duration(seconds: 12), (_) => _loadUnreadMessages());
   }
 
   @override
   void dispose() {
-    _refreshTimer?.cancel();
+    _chatTimer?.cancel();
     super.dispose();
-  }
-
-  Future<void> _loadUnreadNotifications() async {
-    try {
-      final count = await ApiService().getNotificationUnreadCount();
-      if (mounted) setState(() => _unreadNotifications = count);
-    } catch (_) {}
-  }
-
-  Future<void> _openNotifications() async {
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
-    await _loadUnreadNotifications();
   }
 
   Future<void> _loadUnreadMessages() async {
@@ -103,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Theme(
       data: Theme.of(context).copyWith(
         scaffoldBackgroundColor: _bg,
-        colorScheme: const ColorScheme.light(
+        colorScheme: Theme.of(context).colorScheme.copyWith(
             primary: SolarColors.primary, secondary: _gold, surface: _panel),
       ),
       child: Scaffold(
@@ -115,49 +96,27 @@ class _HomeScreenState extends State<HomeScreen> {
               sliver: SliverList.list(children: [
                 _Header(
                   name: user.fullName,
-                  unreadMessages: _unreadNotifications,
-                  onNotifications: _openNotifications,
+                  unreadMessages: _unreadMessages,
+                  onNotifications: _openMessages,
                   onProfile: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const ProfileScreen())),
                 ),
                 const SizedBox(height: 24),
                 if (homeowner)
                   _HomeownerProjects(
-                    firstName: user.fullName.split(' ').first,
                     showProjectList: _selectedTab == 1,
                     onViewProjects: () => setState(() => _selectedTab = 1),
                   )
-                else ...[
-                  const _SystemStrip(),
-                  const SizedBox(height: 16),
-                  const _PowerHero(),
-                  const SizedBox(height: 14),
-                  const Row(children: [
-                    Expanded(child: _BatteryCard()),
-                    SizedBox(width: 12),
-                    Expanded(child: _SavingsCard()),
-                  ]),
-                  const SizedBox(height: 14),
-                  const _EnergyFlowCard(),
-                  const SizedBox(height: 14),
-                  const _GenerationCard(),
-                ],
-                if (!homeowner || _selectedTab == 0) const SizedBox(height: 22),
-                if (!homeowner || _selectedTab == 0)
+                else
+                  StaffDashboard(roles: user.roles, name: user.fullName),
+                if (!homeowner) const SizedBox(height: 22),
+                if (!homeowner)
                   const Text('Quick actions',
                       style: TextStyle(
                           color: _text,
                           fontSize: 18,
                           fontWeight: FontWeight.w700)),
-                if (!homeowner || _selectedTab == 0) const SizedBox(height: 12),
-                if (homeowner && _selectedTab == 0)
-                  _ActionTile(
-                    icon: Icons.add_home_work_outlined,
-                    title: 'Create a new survey',
-                    subtitle: 'Start another solar assessment',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const SurveyScreen())),
-                  ),
+                if (!homeowner) const SizedBox(height: 12),
                 if (fieldStaff)
                   _ActionTile(
                     icon: Icons.engineering_rounded,
@@ -174,21 +133,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const CustomerLocationsScreen())),
                   ),
-                if (!homeowner || _selectedTab == 0)
+                if (!homeowner)
                   _ActionTile(
                     icon: Icons.person_outline_rounded,
                     title: 'Profile & security',
                     subtitle: 'Manage your account information',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const ProfileScreen())),
-                  ),
-                if (!homeowner || _selectedTab == 0) const SizedBox(height: 10),
-                if (!homeowner || _selectedTab == 0)
-                  TextButton.icon(
-                    onPressed: () => _signOut(context, auth),
-                    icon: const Icon(Icons.logout_rounded, size: 18),
-                    label: const Text('Sign out'),
-                    style: TextButton.styleFrom(foregroundColor: _muted),
                   ),
               ]),
             ),
@@ -213,44 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Future<void> _signOut(BuildContext context, AuthProvider auth) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: _panel,
-        title: const Text('Sign out', style: TextStyle(color: _text)),
-        content: const Text('Are you sure you want to sign out of Smart Solar?',
-            style: TextStyle(color: _muted)),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Sign out')),
-        ],
-      ),
-    );
-    if (confirmed == true && context.mounted) {
-      await auth.logout();
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-            (_) => false);
-      }
-    }
-  }
 }
 
 class _HomeownerProjects extends StatefulWidget {
-  final String firstName;
   final bool showProjectList;
   final VoidCallback onViewProjects;
   const _HomeownerProjects(
-      {required this.firstName,
-      required this.showProjectList,
-      required this.onViewProjects});
+      {required this.showProjectList, required this.onViewProjects});
 
   @override
   State<_HomeownerProjects> createState() => _HomeownerProjectsState();
@@ -327,87 +247,40 @@ class _HomeownerProjectsState extends State<_HomeownerProjects> {
     }).length;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (!widget.showProjectList)
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [SolarColors.primary, Color(0xFF214F50)],
-            ),
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x28173E44),
-                  blurRadius: 24,
-                  offset: Offset(0, 10)),
-            ],
+      if (!widget.showProjectList) ...[
+        if (_loading && _projects.isEmpty)
+          const _ProjectsLoading()
+        else if (_error != null)
+          _ProjectsError(message: _error!, onRetry: _loadProjects)
+        else
+          _FeaturedProject(
+            survey: _projects.isEmpty ? null : _projects.first,
+            onOpen: _projects.isEmpty
+                ? _openSurveys
+                : () => _openProject(_projects.first),
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                  color: _gold, borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.solar_power_rounded,
-                  color: SolarColors.primary, size: 25),
-            ),
-            const SizedBox(height: 18),
-            Text('Hello ${widget.firstName},',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 5),
-            const Text('Your solar journey',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 27,
-                    height: 1.12,
-                    fontWeight: FontWeight.w800)),
-            const SizedBox(height: 9),
-            const Text(
-                'Track every submitted site survey and continue your installation from one place.',
-                style: TextStyle(
-                    color: Color(0xFFD8E7E4), fontSize: 12, height: 1.5)),
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              onPressed: _openSurveys,
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Start a new survey'),
-              style: FilledButton.styleFrom(
-                backgroundColor: _gold,
-                foregroundColor: SolarColors.primary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                textStyle: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-            ),
-          ]),
-        ),
+      ],
       const SizedBox(height: 16),
       Row(children: [
         Expanded(
             child: _ProjectMetric(
                 icon: Icons.folder_copy_outlined,
-                value: '${_projects.length}',
+                value: _loading || _error != null ? '?' : '${_projects.length}',
                 label: 'Total projects',
                 color: SolarColors.primary)),
         const SizedBox(width: 10),
         Expanded(
             child: _ProjectMetric(
                 icon: Icons.autorenew_rounded,
-                value: '$processing',
-                label: 'In progress',
+                value: _loading || _error != null ? '?' : '$processing',
+                label: 'In review',
                 color: _cyan)),
         const SizedBox(width: 10),
         Expanded(
             child: _ProjectMetric(
                 icon: Icons.task_alt_rounded,
-                value: '$ready',
-                label: 'Ready',
+                value: _loading || _error != null ? '?' : '$ready',
+                label: 'Proposal ready',
                 color: _gold)),
       ]),
       if (widget.showProjectList) ...[
@@ -450,430 +323,171 @@ class _HomeownerProjectsState extends State<_HomeownerProjects> {
             style: TextButton.styleFrom(foregroundColor: SolarColors.primary),
           ),
         ],
-      ] else
-        _DashboardInsights(
-          projects: _projects,
-          totalProjects: _projects.length,
-          processingProjects: processing,
-          readyProjects: ready,
-          onCreateSurvey: _openSurveys,
-          onViewProjects: widget.onViewProjects,
-        ),
+      ] else ...[
+        const SizedBox(height: 22),
+        const Text('Quick actions',
+            style: TextStyle(
+                color: _text, fontSize: 18, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        _ActionTile(
+            icon: Icons.add_home_work_outlined,
+            title: 'New survey',
+            subtitle: 'Assess another property',
+            onTap: _openSurveys),
+        _ActionTile(
+            icon: Icons.folder_open_outlined,
+            title: 'My projects',
+            subtitle: 'View all submitted assessments',
+            onTap: widget.onViewProjects),
+        _ActionTile(
+            icon: Icons.chat_bubble_outline_rounded,
+            title: 'Contact your team',
+            subtitle: 'Get help with your solar project',
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChatInboxScreen()))),
+      ],
     ]);
   }
 }
 
-class _DashboardInsights extends StatelessWidget {
-  final List<SolarSurvey> projects;
-  final int totalProjects;
-  final int processingProjects;
-  final int readyProjects;
-  final VoidCallback onCreateSurvey;
-  final VoidCallback onViewProjects;
-  const _DashboardInsights({
-    required this.projects,
-    required this.totalProjects,
-    required this.processingProjects,
-    required this.readyProjects,
-    required this.onCreateSurvey,
-    required this.onViewProjects,
-  });
+class _FeaturedProject extends StatelessWidget {
+  final SolarSurvey? survey;
+  final VoidCallback onOpen;
+  const _FeaturedProject({required this.survey, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
-    final title = totalProjects == 0
-        ? 'Start your first assessment'
-        : readyProjects > 0
-            ? '$readyProjects project${readyProjects == 1 ? '' : 's'} ready for review'
-            : processingProjects > 0
-                ? 'Your solar analysis is in progress'
-                : 'Create your next solar project';
-    final description = totalProjects == 0
-        ? 'Submit your electricity usage, roof area and address to receive a personalised solar recommendation.'
-        : readyProjects > 0
-            ? 'Open My Projects to review the recommendations and continue with a proposal.'
-            : processingProjects > 0
-                ? 'We are preparing your system recommendation. You can track its live status in My Projects.'
-                : 'Use a new survey whenever you want to assess another property.';
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const SizedBox(height: 20),
-      _Glass(
-        padding: const EdgeInsets.all(18),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                  color: const Color(0x1872B83E),
-                  borderRadius: BorderRadius.circular(13)),
-              child: Icon(
-                  readyProjects > 0
-                      ? Icons.task_alt_rounded
-                      : processingProjects > 0
-                          ? Icons.auto_awesome_rounded
-                          : Icons.wb_sunny_outlined,
-                  color: _gold,
-                  size: 22),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text('YOUR NEXT STEP',
-                  style: TextStyle(
-                      color: _muted,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.1)),
-            ),
-          ]),
-          const SizedBox(height: 14),
-          Text(title,
-              style: const TextStyle(
-                  color: _text, fontSize: 17, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          Text(description,
-              style: const TextStyle(color: _muted, fontSize: 11, height: 1.5)),
-          const SizedBox(height: 15),
-          FilledButton.icon(
-            onPressed: readyProjects > 0 || processingProjects > 0
-                ? onViewProjects
-                : onCreateSurvey,
-            icon: Icon(
-                readyProjects > 0 || processingProjects > 0
-                    ? Icons.folder_open_outlined
-                    : Icons.add_rounded,
-                size: 18),
-            label: Text(readyProjects > 0 || processingProjects > 0
-                ? 'Open My Projects'
-                : 'Create survey'),
-            style: FilledButton.styleFrom(
-                backgroundColor: SolarColors.primary,
-                foregroundColor: Colors.white),
-          ),
-        ]),
+    final project = survey;
+    final status = project?.surveyStatus.toUpperCase();
+    final proposalReady =
+        ['ANALYSISCOMPLETE', 'APPROVED', 'COMPLETED'].contains(status);
+    // These stages describe survey processing; approval is not installation completion.
+    final stage = switch (status) {
+      'SUBMITTED' || 'PROCESSING' || 'UNDERREVIEW' => 1,
+      'ANALYSISCOMPLETE' => 2,
+      'APPROVED' || 'COMPLETED' => 3,
+      _ => null,
+    };
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [SolarColors.primary, SolarColors.heroEnd]),
       ),
-      const SizedBox(height: 14),
-      _ProjectProgressChart(
-        total: totalProjects,
-        processing: processingProjects,
-        ready: readyProjects,
-      ),
-      const SizedBox(height: 14),
-      _EnergyUsageChart(projects: projects),
-      const SizedBox(height: 14),
-      const _Glass(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('How your project moves forward',
-              style: TextStyle(
-                  color: _text, fontSize: 15, fontWeight: FontWeight.w800)),
-          SizedBox(height: 16),
-          _JourneyStep(
-              number: '1',
-              title: 'Submit survey',
-              subtitle: 'Tell us about your property and energy needs.'),
-          _JourneyLine(),
-          _JourneyStep(
-              number: '2',
-              title: 'Review recommendation',
-              subtitle: 'See suggested system size and panel count.'),
-          _JourneyLine(),
-          _JourneyStep(
-              number: '3',
-              title: 'Continue to proposal',
-              subtitle: 'Track engineering review and project approval.'),
-        ]),
-      ),
-    ]);
-  }
-}
-
-class _ProjectProgressChart extends StatelessWidget {
-  final int total;
-  final int processing;
-  final int ready;
-  const _ProjectProgressChart(
-      {required this.total, required this.processing, required this.ready});
-
-  @override
-  Widget build(BuildContext context) {
-    final other = math.max(0, total - processing - ready);
-    return _Glass(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Row(children: [
+          Icon(Icons.solar_power_rounded,
+              color: SolarColors.heroAccent, size: 24),
+          SizedBox(width: 10),
           Expanded(
-              child: Text('Project progress',
+              child: Text('YOUR SOLAR PROJECT',
                   style: TextStyle(
-                      color: _text,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800))),
-          Icon(Icons.donut_large_rounded, color: _cyan, size: 19),
-        ]),
-        const SizedBox(height: 4),
-        const Text('Current status of your submitted surveys',
-            style: TextStyle(color: _muted, fontSize: 10)),
-        const SizedBox(height: 17),
-        Row(children: [
-          SizedBox(
-            width: 112,
-            height: 112,
-            child: CustomPaint(
-              painter: _ProjectDonutPainter(
-                  total: total, processing: processing, ready: ready),
-              child: Center(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text('$total',
-                      style: const TextStyle(
-                          color: _text,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w800)),
-                  const Text('PROJECTS',
-                      style: TextStyle(
-                          color: _muted,
-                          fontSize: 7,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: .8)),
-                ]),
-              ),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(children: [
-              _ChartLegend(
-                  color: _cyan, label: 'Ready', value: ready.toString()),
-              const SizedBox(height: 11),
-              _ChartLegend(
-                  color: const Color(0xFFE09A10),
-                  label: 'In progress',
-                  value: processing.toString()),
-              const SizedBox(height: 11),
-              _ChartLegend(
-                  color: _line, label: 'Other', value: other.toString()),
-            ]),
-          ),
-        ]),
-      ]),
-    );
-  }
-}
-
-class _ChartLegend extends StatelessWidget {
-  final Color color;
-  final String label;
-  final String value;
-  const _ChartLegend(
-      {required this.color, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) => Row(children: [
-        Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
-        Expanded(
-            child: Text(label,
-                style: const TextStyle(color: _muted, fontSize: 10))),
-        Text(value,
-            style: const TextStyle(
-                color: _text, fontSize: 11, fontWeight: FontWeight.w800)),
-      ]);
-}
-
-class _ProjectDonutPainter extends CustomPainter {
-  final int total;
-  final int processing;
-  final int ready;
-  const _ProjectDonutPainter(
-      {required this.total, required this.processing, required this.ready});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final base = Paint()
-      ..color = _line
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12;
-    canvas.drawArc(rect.deflate(8), -.5 * math.pi, 2 * math.pi, false, base);
-    if (total <= 0) return;
-
-    const gap = .07;
-    var start = -.5 * math.pi;
-    void drawSection(int value, Color color) {
-      if (value <= 0) return;
-      final sweep = (2 * math.pi * value / total) - gap;
-      canvas.drawArc(
-          rect.deflate(8),
-          start,
-          math.max(.02, sweep).toDouble(),
-          false,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 12
-            ..strokeCap = StrokeCap.round);
-      start += 2 * math.pi * value / total;
-    }
-
-    drawSection(ready, _cyan);
-    drawSection(processing, const Color(0xFFE09A10));
-  }
-
-  @override
-  bool shouldRepaint(covariant _ProjectDonutPainter oldDelegate) =>
-      oldDelegate.total != total ||
-      oldDelegate.processing != processing ||
-      oldDelegate.ready != ready;
-}
-
-class _EnergyUsageChart extends StatelessWidget {
-  final List<SolarSurvey> projects;
-  const _EnergyUsageChart({required this.projects});
-
-  @override
-  Widget build(BuildContext context) {
-    final visible = projects.take(5).toList();
-    final values = visible.map((project) => project.monthlyKwh).toList();
-    final average =
-        values.isEmpty ? 0.0 : values.reduce((a, b) => a + b) / values.length;
-    return _Glass(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Energy profile',
-                  style: TextStyle(
-                      color: _text, fontSize: 15, fontWeight: FontWeight.w800)),
-              SizedBox(height: 4),
-              Text('Monthly usage across recent projects',
-                  style: TextStyle(color: _muted, fontSize: 10)),
-            ]),
-          ),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(average == 0 ? '—' : average.toStringAsFixed(0),
-                style: const TextStyle(
-                    color: _text, fontSize: 18, fontWeight: FontWeight.w800)),
-            const Text('AVG kWh',
-                style: TextStyle(
-                    color: _muted, fontSize: 7, fontWeight: FontWeight.w700)),
-          ]),
+                      color: SolarColors.heroText,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1)))
         ]),
         const SizedBox(height: 18),
-        if (values.isEmpty)
-          Container(
-            height: 105,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: _bg, borderRadius: BorderRadius.circular(13)),
-            child: const Text('Create a survey to see your energy chart',
-                style: TextStyle(color: _muted, fontSize: 10)),
-          )
-        else ...[
-          SizedBox(
-            height: 105,
-            width: double.infinity,
-            child: CustomPaint(painter: _UsageBarPainter(values)),
-          ),
-          const SizedBox(height: 7),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(values.length, (index) {
-              final reference = visible[index].id;
-              return Text(
-                  reference.length > 4
-                      ? '#${reference.substring(0, 4)}'
-                      : '#$reference',
-                  style: const TextStyle(color: _muted, fontSize: 8));
-            }),
-          ),
+        Text(
+            project == null
+                ? 'Start your solar journey'
+                : project.propertyAddress.isEmpty
+                    ? 'Your current solar project'
+                    : project.propertyAddress,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                height: 1.2,
+                fontWeight: FontWeight.w800)),
+        const SizedBox(height: 10),
+        Text(
+            project == null
+                ? 'Tell us about your property and electricity usage to receive a personalised solar recommendation.'
+                : _friendlyProjectStatus(project.surveyStatus),
+            style: const TextStyle(
+                color: SolarColors.heroText, fontSize: 14, height: 1.5)),
+        if (project != null) ...[
+          const SizedBox(height: 12),
+          Text(
+              '${project.monthlyKwh.toStringAsFixed(0)} kWh / month${project.recommendedKw == null ? '' : ' ? ${project.recommendedKw!.toStringAsFixed(1)} kW recommended'}',
+              style:
+                  const TextStyle(color: SolarColors.heroText, fontSize: 13)),
+          if (stage != null) ...[
+            const SizedBox(height: 20),
+            Semantics(
+                label:
+                    'Project progress: ${_friendlyProjectStatus(project.surveyStatus)}',
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var i = 0; i < 4; i++)
+                        Expanded(
+                            child: Padding(
+                                padding: EdgeInsets.only(right: i == 3 ? 0 : 8),
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                              color: i <= stage
+                                                  ? SolarColors.heroAccent
+                                                  : Colors.white24,
+                                              borderRadius:
+                                                  BorderRadius.circular(4))),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                          [
+                                            'Submitted',
+                                            'In review',
+                                            'Proposal',
+                                            'Approved'
+                                          ][i],
+                                          style: TextStyle(
+                                              color: i <= stage
+                                                  ? Colors.white
+                                                  : SolarColors.heroText,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600)),
+                                    ]))),
+                    ])),
+          ],
+          const SizedBox(height: 12),
+          Text(
+              status == 'FAILED'
+                  ? 'Your assessment needs attention. Open surveys to review it.'
+                  : proposalReady
+                      ? 'Your recommendation is available. Open your proposal to see the details.'
+                      : 'Your assessment is being reviewed. Open surveys to check its status.',
+              style: const TextStyle(
+                  color: SolarColors.heroText, fontSize: 13, height: 1.5)),
         ],
+        const SizedBox(height: 20),
+        FilledButton.icon(
+            onPressed: onOpen,
+            icon: Icon(
+                project == null
+                    ? Icons.add_rounded
+                    : Icons.arrow_forward_rounded,
+                size: 18),
+            label: Text(project == null
+                ? 'Start your first survey'
+                : proposalReady
+                    ? 'View proposal'
+                    : 'View survey status'),
+            style: FilledButton.styleFrom(
+                backgroundColor: SolarColors.heroAccent,
+                foregroundColor: SolarColors.primary,
+                textStyle: const TextStyle(fontWeight: FontWeight.w800))),
       ]),
     );
   }
-}
-
-class _UsageBarPainter extends CustomPainter {
-  final List<double> values;
-  const _UsageBarPainter(this.values);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = _line
-      ..strokeWidth = 1;
-    for (var i = 0; i < 3; i++) {
-      final y = size.height * i / 2;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-    final maxValue = values.fold<double>(1, math.max);
-    final slot = size.width / values.length;
-    final width = math.min(28.0, slot * .46).toDouble();
-    for (var i = 0; i < values.length; i++) {
-      final height =
-          math.max(8.0, size.height * values[i] / maxValue).toDouble();
-      final left = slot * i + (slot - width) / 2;
-      final rect = RRect.fromRectAndRadius(
-          Rect.fromLTWH(left, size.height - height, width, height),
-          const Radius.circular(7));
-      canvas.drawRRect(
-          rect,
-          Paint()
-            ..shader = const LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [_cyan, _gold]).createShader(rect.outerRect));
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _UsageBarPainter oldDelegate) =>
-      oldDelegate.values != values;
-}
-
-class _JourneyStep extends StatelessWidget {
-  final String number;
-  final String title;
-  final String subtitle;
-  const _JourneyStep(
-      {required this.number, required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) => Row(children: [
-        CircleAvatar(
-          radius: 15,
-          backgroundColor: SolarColors.primary,
-          child: Text(number,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800)),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title,
-                style: const TextStyle(
-                    color: _text, fontSize: 12, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(color: _muted, fontSize: 10)),
-          ]),
-        ),
-      ]);
-}
-
-class _JourneyLine extends StatelessWidget {
-  const _JourneyLine();
-  @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.only(left: 14),
-        child: SizedBox(
-          height: 15,
-          child: VerticalDivider(color: _line, width: 1, thickness: 1),
-        ),
-      );
 }
 
 class _ProjectMetric extends StatelessWidget {
@@ -947,7 +561,10 @@ class _ProjectCard extends StatelessWidget {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(survey.projectName,
+                        Text(
+                            survey.propertyAddress.isEmpty
+                                ? 'Solar project'
+                                : survey.propertyAddress,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -1103,7 +720,7 @@ Color _projectStatusColor(String rawStatus) {
     case 'SUBMITTED':
     case 'PROCESSING':
     case 'UNDERREVIEW':
-      return const Color(0xFFE09A10);
+      return SolarColors.warning;
     default:
       return _muted;
   }
@@ -1121,8 +738,18 @@ class _Header extends StatelessWidget {
       required this.unreadMessages});
   @override
   Widget build(BuildContext context) => Row(children: [
-        const SolarBrand(size: 18),
-        const Spacer(),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const SolarBrand(size: 16),
+          const SizedBox(height: 5),
+          Text(
+              'Hello, ${name.trim().isEmpty ? 'there' : name.trim().split(' ').first}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  color: _text, fontSize: 16, fontWeight: FontWeight.w700)),
+        ])),
         Stack(clipBehavior: Clip.none, children: [
           IconButton(
               tooltip: 'Messages & notifications',
@@ -1157,9 +784,14 @@ class _Header extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: _line)),
             child: Row(children: [
-              Text(name.split(' ').first,
-                  style: const TextStyle(
-                      color: _text, fontSize: 12, fontWeight: FontWeight.w600)),
+              ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 80),
+                  child: Text(name.trim().split(' ').first,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          color: _text,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600))),
               const SizedBox(width: 8),
               const CircleAvatar(
                   radius: 14,
@@ -1169,385 +801,6 @@ class _Header extends StatelessWidget {
           ),
         ),
       ]);
-}
-
-class _SystemStrip extends StatelessWidget {
-  const _SystemStrip();
-  @override
-  Widget build(BuildContext context) => const Row(children: [
-        Expanded(
-            child: _MiniStatus(
-                icon: Icons.check_circle_rounded,
-                color: _cyan,
-                label: 'SYSTEM',
-                value: 'All healthy')),
-        SizedBox(width: 10),
-        Expanded(
-            child: _MiniStatus(
-                icon: Icons.wb_sunny_rounded,
-                color: _gold,
-                label: 'IRRADIANCE',
-                value: '0.82 kW/m²')),
-      ]);
-}
-
-class _MiniStatus extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
-  final String value;
-  const _MiniStatus(
-      {required this.icon,
-      required this.color,
-      required this.label,
-      required this.value});
-  @override
-  Widget build(BuildContext context) => _Glass(
-        padding: const EdgeInsets.all(13),
-        child: Row(children: [
-          Icon(icon, color: color, size: 18),
-          const SizedBox(width: 9),
-          Expanded(
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                Text(label,
-                    style: const TextStyle(
-                        color: _muted,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1)),
-                const SizedBox(height: 3),
-                Text(value,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                        color: _text,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700)),
-              ])),
-        ]),
-      );
-}
-
-class _PowerHero extends StatelessWidget {
-  const _PowerHero();
-  @override
-  Widget build(BuildContext context) => Container(
-        height: 246,
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25),
-          gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFF2F8EF), _panel, Color(0xFFE7F3E1)]),
-          border: Border.all(color: const Color(0x6672B83E)),
-          boxShadow: const [
-            BoxShadow(
-                color: Color(0x1A173E44), blurRadius: 26, offset: Offset(0, 10))
-          ],
-        ),
-        child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                Text('CURRENT POWER OUTPUT',
-                    style: TextStyle(
-                        color: _muted,
-                        fontSize: 10,
-                        letterSpacing: 1.3,
-                        fontWeight: FontWeight.w700)),
-                Spacer(),
-                _LivePill(),
-              ]),
-              SizedBox(height: 12),
-              Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text('4.82',
-                    style: TextStyle(
-                        color: _text,
-                        fontSize: 46,
-                        height: 1,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -2)),
-                Padding(
-                    padding: EdgeInsets.only(left: 7, bottom: 5),
-                    child: Text('kW',
-                        style: TextStyle(
-                            color: _gold,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700))),
-                Spacer(),
-                Padding(
-                    padding: EdgeInsets.only(bottom: 6),
-                    child: Text('↑ 12.4%',
-                        style: TextStyle(
-                            color: _cyan,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700))),
-              ]),
-              SizedBox(height: 10),
-              Expanded(
-                  child: CustomPaint(
-                      painter: _LineChartPainter(), size: Size.infinite)),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text('6 AM', style: TextStyle(color: _muted, fontSize: 9)),
-                Text('12 PM', style: TextStyle(color: _muted, fontSize: 9)),
-                Text('6 PM', style: TextStyle(color: _muted, fontSize: 9)),
-              ]),
-            ]),
-      );
-}
-
-class _LivePill extends StatelessWidget {
-  const _LivePill();
-  @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        decoration: BoxDecoration(
-            color: const Color(0x16087D75),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0x44087D75))),
-        child: const Row(children: [
-          CircleAvatar(radius: 3, backgroundColor: _cyan),
-          SizedBox(width: 6),
-          Text('LIVE',
-              style: TextStyle(
-                  color: _cyan, fontSize: 9, fontWeight: FontWeight.w800))
-        ]),
-      );
-}
-
-class _BatteryCard extends StatelessWidget {
-  const _BatteryCard();
-  @override
-  Widget build(BuildContext context) => const _Glass(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Icon(Icons.battery_charging_full_rounded, color: _cyan, size: 18),
-            SizedBox(width: 7),
-            Text('BATTERY',
-                style: TextStyle(
-                    color: _muted,
-                    fontSize: 9,
-                    letterSpacing: 1.1,
-                    fontWeight: FontWeight.w700))
-          ]),
-          SizedBox(height: 14),
-          Center(
-              child: SizedBox(
-                  width: 92,
-                  height: 92,
-                  child: CustomPaint(
-                      painter: _RingPainter(.76),
-                      child: Center(
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text('76%',
-                            style: TextStyle(
-                                color: _text,
-                                fontSize: 23,
-                                fontWeight: FontWeight.w800)),
-                        Text('CHARGING',
-                            style: TextStyle(
-                                color: _cyan, fontSize: 7, letterSpacing: .8))
-                      ]))))),
-          SizedBox(height: 11),
-          Center(
-              child: Text('3h 20m until full',
-                  style: TextStyle(color: _muted, fontSize: 10))),
-        ]),
-      );
-}
-
-class _SavingsCard extends StatelessWidget {
-  const _SavingsCard();
-  @override
-  Widget build(BuildContext context) => _Glass(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Row(children: [
-            Icon(Icons.savings_outlined, color: _gold, size: 18),
-            SizedBox(width: 7),
-            Text('THIS MONTH',
-                style: TextStyle(
-                    color: _muted,
-                    fontSize: 9,
-                    letterSpacing: 1.1,
-                    fontWeight: FontWeight.w700))
-          ]),
-          const SizedBox(height: 19),
-          const Text('LKR 18,420',
-              style: TextStyle(
-                  color: _text,
-                  fontSize: 21,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -.6)),
-          const SizedBox(height: 5),
-          const Text('estimated savings',
-              style: TextStyle(color: _muted, fontSize: 10)),
-          const SizedBox(height: 18),
-          ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: const LinearProgressIndicator(
-                  value: .68,
-                  minHeight: 7,
-                  backgroundColor: _line,
-                  valueColor: AlwaysStoppedAnimation(_gold))),
-          const SizedBox(height: 11),
-          const Text('68% self-powered',
-              style: TextStyle(
-                  color: _gold, fontSize: 10, fontWeight: FontWeight.w700)),
-        ]),
-      );
-}
-
-class _EnergyFlowCard extends StatelessWidget {
-  const _EnergyFlowCard();
-  @override
-  Widget build(BuildContext context) => const _Glass(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Text('Energy flow',
-                style: TextStyle(
-                    color: _text, fontSize: 16, fontWeight: FontWeight.w700)),
-            Spacer(),
-            Text('Real time', style: TextStyle(color: _cyan, fontSize: 10))
-          ]),
-          SizedBox(height: 22),
-          Row(children: [
-            Expanded(
-                child: _FlowNode(
-                    icon: Icons.solar_power_rounded,
-                    label: 'SOLAR',
-                    value: '4.82 kW',
-                    color: _gold)),
-            _FlowArrow(),
-            Expanded(
-                child: _FlowNode(
-                    icon: Icons.battery_charging_full_rounded,
-                    label: 'BATTERY',
-                    value: '+1.20 kW',
-                    color: _cyan)),
-            _FlowArrow(),
-            Expanded(
-                child: _FlowNode(
-                    icon: Icons.home_rounded,
-                    label: 'HOME',
-                    value: '3.62 kW',
-                    color: SolarColors.primary)),
-          ]),
-        ]),
-      );
-}
-
-class _FlowNode extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-  const _FlowNode(
-      {required this.icon,
-      required this.label,
-      required this.value,
-      required this.color});
-  @override
-  Widget build(BuildContext context) => Column(children: [
-        Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-                color: color.withValues(alpha: .1),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: color.withValues(alpha: .4))),
-            child: Icon(icon, color: color, size: 24)),
-        const SizedBox(height: 9),
-        Text(label,
-            style:
-                const TextStyle(color: _muted, fontSize: 8, letterSpacing: 1)),
-        const SizedBox(height: 3),
-        Text(value,
-            style: const TextStyle(
-                color: _text, fontSize: 10, fontWeight: FontWeight.w700)),
-      ]);
-}
-
-class _FlowArrow extends StatelessWidget {
-  const _FlowArrow();
-  @override
-  Widget build(BuildContext context) => const Padding(
-      padding: EdgeInsets.only(bottom: 32),
-      child: Icon(Icons.arrow_forward_rounded, color: _cyan, size: 17));
-}
-
-class _GenerationCard extends StatelessWidget {
-  const _GenerationCard();
-  @override
-  Widget build(BuildContext context) => _Glass(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Row(children: [
-            Text('Generation vs grid',
-                style: TextStyle(
-                    color: _text, fontSize: 16, fontWeight: FontWeight.w700)),
-            Spacer(),
-            Text('LAST 7 DAYS',
-                style: TextStyle(color: _muted, fontSize: 8, letterSpacing: 1))
-          ]),
-          const SizedBox(height: 18),
-          SizedBox(
-              height: 112,
-              child: LayoutBuilder(builder: (context, constraints) {
-                const solar = [66.0, 78.0, 58.0, 88.0, 73.0, 94.0, 82.0];
-                const grid = [28.0, 22.0, 35.0, 18.0, 27.0, 13.0, 20.0];
-                const tallestValue = 94.0;
-                final availableBarHeight = constraints.maxHeight - 18;
-
-                double scaledHeight(double value) =>
-                    value / tallestValue * availableBarHeight;
-
-                return Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(7, (i) {
-                      return Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Container(
-                                      width: 8,
-                                      height: scaledHeight(solar[i]),
-                                      decoration: BoxDecoration(
-                                          color: _gold,
-                                          borderRadius:
-                                              BorderRadius.circular(6))),
-                                  const SizedBox(width: 3),
-                                  Container(
-                                      width: 8,
-                                      height: scaledHeight(grid[i]),
-                                      decoration: BoxDecoration(
-                                          color: _cyan,
-                                          borderRadius:
-                                              BorderRadius.circular(6))),
-                                ]),
-                            const SizedBox(height: 6),
-                            Text(['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-                                style: const TextStyle(
-                                    color: _muted, fontSize: 8)),
-                          ]);
-                    }));
-              })),
-          const SizedBox(height: 13),
-          const Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            CircleAvatar(radius: 3, backgroundColor: _gold),
-            SizedBox(width: 5),
-            Text('Solar', style: TextStyle(color: _muted, fontSize: 9)),
-            SizedBox(width: 16),
-            CircleAvatar(radius: 3, backgroundColor: _cyan),
-            SizedBox(width: 5),
-            Text('Grid', style: TextStyle(color: _muted, fontSize: 9))
-          ]),
-        ]),
-      );
 }
 
 class _ActionTile extends StatelessWidget {
@@ -1658,7 +911,7 @@ class _BottomNav extends StatelessWidget {
                 children: [
                   _NavItem(
                       icon: Icons.dashboard_rounded,
-                      label: 'Dashboard',
+                      label: 'Home',
                       selected: selectedIndex == 0,
                       onTap: onDashboard),
                   if (homeowner) ...[
@@ -1733,108 +986,38 @@ class _NavItem extends StatelessWidget {
       this.onTap});
   @override
   Widget build(BuildContext context) => Expanded(
-        child: InkWell(
-          onTap: onTap,
+        child: Material(
+          color: selected ? SolarColors.surfaceSoft : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Badge(
-                  isLabelVisible: badgeCount > 0,
-                  label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
-                  backgroundColor: SolarColors.error,
-                  child: Icon(icon, color: selected ? _gold : _muted, size: 21),
-                ),
-                const SizedBox(height: 4),
-                Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: selected ? _gold : _muted,
-                        fontSize: 9,
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w500))
-              ]),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Badge(
+                    isLabelVisible: badgeCount > 0,
+                    label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+                    backgroundColor: SolarColors.error,
+                    child: Icon(icon,
+                        color: selected ? SolarColors.primary : _muted,
+                        size: 21),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: selected ? SolarColors.primary : _muted,
+                          fontSize: 11,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w500))
+                ]),
+              ),
             ),
           ),
         ),
       );
-}
-
-class _LineChartPainter extends CustomPainter {
-  const _LineChartPainter();
-  @override
-  void paint(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = _line
-      ..strokeWidth = 1;
-    for (var i = 1; i < 4; i++) {
-      final y = size.height * i / 4;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-    final values = [.08, .16, .28, .45, .66, .58, .79, .72, .91, .78, .64, .42];
-    final path = Path();
-    for (var i = 0; i < values.length; i++) {
-      final p = Offset(
-          size.width * i / (values.length - 1), size.height * (1 - values[i]));
-      i == 0 ? path.moveTo(p.dx, p.dy) : path.lineTo(p.dx, p.dy);
-    }
-    final fill = Path.from(path)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
-      ..close();
-    canvas.drawPath(
-        fill,
-        Paint()
-          ..shader = const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0x5572B83E), Color(0x0072B83E)])
-              .createShader(Offset.zero & size));
-    canvas.drawPath(
-        path,
-        Paint()
-          ..color = _gold
-          ..strokeWidth = 2.4
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _RingPainter extends CustomPainter {
-  final double value;
-  const _RingPainter(this.value);
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    canvas.drawArc(
-        rect.deflate(7),
-        -.5 * math.pi,
-        2 * math.pi,
-        false,
-        Paint()
-          ..color = _line
-          ..strokeWidth = 8
-          ..style = PaintingStyle.stroke);
-    canvas.drawArc(
-        rect.deflate(7),
-        -.5 * math.pi,
-        2 * math.pi * value,
-        false,
-        Paint()
-          ..color = _cyan
-          ..strokeWidth = 8
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round);
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
-      oldDelegate.value != value;
 }

@@ -136,7 +136,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [SolarColors.primary, Color(0xFF214F50)],
+                    colors: [SolarColors.primary, SolarColors.heroEnd],
                   ),
                   boxShadow: const [
                     BoxShadow(
@@ -165,20 +165,16 @@ class _ProposalScreenState extends State<ProposalScreen> {
                               children: [
                                 const Text('SOLAR PROJECT',
                                     style: TextStyle(
-                                        color: Color(0xFFD8E7E4),
+                                        color: SolarColors.heroText,
                                         fontSize: 8,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 1.1)),
                                 const SizedBox(height: 3),
-                                Text(proposal.projectName,
+                                Text('Proposal #$reference',
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 17,
                                         fontWeight: FontWeight.w800)),
-                                Text('Proposal #$reference',
-                                    style: const TextStyle(
-                                        color: Color(0xFFD8E7E4),
-                                        fontSize: 10)),
                               ]),
                         ),
                         StatusBadge(
@@ -189,7 +185,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                       const SizedBox(height: 22),
                       const Text('Estimated project cost',
                           style: TextStyle(
-                              color: Color(0xFFD8E7E4), fontSize: 10)),
+                              color: SolarColors.heroText, fontSize: 10)),
                       const SizedBox(height: 3),
                       Text(_formatLkr(proposal.estimatedCostLkr),
                           style: const TextStyle(
@@ -212,7 +208,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                             child: Text(
                                 'Final pricing is confirmed after engineering and site review.',
                                 style: TextStyle(
-                                    color: Color(0xFFD8E7E4),
+                                    color: SolarColors.heroText,
                                     fontSize: 9,
                                     height: 1.35)),
                           ),
@@ -243,7 +239,7 @@ class _ProposalScreenState extends State<ProposalScreen> {
                       icon: Icons.electrical_services_rounded,
                       label: 'INVERTER',
                       value: '${proposal.inverterSizeKw} kW',
-                      color: const Color(0xFF087D75)),
+                      color: SolarColors.primary),
                   _ProjectSpec(
                       icon: Icons.health_and_safety_outlined,
                       label: 'RISK',

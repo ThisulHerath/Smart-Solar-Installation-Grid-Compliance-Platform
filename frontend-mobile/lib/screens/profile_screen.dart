@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                   gradient: const LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [SolarColors.primary, Color(0xFF214F50)],
+                    colors: [SolarColors.primary, SolarColors.heroEnd],
                   ),
                   boxShadow: const [
                     BoxShadow(
@@ -89,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
                   Text(user.email,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                          color: Color(0xFFD8E7E4), fontSize: 11)),
+                          color: SolarColors.heroText, fontSize: 11)),
                   const SizedBox(height: 13),
                   Wrap(
                     alignment: WrapAlignment.center,

@@ -2,20 +2,26 @@ import 'package:flutter/material.dart';
 
 class SolarColors {
   // Shared with the React website's public and workspace palettes.
-  static const background = Color(0xFFF6F8F5);
+  static const background = Color(0xFFF8FAF7);
   static const surface = Color(0xFFFFFFFF);
-  static const surfaceSoft = Color(0xFFEEF4ED);
-  static const primary = Color(0xFF07536A);
+  static const surfaceSoft = Color(0xFFEFF6E8);
+  static const primary = Color(0xFF0A5569);
   static const onPrimary = Color(0xFFFFFFFF);
-  static const lime = Color(0xFF72B83E);
-  static const limeDark = Color(0xFF5F9F31);
-  static const text = Color(0xFF304143);
-  static const muted = Color(0xFF687A7C);
-  static const border = Color(0xFFDCE7D8);
-  static const success = Color(0xFF287247);
-  static const warning = Color(0xFF8B580B);
-  static const error = Color(0xFFB33838);
+  static const lime = Color(0xFF69B63B);
+  static const limeDark = Color(0xFF589F30);
+  static const text = Color(0xFF303D3E);
+  static const muted = Color(0xFF657779);
+  static const border = Color(0xFFDFE8D8);
+  static const success = Color(0xFF4D8E28);
+  static const warning = Color(0xFF956719);
+  static const error = Color(0xFFBF4C52);
   static const info = Color(0xFF246A79);
+  static const heroEnd = Color(0xFF377D61);
+  static const heroAccent = Color(0xFFB5DC8B);
+  static const heroText = Color(0xFFE0EDE7);
+  static const successSoft = Color(0xFFEDF7E5);
+  static const warningSoft = Color(0xFFFFF7E6);
+  static const errorSoft = Color(0xFFFFEEEE);
   static const purple = Color(0xFF705193);
 }
 
@@ -107,6 +113,36 @@ ThemeData buildSolarTheme() {
         backgroundColor: SolarColors.surfaceSoft,
         labelStyle: TextStyle(color: SolarColors.primary),
         side: BorderSide(color: SolarColors.border)),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: SolarColors.lime, linearTrackColor: SolarColors.surfaceSoft),
+    navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: SolarColors.surface,
+        indicatorColor: SolarColors.surfaceSoft,
+        labelTextStyle: WidgetStateProperty.all(const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: SolarColors.primary))),
+    tabBarTheme: const TabBarThemeData(
+        labelColor: SolarColors.primary,
+        unselectedLabelColor: SolarColors.muted,
+        indicatorColor: SolarColors.lime,
+        dividerColor: SolarColors.border),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: SolarColors.lime,
+        foregroundColor: Colors.white,
+        elevation: 2),
+    bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: SolarColors.surface,
+        showDragHandle: true,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)))),
+    dialogTheme: DialogThemeData(
+        backgroundColor: SolarColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22))),
+    listTileTheme: const ListTileThemeData(
+        iconColor: SolarColors.primary,
+        textColor: SolarColors.text,
+        contentPadding: EdgeInsets.symmetric(horizontal: 18, vertical: 6)),
     dividerColor: SolarColors.border,
     snackBarTheme: const SnackBarThemeData(
         backgroundColor: SolarColors.primary,

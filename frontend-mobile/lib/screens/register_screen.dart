@@ -399,10 +399,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-              color: const Color(0xFFFFEEEE),
+              color: SolarColors.errorSoft,
               borderRadius: BorderRadius.circular(8)),
           child: Text(_error!,
-              style: const TextStyle(color: Color(0xFFB33838), fontSize: 11))));
+              style: const TextStyle(color: SolarColors.error, fontSize: 11))));
 
   Widget _loginLink() =>
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [

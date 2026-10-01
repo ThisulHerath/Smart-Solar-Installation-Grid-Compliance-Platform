@@ -232,7 +232,7 @@ class _ChatInboxScreenState extends State<ChatInboxScreen> {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-                colors: [SolarColors.primary, Color(0xFF214F50)]),
+                colors: [SolarColors.primary, SolarColors.heroEnd]),
             borderRadius: BorderRadius.circular(20),
           ),
           child: const Row(children: [
