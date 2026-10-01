@@ -144,7 +144,9 @@ it(
       })
     ).toHaveAttribute('href', '/account');
 
-    expect(screen.getByRole('link', { name: 'Dashboard' })).not.toHaveClass('is-active');
+    screen.getAllByRole('link', { name: 'Dashboard' }).forEach((dashboardLink) => {
+      expect(dashboardLink).not.toHaveClass('is-active');
+    });
     expect(screen.getByRole('link', { name: 'Open my profile' })).toHaveClass('is-active');
 
     fireEvent.click(

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/models/equipment_quote.dart';
+import 'package:smart_solar_mobile/features/inventory/models/equipment_quote.dart';
 
 void main() {
   test('Parses reserved equipment and numeric costs', () {

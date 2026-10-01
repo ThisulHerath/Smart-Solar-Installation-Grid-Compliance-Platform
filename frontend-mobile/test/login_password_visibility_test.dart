@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_solar_mobile/providers/auth_provider.dart';
-import 'package:smart_solar_mobile/screens/login_screen.dart';
-import 'package:smart_solar_mobile/widgets/solar_field.dart';
+import 'package:smart_solar_mobile/core/auth/providers/auth_provider.dart';
+import 'package:smart_solar_mobile/core/navigation/screens/login_screen.dart';
+import 'package:smart_solar_mobile/core/widgets/solar_field.dart';
 
 void main() {
   testWidgets(

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { HomeownerWorkspace } from './HomeownerWorkspace';
+import { HomeownerWorkspace } from '../features/assessment/pages/HomeownerWorkspace';
 import { StaffDashboard } from '../components/StaffDashboard';
-import { CustomerLocationMap } from '../components/CustomerLocationMap';
+import { CustomerLocationMap } from '../features/field-operations/components/CustomerLocationMap';
 
 type Report = {
   surveyCount: number;

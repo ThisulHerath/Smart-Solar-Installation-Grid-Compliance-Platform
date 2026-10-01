@@ -1,0 +1,633 @@
+import { SearchBox } from '../../../components/SearchBox'; 
+import React, { useEffect, useState, useCallback } from 'react'; 
+import { useNavigate } from 'react-router-dom'; 
+import { api } from '../../../services/api'; 
+import { FieldJob } from '../../../types/auth'; 
+import { 
+  CheckCircle2, 
+  XCircle, 
+  Clock, 
+  AlertTriangle, 
+  RefreshCw, 
+  MapPin, 
+  ShieldCheck, 
+  User as UserIcon, 
+  Zap, 
+  ArrowRight 
+} from '../../../components/Icons';
+
+export const FieldJobsPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const [jobs, setJobs] = useState<FieldJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [statusFilter, setStatusFilter] =
+    useState<string>('ALL');
+
+  const [searchQuery, setSearchQuery] =
+    useState('');
+
+  const [isRefreshing, setIsRefreshing] =
+    useState(false);
+
+  const fetchJobs = useCallback(
+    async (isSilent = false) => {
+      if (!isSilent) {
+        setIsRefreshing(true);
+      }
+
+      try {
+        const data = await api.getFieldJobs(
+          statusFilter === 'ALL'
+            ? undefined
+            : statusFilter
+        );
+
+        setJobs(data);
+        setError(null);
+      } catch (err: any) {
+        if (!isSilent) {
+          setError(
+            err.message ||
+              'Failed to load field jobs.'
+          );
+        }
+      } finally {
+        setLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [statusFilter]
+  );
+
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
+
+  const getStatusBadge = (status: string) => {
+    const normalizedStatus =
+      status?.toUpperCase() || 'ASSIGNED';
+
+    switch (normalizedStatus) {
+      case 'COMPLIANCECOMPLETE':
+      case 'COMPLIANCE_COMPLETE':
+        return (
+          <span className="badge badge-emerald">
+            <CheckCircle2 size={12} />
+            Compliance Complete
+          </span>
+        );
+
+      case 'COMPLIANCEPROCESSING':
+      case 'COMPLIANCE_PROCESSING':
+        return (
+          <span className="badge badge-amber">
+            <Clock size={12} />
+            Compliance Checking
+          </span>
+        );
+
+      case 'SUBMITTED':
+        return (
+          <span className="badge badge-cyan">
+            <CheckCircle2 size={12} />
+            Inspection Submitted
+          </span>
+        );
+
+      case 'INPROGRESS':
+      case 'IN_PROGRESS':
+        return (
+          <span className="badge badge-amber">
+            <Clock size={12} />
+            In Progress (On Site)
+          </span>
+        );
+
+      case 'ACCEPTED':
+        return (
+          <span
+            className="badge"
+            style={{
+              background:
+                'rgba(59, 130, 246, 0.15)',
+              color: '#246a79',
+            }}
+          >
+            Accepted
+          </span>
+        );
+
+      case 'FAILED':
+        return (
+          <span className="badge badge-danger">
+            <XCircle size={12} />
+            Non-Compliant / Failed
+          </span>
+        );
+
+      default:
+        return (
+          <span
+            className="badge"
+            style={{
+              background:
+                'rgba(58, 85, 49, 0.08)',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            Assigned
+          </span>
+        );
+    }
+  };
+
+  const filteredJobs = jobs.filter((job) => {
+    if (!searchQuery) {
+      return true;
+    }
+
+    const query = searchQuery.toLowerCase();
+
+    return (
+      job.id.toLowerCase().includes(query) ||
+      job.solarSurveyId
+        .toLowerCase()
+        .includes(query) ||
+      job.customerName
+        .toLowerCase()
+        .includes(query) ||
+      (job.projectName || '')
+        .toLowerCase()
+        .includes(query) ||
+      job.propertyAddress
+        .toLowerCase()
+        .includes(query) ||
+      job.technicianName
+        .toLowerCase()
+        .includes(query) ||
+      job.status.toLowerCase().includes(query)
+    );
+  });
+
+  return (
+    <div
+      className="field-jobs-page operations-page"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+      }}
+    >
+      {/* Header */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '24px 28px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div>
+          <h1
+            style={{
+              fontSize: '1.6rem',
+              marginBottom: '4px',
+            }}
+          >
+            Field jobs
+          </h1>
+
+          <p
+            style={{
+              color: 'var(--text-secondary)',
+              fontSize: '0.88rem',
+            }}
+          >
+            Monitor assigned site visits, completed inspections, and compliance results.
+          </p>
+        </div>
+
+        <button
+          onClick={() => fetchJobs()}
+          disabled={isRefreshing}
+          className="btn btn-secondary"
+          style={{
+            padding: '8px 16px',
+          }}
+        >
+          <RefreshCw
+            size={14}
+            className={
+              isRefreshing ? 'spin' : ''
+            }
+          />
+
+          {isRefreshing
+            ? 'Refreshing...'
+            : 'Refresh Jobs'}
+        </button>
+      </div>
+
+      {/* Filters and Search */}
+      <div
+        className="glass-panel field-jobs-toolbar"
+        style={{
+          padding: '16px 20px',
+          display: 'flex',
+          gap: '16px',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div
+          className="field-job-filter-chips"
+          style={{
+            display: 'flex',
+            gap: '8px',
+            flexWrap: 'wrap',
+          }}
+        >
+          {[
+            'ALL',
+            'Assigned',
+            'InProgress',
+            'Submitted',
+            'ComplianceComplete',
+            'Failed',
+          ].map((status) => (
+            <button
+              key={status}
+              onClick={() =>
+                setStatusFilter(status)
+              }
+              className={
+                statusFilter === status
+                  ? 'btn btn-primary'
+                  : 'btn btn-secondary'
+              }
+              style={{
+                padding: '6px 14px',
+                fontSize: '0.8rem',
+              }}
+            >
+              {status === 'ALL'
+                ? 'All jobs'
+                : status.replace(/([a-z])([A-Z])/g, '$1 $2')}
+            </button>
+          ))}
+        </div>
+
+        <SearchBox
+          scope="field-jobs"
+          label="Search field jobs"
+          value={searchQuery}
+          onChange={setSearchQuery}
+          suggestions={jobs.flatMap((job) => [
+            job.projectName,
+            job.customerName,
+            job.propertyAddress,
+            job.technicianName,
+          ])}
+          loading={loading}
+        />
+      </div>
+
+      {/* Main List */}
+      {loading ? (
+        <div
+          className="glass-panel"
+          style={{
+            padding: '40px',
+            textAlign: 'center',
+          }}
+        >
+          <RefreshCw
+            size={24}
+            className="spin"
+            style={{
+              marginBottom: '12px',
+              color: 'var(--solar-emerald)',
+            }}
+          />
+
+          <div>
+            Loading field technician jobs...
+          </div>
+        </div>
+      ) : error ? (
+        <div
+          className="glass-panel"
+          style={{
+            padding: '32px',
+            color: 'var(--solar-danger)',
+            textAlign: 'center',
+          }}
+        >
+          <AlertTriangle
+            size={28}
+            style={{
+              marginBottom: '12px',
+            }}
+          />
+
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: '1.1rem',
+            }}
+          >
+            Failed to Load Jobs
+          </div>
+
+          <p
+            style={{
+              marginTop: '8px',
+              color: 'var(--text-secondary)',
+            }}
+          >
+            {error}
+          </p>
+        </div>
+      ) : filteredJobs.length === 0 ? (
+        <div
+          className="glass-panel"
+          style={{
+            padding: '40px',
+            textAlign: 'center',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <Zap
+            size={32}
+            style={{
+              marginBottom: '12px',
+              opacity: 0.5,
+            }}
+          />
+
+          <div>
+            No field jobs found matching the
+            selected filter.
+          </div>
+        </div>
+      ) : (
+        <div
+          className="field-job-card-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns:
+              'repeat(auto-fill, minmax(360px, 1fr))',
+            gap: '20px',
+          }}
+        >
+          {filteredJobs.map((job) => (
+            <div
+              key={job.id}
+              className="glass-panel"
+              style={{
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition:
+                  'transform 0.2s ease, border-color 0.2s ease',
+                cursor: 'pointer',
+              }}
+              onClick={() =>
+                navigate(`/field-jobs/${job.id}`)
+              }
+            >
+              <div>
+                {/* Customer and Status */}
+                <div
+                  className="field-job-card-heading"
+                  style={{
+                    display: 'flex',
+                    justifyContent:
+                      'space-between',
+                    alignItems: 'flex-start',
+                    marginBottom: '12px',
+                  }}
+                >
+                  <div
+                    className="field-job-card-customer"
+                    style={{
+                      fontWeight: 700,
+                      fontSize: '1.05rem',
+                      color: '#344548',
+                    }}
+                  >
+                    {job.projectName || job.customerName}
+                  </div>
+
+                  {getStatusBadge(job.status)}
+                </div>
+
+                {/* Property Address */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.82rem',
+                    color: 'var(--text-secondary)',
+                    marginBottom: '10px',
+                  }}
+                >
+                  <MapPin
+                    size={14}
+                    color="var(--solar-cyan)"
+                  />
+
+                  <span
+                    style={{
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    <span>{job.customerName}</span>
+                    <span aria-hidden="true"> · </span>
+                    <span>{job.propertyAddress}</span>
+                  </span>
+                </div>
+
+                {/* Technician and Priority */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns:
+                      '1fr 1fr',
+                    gap: '10px',
+                    margin: '14px 0',
+                    background:
+                      'rgba(58, 85, 49, 0.02)',
+                    padding: '10px 12px',
+                    borderRadius:
+                      'var(--radius-sm)',
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '0.72rem',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      Assigned Technician
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        marginTop: '2px',
+                      }}
+                    >
+                      <UserIcon
+                        size={12}
+                        color="var(--solar-emerald)"
+                      />
+
+                      {job.technicianName}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div
+                      style={{
+                        fontSize: '0.72rem',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      Priority & System Size
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: '0.85rem',
+                        fontWeight: 600,
+                        color: 'var(--solar-amber)',
+                        marginTop: '2px',
+                      }}
+                    >
+                      {job.priority} &bull;{' '}
+                      {job.monthlyKwh} kWh
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compliance */}
+                {job.compliance && (
+                  <div
+                    className="field-job-card-compliance"
+                    style={{
+                      padding: '8px 12px',
+                      borderRadius:
+                        'var(--radius-sm)',
+                      background:
+                        job.compliance.gridCompliant
+                          ? 'rgba(16, 185, 129, 0.1)'
+                          : 'rgba(239, 68, 68, 0.1)',
+                      border: `1px solid ${
+                        job.compliance
+                          .gridCompliant
+                          ? 'rgba(16, 185, 129, 0.3)'
+                          : 'rgba(239, 68, 68, 0.3)'
+                      }`,
+                      fontSize: '0.78rem',
+                      marginBottom: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent:
+                        'space-between',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontWeight: 600,
+                        color:
+                          job.compliance
+                            .gridCompliant
+                            ? 'var(--solar-emerald)'
+                            : '#b33838',
+                      }}
+                    >
+                      <ShieldCheck size={14} />
+
+                      {
+                        job.compliance
+                          .complianceStatus
+                      }
+                    </span>
+
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        color: 'var(--text-muted)',
+                      }}
+                    >
+                      Risk:{' '}
+                      {job.compliance.riskLevel}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent:
+                    'space-between',
+                  alignItems: 'center',
+                  marginTop: '12px',
+                  borderTop:
+                    '1px solid var(--border-color)',
+                  paddingTop: '10px',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  Assigned:{' '}
+                  {new Date(
+                    job.assignedAt
+                  ).toLocaleDateString()}
+                </span>
+
+                <span
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: 'var(--solar-emerald)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  View Inspection
+                  <ArrowRight size={14} />
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

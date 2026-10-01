@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/services/api_service.dart';
-import 'package:smart_solar_mobile/theme/solar_theme.dart';
-import 'package:smart_solar_mobile/utils/constants.dart';
-import 'package:smart_solar_mobile/widgets/staff_dashboard.dart';
+import 'package:smart_solar_mobile/core/api/api_service.dart';
+import 'package:smart_solar_mobile/core/theme/solar_theme.dart';
+import 'package:smart_solar_mobile/core/utils/constants.dart';
+import 'package:smart_solar_mobile/core/widgets/staff_dashboard.dart';
 
 class DashboardApi extends ApiService {
   bool fail = false;

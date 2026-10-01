@@ -4,17 +4,17 @@ from fastapi import FastAPI, Header, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from app.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse, SolarSizingResponse
-from app.schemas.compliance_schemas import ComplianceEvaluationResponse
-from app.schemas.guardrail_schemas import GuardrailWorkflowResult
-from app.workflow.graph import run_solar_workflow
-from app.workflow.solar_sizing import run_solar_sizing
-from app.workflow.compliance_workflow import run_compliance_evaluation
-from app.workflow.proposal_workflow import run_guardrail_workflow
-from app.schemas.pricing_schemas import PricingRequest, PricingResponse
-from app.workflow.pricing_workflow import run_pricing_workflow
-from app.schemas.plan_schemas import MasterWorkflowStartRequest, MasterWorkflowResumeRequest
-from app.workflow.master_workflow import start_master_workflow, resume_master_workflow
+from app.shared.schemas.state import WorkflowExecutionRequest, WorkflowExecutionResponse, SolarSizingResponse
+from app.features.field_operations.schemas.compliance_schemas import ComplianceEvaluationResponse
+from app.features.engineering.schemas.guardrail_schemas import GuardrailWorkflowResult
+from app.shared.orchestration.graph import run_solar_workflow
+from app.features.assessment.workflows.solar_sizing import run_solar_sizing
+from app.features.field_operations.workflows.compliance_workflow import run_compliance_evaluation
+from app.features.engineering.workflows.proposal_workflow import run_guardrail_workflow
+from app.features.inventory.schemas.pricing_schemas import PricingRequest, PricingResponse
+from app.features.inventory.workflows.pricing_workflow import run_pricing_workflow
+from app.shared.schemas.plan_schemas import MasterWorkflowStartRequest, MasterWorkflowResumeRequest
+from app.shared.orchestration.master_workflow import start_master_workflow, resume_master_workflow
 
 load_dotenv()
 
