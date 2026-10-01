@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../utils/constants.dart';
 import '../models/proposal.dart';
 import '../models/chat.dart';
+import '../models/app_notification.dart';
 import 'storage_service.dart';
 
 class ApiService {
@@ -72,6 +73,22 @@ class ApiService {
   Future<List<dynamic>> getSurveys() async =>
       List<dynamic>.from(await get('/api/surveys'));
 
+  Future<List<AppNotification>> getNotifications() async {
+    final items = List<dynamic>.from(await get('/api/notifications'));
+    return items
+        .map((item) => AppNotification.fromJson(
+            Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await post('/api/notifications/$id/read', {});
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await post('/api/notifications/read-all', {});
+  }
+
   Future<List<Map<String, dynamic>>> searchLocations(String query) async {
     final response = List<dynamic>.from(await get(
         '/api/locations/search?query=${Uri.encodeQueryComponent(query.trim())}'));
@@ -119,13 +136,15 @@ class ApiService {
   }
 
   Future<Map<String, dynamic>> createSurvey(
-      {required double monthlyKwh,
+      {required String projectName,
+      required double monthlyKwh,
       required double roofAreaSqm,
       required String gridType,
       required String propertyAddress,
       double? latitude,
       double? longitude}) async {
     final response = await post('/api/surveys', {
+      'projectName': projectName,
       'monthlyKwh': monthlyKwh,
       'roofAreaSqm': roofAreaSqm,
       'gridType': gridType,

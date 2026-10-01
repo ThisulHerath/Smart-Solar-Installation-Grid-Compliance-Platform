@@ -25,6 +25,8 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   final ImagePicker _picker = ImagePicker();
 
   FieldJob? _job;
+  bool get _inspectionLocked => _job?.status == 'ComplianceComplete';
+
   bool _loading = true;
   bool _saving = false;
   bool _locatingForNavigation = false;
