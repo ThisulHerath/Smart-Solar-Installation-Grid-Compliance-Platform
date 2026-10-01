@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/solar_survey.dart';
@@ -15,7 +14,6 @@ import 'profile_screen.dart';
 import 'proposal_screen.dart';
 import 'survey_screen.dart';
 import 'technician_jobs_screen.dart';
-import 'welcome_screen.dart';
 import 'customer_locations_screen.dart';
 
 const _bg = SolarColors.background;
@@ -106,28 +104,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 if (homeowner)
                   _HomeownerProjects(
-                    firstName: user.fullName.split(' ').first,
                     showProjectList: _selectedTab == 1,
                     onViewProjects: () => setState(() => _selectedTab = 1),
                   )
                 else
                   StaffDashboard(roles: user.roles, name: user.fullName),
-                if (!homeowner || _selectedTab == 0) const SizedBox(height: 22),
-                if (!homeowner || _selectedTab == 0)
+                if (!homeowner) const SizedBox(height: 22),
+                if (!homeowner)
                   const Text('Quick actions',
                       style: TextStyle(
                           color: _text,
                           fontSize: 18,
                           fontWeight: FontWeight.w700)),
-                if (!homeowner || _selectedTab == 0) const SizedBox(height: 12),
-                if (homeowner && _selectedTab == 0)
-                  _ActionTile(
-                    icon: Icons.add_home_work_outlined,
-                    title: 'Create a new survey',
-                    subtitle: 'Start another solar assessment',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const SurveyScreen())),
-                  ),
+                if (!homeowner) const SizedBox(height: 12),
                 if (fieldStaff)
                   _ActionTile(
                     icon: Icons.engineering_rounded,
@@ -144,21 +133,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const CustomerLocationsScreen())),
                   ),
-                if (!homeowner || _selectedTab == 0)
+                if (!homeowner)
                   _ActionTile(
                     icon: Icons.person_outline_rounded,
                     title: 'Profile & security',
                     subtitle: 'Manage your account information',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => const ProfileScreen())),
-                  ),
-                if (!homeowner || _selectedTab == 0) const SizedBox(height: 10),
-                if (!homeowner || _selectedTab == 0)
-                  TextButton.icon(
-                    onPressed: () => _signOut(context, auth),
-                    icon: const Icon(Icons.logout_rounded, size: 18),
-                    label: const Text('Sign out'),
-                    style: TextButton.styleFrom(foregroundColor: _muted),
                   ),
               ]),
             ),
@@ -183,44 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Future<void> _signOut(BuildContext context, AuthProvider auth) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: _panel,
-        title: const Text('Sign out', style: TextStyle(color: _text)),
-        content: const Text('Are you sure you want to sign out of Smart Solar?',
-            style: TextStyle(color: _muted)),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Sign out')),
-        ],
-      ),
-    );
-    if (confirmed == true && context.mounted) {
-      await auth.logout();
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-            (_) => false);
-      }
-    }
-  }
 }
 
 class _HomeownerProjects extends StatefulWidget {
-  final String firstName;
   final bool showProjectList;
   final VoidCallback onViewProjects;
   const _HomeownerProjects(
-      {required this.firstName,
-      required this.showProjectList,
-      required this.onViewProjects});
+      {required this.showProjectList, required this.onViewProjects});
 
   @override
   State<_HomeownerProjects> createState() => _HomeownerProjectsState();
@@ -297,87 +247,40 @@ class _HomeownerProjectsState extends State<_HomeownerProjects> {
     }).length;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (!widget.showProjectList)
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [SolarColors.primary, SolarColors.heroEnd],
-            ),
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x28173E44),
-                  blurRadius: 24,
-                  offset: Offset(0, 10)),
-            ],
+      if (!widget.showProjectList) ...[
+        if (_loading && _projects.isEmpty)
+          const _ProjectsLoading()
+        else if (_error != null)
+          _ProjectsError(message: _error!, onRetry: _loadProjects)
+        else
+          _FeaturedProject(
+            survey: _projects.isEmpty ? null : _projects.first,
+            onOpen: _projects.isEmpty
+                ? _openSurveys
+                : () => _openProject(_projects.first),
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                  color: _gold, borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.solar_power_rounded,
-                  color: SolarColors.primary, size: 25),
-            ),
-            const SizedBox(height: 18),
-            Text('Hello ${widget.firstName},',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600)),
-            const SizedBox(height: 5),
-            const Text('Your solar journey',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 27,
-                    height: 1.12,
-                    fontWeight: FontWeight.w800)),
-            const SizedBox(height: 9),
-            const Text(
-                'Track every submitted site survey and continue your installation from one place.',
-                style: TextStyle(
-                    color: SolarColors.heroText, fontSize: 12, height: 1.5)),
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              onPressed: _openSurveys,
-              icon: const Icon(Icons.add_rounded, size: 18),
-              label: const Text('Start a new survey'),
-              style: FilledButton.styleFrom(
-                backgroundColor: _gold,
-                foregroundColor: SolarColors.primary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                textStyle: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-            ),
-          ]),
-        ),
+      ],
       const SizedBox(height: 16),
       Row(children: [
         Expanded(
             child: _ProjectMetric(
                 icon: Icons.folder_copy_outlined,
-                value: '${_projects.length}',
+                value: _loading || _error != null ? '?' : '${_projects.length}',
                 label: 'Total projects',
                 color: SolarColors.primary)),
         const SizedBox(width: 10),
         Expanded(
             child: _ProjectMetric(
                 icon: Icons.autorenew_rounded,
-                value: '$processing',
-                label: 'In progress',
+                value: _loading || _error != null ? '?' : '$processing',
+                label: 'In review',
                 color: _cyan)),
         const SizedBox(width: 10),
         Expanded(
             child: _ProjectMetric(
                 icon: Icons.task_alt_rounded,
-                value: '$ready',
-                label: 'Ready',
+                value: _loading || _error != null ? '?' : '$ready',
+                label: 'Proposal ready',
                 color: _gold)),
       ]),
       if (widget.showProjectList) ...[
@@ -420,430 +323,171 @@ class _HomeownerProjectsState extends State<_HomeownerProjects> {
             style: TextButton.styleFrom(foregroundColor: SolarColors.primary),
           ),
         ],
-      ] else
-        _DashboardInsights(
-          projects: _projects,
-          totalProjects: _projects.length,
-          processingProjects: processing,
-          readyProjects: ready,
-          onCreateSurvey: _openSurveys,
-          onViewProjects: widget.onViewProjects,
-        ),
+      ] else ...[
+        const SizedBox(height: 22),
+        const Text('Quick actions',
+            style: TextStyle(
+                color: _text, fontSize: 18, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        _ActionTile(
+            icon: Icons.add_home_work_outlined,
+            title: 'New survey',
+            subtitle: 'Assess another property',
+            onTap: _openSurveys),
+        _ActionTile(
+            icon: Icons.folder_open_outlined,
+            title: 'My projects',
+            subtitle: 'View all submitted assessments',
+            onTap: widget.onViewProjects),
+        _ActionTile(
+            icon: Icons.chat_bubble_outline_rounded,
+            title: 'Contact your team',
+            subtitle: 'Get help with your solar project',
+            onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChatInboxScreen()))),
+      ],
     ]);
   }
 }
 
-class _DashboardInsights extends StatelessWidget {
-  final List<SolarSurvey> projects;
-  final int totalProjects;
-  final int processingProjects;
-  final int readyProjects;
-  final VoidCallback onCreateSurvey;
-  final VoidCallback onViewProjects;
-  const _DashboardInsights({
-    required this.projects,
-    required this.totalProjects,
-    required this.processingProjects,
-    required this.readyProjects,
-    required this.onCreateSurvey,
-    required this.onViewProjects,
-  });
+class _FeaturedProject extends StatelessWidget {
+  final SolarSurvey? survey;
+  final VoidCallback onOpen;
+  const _FeaturedProject({required this.survey, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
-    final title = totalProjects == 0
-        ? 'Start your first assessment'
-        : readyProjects > 0
-            ? '$readyProjects project${readyProjects == 1 ? '' : 's'} ready for review'
-            : processingProjects > 0
-                ? 'Your solar analysis is in progress'
-                : 'Create your next solar project';
-    final description = totalProjects == 0
-        ? 'Submit your electricity usage, roof area and address to receive a personalised solar recommendation.'
-        : readyProjects > 0
-            ? 'Open My Projects to review the recommendations and continue with a proposal.'
-            : processingProjects > 0
-                ? 'We are preparing your system recommendation. You can track its live status in My Projects.'
-                : 'Use a new survey whenever you want to assess another property.';
-
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      const SizedBox(height: 20),
-      _Glass(
-        padding: const EdgeInsets.all(18),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                  color: const Color(0x1872B83E),
-                  borderRadius: BorderRadius.circular(13)),
-              child: Icon(
-                  readyProjects > 0
-                      ? Icons.task_alt_rounded
-                      : processingProjects > 0
-                          ? Icons.auto_awesome_rounded
-                          : Icons.wb_sunny_outlined,
-                  color: _gold,
-                  size: 22),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text('YOUR NEXT STEP',
-                  style: TextStyle(
-                      color: _muted,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.1)),
-            ),
-          ]),
-          const SizedBox(height: 14),
-          Text(title,
-              style: const TextStyle(
-                  color: _text, fontSize: 17, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 6),
-          Text(description,
-              style: const TextStyle(color: _muted, fontSize: 11, height: 1.5)),
-          const SizedBox(height: 15),
-          FilledButton.icon(
-            onPressed: readyProjects > 0 || processingProjects > 0
-                ? onViewProjects
-                : onCreateSurvey,
-            icon: Icon(
-                readyProjects > 0 || processingProjects > 0
-                    ? Icons.folder_open_outlined
-                    : Icons.add_rounded,
-                size: 18),
-            label: Text(readyProjects > 0 || processingProjects > 0
-                ? 'Open My Projects'
-                : 'Create survey'),
-            style: FilledButton.styleFrom(
-                backgroundColor: SolarColors.primary,
-                foregroundColor: Colors.white),
-          ),
-        ]),
+    final project = survey;
+    final status = project?.surveyStatus.toUpperCase();
+    final proposalReady =
+        ['ANALYSISCOMPLETE', 'APPROVED', 'COMPLETED'].contains(status);
+    // These stages describe survey processing; approval is not installation completion.
+    final stage = switch (status) {
+      'SUBMITTED' || 'PROCESSING' || 'UNDERREVIEW' => 1,
+      'ANALYSISCOMPLETE' => 2,
+      'APPROVED' || 'COMPLETED' => 3,
+      _ => null,
+    };
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [SolarColors.primary, SolarColors.heroEnd]),
       ),
-      const SizedBox(height: 14),
-      _ProjectProgressChart(
-        total: totalProjects,
-        processing: processingProjects,
-        ready: readyProjects,
-      ),
-      const SizedBox(height: 14),
-      _EnergyUsageChart(projects: projects),
-      const SizedBox(height: 14),
-      const _Glass(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('How your project moves forward',
-              style: TextStyle(
-                  color: _text, fontSize: 15, fontWeight: FontWeight.w800)),
-          SizedBox(height: 16),
-          _JourneyStep(
-              number: '1',
-              title: 'Submit survey',
-              subtitle: 'Tell us about your property and energy needs.'),
-          _JourneyLine(),
-          _JourneyStep(
-              number: '2',
-              title: 'Review recommendation',
-              subtitle: 'See suggested system size and panel count.'),
-          _JourneyLine(),
-          _JourneyStep(
-              number: '3',
-              title: 'Continue to proposal',
-              subtitle: 'Track engineering review and project approval.'),
-        ]),
-      ),
-    ]);
-  }
-}
-
-class _ProjectProgressChart extends StatelessWidget {
-  final int total;
-  final int processing;
-  final int ready;
-  const _ProjectProgressChart(
-      {required this.total, required this.processing, required this.ready});
-
-  @override
-  Widget build(BuildContext context) {
-    final other = math.max(0, total - processing - ready);
-    return _Glass(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Row(children: [
+          Icon(Icons.solar_power_rounded,
+              color: SolarColors.heroAccent, size: 24),
+          SizedBox(width: 10),
           Expanded(
-              child: Text('Project progress',
+              child: Text('YOUR SOLAR PROJECT',
                   style: TextStyle(
-                      color: _text,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800))),
-          Icon(Icons.donut_large_rounded, color: _cyan, size: 19),
-        ]),
-        const SizedBox(height: 4),
-        const Text('Current status of your submitted surveys',
-            style: TextStyle(color: _muted, fontSize: 10)),
-        const SizedBox(height: 17),
-        Row(children: [
-          SizedBox(
-            width: 112,
-            height: 112,
-            child: CustomPaint(
-              painter: _ProjectDonutPainter(
-                  total: total, processing: processing, ready: ready),
-              child: Center(
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text('$total',
-                      style: const TextStyle(
-                          color: _text,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w800)),
-                  const Text('PROJECTS',
-                      style: TextStyle(
-                          color: _muted,
-                          fontSize: 7,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: .8)),
-                ]),
-              ),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(children: [
-              _ChartLegend(
-                  color: _cyan, label: 'Ready', value: ready.toString()),
-              const SizedBox(height: 11),
-              _ChartLegend(
-                  color: SolarColors.warning,
-                  label: 'In progress',
-                  value: processing.toString()),
-              const SizedBox(height: 11),
-              _ChartLegend(
-                  color: _line, label: 'Other', value: other.toString()),
-            ]),
-          ),
-        ]),
-      ]),
-    );
-  }
-}
-
-class _ChartLegend extends StatelessWidget {
-  final Color color;
-  final String label;
-  final String value;
-  const _ChartLegend(
-      {required this.color, required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) => Row(children: [
-        Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
-        Expanded(
-            child: Text(label,
-                style: const TextStyle(color: _muted, fontSize: 10))),
-        Text(value,
-            style: const TextStyle(
-                color: _text, fontSize: 11, fontWeight: FontWeight.w800)),
-      ]);
-}
-
-class _ProjectDonutPainter extends CustomPainter {
-  final int total;
-  final int processing;
-  final int ready;
-  const _ProjectDonutPainter(
-      {required this.total, required this.processing, required this.ready});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final base = Paint()
-      ..color = _line
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12;
-    canvas.drawArc(rect.deflate(8), -.5 * math.pi, 2 * math.pi, false, base);
-    if (total <= 0) return;
-
-    const gap = .07;
-    var start = -.5 * math.pi;
-    void drawSection(int value, Color color) {
-      if (value <= 0) return;
-      final sweep = (2 * math.pi * value / total) - gap;
-      canvas.drawArc(
-          rect.deflate(8),
-          start,
-          math.max(.02, sweep).toDouble(),
-          false,
-          Paint()
-            ..color = color
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 12
-            ..strokeCap = StrokeCap.round);
-      start += 2 * math.pi * value / total;
-    }
-
-    drawSection(ready, _cyan);
-    drawSection(processing, SolarColors.warning);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ProjectDonutPainter oldDelegate) =>
-      oldDelegate.total != total ||
-      oldDelegate.processing != processing ||
-      oldDelegate.ready != ready;
-}
-
-class _EnergyUsageChart extends StatelessWidget {
-  final List<SolarSurvey> projects;
-  const _EnergyUsageChart({required this.projects});
-
-  @override
-  Widget build(BuildContext context) {
-    final visible = projects.take(5).toList();
-    final values = visible.map((project) => project.monthlyKwh).toList();
-    final average =
-        values.isEmpty ? 0.0 : values.reduce((a, b) => a + b) / values.length;
-    return _Glass(
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          const Expanded(
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Energy profile',
-                  style: TextStyle(
-                      color: _text, fontSize: 15, fontWeight: FontWeight.w800)),
-              SizedBox(height: 4),
-              Text('Monthly usage across recent projects',
-                  style: TextStyle(color: _muted, fontSize: 10)),
-            ]),
-          ),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(average == 0 ? '—' : average.toStringAsFixed(0),
-                style: const TextStyle(
-                    color: _text, fontSize: 18, fontWeight: FontWeight.w800)),
-            const Text('AVG kWh',
-                style: TextStyle(
-                    color: _muted, fontSize: 7, fontWeight: FontWeight.w700)),
-          ]),
+                      color: SolarColors.heroText,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1)))
         ]),
         const SizedBox(height: 18),
-        if (values.isEmpty)
-          Container(
-            height: 105,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: _bg, borderRadius: BorderRadius.circular(13)),
-            child: const Text('Create a survey to see your energy chart',
-                style: TextStyle(color: _muted, fontSize: 10)),
-          )
-        else ...[
-          SizedBox(
-            height: 105,
-            width: double.infinity,
-            child: CustomPaint(painter: _UsageBarPainter(values)),
-          ),
-          const SizedBox(height: 7),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(values.length, (index) {
-              final reference = visible[index].id;
-              return Text(
-                  reference.length > 4
-                      ? '#${reference.substring(0, 4)}'
-                      : '#$reference',
-                  style: const TextStyle(color: _muted, fontSize: 8));
-            }),
-          ),
+        Text(
+            project == null
+                ? 'Start your solar journey'
+                : project.propertyAddress.isEmpty
+                    ? 'Your current solar project'
+                    : project.propertyAddress,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                height: 1.2,
+                fontWeight: FontWeight.w800)),
+        const SizedBox(height: 10),
+        Text(
+            project == null
+                ? 'Tell us about your property and electricity usage to receive a personalised solar recommendation.'
+                : _friendlyProjectStatus(project.surveyStatus),
+            style: const TextStyle(
+                color: SolarColors.heroText, fontSize: 14, height: 1.5)),
+        if (project != null) ...[
+          const SizedBox(height: 12),
+          Text(
+              '${project.monthlyKwh.toStringAsFixed(0)} kWh / month${project.recommendedKw == null ? '' : ' ? ${project.recommendedKw!.toStringAsFixed(1)} kW recommended'}',
+              style:
+                  const TextStyle(color: SolarColors.heroText, fontSize: 13)),
+          if (stage != null) ...[
+            const SizedBox(height: 20),
+            Semantics(
+                label:
+                    'Project progress: ${_friendlyProjectStatus(project.surveyStatus)}',
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var i = 0; i < 4; i++)
+                        Expanded(
+                            child: Padding(
+                                padding: EdgeInsets.only(right: i == 3 ? 0 : 8),
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                          height: 4,
+                                          decoration: BoxDecoration(
+                                              color: i <= stage
+                                                  ? SolarColors.heroAccent
+                                                  : Colors.white24,
+                                              borderRadius:
+                                                  BorderRadius.circular(4))),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                          [
+                                            'Submitted',
+                                            'In review',
+                                            'Proposal',
+                                            'Approved'
+                                          ][i],
+                                          style: TextStyle(
+                                              color: i <= stage
+                                                  ? Colors.white
+                                                  : SolarColors.heroText,
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600)),
+                                    ]))),
+                    ])),
+          ],
+          const SizedBox(height: 12),
+          Text(
+              status == 'FAILED'
+                  ? 'Your assessment needs attention. Open surveys to review it.'
+                  : proposalReady
+                      ? 'Your recommendation is available. Open your proposal to see the details.'
+                      : 'Your assessment is being reviewed. Open surveys to check its status.',
+              style: const TextStyle(
+                  color: SolarColors.heroText, fontSize: 13, height: 1.5)),
         ],
+        const SizedBox(height: 20),
+        FilledButton.icon(
+            onPressed: onOpen,
+            icon: Icon(
+                project == null
+                    ? Icons.add_rounded
+                    : Icons.arrow_forward_rounded,
+                size: 18),
+            label: Text(project == null
+                ? 'Start your first survey'
+                : proposalReady
+                    ? 'View proposal'
+                    : 'View survey status'),
+            style: FilledButton.styleFrom(
+                backgroundColor: SolarColors.heroAccent,
+                foregroundColor: SolarColors.primary,
+                textStyle: const TextStyle(fontWeight: FontWeight.w800))),
       ]),
     );
   }
-}
-
-class _UsageBarPainter extends CustomPainter {
-  final List<double> values;
-  const _UsageBarPainter(this.values);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = _line
-      ..strokeWidth = 1;
-    for (var i = 0; i < 3; i++) {
-      final y = size.height * i / 2;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-    final maxValue = values.fold<double>(1, math.max);
-    final slot = size.width / values.length;
-    final width = math.min(28.0, slot * .46).toDouble();
-    for (var i = 0; i < values.length; i++) {
-      final height =
-          math.max(8.0, size.height * values[i] / maxValue).toDouble();
-      final left = slot * i + (slot - width) / 2;
-      final rect = RRect.fromRectAndRadius(
-          Rect.fromLTWH(left, size.height - height, width, height),
-          const Radius.circular(7));
-      canvas.drawRRect(
-          rect,
-          Paint()
-            ..shader = const LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [_cyan, _gold]).createShader(rect.outerRect));
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _UsageBarPainter oldDelegate) =>
-      oldDelegate.values != values;
-}
-
-class _JourneyStep extends StatelessWidget {
-  final String number;
-  final String title;
-  final String subtitle;
-  const _JourneyStep(
-      {required this.number, required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) => Row(children: [
-        CircleAvatar(
-          radius: 15,
-          backgroundColor: SolarColors.primary,
-          child: Text(number,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800)),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(title,
-                style: const TextStyle(
-                    color: _text, fontSize: 12, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(color: _muted, fontSize: 10)),
-          ]),
-        ),
-      ]);
-}
-
-class _JourneyLine extends StatelessWidget {
-  const _JourneyLine();
-  @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.only(left: 14),
-        child: SizedBox(
-          height: 15,
-          child: VerticalDivider(color: _line, width: 1, thickness: 1),
-        ),
-      );
 }
 
 class _ProjectMetric extends StatelessWidget {
@@ -1094,11 +738,18 @@ class _Header extends StatelessWidget {
       required this.unreadMessages});
   @override
   Widget build(BuildContext context) => Row(children: [
-        const Expanded(
-            child: Align(
-                alignment: Alignment.centerLeft,
-                child: FittedBox(
-                    fit: BoxFit.scaleDown, child: SolarBrand(size: 18)))),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const SolarBrand(size: 16),
+          const SizedBox(height: 5),
+          Text(
+              'Hello, ${name.trim().isEmpty ? 'there' : name.trim().split(' ').first}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  color: _text, fontSize: 16, fontWeight: FontWeight.w700)),
+        ])),
         Stack(clipBehavior: Clip.none, children: [
           IconButton(
               tooltip: 'Messages & notifications',
@@ -1260,7 +911,7 @@ class _BottomNav extends StatelessWidget {
                 children: [
                   _NavItem(
                       icon: Icons.dashboard_rounded,
-                      label: 'Dashboard',
+                      label: 'Home',
                       selected: selectedIndex == 0,
                       onTap: onDashboard),
                   if (homeowner) ...[
@@ -1335,30 +986,36 @@ class _NavItem extends StatelessWidget {
       this.onTap});
   @override
   Widget build(BuildContext context) => Expanded(
-        child: InkWell(
-          onTap: onTap,
+        child: Material(
+          color: selected ? SolarColors.surfaceSoft : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Badge(
-                  isLabelVisible: badgeCount > 0,
-                  label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
-                  backgroundColor: SolarColors.error,
-                  child: Icon(icon, color: selected ? _gold : _muted, size: 21),
-                ),
-                const SizedBox(height: 4),
-                Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: selected ? _gold : _muted,
-                        fontSize: 9,
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w500))
-              ]),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Badge(
+                    isLabelVisible: badgeCount > 0,
+                    label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+                    backgroundColor: SolarColors.error,
+                    child: Icon(icon,
+                        color: selected ? SolarColors.primary : _muted,
+                        size: 21),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          color: selected ? SolarColors.primary : _muted,
+                          fontSize: 11,
+                          fontWeight:
+                              selected ? FontWeight.w700 : FontWeight.w500))
+                ]),
+              ),
             ),
           ),
         ),
