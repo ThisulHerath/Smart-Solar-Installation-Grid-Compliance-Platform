@@ -7,8 +7,16 @@ const _orange = SolarColors.lime;
 const _ink = SolarColors.text;
 const _muted = SolarColors.muted;
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _processExpanded = false;
+  final _processKey = GlobalKey<_HowItWorksState>();
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +29,11 @@ class WelcomeScreen extends StatelessWidget {
         SafeArea(child: LayoutBuilder(builder: (context, constraints) {
           final compact = constraints.maxHeight < 680;
           final horizontal = constraints.maxWidth < 340 ? 18.0 : 26.0;
-          final top = compact ? 118.0 : 145.0;
+          final top = compact ? 75.0 : 90.0;
           final contentHeight =
               (constraints.maxHeight - top - 20).clamp(0.0, double.infinity);
-          return SingleChildScrollView(
+          return _WelcomeViewport(
+            expanded: _processExpanded,
             padding: EdgeInsets.fromLTRB(horizontal, top, horizontal, 20),
             child: Center(
                 child: ConstrainedBox(
@@ -49,8 +58,7 @@ class WelcomeScreen extends StatelessWidget {
                                   blurRadius: 25,
                                   offset: const Offset(0, 8))
                             ]),
-                        child: Icon(Icons.solar_power_rounded,
-                            color: _orange, size: compact ? 38 : 46),
+                        child: const _RooftopSolarIcon(),
                       )),
                       SizedBox(height: compact ? 15 : 22),
                       const Text('Your rooftop.\nA brighter tomorrow.',
@@ -118,16 +126,22 @@ class WelcomeScreen extends StatelessWidget {
                         SizedBox(width: 10),
                         Expanded(
                             child: _HomeFeature(
-                                icon: Icons.verified_user_outlined,
+                                icon: Icons.fact_check_outlined,
                                 title: 'Review',
                                 subtitle: 'Engineering checks')),
                         SizedBox(width: 10),
                         Expanded(
                             child: _HomeFeature(
-                                icon: Icons.insights_rounded,
+                                icon: Icons.trending_up_rounded,
                                 title: 'Track',
                                 subtitle: 'Follow progress')),
                       ]),
+                      const SizedBox(height: 14),
+                      _HowItWorks(
+                        key: _processKey,
+                        onExpansionChanged: (expanded) =>
+                            setState(() => _processExpanded = expanded),
+                      ),
                       const Spacer(),
                       const SizedBox(height: 22),
                       const Text('SMART SOLAR  ·  SRI LANKA',
@@ -145,6 +159,161 @@ class WelcomeScreen extends StatelessWidget {
       ]),
     );
   }
+}
+
+class _WelcomeViewport extends StatelessWidget {
+  final bool expanded;
+  final EdgeInsets padding;
+  final Widget child;
+
+  const _WelcomeViewport(
+      {required this.expanded, required this.padding, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    if (expanded) {
+      return SingleChildScrollView(padding: padding, child: child);
+    }
+    return Padding(
+      padding: padding,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SizedBox.expand(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.topCenter,
+            child: SizedBox(width: constraints.maxWidth, child: child),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RooftopSolarIcon extends StatelessWidget {
+  const _RooftopSolarIcon();
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: SizedBox(
+          width: 54,
+          height: 54,
+          child: Stack(children: [
+            const Positioned(
+                top: 0,
+                right: 0,
+                child: Icon(Icons.wb_sunny_outlined, color: _orange, size: 21)),
+            const Positioned(
+                left: 0,
+                bottom: 0,
+                child: Icon(Icons.home_outlined,
+                    color: SolarColors.primary, size: 44)),
+            Positioned(
+                left: 14,
+                bottom: 10,
+                child: Container(
+                    color: SolarColors.surface,
+                    child: const Icon(Icons.grid_view_rounded,
+                        color: _orange, size: 18))),
+          ]),
+        ),
+      );
+}
+
+class _HowItWorks extends StatefulWidget {
+  final ValueChanged<bool> onExpansionChanged;
+  const _HowItWorks({super.key, required this.onExpansionChanged});
+
+  @override
+  State<_HowItWorks> createState() => _HowItWorksState();
+}
+
+class _HowItWorksState extends State<_HowItWorks> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) => Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          onExpansionChanged: (expanded) {
+            setState(() => _expanded = expanded);
+            widget.onExpansionChanged(expanded);
+          },
+          showTrailingIcon: false,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+          iconColor: _orange,
+          collapsedIconColor: _orange,
+          title: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Text('How it works',
+                style: TextStyle(
+                    color: _orange, fontSize: 14, fontWeight: FontWeight.w800)),
+            const SizedBox(width: 8),
+            AnimatedRotation(
+                turns: _expanded ? .5 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(Icons.expand_more_rounded,
+                    color: _orange, size: 20)),
+          ]),
+          children: const [
+            _ProcessStep(
+                number: '01',
+                title: 'Assess your rooftop',
+                description:
+                    'Create an account and submit your property and electricity usage details.'),
+            _ProcessStep(
+                number: '02',
+                title: 'Review your solar plan',
+                description:
+                    'Follow the site inspection, proposed system, and engineering review.'),
+            _ProcessStep(
+                number: '03',
+                title: 'Track your project',
+                description:
+                    'Check approvals and project progress, and contact your team from your workspace.'),
+          ],
+        ),
+      );
+}
+
+class _ProcessStep extends StatelessWidget {
+  final String number;
+  final String title;
+  final String description;
+  const _ProcessStep(
+      {required this.number, required this.title, required this.description});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+              width: 32,
+              height: 32,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                  color: _orange.withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Text(number,
+                  style: const TextStyle(
+                      color: SolarColors.primary,
+                      fontWeight: FontWeight.w800))),
+          const SizedBox(width: 12),
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(title,
+                    style: const TextStyle(
+                        color: _ink,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text(description,
+                    style: const TextStyle(
+                        color: _muted, fontSize: 12, height: 1.5)),
+              ])),
+        ]),
+      );
 }
 
 class _HomeHeader extends StatelessWidget {
@@ -201,29 +370,24 @@ class _HomeFeature extends StatelessWidget {
       {required this.icon, required this.title, required this.subtitle});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 13),
+        constraints: const BoxConstraints(minHeight: 126),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         decoration: BoxDecoration(
             color: SolarColors.surface,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: SolarColors.border),
-            boxShadow: const [
-              BoxShadow(
-                  color: Color(0x10173E44),
-                  blurRadius: 16,
-                  offset: Offset(0, 6))
-            ]),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: _orange.withValues(alpha: .3))),
         child: Column(children: [
-          Icon(icon, color: _orange, size: 22),
-          const SizedBox(height: 7),
+          Icon(icon, color: _orange, size: 30),
+          const SizedBox(height: 10),
           Text(title,
               style: const TextStyle(
-                  color: _ink, fontSize: 11, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 3),
+                  color: _ink, fontSize: 13, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 5),
           Text(subtitle,
               textAlign: TextAlign.center,
               maxLines: 2,
               style:
-                  const TextStyle(color: _muted, fontSize: 8.5, height: 1.25)),
+                  const TextStyle(color: _muted, fontSize: 10.5, height: 1.4)),
         ]),
       );
 }
