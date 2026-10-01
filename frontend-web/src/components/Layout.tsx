@@ -4,6 +4,7 @@ import { Navbar } from './Navbar';
 import { useAuth } from '../context/AuthContext';
 import { AdminSidebar } from './AdminSidebar';
 import { RoleSidebar } from './RoleSidebar';
+import { WorkspaceFooter } from './WorkspaceFooter';
 
 export const Layout: React.FC = () => {
   const { user } = useAuth();
@@ -33,15 +34,7 @@ export const Layout: React.FC = () => {
           <Outlet />
         </main>
       )}
-      <footer style={{
-        borderTop: '1px solid var(--border-color)',
-        padding: '20px 24px',
-        textAlign: 'center',
-        fontSize: '0.8rem',
-        color: 'var(--text-muted)'
-      }}>
-        Smart Solar &bull; Sri Lanka &bull; Rooftop solar planning
-      </footer>
+      <WorkspaceFooter />
     </div>
   );
 };
