@@ -73,6 +73,22 @@ class ApiService {
   Future<List<dynamic>> getSurveys() async =>
       List<dynamic>.from(await get('/api/surveys'));
 
+  Future<List<AppNotification>> getNotifications() async {
+    final items = List<dynamic>.from(await get('/api/notifications'));
+    return items
+        .map((item) => AppNotification.fromJson(
+            Map<String, dynamic>.from(item as Map)))
+        .toList();
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await post('/api/notifications/$id/read', {});
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await post('/api/notifications/read-all', {});
+  }
+
   Future<List<Map<String, dynamic>>> searchLocations(String query) async {
     final response = List<dynamic>.from(await get(
         '/api/locations/search?query=${Uri.encodeQueryComponent(query.trim())}'));
