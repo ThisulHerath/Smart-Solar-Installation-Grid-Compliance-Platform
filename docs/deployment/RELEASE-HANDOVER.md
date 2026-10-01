@@ -18,7 +18,8 @@ The supplied debug APK targets the Android emulator's http://10.0.2.2:5116. For 
 - Build React with VITE_API_BASE_URL set to the hosted HTTPS API. Set CORS_ALLOWED_ORIGINS on the API to the exact web origin. vercel.json provides SPA route fallback.
 - Set ENABLE_SWAGGER=true only when evaluator API documentation is intended to be available.
 - Replace or disable published demonstration accounts before a public launch. Their credentials are intentionally public development fixtures.
-- Configure durable, private file storage and authorized image delivery before accepting real bills or site photos. The current local upload directory uses static file serving and is for demo data.
+- Configure `FILE_STORAGE_PROVIDER=cloudinary` plus the three Cloudinary credentials from `.env.example`. Hosted environments default to Cloudinary and fail at startup when its credentials are absent, preventing accidental use of an ephemeral deployment disk. New image bytes are stored by Cloudinary while Neon retains provider-neutral URLs and metadata. The local provider remains available for development, and existing `/uploads/...` records require migration before the local directory is removed.
+- Cloudinary delivery URLs currently preserve the application's existing public-image behavior. Before accepting sensitive real property documents, add authenticated delivery or an authorized API proxy; use synthetic photos for the university demonstration until that access-control step is complete.
 - Build a release APK with the HTTPS API URL and the group's signing configuration. The provided artifact is debug-signed for demonstration.
 - Verify public URLs, health, Swagger, mobile connectivity, CI, backups and evaluator access. Record real deployment links and screenshots.
 

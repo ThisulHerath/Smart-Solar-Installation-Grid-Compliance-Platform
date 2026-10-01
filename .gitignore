@@ -8,6 +8,8 @@
 # .NET / C#
 bin/
 obj/
+.cloudinary-build/
+.cloudinary-test/
 *.user
 *.userosscache
 *.suo

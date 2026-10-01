@@ -89,7 +89,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
   Widget build(BuildContext context) {
     final visibleJobs = _jobs
         .where((j) =>
-            '${j.customerName} ${j.propertyAddress} ${j.id} ${j.solarSurveyId}'
+            '${j.projectName} ${j.customerName} ${j.propertyAddress} ${j.id} ${j.solarSurveyId}'
                 .toLowerCase()
                 .contains(_search))
         .toList();
@@ -281,7 +281,7 @@ class _TechnicianJobsScreenState extends State<TechnicianJobsScreen> {
                                               const SizedBox(width: 4),
                                               Expanded(
                                                 child: Text(
-                                                  job.propertyAddress,
+                                                  job.projectName,
                                                   style: const TextStyle(
                                                       fontSize: 13,
                                                       color: SolarColors.muted),

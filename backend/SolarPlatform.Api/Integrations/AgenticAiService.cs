@@ -11,6 +11,8 @@ public interface IAgenticAiService
     Task<SolarSizingResponseDto> ExecuteSolarSizingAsync(object request, CancellationToken cancellationToken = default);
     Task<EvaluateComplianceResponseDto?> ExecuteComplianceEvaluationAsync(object request, CancellationToken cancellationToken = default);
     Task<GuardrailResultDto?> EvaluateGuardrailAsync(object request, CancellationToken cancellationToken = default);
+    Task<StructuredWorkflowResultDto?> StartStructuredWorkflowAsync(object request, CancellationToken cancellationToken = default);
+    Task<StructuredWorkflowResultDto?> ResumeStructuredWorkflowAsync(object request, CancellationToken cancellationToken = default);
 }
 
 public class AgenticAiService : IAgenticAiService
@@ -169,15 +171,44 @@ public class AgenticAiService : IAgenticAiService
             var response = await _httpClient.SendAsync(message, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Agentic AI guardrail endpoint returned status {StatusCode} — defaulting to REQUIRES_APPROVAL.", response.StatusCode);
-                return GuardrailResultDto.SafeDefault();
+                _logger.LogWarning("Agentic AI guardrail endpoint returned status {StatusCode}.", response.StatusCode);
+                return null;
             }
-            return await response.Content.ReadFromJsonAsync<GuardrailResultDto>(cancellationToken: cancellationToken) ?? GuardrailResultDto.SafeDefault();
+            return await response.Content.ReadFromJsonAsync<GuardrailResultDto>(cancellationToken: cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Guardrail evaluation failed or AI service unavailable — defaulting to REQUIRES_APPROVAL.");
-            return GuardrailResultDto.SafeDefault();
+            _logger.LogError(ex, "Guardrail evaluation failed or AI service unavailable.");
+            return null;
+        }
+    }
+
+    public Task<StructuredWorkflowResultDto?> StartStructuredWorkflowAsync(object request, CancellationToken cancellationToken = default)
+        => SendStructuredWorkflowAsync("/workflow/start", request, cancellationToken);
+
+    public Task<StructuredWorkflowResultDto?> ResumeStructuredWorkflowAsync(object request, CancellationToken cancellationToken = default)
+        => SendStructuredWorkflowAsync("/workflow/resume", request, cancellationToken);
+
+    private async Task<StructuredWorkflowResultDto?> SendStructuredWorkflowAsync(string path, object request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var internalKey = _configuration["AgenticAi:InternalKey"] ?? Environment.GetEnvironmentVariable("AGENTIC_AI_INTERNAL_KEY")
+                ?? throw new InvalidOperationException("AGENTIC_AI_INTERNAL_KEY must be configured.");
+            using var message = new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(request) };
+            message.Headers.Add("X-Internal-Key", internalKey);
+            var response = await _httpClient.SendAsync(message, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Structured workflow endpoint {Path} returned status {StatusCode}.", path, response.StatusCode);
+                return null;
+            }
+            return await response.Content.ReadFromJsonAsync<StructuredWorkflowResultDto>(cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Structured workflow call {Path} failed.", path);
+            return null;
         }
     }
 }

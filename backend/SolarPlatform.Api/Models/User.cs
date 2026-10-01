@@ -7,6 +7,7 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string? PhoneNumber { get; set; }
+    public string? ProfileImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
     public int SecurityVersion { get; set; }
     public DateTime? EmailVerifiedAt { get; set; }
@@ -14,5 +15,6 @@ public class User
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public ICollection<UserNotification> Notifications { get; set; } = new List<UserNotification>();
     public CustomerProfile? CustomerProfile { get; set; }
 }

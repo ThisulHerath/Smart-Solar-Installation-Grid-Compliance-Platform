@@ -6,6 +6,9 @@ public class AgentExecutionLog
     public Guid AgentWorkflowId { get; set; }
     public string AgentName { get; set; } = string.Empty;
     public string StepName { get; set; } = string.Empty;
+    public string? ToolName { get; set; }
+    public string? TraceId { get; set; }
+    public string? SpanId { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
     public DateTime? CompletedAt { get; set; }

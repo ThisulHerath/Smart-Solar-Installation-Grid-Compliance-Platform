@@ -5,6 +5,7 @@ class FieldJob {
   final String technicianName;
   final String customerName;
   final String customerPhone;
+  final String projectName;
   final String propertyAddress;
   final double monthlyKwh;
   final double roofAreaSqm;
@@ -28,6 +29,7 @@ class FieldJob {
     required this.technicianName,
     required this.customerName,
     required this.customerPhone,
+    required this.projectName,
     required this.propertyAddress,
     required this.monthlyKwh,
     required this.roofAreaSqm,
@@ -58,6 +60,9 @@ class FieldJob {
       technicianName: json['technicianName'] as String? ?? 'Unassigned',
       customerName: json['customerName'] as String? ?? 'Unknown Customer',
       customerPhone: json['customerPhone'] as String? ?? '',
+      projectName: json['projectName'] as String? ??
+          json['propertyAddress'] as String? ??
+          'Solar project',
       propertyAddress: json['propertyAddress'] as String? ?? '',
       monthlyKwh: (json['monthlyKwh'] as num?)?.toDouble() ?? 0.0,
       roofAreaSqm: (json['roofAreaSqm'] as num?)?.toDouble() ?? 0.0,

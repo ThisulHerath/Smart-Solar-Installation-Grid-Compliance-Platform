@@ -2,6 +2,7 @@ import 'dart:convert';
 
 class SolarSurvey {
   final String id;
+  final String projectName;
   final double monthlyKwh;
   final double roofAreaSqm;
   final String gridType;
@@ -14,6 +15,7 @@ class SolarSurvey {
 
   SolarSurvey({
     required this.id,
+    required this.projectName,
     required this.monthlyKwh,
     required this.roofAreaSqm,
     required this.gridType,
@@ -27,6 +29,9 @@ class SolarSurvey {
 
   factory SolarSurvey.fromJson(Map<String, dynamic> json) => SolarSurvey(
         id: json['id']?.toString() ?? '',
+        projectName: json['projectName']?.toString() ??
+            json['propertyAddress']?.toString() ??
+            'Solar project',
         monthlyKwh: (json['monthlyKwh'] as num?)?.toDouble() ?? 0.0,
         roofAreaSqm: (json['roofAreaSqm'] as num?)?.toDouble() ?? 0.0,
         gridType: json['gridType']?.toString() ?? 'SinglePhase',

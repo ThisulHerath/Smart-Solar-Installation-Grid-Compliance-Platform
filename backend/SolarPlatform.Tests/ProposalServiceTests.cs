@@ -64,6 +64,23 @@ public class ProposalServiceTests
 
         _db.Users.AddRange(engineer, homeowner);
         _db.SolarSurveys.Add(survey);
+        var sizingWorkflow = new AgentWorkflow
+        {
+            SolarSurveyId = survey.Id,
+            Objective = "Agent-backed solar sizing",
+            Status = WorkflowStatus.Completed,
+            ResultJson = "{\"recommended_kw\":12.5,\"estimated_panel_count\":31,\"estimated_inverter_kw\":12.5}",
+            CompletedAt = DateTime.UtcNow
+        };
+        sizingWorkflow.ExecutionLogs.Add(new AgentExecutionLog
+        {
+            AgentName = "SolarSizingAgent",
+            StepName = "sizing",
+            Status = "completed",
+            StartedAt = DateTime.UtcNow,
+            CompletedAt = DateTime.UtcNow
+        });
+        _db.AgentWorkflows.Add(sizingWorkflow);
         var job = new FieldJob { SolarSurveyId = survey.Id, TechnicianId = _engineerId };
         var inspection = new SiteInspection { FieldJobId = job.Id };
         _db.AddRange(job, inspection, new ComplianceAssessment {
@@ -81,7 +98,11 @@ public class ProposalServiceTests
                 RequiresApproval = true,
                 Issues = new List<string> { "kW 12.0 exceeds 10.0 kW automatic threshold" },
                 Recommendations = new List<string> { "Senior engineer review recommended" },
-                RecommendationSummary = "Guardrail evaluation complete"
+                RecommendationSummary = "Guardrail evaluation complete",
+                ExecutionLogs = new List<Dictionary<string, object>>
+                {
+                    new() { ["agent_name"] = "SafetyGuardrailAgent", ["status"] = "completed" }
+                }
             });
     }
 
@@ -107,6 +128,33 @@ public class ProposalServiceTests
         await _db.SaveChangesAsync();
         await Assert.ThrowsAsync<InvalidOperationException>(() => CreateService().CreateAsync(_surveyId, _homeownerId, null));
         Assert.Empty(await _db.EngineeringProposals.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Proposal_RequiresCompletedSolarSizingAgentResult()
+    {
+        _db.AgentWorkflows.RemoveRange(_db.AgentWorkflows);
+        await _db.SaveChangesAsync();
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            CreateService().CreateAsync(_surveyId, _homeownerId, null));
+
+        Assert.Contains("SolarSizingAgent", error.Message);
+        Assert.Empty(await _db.EngineeringProposals.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Proposal_FailsWhenSafetyGuardrailAgentIsUnavailable()
+    {
+        _aiMock
+            .Setup(x => x.EvaluateGuardrailAsync(It.IsAny<object>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((GuardrailResultDto?)null);
+
+        var error = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            CreateService().CreateAsync(_surveyId, _homeownerId, null));
+
+        Assert.Contains("SafetyGuardrailAgent", error.Message);
+        Assert.Equal(ProposalStatus.Failed, (await _db.EngineeringProposals.SingleAsync()).ProposalStatus);
     }
 
     [Fact]

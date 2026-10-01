@@ -9,24 +9,28 @@ public class EmailChallengeCleanup(IServiceScopeFactory scopes, ILogger<EmailCha
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(15));
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                using var scope = scopes.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var now = DateTime.UtcNow;
-                var stale = await db.EmailChallenges.Where(c => c.CreatedAt < now.AddHours(-24) ||
-                    (c.ExpiresAt < now && c.PasswordHash != null)).Take(1000).ToListAsync(stoppingToken);
-                foreach (var row in stale)
+                try
                 {
-                    if (row.CreatedAt < now.AddHours(-24)) db.EmailChallenges.Remove(row);
-                    else { row.PasswordHash = null; row.FullName = null; row.PhoneNumber = null; row.CodeHash = ""; row.ConsumedAt = now; row.Revision = Guid.NewGuid(); }
+                    using var scope = scopes.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    var now = DateTime.UtcNow;
+                    var stale = await db.EmailChallenges.Where(c => c.CreatedAt < now.AddHours(-24) ||
+                        (c.ExpiresAt < now && c.PasswordHash != null)).Take(1000).ToListAsync(stoppingToken);
+                    foreach (var row in stale)
+                    {
+                        if (row.CreatedAt < now.AddHours(-24)) db.EmailChallenges.Remove(row);
+                        else { row.PasswordHash = null; row.FullName = null; row.PhoneNumber = null; row.CodeHash = ""; row.ConsumedAt = now; row.Revision = Guid.NewGuid(); }
+                    }
+                    await db.SaveChangesAsync(stoppingToken);
                 }
-                await db.SaveChangesAsync(stoppingToken);
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
+                catch (Exception ex) { logger.LogWarning("Email challenge cleanup will retry ({ErrorType}).", ex.GetType().Name); }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-            catch (Exception ex) { logger.LogWarning("Email challenge cleanup will retry ({ErrorType}).", ex.GetType().Name); }
         }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { }
     }
 }

@@ -15,4 +15,13 @@ public class ChangePasswordRequestDto
     public string NewPassword { get; set; } = "";
 }
 
+public class ForgotPasswordRequestDto
+{
+    [Required, EmailAddress]
+    public string Email { get; set; } = "";
+
+    [Required, StringLength(64, MinimumLength = 12)]
+    public string NewPassword { get; set; } = "";
+}
+
 public record EmailChallengeResponse(Guid ChallengeId, string MaskedEmail, DateTime ExpiresAt, int ResendAfterSeconds = 60);

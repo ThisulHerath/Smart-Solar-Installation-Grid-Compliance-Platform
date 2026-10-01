@@ -1,13 +1,14 @@
-import { FormHTMLAttributes, InputHTMLAttributes, useEffect, useId, useRef, useState } from 'react';
+import { FormHTMLAttributes, InputHTMLAttributes, ReactNode, useEffect, useId, useRef, useState } from 'react';
 import { Eye, EyeOff, CircleAlert, Check } from 'lucide-react';
 
 type Props = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   hint?: string;
   matchValue?: string;
+  icon?: ReactNode;
 };
 
-export function AuthField({ label, hint, matchValue, ...props }: Props) {
+export function AuthField({ label, hint, matchValue, icon, ...props }: Props) {
   const generatedId = useId();
   props.id ??= generatedId;
   const input = useRef<HTMLInputElement>(null);
@@ -34,6 +35,7 @@ export function AuthField({ label, hint, matchValue, ...props }: Props) {
         aria-invalid={invalid} aria-describedby={invalid || hint || matching ? messageId : undefined}
         onInvalid={event => { event.preventDefault(); setTouched(true); }}
         onBlur={event => { if (error) setTouched(true); props.onBlur?.(event); }} />
+      {icon && <span className="auth-field-icon" aria-hidden="true">{icon}</span>}
       {password && <button className="password-toggle" type="button" aria-label={`${visible ? 'Hide' : 'Show'} ${label.toLowerCase()}`} aria-pressed={visible}
         aria-controls={props.id} disabled={props.disabled} onClick={() => setVisible(!visible)}>
         {visible ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}

@@ -9,6 +9,7 @@ import { Survey } from '../../types/auth';
 
 // Mock the API service
 vi.mock('../../services/api', () => ({
+  resolveAssetUrl: (value: string | null | undefined) => value ?? null,
   api: {
     getSurveys: vi.fn(),
     getMe: vi.fn(),
@@ -19,6 +20,7 @@ const mockSurveys: Survey[] = [
   {
     id: 'survey-101',
     customerId: 'cust-1',
+    projectName: 'Colombo Home Solar',
     monthlyKwh: 1200,
     roofAreaSqm: 80,
     gridType: 'SinglePhase',

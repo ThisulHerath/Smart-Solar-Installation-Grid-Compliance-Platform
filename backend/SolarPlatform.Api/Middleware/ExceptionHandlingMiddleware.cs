@@ -41,40 +41,49 @@ public class ExceptionHandlingMiddleware
                 statusCode = HttpStatusCode.ServiceUnavailable;
                 message = exception.Message;
                 break;
+
             case SolarPlatform.Api.Services.OtpLimitException:
                 statusCode = HttpStatusCode.TooManyRequests;
                 message = exception.Message;
                 context.Response.Headers.RetryAfter = "60";
                 break;
+
             case Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException:
                 statusCode = HttpStatusCode.Conflict;
                 message = "The inventory changed during this request. Refresh and retry.";
                 break;
+
             case Microsoft.EntityFrameworkCore.DbUpdateException:
                 statusCode = HttpStatusCode.Conflict;
                 message = "The change conflicts with an existing record or stock constraint. Refresh and retry.";
                 break;
+
             case Npgsql.PostgresException pg when pg.SqlState is "40001" or "40P01":
                 statusCode = HttpStatusCode.Conflict;
                 message = "A concurrent inventory update occurred. Refresh and retry.";
                 break;
+
             case UnauthorizedAccessException:
                 statusCode = HttpStatusCode.Unauthorized;
                 message = exception.Message;
                 break;
+
             case InvalidOperationException when exception.InnerException != null:
                 // Infrastructure failures must not expose nested provider/configuration details.
                 statusCode = HttpStatusCode.ServiceUnavailable;
                 message = "A required service is temporarily unavailable. Please retry later.";
                 break;
+
             case InvalidOperationException:
                 statusCode = HttpStatusCode.BadRequest;
                 message = exception.Message;
                 break;
+
             case KeyNotFoundException:
                 statusCode = HttpStatusCode.NotFound;
                 message = exception.Message;
                 break;
+                
             case ArgumentException:
                 statusCode = HttpStatusCode.BadRequest;
                 message = exception.Message;

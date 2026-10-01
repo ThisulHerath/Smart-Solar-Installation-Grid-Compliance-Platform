@@ -24,6 +24,8 @@ export interface EngineeringProposalSummary {
   requiresApproval: boolean;
   createdAt: string;
   updatedAt: string;
+  projectName?: string;
+  customerName?: string;
 }
 
 export interface EngineeringProposal extends EngineeringProposalSummary {
@@ -32,6 +34,7 @@ export interface EngineeringProposal extends EngineeringProposalSummary {
   guardrailResultJson?: string;
   validationResultJson?: string;
   customerName?: string;
+  projectName?: string;
   propertyAddress?: string;
   auditLogs: ApprovalAuditLog[];
 }

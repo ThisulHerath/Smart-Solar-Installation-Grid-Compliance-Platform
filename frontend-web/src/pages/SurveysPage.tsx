@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Image as ImageIcon
 } from '../components/Icons';
+import '../styles/surveys.css';
 
 interface SizingResult {
   recommended_kw?: number;
@@ -133,9 +134,9 @@ export const SurveysPage: React.FC = () => {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="staff-surveys-page operations-page" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Header */}
-      <div className="glass-panel" style={{ padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="glass-panel staff-surveys-header" style={{ padding: '24px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.6rem', marginBottom: '4px' }}>Staff Solar Survey Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
@@ -154,9 +155,9 @@ export const SurveysPage: React.FC = () => {
           <div>No customer surveys found. Submit a survey from the mobile app to get started.</div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>
+        <div className="staff-surveys-split" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: '24px' }}>
           {/* Survey List */}
-          <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+          <div className="glass-panel staff-survey-list" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, padding: '4px 8px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Submitted Surveys ({surveys.length})
             </div>
@@ -176,8 +177,9 @@ export const SurveysPage: React.FC = () => {
                   }}
                 >
                   <div style={{ fontWeight: 600, fontSize: '0.92rem', marginBottom: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {s.propertyAddress || 'Unnamed Property'}
+                    {s.projectName || s.propertyAddress || 'Unnamed project'}
                   </div>
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '6px' }}>{s.propertyAddress}</div>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                     {s.monthlyKwh} kWh/mo &bull; {s.roofAreaSqm} m² &bull; {s.gridType}
                   </div>
@@ -194,12 +196,13 @@ export const SurveysPage: React.FC = () => {
 
           {/* Survey Detail Panel */}
           {selectedSurvey && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="staff-survey-detail" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Card 1: Customer Input & Specifications */}
-              <div className="glass-panel" style={{ padding: '24px' }}>
+              <div className="glass-panel staff-survey-detail-card" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                   <div>
-                    <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{selectedSurvey.propertyAddress}</h2>
+                    <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{selectedSurvey.projectName || selectedSurvey.propertyAddress}</h2>
+                    <div style={{ fontSize: '0.86rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>{selectedSurvey.propertyAddress}</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                       Survey ID: {selectedSurvey.id} &bull; Customer ID: {selectedSurvey.customerId}
                     </div>
@@ -263,7 +266,7 @@ export const SurveysPage: React.FC = () => {
                   const isFailed = wf.status?.toLowerCase() === 'failed' || wf.errorMessage;
 
                   return (
-                    <div key={wf.workflowId || idx} className="glass-panel" style={{ padding: '24px' }}>
+                    <div key={wf.workflowId || idx} className="glass-panel staff-survey-workflow-card" style={{ padding: '24px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <Cpu size={20} color="var(--solar-emerald)" />
@@ -293,19 +296,19 @@ export const SurveysPage: React.FC = () => {
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Recommended Array Capacity</div>
-                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2f4b4e', marginTop: '2px' }}>
                                 {sizing.recommended_kw} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>kW</span>
                               </div>
                             </div>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Estimated Panel Count</div>
-                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2f4b4e', marginTop: '2px' }}>
                                 {sizing.estimated_panel_count} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>panels (400W)</span>
                               </div>
                             </div>
                             <div>
                               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Estimated Inverter Size</div>
-                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', marginTop: '2px' }}>
+                              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2f4b4e', marginTop: '2px' }}>
                                 {sizing.estimated_inverter_kw} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>kW</span>
                               </div>
                             </div>

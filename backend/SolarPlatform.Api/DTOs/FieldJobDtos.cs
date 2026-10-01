@@ -12,6 +12,7 @@ public record FieldJobResponseDto(
     string TechnicianName,
     string CustomerName,
     string CustomerPhone,
+    string ProjectName,
     string PropertyAddress,
     decimal MonthlyKwh,
     decimal RoofAreaSqm,
@@ -24,8 +25,10 @@ public record FieldJobResponseDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     bool HasInspection,
+    DateTime? CheckInAt,
     InspectionStatus? InspectionStatus,
-    ComplianceAssessmentDto? Compliance
+    ComplianceAssessmentDto? Compliance,
+    SiteInspectionResponseDto? Inspection
 );
 
 public record CreateFieldJobDto(

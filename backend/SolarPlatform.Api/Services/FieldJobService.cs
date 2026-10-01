@@ -13,17 +13,20 @@ public class FieldJobService : IFieldJobService
     private readonly IAgenticAiService _agenticAi;
     private readonly IFileStorageService _fileStorage;
     private readonly ILogger<FieldJobService> _logger;
+    private readonly INotificationService? _notifications;
 
     public FieldJobService(
         AppDbContext db,
         IAgenticAiService agenticAi,
         IFileStorageService fileStorage,
-        ILogger<FieldJobService> logger)
+        ILogger<FieldJobService> logger,
+        INotificationService? notifications = null)
     {
         _db = db;
         _agenticAi = agenticAi;
         _fileStorage = fileStorage;
         _logger = logger;
+        _notifications = notifications;
     }
 
     public async Task<IReadOnlyList<TechnicianOptionDto>> GetAvailableTechniciansAsync() =>
@@ -125,12 +128,25 @@ public class FieldJobService : IFieldJobService
         _db.FieldJobs.Add(job);
         await _db.SaveChangesAsync();
 
+        if (_notifications != null)
+        {
+            await _notifications.NotifyUserAsync(
+                job.TechnicianId,
+                "FIELD_JOB_ASSIGNED",
+                "New site visit assigned",
+                $"You were assigned to {survey.ProjectName} at {survey.PropertyAddress}.",
+                "/technician-jobs",
+                "FieldJob",
+                job.Id);
+            await NotifyCustomerOfAssignmentAsync(survey, job.TechnicianId, job.ScheduledAt);
+        }
+
         return await GetJobByIdAsync(job.Id) ?? throw new InvalidOperationException("Failed to retrieve created job.");
     }
 
     public async Task<FieldJobResponseDto?> AssignJobAsync(Guid jobId, AssignFieldJobDto dto)
     {
-        var job = await _db.FieldJobs.FindAsync(jobId);
+        var job = await _db.FieldJobs.Include(item => item.SolarSurvey).ThenInclude(survey => survey.Customer).FirstOrDefaultAsync(item => item.Id == jobId);
         if (job == null) return null;
 
         await ValidateTechnicianAsync(dto.TechnicianId);
@@ -142,12 +158,27 @@ public class FieldJobService : IFieldJobService
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
+        if (_notifications != null)
+        {
+            await _notifications.NotifyUserAsync(
+                job.TechnicianId,
+                "FIELD_JOB_ASSIGNED",
+                "Site visit assigned to you",
+                $"You were assigned to {job.SolarSurvey.ProjectName} at {job.SolarSurvey.PropertyAddress}.",
+                "/technician-jobs",
+                "FieldJob",
+                job.Id);
+            await NotifyCustomerOfAssignmentAsync(job.SolarSurvey, job.TechnicianId, job.ScheduledAt);
+        }
         return await GetJobByIdAsync(jobId);
     }
 
     public async Task<FieldJobResponseDto?> UpdateJobStatusAsync(Guid jobId, Guid technicianId, FieldJobStatus newStatus)
     {
-        var job = await _db.FieldJobs.FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
+        var job = await _db.FieldJobs
+            .Include(item => item.SolarSurvey).ThenInclude(survey => survey.Customer)
+            .Include(item => item.Technician)
+            .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
         if (job == null) return null;
 
         FieldJobStatusTransition.ValidateTransition(job.Status, newStatus);
@@ -155,6 +186,24 @@ public class FieldJobService : IFieldJobService
         job.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
+        if (_notifications != null && newStatus == FieldJobStatus.Accepted)
+        {
+            await _notifications.NotifyUserAsync(
+                job.SolarSurvey.Customer.UserId,
+                "VISIT_CONFIRMED",
+                "Your technician confirmed the visit",
+                $"{job.Technician.FullName} accepted the visit for {job.SolarSurvey.ProjectName}.",
+                "/dashboard", "SolarSurvey", job.SolarSurveyId);
+        }
+        else if (_notifications != null && newStatus == FieldJobStatus.InProgress)
+        {
+            await _notifications.NotifyUserAsync(
+                job.SolarSurvey.Customer.UserId,
+                "TECHNICIAN_ON_THE_WAY",
+                "Your technician is on the way",
+                $"{job.Technician.FullName} is travelling to {job.SolarSurvey.PropertyAddress} for your solar site visit.",
+                "/dashboard", "SolarSurvey", job.SolarSurveyId);
+        }
         return await GetJobByIdAsync(jobId);
     }
 
@@ -162,11 +211,18 @@ public class FieldJobService : IFieldJobService
     {
         var job = await _db.FieldJobs
             .Include(j => j.Inspection)
+            .Include(j => j.SolarSurvey).ThenInclude(survey => survey.Customer)
+            .Include(j => j.Technician)
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
 
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "This inspection is locked because grid compliance is complete.");
+
         var inspection = job.Inspection;
+        var firstCheckIn = inspection?.CheckInAt == null;
         if (inspection == null)
         {
             inspection = new SiteInspection
@@ -195,7 +251,31 @@ public class FieldJobService : IFieldJobService
         }
 
         await _db.SaveChangesAsync();
+        if (_notifications != null && firstCheckIn)
+        {
+            await _notifications.NotifyUserAsync(
+                job.SolarSurvey.Customer.UserId,
+                "TECHNICIAN_ARRIVED",
+                "Your technician has arrived",
+                $"{job.Technician.FullName} checked in at {job.SolarSurvey.PropertyAddress} and is ready to begin the inspection.",
+                "/dashboard", "SolarSurvey", job.SolarSurveyId);
+        }
         return await GetInspectionDtoAsync(inspection.Id);
+    }
+
+    private async Task NotifyCustomerOfAssignmentAsync(SolarSurvey survey, Guid technicianId, DateTime? scheduledAt)
+    {
+        if (_notifications == null) return;
+        var technicianName = await _db.Users.AsNoTracking().Where(user => user.Id == technicianId).Select(user => user.FullName).SingleAsync();
+        var schedule = scheduledAt.HasValue
+            ? $" on {scheduledAt.Value.ToUniversalTime().AddHours(5.5):dddd, dd MMM yyyy 'at' h:mm tt} (Sri Lanka time)"
+            : "; the technician will contact you to confirm the date and time";
+        await _notifications.NotifyUserAsync(
+            survey.Customer.UserId,
+            "FIELD_VISIT_SCHEDULED",
+            "Solar site visit arranged",
+            $"{technicianName} was assigned to visit {survey.PropertyAddress}{schedule}.",
+            "/dashboard", "SolarSurvey", survey.Id);
     }
 
     public async Task<SiteInspectionResponseDto?> SaveInspectionDraftAsync(Guid jobId, Guid technicianId, SaveSiteInspectionDto dto)
@@ -205,6 +285,10 @@ public class FieldJobService : IFieldJobService
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
+
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "This inspection is locked because grid compliance is complete.");
 
         var inspection = job.Inspection;
         if (inspection == null)
@@ -239,6 +323,10 @@ public class FieldJobService : IFieldJobService
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
+
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "Readings cannot be changed after grid compliance is complete.");
 
         var inspection = job.Inspection;
         if (inspection == null)
@@ -281,6 +369,10 @@ public class FieldJobService : IFieldJobService
             .FirstOrDefaultAsync(j => j.Id == jobId && j.TechnicianId == technicianId);
 
         if (job == null) return null;
+
+        if (job.Status == FieldJobStatus.ComplianceComplete)
+            throw new InvalidOperationException(
+                "Photos cannot be changed after grid compliance is complete.");
 
         var inspection = job.Inspection;
         if (inspection == null)
@@ -393,17 +485,17 @@ public class FieldJobService : IFieldJobService
             TechnicianNotes: inspection.TechnicianNotes
         );
 
-        EvaluateComplianceResponseDto? aiResult = null;
-        try
+        var aiResult = await _agenticAi.ExecuteComplianceEvaluationAsync(complianceRequest);
+        if (aiResult == null || !aiResult.ExecutionLogs.Any(log =>
+                string.Equals(log.AgentName, "GridComplianceAgent", StringComparison.Ordinal) &&
+                string.Equals(log.Status, "completed", StringComparison.OrdinalIgnoreCase)))
         {
-            aiResult = await _agenticAi.ExecuteComplianceEvaluationAsync(complianceRequest);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Agentic AI compliance call failed, using deterministic local evaluation.");
+            job.Status = FieldJobStatus.Failed;
+            job.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+            throw new InvalidOperationException("GridComplianceAgent did not return a completed, traceable result. No local compliance result was created; retry when the agent service is healthy.");
         }
 
-        // If AI returned a result, use it; otherwise fallback to deterministic local evaluator
         var assessment = inspection.ComplianceAssessment;
         if (assessment == null)
         {
@@ -414,68 +506,15 @@ public class FieldJobService : IFieldJobService
             _db.ComplianceAssessments.Add(assessment);
         }
 
-        if (aiResult != null)
-        {
-            assessment.WorkflowId = aiResult.WorkflowId;
-            assessment.GridCompliant = aiResult.GridCompliant;
-            assessment.ComplianceStatus = aiResult.ComplianceStatus;
-            assessment.RiskLevel = aiResult.RiskLevel;
-            assessment.ValidationStatus = aiResult.ValidationStatus;
-            assessment.ComplianceNotes = string.Join("; ", aiResult.Violations.Concat(aiResult.Recommendations));
-            assessment.UpdatedAt = DateTime.UtcNow;
+        assessment.WorkflowId = aiResult.WorkflowId;
+        assessment.GridCompliant = aiResult.GridCompliant;
+        assessment.ComplianceStatus = aiResult.ComplianceStatus;
+        assessment.RiskLevel = aiResult.RiskLevel;
+        assessment.ValidationStatus = aiResult.ValidationStatus;
+        assessment.ComplianceNotes = string.Join("; ", aiResult.Violations.Concat(aiResult.Recommendations));
+        assessment.UpdatedAt = DateTime.UtcNow;
 
-            job.Status = aiResult.GridCompliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;
-        }
-        else
-        {
-            // Deterministic local compliance evaluation fallback
-            var violations = new List<string>();
-            if (!gridVoltage.HasValue || !gridFrequency.HasValue || !inspection.MainBreakerRating.HasValue || !inspection.InverterLocationSuitable.HasValue)
-                violations.Add("Required inspection measurements are missing.");
-            var recommendations = new List<string>();
-
-            // Voltage check (230V +/- 6% for single phase, 400V +/- 6% for three phase)
-            if (gridVoltage.HasValue)
-            {
-                var targetV = inspection.GridTypeObserved == GridType.ThreePhase ? 400m : 230m;
-                var minV = targetV * 0.94m;
-                var maxV = targetV * 1.06m;
-                if (gridVoltage.Value < minV || gridVoltage.Value > maxV)
-                {
-                    violations.Add($"Grid voltage {gridVoltage.Value}V is outside acceptable range ({minV:F1}V - {maxV:F1}V).");
-                }
-            }
-
-            // Frequency check (50Hz +/- 1% -> 49.5 - 50.5Hz)
-            if (gridFrequency.HasValue)
-            {
-                if (gridFrequency.Value < 49.5m || gridFrequency.Value > 50.5m)
-                {
-                    violations.Add($"Grid frequency {gridFrequency.Value}Hz is outside standard tolerances (49.5Hz - 50.5Hz).");
-                }
-            }
-
-            // Inverter suitability
-            if (inspection.InverterLocationSuitable == false)
-            {
-                violations.Add("Technician identified inverter location as unsuitable for thermal dissipation and safety.");
-            }
-
-            bool compliant = violations.Count == 0;
-            string risk = compliant ? "Low" : (violations.Count > 1 ? "High" : "Medium");
-
-            assessment.WorkflowId = $"local-comp-{Guid.NewGuid().ToString()[..8]}";
-            assessment.GridCompliant = compliant;
-            assessment.ComplianceStatus = compliant ? "COMPLIANT" : "NON_COMPLIANT";
-            assessment.RiskLevel = risk;
-            assessment.ValidationStatus = "DeterministicValidated";
-            assessment.ComplianceNotes = violations.Count > 0
-                ? $"Violations: {string.Join("; ", violations)}"
-                : "Local project screening passed while the AI service was unavailable. Separate utility and engineering approval is required.";
-            assessment.UpdatedAt = DateTime.UtcNow;
-
-            job.Status = compliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;
-        }
+        job.Status = aiResult.GridCompliant ? FieldJobStatus.ComplianceComplete : FieldJobStatus.Failed;
 
         job.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
@@ -527,6 +566,11 @@ public class FieldJobService : IFieldJobService
 
         if (inspection == null) return null;
 
+        return ToInspectionDto(inspection);
+    }
+
+    private static SiteInspectionResponseDto ToInspectionDto(SiteInspection inspection)
+    {
         return new SiteInspectionResponseDto(
             inspection.Id,
             inspection.FieldJobId,
@@ -571,6 +615,7 @@ public class FieldJobService : IFieldJobService
             j.Technician?.FullName ?? "Unassigned",
             j.SolarSurvey?.Customer?.FullName ?? "Unknown Customer",
             j.SolarSurvey?.Customer?.PhoneNumber ?? string.Empty,
+            j.SolarSurvey?.ProjectName ?? "Solar project",
             j.SolarSurvey?.PropertyAddress ?? string.Empty,
             j.SolarSurvey?.MonthlyKwh ?? 0,
             j.SolarSurvey?.RoofAreaSqm ?? 0,
@@ -583,6 +628,7 @@ public class FieldJobService : IFieldJobService
             j.CreatedAt,
             j.UpdatedAt,
             j.Inspection != null,
+            j.Inspection?.CheckInAt,
             j.Inspection?.InspectionStatus,
             j.Inspection?.ComplianceAssessment == null ? null : new ComplianceAssessmentDto(
                 j.Inspection.ComplianceAssessment.Id,
@@ -595,7 +641,8 @@ public class FieldJobService : IFieldJobService
                 j.Inspection.ComplianceAssessment.ValidationStatus,
                 j.Inspection.ComplianceAssessment.CreatedAt,
                 j.Inspection.ComplianceAssessment.UpdatedAt
-            )
+            ),
+            j.Inspection == null ? null : ToInspectionDto(j.Inspection)
         );
     }
 }

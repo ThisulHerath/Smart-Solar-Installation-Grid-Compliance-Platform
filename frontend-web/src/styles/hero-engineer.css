@@ -1,0 +1,20 @@
+.hero-photo--engineer { justify-self: center; width: min(100%, 465px); min-height: 445px; border-radius: 42px; }
+
+.hero-photo--engineer img { height: 445px; border-radius: 42px; object-position: center 22%; }
+
+.hero-photo--engineer::after { border-radius: 42px; background: linear-gradient(0deg, #052a381a, transparent 58%); }
+
+.hero-photo--engineer .touch-badge { top: -16px; right: -18px; }
+
+.hero-photo--engineer .touch-badge { width: 126px; height: 126px; border-width: 6px; background: #07536a; }
+
+.hero-photo--engineer .touch-badge .touch-ring { position: absolute; inset: 9px; display: block; transform: none; }
+
+.hero-photo--engineer .touch-badge .touch-ring i { position: absolute; top: 0; left: 50%; height: 50%; color: #fff; font-size: 9px; font-style: normal; font-weight: 800; letter-spacing: 0; transform: translateX(-50%) rotate(calc(-142deg + var(--letter) * 12deg)); transform-origin: 50% 100%; }
+
+.hero-photo--engineer .touch-badge b { width: 43px; height: 43px; background: #78bd42; }
+
+@media (max-width: 760px) {
+  .hero-photo--engineer { width: 100%; min-height: 410px; }
+  .hero-photo--engineer img { height: 410px; }
+}

@@ -1,0 +1,43 @@
+.eco-newsletter { width: min(900px, calc(100% - 64px)); margin: 0 auto 105px; padding: 62px 0 20px; text-align: center; }
+.eco-newsletter > p { margin-bottom: 17px; font-size: 11px; }
+.eco-newsletter h2 { font-size: clamp(42px, 4.5vw, 62px); line-height: 1.04; }
+.eco-newsletter form { margin-top: 35px; }
+.eco-newsletter label { width: 310px; height: 50px; padding: 0 18px; }
+.eco-newsletter input { height: 48px; font-size: 13px; }
+.eco-newsletter button { min-width: 130px; height: 50px; font-size: 13px; }
+
+.eco-footer { display: block; width: 100%; min-height: 0; margin: 0; border: 0; background: #0b596b; color: #eaf5f5; }
+.eco-footer-main { display: grid; grid-template-columns: 1.45fr .8fr .9fr 1.35fr; gap: 56px; width: min(1180px, calc(100% - 64px)); margin: auto; padding: 72px 0 68px; }
+.eco-footer-main > div:not(.footer-brand-column) { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.eco-footer-main h3 { margin: 0 0 8px; color: #fff; font-size: 15px; }
+.eco-footer-main a,
+.eco-footer-main p { margin: 0; color: #c7dcdf; font-size: 12px; line-height: 1.6; text-decoration: none; }
+.eco-footer-main > div > a:hover { color: #8bd058; }
+.footer-brand-column .eco-brand { color: #fff; font-size: 18px; }
+.footer-brand-column .eco-brand svg { padding: 6px; border-radius: 50%; background: #78bd42; color: #fff; box-sizing: content-box; }
+.footer-brand-column > p { max-width: 270px; margin-top: 19px; }
+.footer-socials { display: flex; gap: 10px; margin-top: 20px; }
+.footer-socials a { display: grid; place-items: center; width: 31px; height: 31px; border-radius: 50%; background: #ffffff1f; color: #fff; }
+.footer-socials a:hover { background: #78bd42; color: #fff; }
+.footer-subscribe form { display: flex; width: 100%; margin-top: 7px; overflow: hidden; border-radius: 6px; background: #ffffff20; }
+.footer-subscribe input { min-width: 0; flex: 1; height: 43px; padding: 0 13px; border: 0; outline: 0; background: transparent; color: #fff; font-size: 12px; }
+.footer-subscribe input::placeholder { color: #d2e2e3; }
+.footer-subscribe button { display: grid; place-items: center; width: 45px; border: 0; background: #78bd42; color: #fff; cursor: pointer; }
+.eco-footer-legal { display: flex; justify-content: space-between; gap: 24px; width: 100%; box-sizing: border-box; padding: 18px max(32px, calc((100vw - 1180px) / 2)); background: #78bd42; color: #fff; font-size: 12px; }
+.eco-footer-legal > span:last-child { display: flex; gap: 20px; }
+.eco-footer-legal a { color: inherit; text-decoration: none; }
+.eco-footer-legal a:hover { text-decoration: underline; }
+
+@media (max-width: 850px) {
+  .eco-footer-main { grid-template-columns: 1.2fr 1fr; gap: 42px; }
+  .footer-subscribe { grid-column: span 2; }
+}
+
+@media (max-width: 650px) {
+  .eco-newsletter { width: calc(100% - 36px); margin-bottom: 65px; padding-top: 35px; }
+  .eco-newsletter h2 { font-size: 40px; }
+  .eco-newsletter label { width: 100%; }
+  .eco-footer-main { grid-template-columns: 1fr; gap: 35px; width: calc(100% - 36px); padding: 52px 0; }
+  .footer-subscribe { grid-column: auto; }
+  .eco-footer-legal { align-items: flex-start; flex-direction: column; padding: 18px; font-size: 11px; }
+}

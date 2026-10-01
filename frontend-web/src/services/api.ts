@@ -1,10 +1,18 @@
-import { AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment } from '../types/auth';
+import { AppNotification, AuthResponse, HealthResponse, User, WorkflowResult, Survey, FieldJob, ComplianceAssessment, LocationSearchResult } from '../types/auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5116';
+
+export function resolveAssetUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (/^(https?:|data:)/i.test(url)) return url;
+  return new URL(url, `${API_BASE_URL}/`).toString();
+}
 
 class ApiService {
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('smartsolar_token');
+    const token =
+      localStorage.getItem('smartsolar_token') ??
+      sessionStorage.getItem('smartsolar_token');
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -47,6 +55,51 @@ class ApiService {
       throw new Error('Failed to fetch user session.');
     }
     return res.json();
+  }
+
+  async getNotifications(limit = 30): Promise<AppNotification[]> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications?limit=${limit}`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to load notifications.');
+    return res.json();
+  }
+
+  async getNotificationUnreadCount(): Promise<number> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to load notification count.');
+    return (await res.json()).count ?? 0;
+  }
+
+  async markNotificationRead(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, { method: 'POST', headers: this.getHeaders() });
+    if (!res.ok && res.status !== 204) throw new Error('Unable to update notification.');
+  }
+
+  async markAllNotificationsRead(): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/read-all`, { method: 'POST', headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to update notifications.');
+  }
+
+  async uploadProfileImage(file: File): Promise<{ profileImageUrl: string }> {
+    const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
+    const body = new FormData();
+    body.append('file', file);
+    const res = await fetch(`${API_BASE_URL}/api/auth/profile-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || 'Unable to save your profile image.');
+    return data;
+  }
+
+  async deleteProfileImage(): Promise<void> {
+    const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
+    const res = await fetch(`${API_BASE_URL}/api/auth/profile-image`, {
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok && res.status !== 204) throw new Error('Unable to remove your profile image.');
   }
 
   // Architecture Verification Endpoints
@@ -93,6 +146,18 @@ class ApiService {
   async getSurvey(id: string): Promise<Survey> {
     const res = await fetch(`${API_BASE_URL}/api/surveys/${id}`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error(`Unable to load survey (${res.status}).`);
+    return res.json();
+  }
+
+  async searchLocations(query: string, signal?: AbortSignal): Promise<LocationSearchResult[]> {
+    const res = await fetch(`${API_BASE_URL}/api/locations/search?query=${encodeURIComponent(query)}`, {
+      headers: this.getHeaders(),
+      signal,
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'Unable to search for that address.');
+    }
     return res.json();
   }
 

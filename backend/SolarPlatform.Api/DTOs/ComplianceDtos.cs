@@ -57,5 +57,5 @@ public record ComplianceExecutionLogDto(
     [property: JsonPropertyName("status")] string Status,
     [property: JsonPropertyName("output_summary")] string? OutputSummary,
     [property: JsonPropertyName("error_message")] string? ErrorMessage,
-    [property: JsonPropertyName("duration_ms")] long DurationMs
+    [property: JsonPropertyName("duration_ms")] double DurationMs
 );

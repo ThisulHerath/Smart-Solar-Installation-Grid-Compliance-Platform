@@ -92,13 +92,8 @@ public class ProposalService : IProposalService
             }
         }
 
-        // Fallback sizing from survey data if no workflow result
-        if (recommendedKw == 0)
-        {
-            recommendedKw = Math.Round((decimal)survey.MonthlyKwh / 120m, 2);
-            panelCount = Math.Max(1, (int)Math.Round(recommendedKw * 1000 / 400));
-            inverterSizeKw = recommendedKw;
-        }
+        if (recommendedKw <= 0 || panelCount <= 0 || inverterSizeKw <= 0)
+            throw new InvalidOperationException("A valid SolarSizingAgent result is required before creating a proposal. Retry the survey analysis while the agent service is healthy.");
 
         var estimatedCost = (panelCount * PanelUnitPriceLkr) + (inverterSizeKw * InverterPricePerKwLkr);
         var complianceStatus = compliance?.ComplianceStatus ?? "UNKNOWN";
@@ -152,15 +147,24 @@ public class ProposalService : IProposalService
 
         var guardrailResult = await _ai.EvaluateGuardrailAsync(guardrailRequest, ct);
 
-        proposal.SafetyStatus = guardrailResult?.SafetyStatus ?? "REQUIRES_APPROVAL";
-        proposal.GuardrailResultJson = guardrailResult != null
-            ? JsonSerializer.Serialize(guardrailResult)
-            : null;
+        if (guardrailResult == null || !HasCompletedAgentTrace(guardrailResult.ExecutionLogs, "SafetyGuardrailAgent"))
+        {
+            proposal.SafetyStatus = "FAILED";
+            ProposalStatusTransition.ValidateTransition(proposal.ProposalStatus, ProposalStatus.Failed);
+            proposal.ProposalStatus = ProposalStatus.Failed;
+            proposal.UpdatedAt = DateTime.UtcNow;
+            AddLifecycleEvent(proposal, ProposalLifecycleEvent.APPROVAL_BLOCKED, "SafetyGuardrailAgent was unavailable; no fallback safety decision was created.");
+            await _db.SaveChangesAsync(ct);
+            throw new InvalidOperationException("SafetyGuardrailAgent is unavailable. Proposal processing failed; retry when the agent service is healthy.");
+        }
+
+        proposal.SafetyStatus = guardrailResult.SafetyStatus;
+        proposal.GuardrailResultJson = JsonSerializer.Serialize(guardrailResult);
 
         // 7. Deterministic validation — OVERRIDES AI if rules trigger approval requirement
         var validationResult = RunDeterministicValidation(
             recommendedKw, panelCount, inverterSizeKw, estimatedCost,
-            complianceStatus, guardrailResult?.RequiresApproval ?? true);
+            complianceStatus, guardrailResult.RequiresApproval);
 
         proposal.RequiresApproval = validationResult.RequiresApproval;
         proposal.ValidationResultJson = JsonSerializer.Serialize(validationResult);
@@ -169,7 +173,7 @@ public class ProposalService : IProposalService
             AddLifecycleEvent(proposal, ProposalLifecycleEvent.APPROVAL_REQUIRED, "Senior staff approval is required.");
         else if (!validationResult.Valid)
             AddLifecycleEvent(proposal, ProposalLifecycleEvent.APPROVAL_BLOCKED, "Proposal validation blocked approval.");
-        proposal.RecommendationSummary = guardrailResult?.RecommendationSummary
+        proposal.RecommendationSummary = guardrailResult.RecommendationSummary
             ?? $"Solar system of {recommendedKw}kW ({panelCount} panels) proposed for {survey.PropertyAddress}.";
 
         // 8. Transition to PendingApproval (always — high-impact rule)
@@ -184,6 +188,15 @@ public class ProposalService : IProposalService
 
         return await BuildDtoAsync(proposal.Id, null, true, ct) ?? throw new InvalidOperationException("Proposal not found after creation.");
     }
+
+    private static bool HasCompletedAgentTrace(
+        IEnumerable<Dictionary<string, object>> logs,
+        string agentName)
+        => logs.Any(log =>
+            log.TryGetValue("agent_name", out var agent) &&
+            log.TryGetValue("status", out var status) &&
+            string.Equals(agent?.ToString(), agentName, StringComparison.Ordinal) &&
+            string.Equals(status?.ToString(), "completed", StringComparison.OrdinalIgnoreCase));
 
     // ─── Deterministic Validator (authoritative — overrides AI) ──────────────
 
@@ -256,12 +269,14 @@ public class ProposalService : IProposalService
 
     public async Task<List<EngineeringProposalSummaryDto>> GetAllAsync(CancellationToken ct = default)
         => await _db.EngineeringProposals
+            .Include(p => p.SolarSurvey).ThenInclude(s => s.Customer)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => ToSummaryDto(p))
             .ToListAsync(ct);
 
     public async Task<List<EngineeringProposalSummaryDto>> GetPendingAsync(CancellationToken ct = default)
         => await _db.EngineeringProposals
+            .Include(p => p.SolarSurvey).ThenInclude(s => s.Customer)
             .Where(p => p.ProposalStatus == ProposalStatus.PendingApproval)
             .OrderByDescending(p => p.CreatedAt)
             .Select(p => ToSummaryDto(p))
@@ -271,6 +286,7 @@ public class ProposalService : IProposalService
         Guid surveyId, Guid requestingUserId, bool isStaff, CancellationToken ct = default)
     {
         var query = _db.EngineeringProposals
+            .Include(p => p.SolarSurvey).ThenInclude(s => s.Customer)
             .Where(p => p.SolarSurveyId == surveyId);
 
         if (!isStaff)
@@ -307,6 +323,19 @@ public class ProposalService : IProposalService
                 throw new InvalidOperationException(
                     $"Proposal cannot be approved from status '{proposal.ProposalStatus}'. Only PENDING_APPROVAL proposals can be approved.");
 
+            // Approval must use current compliance evidence, not only the status
+            // copied onto the proposal when it was created. The evidence may have
+            // been removed or invalidated while the proposal awaited review.
+            var hasComplianceEvidence = await _db.ComplianceAssessments
+                .AsNoTracking()
+                .AnyAsync(
+                    assessment => assessment.SiteInspection.FieldJob.SolarSurveyId == proposal.SolarSurveyId,
+                    ct);
+
+            if (!hasComplianceEvidence)
+                throw new InvalidOperationException(
+                    "Compliance evidence is required before a proposal can be approved.");
+
             // Step 2: Re-run deterministic validation
             if (proposal.SafetyStatus.Equals("BLOCKED", StringComparison.OrdinalIgnoreCase))
             {
@@ -321,7 +350,7 @@ public class ProposalService : IProposalService
             {
                 approvalBlocked = true;
                 throw new InvalidOperationException(
-                    $"Approval blocked: deterministic validation failed. Violations: {string.Join("; ", reValidation.Violations)}");
+                    $"Deterministic validation blocks approval: {string.Join("; ", reValidation.Violations)}");
             }
 
             // Step 3: Validate state transition
@@ -490,7 +519,8 @@ public class ProposalService : IProposalService
     private static EngineeringProposalSummaryDto ToSummaryDto(EngineeringProposal p) => new(
         p.Id, p.SolarSurveyId, p.WorkflowId, p.RecommendedKw, p.PanelCount,
         p.InverterSizeKw, p.EstimatedCostLkr, p.GridComplianceStatus, p.RiskLevel,
-        p.SafetyStatus, p.ProposalStatus.ToString(), p.RequiresApproval, p.CreatedAt, p.UpdatedAt
+        p.SafetyStatus, p.ProposalStatus.ToString(), p.RequiresApproval, p.CreatedAt, p.UpdatedAt,
+        p.SolarSurvey.ProjectName, p.SolarSurvey.Customer.FullName
     );
 
     private static EngineeringProposalDto ToDetailDto(EngineeringProposal p) => new(
@@ -508,6 +538,7 @@ public class ProposalService : IProposalService
             a.Id, a.Event.ToString(), a.Details, a.WorkflowId, a.Timestamp
         )).ToList(),
         p.SolarSurvey?.Customer?.FullName,
+        p.SolarSurvey?.ProjectName,
         p.SolarSurvey?.PropertyAddress
     );
 

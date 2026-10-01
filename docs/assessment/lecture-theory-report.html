@@ -64,7 +64,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <h3>Lecture 5 part 1 — LLMs and agent fundamentals</h3>
 <ul>
 <li><strong>✓ Existing — structured contracts, specialist responsibilities, guardrails and human approval.</strong> Pydantic validates Python input/output; backend DTOs and services independently control actions. These are useful foundations for an agent framework.</li>
-<li><strong>△ Partial — actual agent autonomy (pp.22–25, 29, 32).</strong> The lecture&#x27;s LLM-directed loop observes tool results and chooses a next action. The present PlannerAgent emits a fixed eight-step roadmap. It does not reinterpret a goal, choose tools dynamically or replan after failure. Its docstring now states this honestly.</li>
+<li><strong>✓ Added / △ Partial — controlled agency (pp.22–25, 29, 32).</strong> PlannerAgent now classifies reviewed objectives into three workflow types and emits typed steps with dependencies, required inputs, allowed tools, status and high-impact markers. The master workflow pauses/resumes and returns failed evidence to a correction loop. Selection remains deterministic: there is no live LLM interpreting arbitrary goals or choosing arbitrary tools.</li>
 <li><strong>✓ Existing / ✓ Added — simplest suitable workflow (p.25).</strong> Deterministic arithmetic and explicit approval dependencies are preserved. No language model should replace stock arithmetic or authorize installation.</li>
 <li><strong>△ Partial — six framework components (p.36).</strong> Tools, some state/history, monitoring and orchestration exist. Model inference and runtime prompts for such inference are absent. Prompt files or class names alone do not establish model execution.</li>
 </ul>
@@ -95,7 +95,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <li>Replaced synthetic timing for sizing/compliance with measured stage events; retained failures and capped sizing graph steps.</li>
 <li>Added a single bounded retry for transient exchange-tool failures, without a made-up fallback rate.</li>
 <li>Rejected non-finite sizing values and stopped treating missing inverter-location evidence as suitable.</li>
-<li>Added focused regression tests, ADR-007 and these bilingual reports. No paid inference dependency, database migration, commit or push was added.</li>
+<li>Added focused regression tests, ADR-007, bilingual guidance and a migration for durable workflow state/trace fields. No paid inference dependency, commit or push was added.</li>
 </ol>
 <h2 id="en-section-3">4. How the complete workflow connects</h2>
 <p><strong>React / Flutter → ASP.NET API → business services → PostgreSQL.</strong> Where calculation or screening is needed, ASP.NET calls <strong>internal FastAPI → specialist workflow → independent validator</strong>, receives structured results, then persists the appropriate state. An internal service key protects the Python boundary. Client JWTs and backend role/ownership checks protect user actions.</p>
@@ -129,7 +129,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <li><strong>Router:</strong> choose one specialist based on the request. A future help request might route to billing or field support. Existing HTTP routing is not evidence of an LLM router.</li>
 <li><strong>Pipeline:</strong> each stage feeds the next. This is the main implemented pattern, because approval must follow inspection/validation.</li>
 <li><strong>Parallel:</strong> independent specialists run together, then results merge. It could suit independent document checks, but dependent approval/reservation stages should not be parallelized. No runtime parallel-agent workflow is claimed.</li>
-<li><strong>Supervisor:</strong> a coordinator dynamically chooses specialists and next steps from results. The fixed PlannerAgent is not such a supervisor.</li>
+<li><strong>Supervisor:</strong> a coordinator chooses specialists and next steps from results. The project now has a bounded deterministic coordinator with objective-specific plans and correction transitions; it is still not an LLM supervisor.</li>
 </ol>
 <p>These are coordination choices, not a rule that every project must implement all four.</p>
 <h3>Four domain specialists in this project</h3>
@@ -139,7 +139,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <li><strong>SafetyGuardrailAgent:</strong> proposal data → safety findings and escalation signals; cannot grant human approval.</li>
 <li><strong>EquipmentPricingAgent:</strong> compatible equipment plus the exchange tool → structured equipment cost; cannot write inventory.</li>
 </ol>
-<p>PlannerAgent adds a fixed roadmap. Independent validators check outputs rather than relying only on the specialist that produced them. Four class names alone do not prove four LLM agents.</p>
+<p>PlannerAgent adds an objective-sensitive typed roadmap, and the resumable coordinator updates step state. Independent validators check outputs rather than relying only on the specialist that produced them. Four class names alone do not prove four LLM agents.</p>
 <h3>Four memory types and six framework components</h3>
 <p><code>lec5 part2.pdf</code>, p.47 lists <strong>working, episodic, semantic and procedural memory</strong>. The mappings are graph input/state, stored events/decisions, reviewed knowledge passages, and rules/roadmaps. Those mappings explain architecture; they do not establish autonomous learning.</p>
 <p><code>lec5 part1.pdf</code>, p.36 actually lists <strong>six</strong> components: <strong>Models, Tools, Memory, Monitoring, Prompts, Middleware/Orchestration</strong>. Model inference and runtime prompting remain missing here; the other areas exist to differing degrees.</p>
@@ -157,11 +157,11 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <p>Each member should make genuine issues, commits, tests and peer reviews, and write their own reflection. Shared architecture can be documented jointly. Do not fabricate contribution history, signatures or evaluation evidence.</p>
 <h2 id="en-section-6">7. Verification in this audit</h2>
 <ul>
-<li><strong>Python:</strong> 55 tests passed. Includes six small retrieval cases, safe compliance failure, missing location evidence, measured sizing events, failed-stage retention and bounded tool retries. A dependency deprecation warning remains.</li>
-<li><strong>ASP.NET:</strong> 98 tests passed; 1 PostgreSQL integration test skipped. The skipped test is not a pass and provides no fresh database-concurrency proof.</li>
+<li><strong>Python:</strong> 63 tests passed. Includes typed planning, pause/resume, correction, tool permission denial, retrieval, safe failures, measured events and bounded tool retries. A dependency deprecation warning remains.</li>
+<li><strong>ASP.NET:</strong> 105 tests passed; 1 PostgreSQL integration test skipped. React has 47 passing tests and Flutter has 20. The skipped database test is not a pass.</li>
 <li><strong>React:</strong> 47 tests passed across 12 files. The intentional error-boundary test causes expected development error output; an existing account-flow test also warns that its test router has no dashboard route.</li>
 <li><strong>Web production build:</strong> TypeScript and Vite succeeded; separate route chunks were emitted.</li>
-<li><strong>Flutter (19 September):</strong> 20 tests passed; <code>flutter analyze</code> reported no issues. No Flutter source was changed in this lecture audit. Package-update notices are informational, not analyzer failures.</li>
+<li><strong>Flutter (28 September):</strong> 20 tests passed; <code>flutter analyze</code> reported no issues. Package-update notices are informational, not analyzer failures.</li>
 </ul>
 <p>These are automated local checks. They do not establish production uptime, physical-device behavior, load capacity or a fresh browser-to-phone end-to-end run. Earlier evidence in <code>assignment-readiness.md</code> is dated separately and must not be relabelled as this run.</p>
 <p>Useful reruns from the repository: <code>dotnet test backend/SolarPlatform.Tests -c Release</code>; run <code>npm test</code> and <code>npm run build</code> inside <code>frontend-web</code>; run <code>..\.venv\Scripts\python.exe -m pytest -q</code> inside <code>agentic-ai</code>; run <code>flutter analyze</code> and <code>flutter test</code> inside <code>frontend-mobile</code>.</p>
@@ -234,7 +234,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <h3>Lecture 5 part 1 — LLM සහ agent පදනම</h3>
 <ul>
 <li><strong>✓ දැනට තිබේ — structured inputs/outputs, validation සහ human approval.</strong> Pydantic schemas සහ backend DTOs මඟින් data contract පාලනය කරයි. Specialist output එක independent validator එකකින් පරීක්ෂා කරයි.</li>
-<li><strong>△ අර්ධ වශයෙන් — සැබෑ autonomy, පිටු 22–25, 29, 32.</strong> දේශනයේ agent එක tool result නිරීක්ෂණය කර ඊළඟ ක්‍රියාව model එකෙන් තෝරයි. මෙහි PlannerAgent එක දැනට පෙර ලියා ඇති පියවර අටක් ලබා දෙයි. එය dynamic supervisor හෝ ReAct agent එකක් නොවේ. Code comment එකත් එයට ගැළපෙන ලෙස නිවැරදි කර ඇත.</li>
+<li><strong>✓ එක් කළා / △ අර්ධ වශයෙන් — controlled agency, පිටු 22–25, 29, 32.</strong> PlannerAgent දැන් reviewed objective එක workflow වර්ග තුනකින් එකකට වෙන් කර dependencies, required inputs, allowed tools, status සහ high-impact markers ඇති typed plan එකක් හදයි. Master workflow එක pause/resume වන අතර fail වූ evidence correction loop එකට යවයි. මෙය තවම deterministic selection එකකි; arbitrary goals තේරුම්ගෙන tools තෝරන live LLM එකක් නැත.</li>
 <li><strong>✓ යොදා ඇත — සරලම ගැළපෙන workflow එක තේරීම, පිටුව 25.</strong> Cost calculation, stock update සහ approval වැනි අවදානම් ක්‍රියා සඳහා deterministic rules තබා ඇත. Model එකකට අනුමැතිය ලබා දීමට ඉඩ දී නැත.</li>
 <li><strong>△ අර්ධ වශයෙන් — framework components, පිටුව 36.</strong> දේශනයේ components හයක් ඇත. Tools, state/history, monitoring සහ orchestration යම් මට්ටමකින් තිබුණත් live model inference සහ එයට runtime prompts නැත.</li>
 </ul>
@@ -265,7 +265,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <li>Sizing/compliance සඳහා සැබෑ stage timing සහ failed-event retention එක් කළා.</li>
 <li>Exchange tool එකට සීමිත transient retry එකක් එක් කළා; fake fallback rate එකක් නැත.</li>
 <li>NaN/Infinity වැනි sizing input ප්‍රතික්ෂේප කිරීම සහ missing inverter evidence වැරදි ලෙස pass නොවීම තහවුරු කළා.</li>
-<li>Regression tests, ADR-007 සහ මෙම භාෂා දෙකේ වාර්තා එක් කළා. Paid inference dependency, database migration, commit හෝ push එකක් නොකළා.</li>
+<li>Regression tests, ADR-007, භාෂා දෙකේ guidance සහ durable workflow state/trace fields සඳහා database migration එක එක් කළා. Paid inference dependency, commit හෝ push එකක් නොකළා.</li>
 </ol>
 <h2 id="si-section-3">4. සම්පූර්ණ workflow එක සම්බන්ධ වන ආකාරය</h2>
 <p><strong>React / Flutter → ASP.NET API → business services → PostgreSQL.</strong> Calculation/screening අවශ්‍ය තැනදී ASP.NET විසින් <strong>internal FastAPI → specialist → independent validator</strong> කැඳවයි. Structured result එක ලැබුණු පසු business state save කරයි. Client එක Python හෝ PostgreSQL වෙත සෘජුව නොයයි.</p>
@@ -299,7 +299,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <li><strong>Router:</strong> request එකට ගැළපෙන specialist එක තෝරයි. සාමාන්‍ය HTTP routing තිබීම LLM router එකක් තිබීමේ සාක්ෂියක් නොවේ.</li>
 <li><strong>Pipeline:</strong> පෙර stage output එක ඊළඟ stage එක භාවිත කරයි. ව්‍යාපෘතියේ ප්‍රධාන ක්‍රමය මෙයයි.</li>
 <li><strong>Parallel:</strong> ස්වාධීන වැඩ කිහිපයක් එකවර කර ප්‍රතිඵල එකතු කරයි. Approval සහ stock reservation වැනි dependent stages එසේ එකවර කළ යුතු නැත. දැනට parallel-agent runtime එකක් කියා නොපෙන්වන්න.</li>
-<li><strong>Supervisor:</strong> ප්‍රතිඵල අනුව ඊළඟ specialist/step එක තීරණය කරයි. Fixed PlannerAgent එක එවැනි dynamic supervisor එකක් නොවේ.</li>
+<li><strong>Supervisor:</strong> ප්‍රතිඵල අනුව ඊළඟ specialist/step එක තීරණය කරයි. Project එකේ දැන් objective-specific plans සහ correction transitions ඇති bounded deterministic coordinator එකක් තිබේ; එය තවම LLM supervisor එකක් නොවේ.</li>
 </ol>
 <p>මේ patterns හතරම සෑම project එකකම තිබිය යුතු යැයි දේශනයෙන් අදහස් නොවේ.</p>
 <h3>ව්‍යාපෘතියේ specialist කොටස් හතර</h3>
@@ -309,7 +309,7 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <li><strong>SafetyGuardrailAgent:</strong> proposal risks සහ escalation flags ලබා දෙයි; human approval ලබා නොදෙයි.</li>
 <li><strong>EquipmentPricingAgent:</strong> compatible equipment සහ exchange rate එකෙන් quotation ගණනය කරයි; stock ලියන්නේ නැත.</li>
 </ol>
-<p>PlannerAgent අමතර fixed roadmap එක ලබා දෙයි. Validators outputs පරීක්ෂා කරයි. Agent නම ඇති classes හතරක් තිබීම LLM agents හතරක් තිබීමේ සාක්ෂියක් නොවේ.</p>
+<p>PlannerAgent objective-sensitive typed roadmap එක ලබා දෙන අතර resumable coordinator එක step status update කරයි. Validators outputs පරීක්ෂා කරයි. Agent නම ඇති classes හතරක් තිබීම LLM agents හතරක් තිබීමේ සාක්ෂියක් නොවේ.</p>
 <h3>Memory හතර සහ framework components හය</h3>
 <p><code>lec5 part2.pdf</code>, පිටුව 47 හි <strong>working, episodic, semantic, procedural</strong> memory වර්ග හතර ඇත. මෙහි graph state, stored decisions, reviewed passages සහ business rules සමඟ ඒවා සංකල්පමය වශයෙන් සම්බන්ධ කළ හැක.</p>
 <p><code>lec5 part1.pdf</code>, පිටුව 36 හි ඇත්තේ <strong>Models, Tools, Memory, Monitoring, Prompts, Middleware/Orchestration</strong> යන components <strong>හයයි</strong>. එය හතරක් ලෙස presentation එකේ නොකියන්න. Model inference සහ runtime prompting දැනට නැත.</p>
@@ -327,8 +327,8 @@ main{min-width:0;max-width:950px}h1{font-size:clamp(28px,4vw,43px);line-height:1
 <p>සෑම සාමාජිකයෙකුම සැබෑ issue, commit, test සහ peer review evidence එකතු කළ යුතුය. තමන් කළ දේ පිළිබඳ reflection තමන් ලියන්න. අතීත contributions, signatures හෝ marks evidence ගොතා නොදමන්න.</p>
 <h2 id="si-section-6">7. පරීක්ෂණ සහ ඒවායේ සීමා</h2>
 <ul>
-<li>Python tests <strong>55ක් pass</strong> විය. Retrieval queries හය, safe failures, missing evidence, timing සහ bounded retries ඇතුළත් වේ. Dependency deprecation warning එකක් ඇත.</li>
-<li>ASP.NET tests <strong>98ක් pass</strong>, PostgreSQL integration test <strong>1ක් skip</strong> විය. එය fresh database concurrency proof එකක් නොවේ.</li>
+<li>Python tests <strong>63ක් pass</strong> විය. Typed planning, pause/resume, correction, tool permission denial, retrieval, safe failures, missing evidence, timing සහ bounded retries ඇතුළත් වේ. Dependency deprecation warning එකක් ඇත.</li>
+<li>ASP.NET tests <strong>105ක් pass</strong>, Python tests <strong>63ක් pass</strong>, React tests <strong>47ක් pass</strong> සහ Flutter tests <strong>20ක් pass</strong> විය. PostgreSQL integration test <strong>1ක් skip</strong> විය.</li>
 <li>React tests <strong>47ක් pass</strong> විය. Error boundary test එක හිතාමතා render error එකක් ඇති කරයි. Account test router එකේ dashboard route නැති බවට පැරණි warning එකක්ද ඇත.</li>
 <li>TypeScript/Vite production build සාර්ථක විය; lazy route chunks නිපදවිය.</li>
 <li>Flutter සඳහා සැප්තැම්බර් 19 දින tests <strong>20ක් pass</strong> විය; <code>flutter analyze</code> එකේ issues නොමැත. Package-update notices analyzer failures නොවේ. මෙම lecture audit එකේ Flutter source වෙනස් කර නැත.</li>

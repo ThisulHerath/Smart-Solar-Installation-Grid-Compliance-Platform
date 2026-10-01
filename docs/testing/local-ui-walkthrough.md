@@ -9,7 +9,7 @@ For exact inputs, expected results and all five roles, follow the [complete manu
 - API health: http://localhost:5116/api/health
 - API documentation: http://localhost:5116/swagger
 
-For this local session, the Solar AI service uses http://127.0.0.1:8001 because port 8000 is occupied by another project. The private root `.env` has been updated to use port 8001.
+The Solar AI service uses http://127.0.0.1:8000. Keep the private root `.env` value `AGENTIC_AI_BASE_URL` on the same port.
 
 ## Manual login credentials
 
@@ -52,7 +52,7 @@ Open separate PowerShell terminals at the repository root:
 
 ```powershell
 # AI service
-.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir agentic-ai --host 127.0.0.1 --port 8001
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir agentic-ai --host 127.0.0.1 --port 8000
 ```
 
 ```powershell

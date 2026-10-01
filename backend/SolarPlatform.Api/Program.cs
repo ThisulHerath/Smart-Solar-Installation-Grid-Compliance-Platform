@@ -16,6 +16,12 @@ using SolarPlatform.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Avoid the Windows Event Log provider in local development, where its permissions
+// can turn an otherwise recoverable warning into a failed HTTP request.
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 if (builder.Environment.IsDevelopment())
 {
     var envFilePath = Path.GetFullPath(Path.Combine(builder.Environment.ContentRootPath, "..", "..", ".env"));
@@ -107,10 +113,47 @@ builder.Services.AddScoped<IOtpEmailSender, OtpEmailSender>();
 builder.Services.AddScoped<EmailVerificationService>();
 builder.Services.AddHostedService<EmailChallengeCleanup>();
 builder.Services.AddScoped<ISurveyService, SurveyService>();
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+var storageProvider = (Environment.GetEnvironmentVariable("FILE_STORAGE_PROVIDER")
+    ?? (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing") ? "local" : "cloudinary"))
+    .Trim().ToLowerInvariant();
+
+if (storageProvider == "cloudinary")
+{
+    var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
+    var apiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
+    var apiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
+    if (string.IsNullOrWhiteSpace(cloudName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiSecret))
+        throw new InvalidOperationException("Cloudinary storage requires CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.");
+
+    builder.Services.AddSingleton(new CloudinaryStorageOptions
+    {
+        CloudName = cloudName,
+        ApiKey = apiKey,
+        ApiSecret = apiSecret,
+        RootFolder = Environment.GetEnvironmentVariable("CLOUDINARY_ROOT_FOLDER") ?? "smart-solar"
+    });
+    builder.Services.AddScoped<IFileStorageService, CloudinaryFileStorageService>();
+}
+else if (storageProvider == "local")
+{
+    builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+}
+else
+{
+    throw new InvalidOperationException("FILE_STORAGE_PROVIDER must be either 'local' or 'cloudinary'.");
+}
 builder.Services.AddScoped<IFieldJobService, FieldJobService>();
 builder.Services.AddScoped<IProposalService, ProposalService>();
 builder.Services.AddScoped<InventoryService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<IGeocodingService, NominatimGeocodingService>(client =>
+{
+    client.BaseAddress = new Uri("https://nominatim.openstreetmap.org/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("SmartSolarUniversityProject/1.0");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+});
 
 // 4. Agentic AI Service Client
 var agenticAiBaseUrl = Environment.GetEnvironmentVariable("AGENTIC_AI_BASE_URL")

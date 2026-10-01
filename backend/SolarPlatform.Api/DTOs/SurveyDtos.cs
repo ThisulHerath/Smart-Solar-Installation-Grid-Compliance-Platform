@@ -12,6 +12,7 @@ public class UpdateProfileRequestDto
 }
 public class SurveyRequestDto
 {
+    [Required, StringLength(120, MinimumLength = 3)] public string ProjectName { get; set; } = string.Empty;
     [Range(0.01, 100000)] public decimal MonthlyKwh { get; set; }
     [Range(1, 100000)] public decimal RoofAreaSqm { get; set; }
     [EnumDataType(typeof(GridType))] public GridType GridType { get; set; }
@@ -24,4 +25,9 @@ public class SurveyRequestDto
 }
 public record SurveyImageDto(Guid Id, SurveyImageType ImageType, string FileUrl, string FileName);
 public record WorkflowDto(string WorkflowId, WorkflowStatus Status, string? ResultJson, string? ValidationJson, string? ErrorMessage, DateTime? StartedAt, DateTime? CompletedAt);
-public record SurveyDto(Guid Id, Guid CustomerId, decimal MonthlyKwh, decimal RoofAreaSqm, GridType GridType, RoofOrientation RoofOrientation, decimal? RoofTilt, string PropertyAddress, decimal? Latitude, decimal? Longitude, SurveyStatus SurveyStatus, string? Notes, DateTime CreatedAt, DateTime UpdatedAt, IReadOnlyList<SurveyImageDto> Images, IReadOnlyList<WorkflowDto> Workflows);
+public record SurveyDto(Guid Id, Guid CustomerId, string ProjectName, decimal MonthlyKwh, decimal RoofAreaSqm, GridType GridType, RoofOrientation RoofOrientation, decimal? RoofTilt, string PropertyAddress, decimal? Latitude, decimal? Longitude, SurveyStatus SurveyStatus, string? Notes, DateTime CreatedAt, DateTime UpdatedAt, IReadOnlyList<SurveyImageDto> Images, IReadOnlyList<WorkflowDto> Workflows)
+{
+    public string? CustomerName { get; init; }
+}
+
+public record LocationSearchResultDto(string DisplayName, decimal Latitude, decimal Longitude);

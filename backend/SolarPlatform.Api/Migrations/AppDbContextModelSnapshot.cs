@@ -53,6 +53,10 @@ namespace SolarPlatform.Api.Migrations
                     b.Property<int>("RetryCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SpanId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -63,6 +67,14 @@ namespace SolarPlatform.Api.Migrations
 
                     b.Property<string>("StepName")
                         .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ToolName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TraceId")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
@@ -82,11 +94,21 @@ namespace SolarPlatform.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("ApprovalStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CurrentStep")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ErrorMessage")
                         .HasColumnType("text");
@@ -102,11 +124,17 @@ namespace SolarPlatform.Api.Migrations
                     b.Property<string>("ResultJson")
                         .HasColumnType("text");
 
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("SolarSurveyId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("StartedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("StateJson")
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -942,6 +970,11 @@ namespace SolarPlatform.Api.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
+                    b.Property<string>("ProjectName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
                     b.Property<string>("PropertyAddress")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -1032,6 +1065,73 @@ namespace SolarPlatform.Api.Migrations
                     b.ToTable("Supplier");
                 });
 
+            modelBuilder.Entity("SolarPlatform.Api.Models.SupportConversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("HomeownerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastMessageAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SolarSurveyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TechnicianId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SolarSurveyId")
+                        .IsUnique();
+
+                    b.HasIndex("HomeownerId", "LastMessageAt");
+
+                    b.HasIndex("TechnicianId", "LastMessageAt");
+
+                    b.ToTable("SupportConversations");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.SupportMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("ConversationId", "CreatedAt");
+
+                    b.HasIndex("ConversationId", "ReadAt");
+
+                    b.ToTable("SupportMessages");
+                });
+
             modelBuilder.Entity("SolarPlatform.Api.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1066,6 +1166,10 @@ namespace SolarPlatform.Api.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ProfileImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("SecurityVersion")
                         .IsConcurrencyToken()
@@ -1144,6 +1248,57 @@ namespace SolarPlatform.Api.Migrations
                             SecurityVersion = 0,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         });
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.UserNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActionUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("EntityType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
+
+                    b.ToTable("UserNotifications");
                 });
 
             modelBuilder.Entity("SolarPlatform.Api.Models.UserRole", b =>
@@ -1406,6 +1561,63 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("SolarSurvey");
                 });
 
+            modelBuilder.Entity("SolarPlatform.Api.Models.SupportConversation", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.User", "Homeowner")
+                        .WithMany()
+                        .HasForeignKey("HomeownerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SolarPlatform.Api.Models.SolarSurvey", "SolarSurvey")
+                        .WithMany()
+                        .HasForeignKey("SolarSurveyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SolarPlatform.Api.Models.User", "Technician")
+                        .WithMany()
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Homeowner");
+
+                    b.Navigation("SolarSurvey");
+
+                    b.Navigation("Technician");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.SupportMessage", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.SupportConversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SolarPlatform.Api.Models.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("SolarPlatform.Api.Models.UserNotification", b =>
+                {
+                    b.HasOne("SolarPlatform.Api.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SolarPlatform.Api.Models.UserRole", b =>
                 {
                     b.HasOne("SolarPlatform.Api.Models.Role", "Role")
@@ -1473,9 +1685,16 @@ namespace SolarPlatform.Api.Migrations
                     b.Navigation("Workflows");
                 });
 
+            modelBuilder.Entity("SolarPlatform.Api.Models.SupportConversation", b =>
+                {
+                    b.Navigation("Messages");
+                });
+
             modelBuilder.Entity("SolarPlatform.Api.Models.User", b =>
                 {
                     b.Navigation("CustomerProfile");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("UserRoles");
                 });

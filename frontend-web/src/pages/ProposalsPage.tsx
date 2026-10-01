@@ -55,7 +55,7 @@ export const ProposalsPage: React.FC = () => {
   const pendingCount = proposals.filter(p => p.proposalStatus === 'PendingApproval').length;
 
   return (
-    <div className="page-container">
+    <div className="page-container operations-page proposals-page">
       <div className="page-header">
         <div>
           <h1 className="page-title">Engineering Proposals</h1>
@@ -105,6 +105,7 @@ export const ProposalsPage: React.FC = () => {
             <thead>
               <tr>
                 <th>Status</th>
+                <th>Project</th>
                 <th>Customer</th>
                 <th>System Size</th>
                 <th>Panels</th>
@@ -124,7 +125,8 @@ export const ProposalsPage: React.FC = () => {
                       {STATUS_LABELS[p.proposalStatus] ?? p.proposalStatus}
                     </span>
                   </td>
-                  <td>{p.solarSurveyId.slice(0, 8)}…</td>
+                  <td><strong>{p.projectName || 'Solar project'}</strong><br /><small>{p.solarSurveyId.slice(0, 8)}…</small></td>
+                  <td>{p.customerName || 'Customer'}</td>
                   <td>{p.recommendedKw.toFixed(2)} kW</td>
                   <td>{p.panelCount}</td>
                   <td>{p.inverterSizeKw.toFixed(2)} kW</td>

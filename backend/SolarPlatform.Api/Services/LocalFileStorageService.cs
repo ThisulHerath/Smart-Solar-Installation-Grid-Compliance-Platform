@@ -44,16 +44,16 @@ public class LocalFileStorageService : IFileStorageService
 
     public Task<bool> DeleteFileAsync(string fileUrl, CancellationToken cancellationToken = default)
     {
+        if (!fileUrl.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult(true);
+        }
+
         var root = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
         var relativePath = fileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
         var fullPath = Path.Combine(root, relativePath);
 
-        if (File.Exists(fullPath))
-        {
-            File.Delete(fullPath);
-            return Task.FromResult(true);
-        }
-
-        return Task.FromResult(false);
+        if (File.Exists(fullPath)) File.Delete(fullPath);
+        return Task.FromResult(true);
     }
 }

@@ -35,7 +35,9 @@ public record EngineeringProposalSummaryDto(
     string ProposalStatus,
     bool RequiresApproval,
     DateTime CreatedAt,
-    DateTime UpdatedAt
+    DateTime UpdatedAt,
+    string? ProjectName,
+    string? CustomerName
 );
 
 public record EngineeringProposalDto(
@@ -61,6 +63,7 @@ public record EngineeringProposalDto(
     List<ProposalLifecycleAuditEventDto> LifecycleEvents,
     // Customer/survey summary fields
     string? CustomerName,
+    string? ProjectName,
     string? PropertyAddress
 );
 

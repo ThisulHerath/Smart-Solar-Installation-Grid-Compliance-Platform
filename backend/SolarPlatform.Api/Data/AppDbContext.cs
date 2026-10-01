@@ -26,6 +26,9 @@ public class AppDbContext : DbContext
     public DbSet<EngineeringProposal> EngineeringProposals => Set<EngineeringProposal>();
     public DbSet<ApprovalAuditLog> ApprovalAuditLogs => Set<ApprovalAuditLog>();
     public DbSet<ProposalLifecycleAuditEvent> ProposalLifecycleAuditEvents => Set<ProposalLifecycleAuditEvent>();
+    public DbSet<SupportConversation> SupportConversations => Set<SupportConversation>();
+    public DbSet<SupportMessage> SupportMessages => Set<SupportMessage>();
+    public DbSet<UserNotification> UserNotifications => Set<UserNotification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,8 +54,21 @@ public class AppDbContext : DbContext
             entity.Property(u => u.PasswordHash).IsRequired();
             entity.Property(u => u.FullName).IsRequired().HasMaxLength(255);
             entity.Property(u => u.PhoneNumber).HasMaxLength(50);
+            entity.Property(u => u.ProfileImageUrl).HasMaxLength(1000);
             entity.Property(u => u.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(u => u.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<UserNotification>(entity =>
+        {
+            entity.HasKey(notification => notification.Id);
+            entity.HasIndex(notification => new { notification.UserId, notification.IsRead, notification.CreatedAt });
+            entity.Property(notification => notification.Type).IsRequired().HasMaxLength(50);
+            entity.Property(notification => notification.Title).IsRequired().HasMaxLength(160);
+            entity.Property(notification => notification.Message).IsRequired().HasMaxLength(600);
+            entity.Property(notification => notification.ActionUrl).HasMaxLength(500);
+            entity.Property(notification => notification.EntityType).HasMaxLength(50);
+            entity.HasOne(notification => notification.User).WithMany(user => user.Notifications).HasForeignKey(notification => notification.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         // Role Configuration
@@ -100,6 +116,7 @@ public class AppDbContext : DbContext
             entity.Property(s => s.RoofAreaSqm).HasPrecision(12, 2).IsRequired();
             entity.Property(s => s.Latitude).HasPrecision(9, 6);
             entity.Property(s => s.Longitude).HasPrecision(9, 6);
+            entity.Property(s => s.ProjectName).IsRequired().HasMaxLength(120);
             entity.Property(s => s.PropertyAddress).IsRequired().HasMaxLength(500);
             entity.HasOne(s => s.Customer).WithMany(p => p.Surveys).HasForeignKey(s => s.CustomerId).OnDelete(DeleteBehavior.Cascade);
         });
@@ -120,6 +137,8 @@ public class AppDbContext : DbContext
             entity.HasIndex(w => new { w.SolarSurveyId, w.Status });
             entity.Property(w => w.WorkflowId).IsRequired().HasMaxLength(100);
             entity.Property(w => w.Objective).IsRequired().HasMaxLength(500);
+            entity.Property(w => w.CurrentStep).IsRequired().HasMaxLength(100);
+            entity.Property(w => w.ApprovalStatus).IsRequired().HasMaxLength(50);
             entity.HasOne(w => w.SolarSurvey).WithMany(s => s.Workflows).HasForeignKey(w => w.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -129,6 +148,9 @@ public class AppDbContext : DbContext
             entity.HasIndex(l => new { l.AgentWorkflowId, l.StartedAt });
             entity.Property(l => l.AgentName).IsRequired().HasMaxLength(100);
             entity.Property(l => l.StepName).IsRequired().HasMaxLength(100);
+            entity.Property(l => l.ToolName).HasMaxLength(100);
+            entity.Property(l => l.TraceId).HasMaxLength(100);
+            entity.Property(l => l.SpanId).HasMaxLength(100);
             entity.Property(l => l.Status).IsRequired().HasMaxLength(50);
             entity.Property(l => l.OutputSummary).HasMaxLength(1000);
             entity.Property(l => l.ErrorMessage).HasMaxLength(1000);
@@ -256,6 +278,27 @@ public class AppDbContext : DbContext
                 .WithMany(p => p.LifecycleEvents)
                   .HasForeignKey(a => a.EngineeringProposalId)
                   .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SupportConversation>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.HasIndex(c => c.SolarSurveyId).IsUnique();
+            entity.HasIndex(c => new { c.HomeownerId, c.LastMessageAt });
+            entity.HasIndex(c => new { c.TechnicianId, c.LastMessageAt });
+            entity.HasOne(c => c.SolarSurvey).WithMany().HasForeignKey(c => c.SolarSurveyId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(c => c.Homeowner).WithMany().HasForeignKey(c => c.HomeownerId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(c => c.Technician).WithMany().HasForeignKey(c => c.TechnicianId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<SupportMessage>(entity =>
+        {
+            entity.HasKey(m => m.Id);
+            entity.HasIndex(m => new { m.ConversationId, m.CreatedAt });
+            entity.HasIndex(m => new { m.ConversationId, m.ReadAt });
+            entity.Property(m => m.Body).IsRequired().HasMaxLength(2000);
+            entity.HasOne(m => m.Conversation).WithMany(c => c.Messages).HasForeignKey(m => m.ConversationId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(m => m.Sender).WithMany().HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // Seed Foundation Data

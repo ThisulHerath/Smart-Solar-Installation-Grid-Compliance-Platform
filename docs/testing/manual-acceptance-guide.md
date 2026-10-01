@@ -8,7 +8,7 @@ Use this guide in order. It follows one synthetic project across all five accoun
 - Flutter in Microsoft Edge: http://localhost:5180
 - API health: http://localhost:5116/api/health
 - Swagger: http://localhost:5116/swagger
-- Internal AI health: http://127.0.0.1:8001/health
+- Internal AI health: http://127.0.0.1:8000/health
 
 Expected API health fields: `status: healthy`, `database: connected`, `agenticAi: available`. A loaded page or HTTP 200 alone does not establish healthy dependencies. If degraded or timing out, resolve that before running the scenario. Restart commands are in [local UI walkthrough](local-ui-walkthrough.md). Do not launch duplicate servers on occupied ports.
 
@@ -196,7 +196,7 @@ Use new addresses `MANUAL-B-01`, `MANUAL-C-01`, etc. Do not damage the successfu
 - **Input checks:** missing rejection/revision comment → confirmation blocked; duplicate inventory SKU → validation error; negative stock/price → blocked.
 - **Low-stock filter:** create a separate unused item with stock 1 and reorder level 2 → it appears under Low stock only. Do not alter shared stock to force this.
 - **Deactivation:** deactivate only an unused test item → Inactive; it should no longer be selected for new pricing.
-- **AI unavailable:** after the successful run, stop only the Solar Python server in its terminal. Submit a new survey or run the diagnostic. Expect a visible failed/unavailable outcome, no fabricated successful analysis and no automatic approval/reservation. Restart the AI server on 8001 afterwards. If Codex owns that server and you have no terminal control, skip this test until it is started in your terminal.
+- **AI unavailable:** after the successful run, stop only the Solar Python server in its terminal. Submit a new survey or run the diagnostic. Expect a visible failed/unavailable outcome, no fabricated successful analysis and no automatic approval/reservation. Restart the AI server on 8000 afterwards. If Codex owns that server and you have no terminal control, skip this test until it is started in your terminal.
 - **Unauthorized internal call:** Python workflow endpoints without the internal header should return 401. Do not copy the server's private key into a browser or report.
 - **Persistence:** refresh/reopen both clients → saved survey, proposal and quote remain. Different IDs or disappearing records indicate a failure to investigate.
 

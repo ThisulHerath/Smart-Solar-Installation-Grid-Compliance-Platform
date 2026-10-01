@@ -19,6 +19,7 @@ class SolarField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
+  final bool enabled;
   const SolarField(
       {super.key,
       required this.controller,
@@ -31,12 +32,14 @@ class SolarField extends StatelessWidget {
       this.validator,
       this.inputFormatters,
       this.textInputAction = TextInputAction.next,
-      this.onFieldSubmitted});
+      this.onFieldSubmitted,
+      this.enabled = true});
   @override
   Widget build(BuildContext context) => Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
+        enabled: enabled,
         decoration: decoration.copyWith(
           border: Theme.of(context).inputDecorationTheme.border,
           enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder,

@@ -310,6 +310,12 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   }
 
   Future<void> _handleUploadPhoto(String photoType) async {
+    if (_inspectionLocked) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'This inspection is locked because compliance is complete.')));
+      return;
+    }
     try {
       final source = await showModalBottomSheet<ImageSource>(
           context: context,

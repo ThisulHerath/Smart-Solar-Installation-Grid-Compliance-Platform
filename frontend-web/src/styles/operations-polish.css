@@ -1,0 +1,464 @@
+.admin-route-content .operations-page {
+  width: min(100%, 1320px);
+  margin: 0 auto;
+  padding: 36px 34px 64px;
+  color: #304143;
+  box-sizing: border-box;
+}
+
+.admin-route-content .operations-page .page-header,
+.admin-route-content .operations-page .inventory-heading,
+.admin-route-content .field-jobs-page > .glass-panel:first-child,
+.admin-route-content .staff-surveys-header {
+  min-height: 112px;
+  margin: 0 0 28px;
+  padding: 24px 28px !important;
+  border: 1px solid #d8e7d1 !important;
+  border-left: 5px solid #72b83e !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .operations-page .page-header,
+.admin-route-content .operations-page .inventory-heading,
+.admin-route-content .field-jobs-page > .glass-panel:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.admin-route-content .operations-page .page-title,
+.admin-route-content .operations-page .inventory-heading h1,
+.admin-route-content .field-jobs-page > .glass-panel:first-child h1,
+.admin-route-content .staff-surveys-header h1 {
+  margin: 0 0 7px !important;
+  color: #2d3f42 !important;
+  font-size: clamp(25px, 2.2vw, 33px) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.admin-route-content .operations-page .page-subtitle,
+.admin-route-content .operations-page .inventory-heading p,
+.admin-route-content .field-jobs-page > .glass-panel:first-child p,
+.admin-route-content .staff-surveys-header p {
+  margin: 0;
+  color: #6b7e80 !important;
+  font-size: 13px !important;
+  line-height: 1.6;
+}
+
+.admin-route-content .operations-page .eyebrow {
+  margin: 0 0 8px;
+  color: #67ab39;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.admin-route-content .operations-page .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border-radius: 7px;
+}
+
+.admin-route-content .operations-page .btn-secondary,
+.admin-route-content .operations-page .inventory-secondary {
+  border: 1px solid #c9ddc2 !important;
+  background: #fff !important;
+  color: #47724c !important;
+}
+
+.admin-route-content .operations-page .filter-bar,
+.admin-route-content .field-jobs-page > .glass-panel:nth-of-type(2),
+.admin-route-content .inventory-filters {
+  margin: 0 0 22px;
+  border: 1px solid #dce9d7 !important;
+  border-radius: 9px !important;
+  background: #f6faf2 !important;
+  box-shadow: none !important;
+}
+
+.admin-route-content .operations-page .filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 13px;
+}
+
+.admin-route-content .operations-page .filter-chip {
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: #fff;
+  color: #5d7476;
+  font-size: 12px;
+}
+
+.admin-route-content .operations-page .filter-chip--active {
+  border-color: #72b83e !important;
+  background: #eaf5df !important;
+  color: #4b8d28 !important;
+}
+
+.admin-route-content .operations-page .data-table-wrapper,
+.admin-route-content .operations-page .inventory-panel,
+.admin-route-content .operations-page .staff-survey-list,
+.admin-route-content .operations-page .staff-survey-detail-card,
+.admin-route-content .operations-page .staff-survey-workflow-card {
+  border: 1px solid #dce8d7 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .operations-page .data-table th,
+.admin-route-content .operations-page .inventory-table th {
+  padding: 14px 16px;
+  background: #f4f8f1 !important;
+  color: #617574 !important;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.admin-route-content .operations-page .data-table td,
+.admin-route-content .operations-page .inventory-table td {
+  padding: 15px 16px;
+  color: #405457;
+  font-size: 13px;
+}
+
+.admin-route-content .operations-page .data-table tr:hover td,
+.admin-route-content .operations-page .inventory-table tbody tr:hover td {
+  background: #f9fcf7;
+}
+
+.admin-route-content .operations-page .card.card--pending {
+  overflow: hidden;
+  border: 1px solid #dce8d7 !important;
+  border-left: 5px solid #d7a22f !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .operations-page .card__header {
+  padding: 18px 22px;
+  border-bottom: 1px solid #e7eee2;
+  background: #fbfcfa;
+}
+
+.admin-route-content .operations-page .card__body { padding: 20px 22px; }
+.admin-route-content .operations-page .card__footer { padding: 0 22px 22px; }
+.admin-route-content .operations-page .spec-grid { gap: 12px; }
+.admin-route-content .operations-page .spec-item { padding: 13px; border: 1px solid #e0eadb; border-radius: 7px; background: #f9fcf7; }
+.admin-route-content .operations-page .spec-label { color: #738680; font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.admin-route-content .operations-page .spec-value { margin-top: 5px; color: #354a4c; font-size: 15px; font-weight: 750; }
+
+/* Engineering approval queue */
+.admin-route-content .approvals-page { display: flex; flex-direction: column; }
+.admin-route-content .approvals-page .page-header { position: relative; overflow: hidden; min-height: 142px !important; margin-bottom: 24px !important; border-left-color: #d7a22f !important; }
+.admin-route-content .approvals-page .page-header::after { content: ''; position: absolute; width: 220px; height: 220px; right: 6%; top: -152px; border: 32px solid #eef5e9; border-radius: 50%; pointer-events: none; }
+.admin-route-content .approvals-page .page-header > * { position: relative; z-index: 1; }
+.admin-route-content .approvals-page .page-title { color: #304143 !important; font-size: clamp(26px, 2.4vw, 35px) !important; }
+.admin-route-content .approvals-page .page-subtitle { max-width: 480px; }
+.admin-route-content .approvals-page .page-header .btn-secondary { min-width: 112px; border-color: #dec994 !important; color: #8c621a !important; }
+.admin-route-content .approvals-page > p[style] { display: flex; align-items: center; gap: 10px; margin: 0 0 18px !important; color: #5e7472 !important; font-size: 14px; }
+.admin-route-content .approvals-page > p[style] strong { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: #fff3d9; color: #9a6710 !important; font-size: 14px; }
+.admin-route-content .approvals-page > div[style] { display: grid !important; gap: 16px !important; }
+.admin-route-content .approvals-page .card--pending { transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.admin-route-content .approvals-page .card--pending:hover { border-color: #d5b76b !important; box-shadow: 0 14px 28px #173e4414 !important; transform: translateY(-1px); }
+.admin-route-content .approvals-page .card__header { min-height: 61px; box-sizing: border-box; }
+.admin-route-content .approvals-page .card__header > div { display: flex !important; flex-wrap: wrap; gap: 8px !important; }
+.admin-route-content .approvals-page .card__header > span { color: #70817f !important; font-size: 12px !important; font-variant-numeric: tabular-nums; }
+.admin-route-content .approvals-page .status-badge, .admin-route-content .approvals-page .badge { white-space: nowrap; }
+.admin-route-content .approvals-page .spec-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.admin-route-content .approvals-page .spec-item { min-width: 0; min-height: 88px; justify-content: center; padding: 14px 16px; }
+.admin-route-content .approvals-page .spec-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.admin-route-content .approvals-page .card__footer { display: flex; justify-content: flex-end; padding-top: 14px; border-top: 1px solid #e7eee2; background: #fcfdfb; }
+.admin-route-content .approvals-page .card__footer .btn { min-width: 174px; background: #0c6171; border-color: #0c6171; }
+.admin-route-content .approvals-page .card__footer .btn:hover { background: #084c59; border-color: #084c59; }
+
+.admin-route-content .operations-page .empty-state,
+.admin-route-content .operations-page .loading-state,
+.admin-route-content .operations-page .alert {
+  padding: 34px;
+  border: 1px solid #dce8d7;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 25px #173e440d;
+}
+
+.admin-route-content .staff-surveys-page { gap: 22px !important; }
+.admin-route-content .staff-surveys-header { position: static; box-shadow: 0 10px 25px #173e440d !important; }
+.admin-route-content .staff-surveys-split { grid-template-columns: 290px minmax(0, 1fr) !important; gap: 20px !important; }
+.admin-route-content .staff-survey-list { position: sticky !important; top: 132px; min-height: 0; height: auto; max-height: calc(100dvh - 190px) !important; padding: 12px 12px 20px !important; scrollbar-gutter: stable; }
+.admin-route-content .staff-survey-list > div:not(:first-child) { border-color: #e0eadb !important; border-radius: 7px !important; background: #fff !important; }
+.admin-route-content .staff-survey-list > div:not(:first-child):hover { border-color: #8cc85d !important; background: #f8fcf5 !important; }
+.admin-route-content .staff-survey-detail-card,
+.admin-route-content .staff-survey-workflow-card { padding: 22px !important; }
+
+.admin-route-content .field-jobs-page > div[style*="grid-template-columns"] > .glass-panel {
+  border: 1px solid #dce8d7 !important;
+  border-top: 4px solid #0a5569 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-shadow: 0 10px 25px #173e440d !important;
+}
+
+.admin-route-content .field-jobs-page > div[style*="grid-template-columns"] > .glass-panel:hover {
+  border-color: #9bcf75 !important;
+  transform: translateY(-2px);
+}
+
+.admin-route-content .field-job-card-heading { gap: 12px; }
+.admin-route-content .field-job-card-heading > div { min-width: 0; }
+.admin-route-content .field-job-card-customer { overflow: hidden; color: #344548 !important; text-overflow: ellipsis; white-space: nowrap; }
+.admin-route-content .field-job-card-heading .badge,
+.admin-route-content .field-job-card-compliance > span { flex-shrink: 0; white-space: nowrap; }
+.admin-route-content .field-job-card-compliance { gap: 12px; }
+.admin-route-content .field-job-card-grid { grid-auto-rows: 1fr; }
+.admin-route-content .field-job-card-grid > .glass-panel { min-height: 0; height: 100%; box-sizing: border-box; }
+
+.admin-route-content .field-jobs-toolbar {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, .86fr);
+  gap: 22px !important;
+  align-items: end !important;
+  padding: 18px 20px !important;
+}
+
+.admin-route-content .field-job-filter-chips { gap: 8px !important; }
+.admin-route-content .field-job-filter-chips .btn { min-height: 38px; padding: 0 13px !important; border-radius: 6px; font-size: 12px !important; }
+.admin-route-content .field-job-filter-chips .btn-secondary { border-color: #cfe0c8 !important; background: #fff !important; color: #4e7651 !important; }
+.admin-route-content .field-jobs-toolbar .solar-search { min-width: 0; }
+.admin-route-content .field-jobs-toolbar .solar-search label { display: block; margin-bottom: 8px; color: #405958; font-size: 12px; font-weight: 750; }
+.admin-route-content .field-jobs-toolbar .solar-search-input { min-height: 46px; border-color: #cbdcc6; border-radius: 7px; background: #fff; }
+.admin-route-content .field-jobs-toolbar .solar-search-input input { font-size: 13px; }
+
+@media (max-width: 900px) {
+  .admin-route-content .field-jobs-toolbar { grid-template-columns: 1fr; align-items: stretch !important; }
+}
+
+.admin-route-content .field-job-detail-page { display: flex; flex-direction: column; gap: 20px !important; }
+.admin-route-content .field-job-detail-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 2px; }
+.admin-route-content .field-job-overview,
+.admin-route-content .field-job-compliance { padding: 26px 30px !important; border: 1px solid #d8e7d1 !important; border-radius: 10px !important; background: #fff !important; box-shadow: 0 10px 25px #173e440d !important; }
+.admin-route-content .field-job-overview { border-top: 4px solid #0a5569 !important; }
+.admin-route-content .field-job-overview h1 { margin: 0; color: #304143; font-size: clamp(23px, 2.2vw, 31px) !important; letter-spacing: 0; }
+.admin-route-content .field-job-overview-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px !important; }
+.admin-route-content .field-job-address { margin: 6px 0 0; color: #4e686b !important; font-size: 15px; font-weight: 650; }
+.admin-route-content .field-job-records { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 8px 0 0; color: #829295 !important; font-size: 11px !important; }
+.admin-route-content .field-job-summary-grid,
+.admin-route-content .field-job-compliance-grid { gap: 14px !important; }
+.admin-route-content .field-job-summary-grid > div,
+.admin-route-content .field-job-compliance-grid > div { border: 1px solid #e1ebdc; border-radius: 8px !important; background: #f8fbf6 !important; }
+.admin-route-content .field-job-summary-grid > div { padding: 16px 18px !important; }
+.admin-route-content .field-job-compliance { border-left: 5px solid #72b83e !important; }
+.admin-route-content .field-job-compliance h2 { margin: 0; color: #304143; letter-spacing: 0; }
+.admin-route-content .field-job-compliance-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px !important; }
+.admin-route-content .field-job-compliance-title { display: flex; align-items: center; gap: 10px; }
+.admin-route-content .field-job-compliance-notes { border-color: #dce8d7 !important; background: #fbfdf9 !important; }
+.admin-route-content .field-job-compliance-notes p { color: #516769 !important; }
+
+.admin-route-content .inventory-page { max-width: none; }
+.admin-route-content .inventory-page { display: flex; flex-direction: column; gap: 22px; }
+.admin-route-content .inventory-panel { margin: 0; padding: 26px; }
+.admin-route-content .inventory-heading { margin: 0; padding: 28px 30px; border: 1px solid #d9e8d3; border-left: 5px solid #0a5569; border-radius: 10px; background: #fff; box-shadow: 0 10px 25px #173e440d; }
+.admin-route-content .inventory-heading h1 { margin: 0 0 7px; color: #304143; font-size: clamp(28px, 3vw, 38px); letter-spacing: 0; }
+.admin-route-content .inventory-heading > div > p:last-child { max-width: 570px; margin: 0; color: #607879; font-size: 14px; }
+.admin-route-content .inventory-header-actions { gap: 10px; }
+.admin-route-content .inventory-header-actions button { min-height: 40px; padding: 0 15px; font-size: 13px; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-filters { grid-template-columns: minmax(260px, 2fr) minmax(150px, .9fr) minmax(170px, 1fr) auto; padding: 16px; }
+.admin-route-content .inventory-page .inventory-count { border-radius: 999px; background: #eaf5df; color: #4e9130; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-table { margin: 0; border: 1px solid #e0eadb; border-radius: 8px; background: #fff; }
+.admin-route-content .inventory-page .inventory-table table { min-width: 850px; }
+.admin-route-content .inventory-page .inventory-table td:first-child { min-width: 230px; white-space: normal; }
+.admin-route-content .inventory-page .inventory-table td:first-child strong { color: #344b4d; font-size: 14px; }
+.admin-route-content .inventory-page .inventory-table td:nth-child(3),
+.admin-route-content .inventory-page .inventory-table td:nth-child(4),
+.admin-route-content .inventory-page .inventory-table td:nth-child(5),
+.admin-route-content .inventory-page .inventory-table td:nth-child(6) { font-variant-numeric: tabular-nums; }
+.admin-route-content .inventory-page .inventory-table td:nth-child(5) { color: #286c43; font-weight: 800; }
+.admin-route-content .inventory-page .stock-low,
+.admin-route-content .inventory-page .inventory-status { display: inline-flex; align-items: center; min-height: 25px; border: 1px solid #efd6a1; border-radius: 999px; background: #fff7e7; color: #9a6613; font-size: 11px; font-weight: 800; padding: 0 9px; }
+.admin-route-content .inventory-page .inventory-table td:nth-child(7) { color: #4f8d31; font-size: 12px; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-toolbar { margin-top: 18px; padding: 0 2px; color: #6d8280; font-size: 12px; }
+.admin-route-content .inventory-page .inventory-toolbar button { min-height: 36px; border-radius: 6px; background: #0c6171; border-color: #0c6171; font-size: 12px; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-toolbar button:disabled { background: #eef3eb; color: #98a79a; border-color: #e0e9dc; }
+.admin-route-content .inventory-page .inventory-quote-selector { margin: 2px 0 20px; border: 1px solid #e0eadb; border-radius: 9px; background: #f7faf4; }
+.admin-route-content .inventory-page .inventory-quote-selector button { min-height: 44px; background: #0c6171; border-color: #0c6171; font-weight: 750; }
+.admin-route-content .inventory-page .inventory-empty { margin: 0 0 20px; border-color: #cbdcc5; background: #fbfdf9; color: #617978; }
+.admin-route-content .inventory-page .estimate-sheet { margin-top: 0; border-radius: 10px; border-color: #d8e7d1; box-shadow: none; }
+.admin-route-content .inventory-page .estimate-heading { background: #f6faf2; }
+.admin-route-content .inventory-page .estimate-heading h3 { color: #304143; }
+.admin-route-content .inventory-page .estimate-total > strong { color: #0c6171; }
+.admin-route-content .inventory-page .estimate-summary { background: #f3f8ee; }
+.admin-route-content .inventory-page .inventory-reservations-panel .inventory-table { margin-top: 4px; }
+
+.admin-route-content .staff-dashboard { width: min(100%, 1320px); box-sizing: border-box; margin: 0 auto; padding: 36px 34px 64px; display: grid; gap: 22px; }
+.staff-dashboard-hero { padding: 38px 40px; border-radius: 10px; background: linear-gradient(115deg, #0a5569, #377d61); color: #fff; box-shadow: 0 14px 28px #173e4420; }
+.staff-dashboard--inventory-officer .staff-dashboard-hero,
+.staff-dashboard--field-technician .staff-dashboard-hero { background: linear-gradient(115deg, #0a5569, #377d61); box-shadow: 0 14px 28px #173e4420; }
+.staff-dashboard-hero p, .staff-dashboard-tools header p { margin: 0 0 9px; color: #b5dc8b; font-size: 10px; font-weight: 800; letter-spacing: .16em; }
+.staff-dashboard--inventory-officer .staff-dashboard-hero p,
+.staff-dashboard--field-technician .staff-dashboard-hero p { color: #b5dc8b; }
+.staff-dashboard-hero h1 { margin: 0 0 16px; color: #fff; font-size: clamp(28px, 3vw, 40px); letter-spacing: 0; }
+.staff-dashboard-hero h2 { margin: 0 0 7px; color: #fff; font-size: 18px; letter-spacing: 0; }
+.staff-dashboard-hero span { color: #f8eee0; font-size: 14px; }
+.staff-dashboard-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.staff-dashboard-metrics article { min-height: 106px; padding: 18px; border: 1px solid #dce8d7; border-radius: 9px; background: #fff; box-shadow: 0 8px 20px #173e4409; }
+.staff-dashboard-metrics span { display: block; color: #718582; font-size: 11px; font-weight: 750; text-transform: uppercase; }
+.staff-dashboard-metrics strong { display: block; margin-top: 12px; color: #354a4c; font-size: 25px; }
+.staff-dashboard-tools { overflow: hidden; border: 1px solid #dce8d7; border-radius: 10px; background: #fff; box-shadow: 0 10px 25px #173e440d; }
+.staff-dashboard-tools header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; border-bottom: 1px solid #e5ede1; }
+.staff-dashboard-tools header p { color: #67a63c; }
+.staff-dashboard-tools h2 { margin: 0; color: #304143; font-size: 20px; letter-spacing: 0; }
+.staff-dashboard-tools header > span { color: #788b88; font-size: 12px; }
+.staff-dashboard-tools > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; padding: 14px; background: #f8fbf6; }
+.staff-dashboard-tools a { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 13px; align-items: center; min-height: 94px; padding: 15px; border: 1px solid #dfe9da; border-radius: 8px; background: #fff; color: inherit; text-decoration: none; transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.staff-dashboard-tools a:last-child { border-right: 1px solid #dfe9da; }
+.staff-dashboard-tools a:hover { border-color: #b5d99d; background: #fff; box-shadow: 0 7px 16px #173e4410; transform: translateY(-1px); }
+.staff-dashboard-tools a > span { grid-row: 1 / span 2; display: inline-grid; width: 38px; height: 38px; place-items: center; border: 1px solid #c9e1bb; border-radius: 8px; background: #eff8ea; color: #5a9d33; }
+.staff-dashboard--inventory-officer .staff-dashboard-tools a > span,
+.staff-dashboard--field-technician .staff-dashboard-tools a > span { border-color: #c9e1bb; background: #eff8ea; color: #5a9d33; }
+.staff-dashboard-tools h3 { margin: 0; color: #344b4d; font-size: 15px; }
+.staff-dashboard-tools a p { grid-column: 2; margin: 3px 0 0; color: #728583; font-size: 11px; line-height: 1.45; }
+.staff-dashboard-tools a b { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 5px; margin: 0; color: #679f3c; font-size: 0; }
+.staff-dashboard-tools a b svg { width: 18px; height: 18px; }
+.staff-dashboard-error { margin: 0; padding: 13px 16px; border: 1px solid #f1c9c4; border-radius: 8px; background: #fff4f2; color: #a44a46; font-size: 13px; }
+.admin-route-content .technician-jobs-page { width: min(100%, 1320px); box-sizing: border-box; margin: 0 auto; padding: 36px 34px 64px; }
+.technician-jobs-heading { padding: 30px; border: 1px solid #d7e8d4; border-left: 5px solid #28715f; border-radius: 10px; background: #fff; box-shadow: 0 10px 25px #173e440d; }
+.technician-jobs-heading h1 { margin: 0 0 7px; color: #304143; font-size: 32px; }
+.technician-jobs-heading p:last-child { margin: 0; color: #6d8180; font-size: 14px; }
+.technician-jobs-empty { margin-top: 22px; padding: 35px; border: 1px dashed #c9dfc3; border-radius: 9px; color: #718682; text-align: center; }
+.technician-job-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 22px; }
+.technician-job-grid article { padding: 21px; border: 1px solid #dce8d7; border-top: 4px solid #28715f; border-radius: 9px; background: #fff; box-shadow: 0 9px 22px #173e440c; }
+.technician-job-status { display: inline-flex; padding: 5px 8px; border-radius: 999px; background: #ecf8f1; color: #2b7a61; font-size: 10px; font-weight: 800; }
+.technician-job-grid h2 { margin: 15px 0 11px; color: #344b4d; font-size: 18px; }
+.technician-job-grid p { display: flex; gap: 7px; margin: 7px 0; color: #718581; font-size: 12px; line-height: 1.5; }
+.technician-job-grid p svg { flex: 0 0 auto; color: #4b9477; }
+.technician-job-grid strong { display: block; margin-top: 15px; color: #a16c14; font-size: 12px; }
+.technician-job-note { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; color: #347f64; font-size: 12px; font-weight: 800; }
+.technician-job-directions { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; margin-top: 16px; padding: 0 13px; border-radius: 7px; background: #07536a; color: #fff; font-size: 12px; font-weight: 800; text-decoration: none; }
+.technician-job-directions:hover { background: #06475a; color: #fff; }
+.technician-job-directions--disabled,
+.technician-job-directions--disabled:hover { border: 0; background: #dce5e1; color: #768682; cursor: not-allowed; }
+.technician-job-location-state { display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; color: #4f7b45; font-size: 11px; font-weight: 750; }
+.technician-route-origin { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; margin-top: 18px; padding: 18px 20px; border: 1px solid #cfe0c9; border-radius: 10px; background: #fff; box-shadow: 0 8px 20px #173e440a; }
+.technician-route-origin__icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 10px; background: #edf7e7; color: #599d34; }
+.technician-route-origin h2 { margin: 2px 0 4px; color: #344b4d; font-size: 17px; }
+.technician-route-origin p:last-child { margin: 0; color: #718581; font-size: 12px; }
+.technician-route-origin .btn { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 7px; white-space: nowrap; }
+.technician-route-origin .technician-route-origin__error { margin-top: 7px; color: #a94646; }
+
+.assignment-page { display: grid; gap: 22px; }
+.assignment-page__header { display: flex; align-items: flex-start; gap: 16px; padding: 26px 28px; border: 1px solid var(--border-color); border-left: 5px solid var(--solar-emerald); border-radius: 12px; background: #fff; box-shadow: 0 10px 28px rgba(26, 65, 59, .07); }
+.assignment-page__header > span { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border-radius: 12px; background: #eef8e8; color: #5aa934; }
+.assignment-page__header h1,
+.assignment-success h2 { margin: 2px 0 7px; }
+.assignment-page__header p:last-child,
+.assignment-success p { margin: 0; color: var(--text-secondary); }
+.assignment-success .assignment-success__address,
+.assignment-success .assignment-success__location { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
+.assignment-success .assignment-success__location { color: #4f7b45; font-size: 12px; font-weight: 750; }
+.assignment-page > .glass-panel { max-width: 980px; }
+.assignment-form-card { overflow: hidden; padding: 0 !important; }
+.assignment-form-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px; border-bottom: 1px solid #e1ebdd; background: linear-gradient(120deg, #fff, #f7fbf4); }
+.assignment-form-card__heading h2 { margin: 3px 0 6px; color: #304143; font-size: 23px; }
+.assignment-form-card__heading p:last-child { margin: 0; color: var(--text-secondary); font-size: 13px; }
+.assignment-form-card__heading > span { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; padding: 8px 11px; border: 1px solid #cbe1bf; border-radius: 999px; background: #eff8e9; color: #4e8f30; font-size: 11px; font-weight: 800; }
+.assignment-form { display: grid; gap: 0; }
+.assignment-form-section { padding: 23px 26px; border-bottom: 1px solid #e7eee3; }
+.assignment-form-section__title { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 17px; }
+.assignment-form-section__title > span { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 9px; background: #eef7e9; color: #5a9f35; }
+.assignment-form-section__title h3 { margin: 0 0 3px; color: #33494b; font-size: 15px; }
+.assignment-form-section__title p { margin: 0; color: #718582; font-size: 11px; }
+.assignment-form label { display: grid; gap: 7px; color: #49615f; font-size: 12px; font-weight: 750; }
+.assignment-form label > span { color: #b9474c; }
+.assignment-form .input-field { width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid #cbdccb !important; border-radius: 8px !important; font-size: 13px; }
+.assignment-form .input-field[aria-invalid="true"] { border-color: #c55357 !important; box-shadow: 0 0 0 3px rgba(197, 83, 87, .1) !important; }
+.survey-picker { display: grid; gap: 14px; }
+.survey-picker__search-field { display: flex; min-height: 48px; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid #cbdccb; border-radius: 8px; background: #fff; color: #68807d !important; transition: border-color .2s ease, box-shadow .2s ease; }
+.survey-picker__search-field:focus-within { border-color: #70ad52; box-shadow: 0 0 0 3px rgba(106, 177, 67, .12); }
+.survey-picker__search-field input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #304143; font: inherit; font-weight: 500; }
+.survey-picker__search-field input::placeholder { color: #8b9b99; opacity: 1; }
+.survey-picker__select { color: #304143; font-weight: 650; }
+.survey-picker__selection { display: grid; grid-template-columns: auto minmax(180px, 1.2fr) minmax(290px, 1fr); align-items: center; gap: 14px; padding: 15px 16px; border: 1px solid #c8dfbd; border-radius: 10px; background: linear-gradient(120deg, #f5faF2, #fff); box-shadow: 0 5px 16px rgba(43, 92, 65, .06); }
+.survey-picker__selection-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 10px; background: #e8f5df; color: #559b33; }
+.survey-picker__selection-main { display: grid; min-width: 0; gap: 2px; }
+.survey-picker__selection-label { color: #68905b !important; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.survey-picker__selection-main strong { overflow: hidden; color: #2f4645; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.survey-picker__selection-main small { overflow: hidden; color: #748784; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.survey-picker__selection dl { display: grid; grid-template-columns: minmax(90px, 1fr) 85px minmax(110px, auto); gap: 12px; margin: 0; }
+.survey-picker__selection dl > div { min-width: 0; }
+.survey-picker__selection dt { margin-bottom: 3px; color: #82918f; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.survey-picker__selection dd { overflow: hidden; margin: 0; color: #425755; font-size: 11px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.survey-picker__status { display: inline-flex; max-width: 100%; padding: 4px 7px; border-radius: 999px; background: #eef4ec; color: #526863; font-size: 9px; line-height: 1; }
+.survey-picker__status--analysiscomplete { background: #eaf6e4; color: #4d8c30; }
+.survey-picker__status--failed { background: #fff0ef; color: #b04349; }
+.assignment-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.assignment-field-help,
+.assignment-schedule-error { margin: 9px 0 0; color: #718582; font-size: 11px; }
+.assignment-schedule-error { color: #ad3f45; font-weight: 700; }
+.assignment-empty { margin: 10px 0 0; padding: 10px 12px; border-radius: 7px; background: #fff6e8; color: #8c641f; font-size: 12px; }
+.assignment-form-error { margin: 20px 26px 0; padding: 12px 14px; border: 1px solid #edc5c5; border-radius: 8px; background: #fff3f2; color: #a53f45; font-size: 12px; }
+.assignment-form-loading { margin: 24px 26px; padding: 22px; border-radius: 9px; background: #f5f9f3; color: #69807c; text-align: center; }
+.assignment-preview { display: grid; gap: 4px; margin: 20px 26px 0; padding: 15px 17px; border: 1px solid #cde1c3; border-radius: 9px; background: #f3f9ef; }
+.assignment-preview strong { color: #426f35; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.assignment-preview span { color: #536c68; font-size: 12px; }
+.assignment-form-actions { display: flex; flex-wrap: wrap; gap: 11px; padding: 23px 26px 26px; }
+.assignment-form-actions .btn { min-height: 45px; padding-inline: 20px; }
+.assignment-success { display: flex; max-width: 820px; gap: 18px; padding: 28px; border: 1px solid #b9ddb0; border-radius: 12px; background: #f4faef; color: #4f9a2e; }
+.assignment-success > div > div { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.assignment-success .btn { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+.customer-locations-page .customer-location-panel { width: 100%; margin: 0; }
+
+@media (max-width: 900px) {
+  .admin-route-content .operations-page { padding: 26px 20px 48px; }
+  .admin-route-content .operations-page .page-header,
+  .admin-route-content .operations-page .inventory-heading,
+  .admin-route-content .field-jobs-page > .glass-panel:first-child,
+  .admin-route-content .staff-surveys-header { align-items: flex-start; flex-direction: column; }
+  .admin-route-content .staff-surveys-split { grid-template-columns: 1fr !important; }
+  .admin-route-content .staff-survey-list { position: static !important; max-height: 360px !important; }
+  .admin-route-content .approvals-page .spec-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 650px) {
+  .admin-route-content .operations-page { padding: 20px 14px 42px; }
+  .admin-route-content .operations-page .page-header,
+  .admin-route-content .operations-page .inventory-heading,
+  .admin-route-content .field-jobs-page > .glass-panel:first-child,
+  .admin-route-content .staff-surveys-header { padding: 20px !important; }
+  .admin-route-content .operations-page .card__header { align-items: flex-start; flex-direction: column; }
+  .admin-route-content .approvals-page .page-header::after { display: none; }
+  .admin-route-content .approvals-page .spec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-route-content .approvals-page .card__footer .btn { width: 100%; }
+  .assignment-page__header,
+  .assignment-success { padding: 20px; }
+  .assignment-form-card__heading { align-items: flex-start; flex-direction: column; padding: 20px; }
+  .assignment-form-section { padding: 20px; }
+  .survey-picker__selection { grid-template-columns: auto minmax(0, 1fr); }
+  .survey-picker__selection dl { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-top: 4px; }
+  .assignment-form-grid { grid-template-columns: 1fr; }
+  .assignment-preview { margin-inline: 20px; }
+  .assignment-form-actions { padding-inline: 20px; }
+  .assignment-form-actions .btn { width: 100%; }
+  .technician-route-origin { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .technician-route-origin .btn { grid-column: 1 / -1; width: 100%; }
+  .technician-job-directions { width: 100%; box-sizing: border-box; }
+}
+
+@media (max-width: 520px) {
+  .survey-picker__selection { align-items: start; }
+  .survey-picker__selection dl { grid-template-columns: 1fr 1fr; }
+  .survey-picker__selection dl > div:last-child { grid-column: 1 / -1; }
+}

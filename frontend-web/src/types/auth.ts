@@ -3,6 +3,7 @@ export interface User {
   email: string;
   fullName: string;
   phoneNumber?: string;
+  profileImageUrl?: string;
   roles: string[];
   createdAt: string;
 }
@@ -23,6 +24,19 @@ export interface HealthResponse {
   details: Record<string, string>;
 }
 
+export interface AppNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  actionUrl?: string;
+  entityType?: string;
+  entityId?: string;
+  isRead: boolean;
+  readAt?: string;
+  createdAt: string;
+}
+
 export interface WorkflowResult {
   workflow_id: string;
   customer_id?: string;
@@ -41,6 +55,8 @@ export interface WorkflowResult {
 export interface Survey {
   id: string;
   customerId: string;
+  customerName?: string;
+  projectName: string;
   monthlyKwh: number;
   roofAreaSqm: number;
   gridType: string;
@@ -55,6 +71,12 @@ export interface Survey {
   updatedAt: string;
   images: { id: string; imageType: string; fileUrl: string; fileName: string }[];
   workflows: { workflowId: string; status: string; resultJson?: string; validationJson?: string; errorMessage?: string }[];
+}
+
+export interface LocationSearchResult {
+  displayName: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface ComplianceAssessment {
@@ -120,6 +142,7 @@ export interface FieldJob {
   technicianName: string;
   customerName: string;
   customerPhone: string;
+  projectName: string;
   propertyAddress: string;
   monthlyKwh: number;
   roofAreaSqm: number;
@@ -132,6 +155,7 @@ export interface FieldJob {
   createdAt: string;
   updatedAt: string;
   hasInspection: boolean;
+  checkInAt?: string;
   inspectionStatus?: string;
   compliance?: ComplianceAssessment;
 }

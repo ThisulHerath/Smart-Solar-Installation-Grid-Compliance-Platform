@@ -10,6 +10,7 @@ import { FieldJob } from '../../types/auth';
 
 // Mock API service
 vi.mock('../../services/api', () => ({
+  resolveAssetUrl: (value: string | null | undefined) => value ?? null,
   api: {
     getFieldJobs: vi.fn(),
     getFieldJob: vi.fn(),
@@ -26,6 +27,7 @@ const mockJobs: FieldJob[] = [
     technicianName: 'Lead Field Technician',
     customerName: 'Kamal Perera',
     customerPhone: '+94771234567',
+    projectName: 'Perera Home Solar',
     propertyAddress: '45 Galle Road, Colombo 03',
     monthlyKwh: 1200,
     roofAreaSqm: 85,
@@ -75,7 +77,7 @@ describe('FieldJobsPage & FieldJobDetailPage Tests', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Field Technician Operations & Compliance/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: 'Field jobs' })).toBeInTheDocument();
       expect(screen.getByText('Kamal Perera')).toBeInTheDocument();
       expect(screen.getByText('45 Galle Road, Colombo 03')).toBeInTheDocument();
       expect(screen.getByText('Lead Field Technician')).toBeInTheDocument();

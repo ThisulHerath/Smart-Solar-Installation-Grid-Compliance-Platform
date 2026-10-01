@@ -317,3 +317,29 @@ class _AvatarBadge extends StatelessWidget {
     );
   }
 }
+
+class _SocialSquare extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _SocialSquare({required this.child, required this.onTap});
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(5),
+        child: Container(
+            width: 35,
+            height: 35,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: SolarColors.surface,
+                border: Border.all(color: SolarColors.border),
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: const [
+                  BoxShadow(
+                      color: Color(0x14173E44),
+                      blurRadius: 7,
+                      offset: Offset(0, 2))
+                ]),
+            child: child),
+      );
+}

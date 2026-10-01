@@ -25,7 +25,44 @@ public class SurveyServiceTests
     }
 
     private SurveyService Service() => new(_db, _ai.Object);
-    private static SurveyRequestDto Request() => new() { MonthlyKwh = 900, RoofAreaSqm = 75, GridType = GridType.SinglePhase, PropertyAddress = "10 Solar Lane" };
+    [Fact] public async Task Submit_NotifiesActiveEngineers()
+    {
+        var engineer = new User { Email = "engineer@test.local", FullName = "Solar Engineer", PasswordHash = "x" };
+        var role = new Role { Name = RoleConstants.SeniorEngineer };
+        engineer.UserRoles.Add(new UserRole { User = engineer, Role = role });
+        _db.Users.Add(engineer);
+        await _db.SaveChangesAsync();
+        var notifications = new NotificationService(_db);
+        var service = new SurveyService(_db, _ai.Object, notifications);
+        var survey = await service.CreateAsync(_owner, Request());
+
+        await service.SubmitAsync(_owner, survey.Id);
+
+        var item = Assert.Single(await notifications.GetForUserAsync(engineer.Id));
+        Assert.Equal("SURVEY_SUBMITTED", item.Type);
+        Assert.Equal(survey.Id, item.EntityId);
+        Assert.False(item.IsRead);
+    }
+    [Fact] public async Task Delete_RequiresOwnership_AndRemovesProject()
+    {
+        var survey = await Service().CreateAsync(_owner, Request());
+        Assert.False(await Service().DeleteAsync(_other, survey.Id));
+        Assert.True(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
+        Assert.True(await Service().DeleteAsync(_owner, survey.Id));
+        Assert.False(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
+    }
+
+    [Fact] public async Task Delete_RejectsProjectWithInventoryRecords()
+    {
+        var survey = await Service().CreateAsync(_owner, Request());
+        var proposal = new EngineeringProposal { SolarSurveyId = survey.Id };
+        _db.EngineeringProposals.Add(proposal);
+        _db.Set<EquipmentQuote>().Add(new EquipmentQuote { EngineeringProposal = proposal });
+        await _db.SaveChangesAsync();
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service().DeleteAsync(_owner, survey.Id));
+        Assert.True(await _db.SolarSurveys.AnyAsync(s => s.Id == survey.Id));
+    }
+    private static SurveyRequestDto Request() => new() { ProjectName = "Family rooftop", MonthlyKwh = 900, RoofAreaSqm = 75, GridType = GridType.SinglePhase, PropertyAddress = "10 Solar Lane" };
     private static SolarSizingResponseDto Success() => new()
     {
         Status = "completed", Recommendation = JsonDocument.Parse("{\"recommended_kw\":7.5,\"estimated_panel_count\":19,\"estimated_inverter_kw\":7.5}").RootElement,
@@ -53,6 +90,28 @@ public class SurveyServiceTests
     {
         var request = Request(); request.MonthlyKwh = 0;
         await Assert.ThrowsAsync<ArgumentException>(() => Service().CreateAsync(_owner, request));
+    }
+
+    [Fact] public async Task BlankProjectName_IsRejected()
+    {
+        var request = Request(); request.ProjectName = "   ";
+        await Assert.ThrowsAsync<ArgumentException>(() => Service().CreateAsync(_owner, request));
+    }
+
+    [Fact] public async Task LocationCoordinates_AndCustomerName_AreReturnedToAuthorizedUsers()
+    {
+        var request = Request();
+        request.Latitude = 6.9271m;
+        request.Longitude = 79.8612m;
+
+        var created = await Service().CreateAsync(_owner, request);
+        var listed = Assert.Single(await Service().GetAllAsync());
+
+        Assert.Equal(6.9271m, created.Latitude);
+        Assert.Equal(79.8612m, created.Longitude);
+        Assert.Equal("Family rooftop", created.ProjectName);
+        Assert.Equal("Family rooftop", listed.ProjectName);
+        Assert.Equal("Owner", listed.CustomerName);
     }
 
     [Fact] public async Task Submission_RunsWorkflow_PersistsResultAndExecutionLogs()
