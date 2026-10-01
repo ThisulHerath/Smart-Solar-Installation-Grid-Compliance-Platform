@@ -25,7 +25,7 @@ export const Layout: React.FC = () => {
       <Navbar />
       {administrator || staffRole ? (
         <div className={`admin-route-shell${profileRoute ? ' profile-route' : ''}`}>
-          {!profileRoute && (administrator ? <AdminSidebar /> : <RoleSidebar role={staffRole!} />)}
+          {administrator ? <AdminSidebar /> : <RoleSidebar role={staffRole!} />}
           <main className="admin-route-content"><Outlet /></main>
         </div>
       ) : (

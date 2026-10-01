@@ -217,17 +217,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                           crossAxisAlignment:
                                               WrapCrossAlignment.center,
                                           children: [
-                                            const Text(
-                                                "Don't have an account?",
+                                            const Text("Don't have an account?",
                                                 style: TextStyle(
                                                     color: _muted,
                                                     fontSize: 12)),
                                             TextButton(
-                                                onPressed: () =>
-                                                    Navigator.of(context).push(
-                                                        MaterialPageRoute(
-                                                            builder: (_) =>
-                                                                const RegisterScreen())),
+                                                onPressed: () => Navigator.of(
+                                                        context)
+                                                    .push(MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            const RegisterScreen())),
                                                 style: TextButton.styleFrom(
                                                     foregroundColor: _orange,
                                                     textStyle: const TextStyle(
@@ -316,30 +315,4 @@ class _AvatarBadge extends StatelessWidget {
       ),
     );
   }
-}
-
-class _SocialSquare extends StatelessWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  const _SocialSquare({required this.child, required this.onTap});
-  @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(5),
-        child: Container(
-            width: 35,
-            height: 35,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: SolarColors.surface,
-                border: Border.all(color: SolarColors.border),
-                borderRadius: BorderRadius.circular(5),
-                boxShadow: const [
-                  BoxShadow(
-                      color: Color(0x14173E44),
-                      blurRadius: 7,
-                      offset: Offset(0, 2))
-                ]),
-            child: child),
-      );
 }

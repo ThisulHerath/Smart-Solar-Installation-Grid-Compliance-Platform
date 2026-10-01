@@ -34,6 +34,9 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
   String? _gpsCheckInError;
   Position? _navigationOrigin;
 
+  bool get _inspectionLocked =>
+      _job?.status.toLowerCase() == 'compliancecomplete';
+
   final Map<String, Uint8List> _photoBytes = {};
   final Map<String, String> _photoUrls = {};
 

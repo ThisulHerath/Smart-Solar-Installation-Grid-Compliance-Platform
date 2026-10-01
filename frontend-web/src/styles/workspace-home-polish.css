@@ -2,10 +2,88 @@
 .workspace-shell > main { max-width: 1300px !important; margin: 0 auto !important; padding: 42px 32px 70px !important; }
 .workspace-shell > main:has(.profile-page) { padding-top: 16px !important; }
 .workspace-shell .profile-page { padding-top: 0; }
+.admin-layout { --staff-sidebar-width: 260px; }
 .admin-sidebar-brand { gap: 11px; padding: 8px 12px 30px; color: #fff !important; font-size: 24px; font-weight: 400; letter-spacing: 0; }
 .admin-sidebar-brand svg { width: 34px; height: 34px; color: #8dce50; }
 .admin-sidebar-brand span { white-space: nowrap; }
 .admin-sidebar-brand b { font-weight: 800; }
+
+/* Staff workspaces use one continuous, full-height navigation rail. */
+.admin-layout > .member-home-nav {
+  width: calc(100% - var(--staff-sidebar-width));
+  margin-left: var(--staff-sidebar-width);
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: clamp(48px, 5vw, 76px);
+  padding-inline: clamp(24px, 3vw, 40px);
+}
+
+.admin-layout > .member-home-nav .member-home-brand { display: none; }
+.admin-layout > .member-home-nav nav {
+  position: static;
+  grid-column: 1;
+  justify-self: center;
+  transform: translateX(104px);
+}
+.admin-layout > .member-home-nav .member-home-account {
+  grid-column: 2;
+  justify-self: end;
+}
+
+.admin-layout .admin-sidebar {
+  inset: 0 auto 0 0 !important;
+  width: var(--staff-sidebar-width);
+  height: 100dvh;
+  min-height: 100dvh;
+  padding-top: 28px;
+  border-radius: 0;
+}
+
+.admin-layout .admin-sidebar-brand {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.admin-layout > .admin-route-shell,
+.admin-layout > .admin-route-shell.profile-route {
+  min-height: 100vh;
+  padding-left: var(--staff-sidebar-width);
+}
+
+.admin-layout .admin-sidebar-link span { white-space: nowrap; }
+
+.admin-route-shell.profile-route .admin-route-content { min-height: 100vh; }
+
+@media (max-width: 800px) {
+  .admin-layout > .member-home-nav {
+    width: 100%;
+    margin-left: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 20px;
+  }
+
+  .admin-layout > .member-home-nav nav {
+    position: static;
+    justify-self: center;
+    transform: none;
+  }
+
+  .admin-layout > .member-home-nav .member-home-account { grid-column: 2; }
+
+  .admin-layout .admin-sidebar {
+    width: auto;
+    height: auto;
+    min-height: auto;
+    padding-top: 22px;
+  }
+
+  .admin-layout .admin-sidebar-link span { white-space: normal; }
+
+  .admin-layout > .admin-route-shell,
+  .admin-layout > .admin-route-shell.profile-route {
+    min-height: calc(100vh - 74px);
+    padding-left: 0;
+  }
+}
 
 @keyframes sidebar-solar-glow {
   0% { filter: drop-shadow(0 0 2px #a8d95a80); transform: rotate(0deg) scale(1); }
@@ -41,7 +119,7 @@
 .admin-route-content > .member-home-nav .member-home-brand { display: none; }
 .admin-route-content > .member-home-nav nav { justify-self: center; }
 .admin-sidebar { border-radius: 0 !important; }
-.role-sidebar-label { margin: -12px 12px 18px; color: #c4dcde; font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.role-sidebar-label { margin: 2px 12px 24px; color: #c4dcde; font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
 .role-sidebar--engineer,
 .role-sidebar--technician,
 .role-sidebar--inventory { background: #0a5569 !important; }
