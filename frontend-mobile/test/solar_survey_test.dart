@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/models/solar_survey.dart';
-import 'package:smart_solar_mobile/models/user.dart';
-import 'package:smart_solar_mobile/models/auth_response.dart';
+import 'package:smart_solar_mobile/features/assessment/models/solar_survey.dart';
+import 'package:smart_solar_mobile/core/auth/models/user.dart';
+import 'package:smart_solar_mobile/core/auth/models/auth_response.dart';
 
 void main() {
   group('SolarSurvey Model & Result Parsing Tests', () {

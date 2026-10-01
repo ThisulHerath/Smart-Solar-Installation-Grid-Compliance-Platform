@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/models/user.dart';
-import 'package:smart_solar_mobile/models/auth_response.dart';
+import 'package:smart_solar_mobile/core/auth/models/user.dart';
+import 'package:smart_solar_mobile/core/auth/models/auth_response.dart';
 
 void main() {
   group('Smart Solar Mobile Models Test', () {

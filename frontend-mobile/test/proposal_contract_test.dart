@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/models/proposal.dart';
+import 'package:smart_solar_mobile/features/engineering/models/proposal.dart';
 
 void main() {
   test('proposal survey response parses the API list contract', () {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/utils/validators.dart';
-import 'package:smart_solar_mobile/widgets/solar_search.dart';
-import 'package:smart_solar_mobile/widgets/solar_field.dart';
+import 'package:smart_solar_mobile/core/utils/validators.dart';
+import 'package:smart_solar_mobile/core/widgets/solar_search.dart';
+import 'package:smart_solar_mobile/core/widgets/solar_field.dart';
 
 void main() {
   test(

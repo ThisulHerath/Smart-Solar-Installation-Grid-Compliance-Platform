@@ -1,8 +1,8 @@
-import 'theme/solar_theme.dart';
+import 'package:smart_solar_mobile/core/theme/solar_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
-import 'screens/splash_screen.dart';
+import 'package:smart_solar_mobile/core/auth/providers/auth_provider.dart';
+import 'package:smart_solar_mobile/core/navigation/screens/splash_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
