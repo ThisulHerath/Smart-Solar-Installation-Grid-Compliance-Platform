@@ -114,7 +114,6 @@
 .journey-start-card__steps div { min-width: 0; display: grid; gap: 2px; }
 .journey-start-card__steps b { color: #3d5653; font-size: 13px; }
 .journey-start-card__steps small { color: #758784; font-size: 11px; line-height: 1.35; }
-.workspace-shell > footer { border-top-color: #dfe8d8 !important; background: #fff; color: #718184 !important; }
 
 @media (max-width: 760px) {
   .workspace-shell > main { padding: 26px 18px 54px !important; }
