@@ -1,135 +1,175 @@
-# SE3090 assignment readiness
+# SE3090 Assignment Readiness
 
-**28 September 2026 update.** The agentic strengthening requested after this audit is implemented. PlannerAgent now creates objective-sensitive typed plans; a persisted master workflow supports inspection, correction, engineering decision, pricing and inventory pause/resume events; a central registry restricts each specialist's tools; ASP.NET verifies database business state before accepting high-impact events; and correlated trace/tool fields are persisted through migration `StrengthenAgentWorkflowState`. Current automated results are 105 ASP.NET tests passed (one PostgreSQL integration test skipped), 63 Python tests passed, 47 React tests passed, and 20 Flutter tests passed. The older checklist below remains useful historical context, but its fixed-plan, missing-canonical-state and trace-gap items have been superseded. Live LLM reasoning and generative RAG are still deliberately absent under the no-paid-service decision.
+**Last updated:** 28 September 2026 (original audit 15 September 2026; lecture follow-up 19 September 2026)
 
-Follow-up, 19 September 2026: see [English lecture audit](lecture-theory-audit.en.md), [Sinhala lecture audit](lecture-theory-audit.si.md) and [bilingual presentation report](lecture-theory-report.html). They distinguish deterministic specialists from LLM agents, record later changes and report their own verification scope. The dated results below remain historical evidence.
+> This is a development audit, not a signed submission or an awarded grade. Passing tests do not prove every feature works.
 
-**15 September 2026.** Reviewed against the supplied 17-page assignment specification. Page references below refer to that document. This is a development audit, not a signed submission or an awarded grade.
+**Legend:** ✅ verified at the stated scope | 🟡 partial | ⬜ to do | ❓ unverified
 
-**The assignment requires at least four distinct agents and at least one complete assessed agentic workflow (page 6). It does not prescribe four named workflows.** A standard group also needs four primary business components.
+---
 
-Legend: `[x]` = verified at the stated scope; `PARTIAL` = implementation exists but a required part or proof is missing; `TODO` = outstanding; `UNVERIFIED` = not established. Passing tests do not prove every feature works.
+## 1. Summary
 
-## Requirements checklist
+The agentic strengthening requested after the first audit is **implemented**:
 
-### Platform and business logic — pages 2–5
+- PlannerAgent creates objective-sensitive, typed plans.
+- A persisted master workflow supports inspection, correction, engineering decision, pricing and inventory pause/resume events.
+- A central registry restricts each specialist's tools.
+- ASP.NET verifies database business state before accepting high-impact events.
+- Correlated trace/tool fields are persisted (migration `StrengthenAgentWorkflowState`).
 
-- [x] ASP.NET Core API, PostgreSQL/EF Core/Npgsql, React and Flutter are implemented and integrated.
-- [x] Both clients use ASP.NET as their gateway; Python is internal.
-- [x] Five roles: homeowner, field technician, senior engineer, inventory officer and administrator.
-- [x] Four business components: customer assessment; field operations/compliance; engineering proposals/approval; inventory/pricing.
-- [x] Each component has at least four meaningful API routes and non-CRUD business operations. Evidence: SurveysController, FieldJobsController/TechnicianController, ProposalsController and InventoryController.
-- [x] Services, DTOs, DI, async operations, validation, exception handling, JWT/password hashing, CORS, health and Swagger exist.
-- [x] CRUD and controlled lifecycle operations exist. Audited records use workflow transitions where destructive deletion would be inappropriate.
-- [ ] PARTIAL — Search/filter/sort/pagination/reporting exist, but complete usability across every role and list is not exhaustively verified here.
-- [x] Entities, relationships, migrations, indexes/constraints, seeds, audit timestamps and database design/ERDs exist.
-- [x] A real PostgreSQL test passed: migrations, constraints, concurrent reservation, replay/idempotency, rollback/release and email replay concurrency in an isolated schema.
-- [ ] PARTIAL — Add equivalent integrity/transaction evidence for the other components; current database test coverage is strongest around inventory and authentication.
+**Current automated results:** 105 ASP.NET passed (1 PostgreSQL integration test skipped), 63 Python passed, 47 React passed, 20 Flutter passed.
 
-### React and Flutter — pages 5–7
+**Still absent by design (no-paid-service decision):** live LLM reasoning and generative RAG.
 
-- [x] React routing, role navigation, forms, staff approval and equipment operations are implemented; 32 tests passed.
-- [x] Flutter homeowner/technician screens, authenticated API access, token storage and reusable widgets are implemented; 16 tests passed.
-- [x] Distinct purposes: React emphasizes staff work; Flutter emphasizes homeowner updates and field work.
-- [x] Mobile location and camera/gallery integrations are implemented.
-- [ ] UNVERIFIED — Physical-device permissions, camera and GPS were not tested in this audit. Edge cannot prove native-device behaviour.
-- [ ] PARTIAL — A debug Android APK exists. Rebuild using the final API URL and verify the exact submitted APK on a clean device.
-- [ ] PARTIAL — The common API workflow passed end to end, but this run used an HTTP script. Record a continuous Flutter → React approval → Flutter status scenario with the same survey ID.
-- [ ] UNVERIFIED — Exhaustive mobile navigation/error-state, keyboard, screen-reader and contrast testing across all screens.
+> Deadline note: the assignment PDF states **30 September 2026, 23:50**. Confirm submission status or an extension with your lecturer immediately. Evaluator access is required through **21 October 2026**.
 
-### Agentic acceptance — page 6
+The assignment requires at least four distinct agents and at least one complete assessed agentic workflow (page 6). A standard group also needs four primary business components.
 
-- [x] Four different domain specialists: SolarSizingAgent, GridComplianceAgent, SafetyGuardrailAgent and EquipmentPricingAgent; PlannerAgent is an additional coordinator.
-- [x] Domain agents have identifiable responsibilities and input/output validation boundaries in `agentic-ai/app/agents`, `schemas` and `validators`.
-- [x] Typed specialist/coordinator contracts, per-agent tool permissions and participation evidence are implemented and documented.
-- [x] A domain objective can enter the workflow; the diagnostic route and sizing request now preserve it.
-- [x] PlannerAgent classifies reviewed objectives and creates structured step objects with dependencies, required inputs, tool permissions, high-impact markers and state. Selection is deterministic and must not be presented as live LLM reasoning.
-- [x] Specialist stages execute in the business process. Sizing, safety and pricing use LangGraph; compliance is a procedural pipeline.
-- [x] Pricing calls a real allowlisted USD/LKR tool with currency/rate/freshness validation, timeout, caching and structured output. No agent can directly mutate stock.
-- [x] Deterministic sizing, compliance, safety, price and availability checks run before outputs/actions are accepted.
-- [x] Proposals pause for authorized engineer approval; approval/rejection/revision and audit records exist. Homeowner approval was rejected live.
-- [x] Results and approvals persist in PostgreSQL and appear in an authorized overview.
-- [x] Canonical serialized workflow state, current step, approval status and retry count persist in AgentWorkflow and can be resumed through authenticated endpoints.
-- [x] Correlated trace/span/tool fields persist for structured workflow events. Zero-duration human transition events represent recorded decisions rather than model latency.
-- [x] Tested failures include invalid inputs, unsafe results, stale pricing, downstream errors and unauthorized actions. Internal endpoint authentication is enforced.
-- [ ] PARTIAL — Inert catalog-instruction text is tested; extend the golden evaluation to objective abuse, tool timeouts/rate limits, retry bounds and interrupted-run recovery.
-- [ ] PARTIAL — Strong deterministic agentic workflow evidence now exists, but live LLM reasoning/generative RAG remain absent. Confirm the lecturer's interpretation before claiming full agentic marks.
+---
 
-### Testing, CI, security and submission — pages 8–17
+## 2. Requirements Checklist
 
-- [x] Fresh results: **95 backend, 40 Python, 32 React and 16 Flutter tests passed**. Zero backend tests skipped; PostgreSQL was exercised.
-- [x] Fresh live local workflow passed: sizing → inspection → compliance → safety → engineer approval → pricing → reservation/release.
-- [x] Live negative checks: homeowner approval forbidden, repeated reservation idempotent, reservation after release rejected.
-- [x] A limited performance sample records 20 report requests at concurrency 5 with statuses and timings in the evidence JSON.
-- [ ] PARTIAL — Add separate database and agent/tool latency, concurrent-write and failure-rate evidence. This small report sample is not a capacity benchmark.
-- [x] Backend CI configuration now covers every push and every PR to main without path filters. Other component workflows exist.
-- [ ] UNVERIFIED — GitHub has not run these local changes; no commit or push was made. Keep real green CI evidence after you choose to push.
-- [ ] TODO — Four-person ownership, regular contributions, issues, PR reviews and board evidence. The user says the work so far is theirs alone.
-- [x] README, API/architecture/database documents and six ADRs exist. Agent documentation was corrected to match the implementation.
-- [ ] PARTIAL — Final documentation needs current setup verification, agent-state schema justification, URLs and individual evidence. Older documents may need further alignment.
-- [x] Managed PostgreSQL is reachable and tested; credentials were not copied into this report.
-- [ ] UNVERIFIED — Cloud database least privilege, backups and evaluator-access settings were not audited.
-- [ ] TODO — Public ASP.NET health/Swagger and React URLs. Localhost does not meet deployment evidence requirements.
-- [ ] PARTIAL — Local AI operation is allowed on page 9; final startup and evaluator instructions need clean-machine verification.
-- [ ] PARTIAL — Durable Cloudinary storage is implemented for hosted uploads, with provider-neutral URLs retained in Neon. Authorized/private image delivery is still required before accepting real bills or property photos; use synthetic demonstration images meanwhile.
-- [ ] TODO — One consolidated PDF with group report, four individual reports, evidence and references.
-- [ ] TODO — Actual student AI-use logs, student-written reflections and signed declarations. `docs/AI-USAGE.md` is a draft, not four individuals' evidence.
-- [ ] TODO — Accessible ten-minute demo video; the user confirmed none exists yet.
-- [ ] TODO — Final naming, links and evaluator access through 21 October 2026. The PDF states a deadline of 30 September 2026, 23:50.
-- [ ] TODO — Each member must explain, test, modify and debug their contribution in the viva; naming existing code does not establish ownership.
+### Platform and business logic (pages 2–5)
 
-## Proposed Member 1–4 allocation
+- ✅ ASP.NET Core API, PostgreSQL/EF Core/Npgsql, React and Flutter implemented and integrated.
+- ✅ Both clients use ASP.NET as the gateway; Python is internal only.
+- ✅ Five roles: homeowner, field technician, senior engineer, inventory officer, administrator.
+- ✅ Four business components: customer assessment; field operations/compliance; engineering proposals/approval; inventory/pricing.
+- ✅ Each component has at least four meaningful API routes plus non-CRUD operations (`SurveysController`, `FieldJobsController`/`TechnicianController`, `ProposalsController`, `InventoryController`).
+- ✅ Services, DTOs, DI, async, validation, exception handling, JWT/password hashing, CORS, health and Swagger.
+- ✅ CRUD and controlled lifecycle operations (workflow transitions instead of destructive deletes for audited records).
+- 🟡 Search/filter/sort/pagination/reporting exist, but usability across every role and list is not exhaustively verified.
+- ✅ Entities, relationships, migrations, indexes/constraints, seeds, audit timestamps and ERDs.
+- ✅ Real PostgreSQL test passed: migrations, constraints, concurrent reservation, replay/idempotency, rollback/release, email replay concurrency (isolated schema).
+- 🟡 Add equivalent integrity/transaction evidence for the other components. Database test coverage is strongest for inventory and authentication.
 
-These are **future responsibilities**, not claims about authorship. Every member needs genuine work in API, database, React, Flutter, testing, Git and documentation, plus their distinct agent. Do not divide the team into backend-only, web-only, mobile-only and testing-only roles.
+### React and Flutter (pages 5–7)
 
-### Member 1 — Customer assessment and sizing
+- ✅ React: routing, role navigation, forms, staff approval, equipment operations.
+- ✅ Flutter: homeowner/technician screens, authenticated API access, token storage, reusable widgets.
+- ✅ Distinct purposes: React for staff work; Flutter for homeowner updates and field work.
+- ✅ Mobile location and camera/gallery integrations implemented.
+- ❓ Physical-device permissions, camera and GPS not tested.
+- 🟡 A debug Android APK exists. Rebuild with the final API URL and verify the exact submitted APK on a clean device.
+- 🟡 Common API workflow passed end to end, but via an HTTP script. Record a continuous Flutter → React approval → Flutter status scenario with the **same survey ID**.
+- ❓ Exhaustive mobile navigation/error-state, keyboard, screen-reader and contrast testing.
 
-Own survey/profile APIs; CustomerProfile/SolarSurvey/workflow records; web survey screens; Flutter survey/photo/status screens; SolarSizingAgent and coordination-plan improvements. Implement structured plan steps with objective validation, dependencies and allowed tools. Add regression tests across these layers and real PR evidence. Explain usage input → preliminary calculation → validation → durable result.
+### Agentic acceptance (page 6)
 
-### Member 2 — Field operations and compliance
+- ✅ Four domain specialists: **SolarSizingAgent, GridComplianceAgent, SafetyGuardrailAgent, EquipmentPricingAgent**; PlannerAgent is an additional coordinator.
+- ✅ Identifiable responsibilities and input/output validation boundaries (`agentic-ai/app/agents`, schemas, validators).
+- ✅ Typed contracts, per-agent tool permissions and participation evidence.
+- ✅ A domain objective can enter the workflow and is preserved through sizing.
+- ✅ PlannerAgent classifies reviewed objectives and creates structured steps (dependencies, required inputs, tool permissions, high-impact markers, state). Selection is deterministic; do **not** present it as live LLM reasoning.
+- ✅ Specialist stages run in the business process. Sizing, safety and pricing use LangGraph; compliance is a procedural pipeline.
+- ✅ Pricing calls a real allowlisted USD/LKR tool with currency/rate/freshness validation, timeout, caching and structured output. No agent can mutate stock.
+- ✅ Deterministic sizing, compliance, safety, price and availability checks run before outputs/actions are accepted.
+- ✅ Proposals pause for authorized engineer approval; approval/rejection/revision and audit records exist. Homeowner approval was rejected live.
+- ✅ Results and approvals persist in PostgreSQL and appear in an authorized overview.
+- ✅ Canonical workflow state, current step, approval status and retry count persist in `AgentWorkflow` and resume through authenticated endpoints.
+- ✅ Correlated trace/span/tool fields persist. Zero-duration human transition events represent recorded decisions, not model latency.
+- ✅ Tested failures: invalid inputs, unsafe results, stale pricing, downstream errors, unauthorized actions. Internal endpoint authentication enforced.
+- 🟡 Extend golden evaluation to objective abuse, tool timeouts/rate limits, retry bounds and interrupted-run recovery.
+- 🟡 Strong deterministic evidence exists, but live LLM reasoning and generative RAG are absent. **Confirm the lecturer's interpretation before claiming full agentic marks.**
 
-Own assignment/check-in/inspection/telemetry APIs; FieldJob/SiteInspection/SiteTelemetry/ComplianceAssessment records; React dispatch/review screens; Flutter technician screens; GridComplianceAgent. Improve missing/out-of-range input handling, execution traces and permission-denial UX. Supply real GPS/photo device evidence and database/API/agent/UI tests. Explain why screening is not utility certification.
+### Testing, CI, security and submission (pages 8–17)
 
-### Member 3 — Engineering proposals and approval
+- ✅ Fresh results (15 Sep run): 95 backend, 40 Python, 32 React, 16 Flutter. PostgreSQL exercised. *(Superseded by the 28 Sep counts above.)*
+- ✅ Live local workflow passed: sizing → inspection → compliance → safety → engineer approval → pricing → reservation/release.
+- ✅ Live negative checks: homeowner approval forbidden, repeated reservation idempotent, reservation after release rejected.
+- ✅ Limited performance sample: 20 report requests at concurrency 5 (not a capacity benchmark).
+- 🟡 Add separate database and agent/tool latency, concurrent-write and failure-rate evidence.
+- ✅ Backend CI covers every push and PR to `main` without path filters. Other component workflows exist.
+- ❓ GitHub has not run these local changes (no commit or push). Keep green CI evidence after you push.
+- ⬜ Four-person ownership, regular contributions, issues, PR reviews, board evidence. The work so far is yours alone.
+- ✅ README, API/architecture/database docs and ADRs exist (ADR-007 added later). Agent documentation corrected.
+- 🟡 Final documentation needs current setup verification, agent-state schema justification, URLs and individual evidence.
+- ✅ Managed PostgreSQL reachable and tested (credentials not recorded).
+- ❓ Cloud database least privilege, backups and evaluator-access settings not audited.
+- ⬜ **Public** ASP.NET health/Swagger and React URLs. Localhost does not count.
+- 🟡 Local AI operation is allowed (page 9); startup and evaluator instructions need clean-machine verification.
+- 🟡 Durable Cloudinary storage implemented, but authorized/private image delivery is still required. **Use synthetic images only** until fixed.
+- ⬜ One consolidated PDF: group report, four individual reports, evidence, references.
+- ⬜ Real student AI-use logs, reflections and signed declarations (`docs/AI-USAGE.md` is only a draft).
+- ⬜ Accessible ten-minute demo video (none exists yet).
+- ⬜ Final naming, links and evaluator access through 21 October 2026.
+- ⬜ Each member must explain, test, modify and debug their own contribution in the viva.
 
-Own proposal/create/approve/reject/revise APIs; proposal/approval/lifecycle records; React engineer workspace; Flutter proposal history; SafetyGuardrailAgent. Strengthen interrupted-run/revision recovery and audit presentation. Test unauthorized, concurrent and stale decisions. Explain why server checks and the authorized engineer determine approval, not the agent.
+---
 
-### Member 4 — Equipment pricing and inventory
+## 3. Proposed Member Allocation
 
-Own catalog/supplier/quote/reserve/release APIs; inventory/quote/reservation records; React inventory/pricing screens; Flutter equipment status; EquipmentPricingAgent. Improve measured tool traces, timeout/rate-limit tests and quote recovery. Explain exchange validation, stock rechecks, transaction rollback and idempotency. Provide real cross-layer changes and tests.
+> These are **future** responsibilities, not claims about authorship. Each member needs genuine work across API, database, React, Flutter, testing, Git and documentation, plus their own agent. Do not split into backend-only, web-only, mobile-only or testing-only roles.
 
-All four should review another member's PR, document their own work, run the integrated scenario and prepare a small viva change/debugging example. Preserve actual Git history; do not backdate or fabricate contributions.
+| Member | Component | Agent | Focus |
+|---|---|---|---|
+| **1** | Customer assessment and sizing | SolarSizingAgent | Survey/profile APIs, `CustomerProfile`/`SolarSurvey` records, web survey screens, Flutter survey/photo/status. Structured plan steps with objective validation, dependencies, allowed tools. |
+| **2** | Field operations and compliance | GridComplianceAgent | Assignment/check-in/inspection/telemetry APIs, `FieldJob`/`SiteInspection`/`ComplianceAssessment`, React dispatch/review, Flutter technician screens. Missing/out-of-range input handling, traces, real GPS/photo evidence. Explain why screening is not utility certification. |
+| **3** | Engineering proposals and approval | SafetyGuardrailAgent | Proposal create/approve/reject/revise APIs, React engineer workspace, Flutter proposal history. Interrupted-run/revision recovery, audit presentation, unauthorized/concurrent/stale decision tests. Explain why server checks and the engineer decide approval, not the agent. |
+| **4** | Equipment pricing and inventory | EquipmentPricingAgent | Catalog/supplier/quote/reserve/release APIs, React inventory/pricing, Flutter equipment status. Tool traces, timeout/rate-limit tests, quote recovery. Explain exchange validation, stock rechecks, rollback, idempotency. |
 
-## How the process connects
+**All four should:** review another member's PR, document their own work, run the integrated scenario, and prepare a small viva change/debugging example. Preserve real Git history. Do not backdate or fabricate contributions.
 
-1. A homeowner submits usage, roof details and photos in Flutter or React. ASP.NET checks identity/ownership and stores the survey in PostgreSQL.
-2. ASP.NET calls internal Python using its server-held key. PlannerAgent lists the steps; SolarSizingAgent calculates a preliminary system; an independent validator checks it. ASP.NET stores the outcome/logs.
-3. An engineer assigns field work. A technician submits measurements, normally from Flutter. GridComplianceAgent screens them and another validator checks the result.
-4. Proposal creation invokes SafetyGuardrailAgent and validation. It remains pending until an authorized engineer approves, rejects or requests revision in React. The agent cannot approve.
-5. After approval, inventory staff request pricing. The Python graph combines catalog selection and a real USD/LKR rate, then checks prices and availability.
-6. Staff explicitly reserve stock. ASP.NET rechecks approval, permissions and quantities in a PostgreSQL transaction. The homeowner reads updated status using the same API.
+---
 
-This is a request-driven, multi-stage process with human pauses. The four specialist workflows are **sizing, compliance, safety review and equipment pricing**. `/api/agent-workflows/test` exercises sizing only, not all four.
+## 4. How the Process Connects
 
-## Highest-value work for the rubric
+1. **Homeowner** submits usage, roof details and photos in Flutter or React. ASP.NET checks identity/ownership and stores the survey in PostgreSQL.
+2. ASP.NET calls internal Python with a server-held key. **PlannerAgent** lists steps, **SolarSizingAgent** calculates a preliminary system, an independent validator checks it, and ASP.NET stores the outcome and logs.
+3. An **engineer assigns** field work. A **technician** submits measurements (normally from Flutter). **GridComplianceAgent** screens them and another validator checks the result.
+4. Proposal creation invokes **SafetyGuardrailAgent** and validation. It stays pending until an **authorized engineer** approves, rejects or requests revision in React. The agent cannot approve.
+5. After approval, **inventory staff** request pricing. The Python graph combines catalog selection with a real USD/LKR rate, then checks prices and availability.
+6. Staff explicitly **reserve stock**. ASP.NET rechecks approval, permissions and quantities in a PostgreSQL transaction. The homeowner sees the updated status through the same API.
 
-The rubric gives **30 group marks and 70 individual marks**. Group: business logic 10, integration/agent orchestration/state 10, documentation/deployment 10. Individual: API 10, database 10, React 10, Flutter 10, agent contribution 12, integration/security 10, testing/CI/Git 8. A predicted grade would be misleading without deployment, ownership and viva evidence.
+This is a request-driven, multi-stage process with human pauses. `/api/agent-workflows/test` exercises sizing only, not all four specialists.
 
-1. **Agree genuine ownership now.** Create forward-looking issues and have each member implement meaningful cross-layer improvements. This affects the 70 individual marks.
-2. **Strengthen agent acceptance.** Add objective-sensitive structured plans, consistent correlated traces and recovery. Keep authorization, calculations and stock changes deterministic. Justify the runtime in the ADR; no LLM currently runs.
-3. **Deploy and verify access.** Provide public API/Swagger/health and React links plus a tested APK. Secure uploads before using real documents.
-4. **Record a continuous golden scenario.** Flutter start → persisted state and all four specialists → React approval → Flutter status for the same survey. Include an unauthorized attempt and one safe failure. Add agent/tool/database performance evidence.
-5. **Finish evidence and rehearsal.** Consolidated report, genuine individual sections, ADRs, dated AI logs, personal reflections/signatures, video and green CI links. Every member must explain and modify their own contribution.
+---
 
-## Fixes and evidence from this audit
+## 5. Marks Breakdown
 
-- Reproduced Python `/workflow/test` HTTP 500: dictionary logs violated its legacy string-log contract. Fixed serialization and added an endpoint regression test.
-- Fixed ASP.NET forwarding: camelCase customer/input fields now map explicitly to Python snake_case; backend contract tests cover it.
-- Preserved objective through sizing and forwarded the persisted survey objective. Tested non-default consumption.
-- Empty downstream diagnostic responses now return safe failure instead of misleading completion; tested both outcomes.
+**Total: 100** (30 group + 70 individual)
+
+| Group (30) | Marks | Individual (70) | Marks |
+|---|---|---|---|
+| Business logic | 10 | API | 10 |
+| Integration, agent orchestration, state | 10 | Database | 10 |
+| Documentation and deployment | 10 | React | 10 |
+| | | Flutter | 10 |
+| | | Agent contribution | 12 |
+| | | Integration and security | 10 |
+| | | Testing, CI, Git | 8 |
+
+A predicted grade would be misleading without deployment, ownership and viva evidence.
+
+---
+
+## 6. Highest-Value Work (in priority order)
+
+1. **Confirm the deadline / extension** with your lecturer (30 September 23:50 has passed).
+2. **Agree genuine ownership now.** Create forward-looking issues; each member implements meaningful cross-layer improvements. This affects the 70 individual marks.
+3. **Strengthen agent acceptance.** Add objective-abuse, timeout/rate-limit, retry-bound and interrupted-run tests. Keep authorization, calculations and stock changes deterministic. Justify the runtime in the ADR (no LLM currently runs).
+4. **Deploy and verify access.** Public API/Swagger/health and React links, plus a tested APK. Secure uploads before using real documents.
+5. **Record one continuous golden scenario.** Flutter start → persisted state and all four specialists → React approval → Flutter status, same survey ID. Include an unauthorized attempt and one safe failure. Add agent/tool/database performance evidence.
+6. **Finish evidence and rehearsal.** Consolidated PDF, individual sections, ADRs, dated AI logs, personal reflections/signatures, video, green CI links. Every member must explain and modify their own contribution.
+
+---
+
+## 7. Fixes and Evidence from the First Audit
+
+- Reproduced a Python `/workflow/test` HTTP 500 (dictionary logs violated a legacy string-log contract). Fixed serialization and added a regression test.
+- Fixed ASP.NET forwarding: camelCase customer/input fields now map explicitly to Python snake_case; backend contract tests added.
+- Preserved the objective through sizing and forwarded the persisted survey objective. Tested with non-default consumption.
+- Empty downstream diagnostic responses now return a safe failure instead of a misleading completion.
 - Added the omitted SolarSizingAgent to the health agent list.
-- Corrected backend CI triggers and extended the live runner to verify the repaired cross-service diagnostic contract.
+- Corrected backend CI triggers; extended the live runner to verify the repaired cross-service contract.
+- Fresh evidence JSON records statuses/durations, workflow output, approval history, pricing and a small concurrency sample (no tokens or connection strings).
 
-Fresh evidence: [live workflow JSON](../testing/assignment-audit-live-2026-09-15.json). It records statuses/durations, workflow output, approval history, pricing and a small concurrency sample without tokens or connection strings.
+The script leaves labelled synthetic demo records for inspection and releases its reservation. The audit did **not** send OTP email, test a physical device, deploy, record video, commit or push.
 
-The script leaves labelled synthetic demo records for inspection and releases its reservation. This audit did not send OTP email, test a physical device, deploy, record video, commit or push.
+---
+
+## 8. Related Documents
+
+- English lecture audit, Sinhala lecture audit and bilingual presentation report (19 September 2026) distinguish deterministic specialists from LLM agents and record their own verification scope.
+- Dated test results in older sections are historical evidence, not fresh runs.

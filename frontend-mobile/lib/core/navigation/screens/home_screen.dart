@@ -7,6 +7,7 @@ import 'package:smart_solar_mobile/core/api/api_service.dart';
 import 'package:smart_solar_mobile/core/theme/solar_theme.dart';
 import 'package:smart_solar_mobile/core/utils/constants.dart';
 import 'package:smart_solar_mobile/core/widgets/solar_brand.dart';
+import 'package:smart_solar_mobile/core/widgets/solar_home_icon.dart';
 import 'package:smart_solar_mobile/core/navigation/screens/login_screen.dart';
 import 'package:smart_solar_mobile/core/widgets/staff_dashboard.dart';
 import 'package:smart_solar_mobile/core/chat/screens/chat_inbox_screen.dart';
@@ -910,7 +911,8 @@ class _BottomNav extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _NavItem(
-                      icon: Icons.dashboard_rounded,
+                      icon: Icons.solar_power_rounded,
+                      solarHome: true,
                       label: 'Home',
                       selected: selectedIndex == 0,
                       onTap: onDashboard),
@@ -974,12 +976,14 @@ class _BottomNav extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
+  final bool solarHome;
   final String label;
   final bool selected;
   final int badgeCount;
   final VoidCallback? onTap;
   const _NavItem(
       {required this.icon,
+      this.solarHome = false,
       required this.label,
       this.selected = false,
       this.badgeCount = 0,
@@ -1001,9 +1005,11 @@ class _NavItem extends StatelessWidget {
                     isLabelVisible: badgeCount > 0,
                     label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
                     backgroundColor: SolarColors.error,
-                    child: Icon(icon,
-                        color: selected ? SolarColors.primary : _muted,
-                        size: 21),
+                    child: solarHome
+                        ? SolarHomeIcon(selected: selected)
+                        : Icon(icon,
+                            color: selected ? SolarColors.primary : _muted,
+                            size: 21),
                   ),
                   const SizedBox(height: 4),
                   Text(label,
