@@ -56,6 +56,7 @@ namespace SolarPlatform.Api.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ReadAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
+                
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SupportMessages", x => x.Id);

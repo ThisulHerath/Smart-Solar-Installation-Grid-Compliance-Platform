@@ -739,6 +739,7 @@ namespace SolarPlatform.Api.Migrations
                             Name = "ADMINISTRATOR",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
@@ -747,6 +748,7 @@ namespace SolarPlatform.Api.Migrations
                             Name = "SENIOR_ENGINEER",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
@@ -755,6 +757,7 @@ namespace SolarPlatform.Api.Migrations
                             Name = "FIELD_TECHNICIAN",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
@@ -763,6 +766,7 @@ namespace SolarPlatform.Api.Migrations
                             Name = "HOMEOWNER",
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("55555555-5555-5555-5555-555555555555"),
@@ -1103,6 +1107,7 @@ namespace SolarPlatform.Api.Migrations
                             SecurityVersion = 0,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -1115,6 +1120,7 @@ namespace SolarPlatform.Api.Migrations
                             SecurityVersion = 0,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
@@ -1127,6 +1133,7 @@ namespace SolarPlatform.Api.Migrations
                             SecurityVersion = 0,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
@@ -1139,6 +1146,7 @@ namespace SolarPlatform.Api.Migrations
                             SecurityVersion = 0,
                             UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
                         },
+
                         new
                         {
                             Id = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
@@ -1173,21 +1181,25 @@ namespace SolarPlatform.Api.Migrations
                             UserId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111")
                         },
+
                         new
                         {
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222")
                         },
+
                         new
                         {
                             UserId = new Guid("cccccccc-cccc-cccc-cccc-cccccccccccc"),
                             RoleId = new Guid("33333333-3333-3333-3333-333333333333")
                         },
+
                         new
                         {
                             UserId = new Guid("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                             RoleId = new Guid("44444444-4444-4444-4444-444444444444")
                         },
+                        
                         new
                         {
                             UserId = new Guid("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),

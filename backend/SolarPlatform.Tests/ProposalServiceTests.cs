@@ -72,6 +72,7 @@ public class ProposalServiceTests
             ResultJson = "{\"recommended_kw\":12.5,\"estimated_panel_count\":31,\"estimated_inverter_kw\":12.5}",
             CompletedAt = DateTime.UtcNow
         };
+        
         sizingWorkflow.ExecutionLogs.Add(new AgentExecutionLog
         {
             AgentName = "SolarSizingAgent",
@@ -80,9 +81,11 @@ public class ProposalServiceTests
             StartedAt = DateTime.UtcNow,
             CompletedAt = DateTime.UtcNow
         });
+
         _db.AgentWorkflows.Add(sizingWorkflow);
         var job = new FieldJob { SolarSurveyId = survey.Id, TechnicianId = _engineerId };
         var inspection = new SiteInspection { FieldJobId = job.Id };
+
         _db.AddRange(job, inspection, new ComplianceAssessment {
             SiteInspectionId = inspection.Id, ComplianceStatus = "COMPLIANT", RiskLevel = "LOW", GridCompliant = true });
         _db.SaveChanges();
@@ -100,6 +103,7 @@ public class ProposalServiceTests
                 Recommendations = new List<string> { "Senior engineer review recommended" },
                 RecommendationSummary = "Guardrail evaluation complete",
                 ExecutionLogs = new List<Dictionary<string, object>>
+                
                 {
                     new() { ["agent_name"] = "SafetyGuardrailAgent", ["status"] = "completed" }
                 }

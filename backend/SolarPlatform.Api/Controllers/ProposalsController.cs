@@ -53,11 +53,13 @@ public class ProposalsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateProposalRequestDto request, CancellationToken ct)
     {
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
+       
         try
         {
             var proposal = await _service.CreateAsync(request.SolarSurveyId, UserId(), request.Notes, ct);
             return CreatedAtAction(nameof(Get), new { id = proposal.Id }, proposal);
         }
+
         catch (ArgumentException ex) { return NotFound(new { message = ex.Message }); }
         catch (UnauthorizedAccessException) { return Forbid(); }
     }
@@ -71,6 +73,7 @@ public class ProposalsController : ControllerBase
             var proposal = await _service.ApproveAsync(id, UserId(), request.Comment, ct);
             return Ok(proposal);
         }
+
         catch (ArgumentException ex) { return NotFound(new { message = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
     }
@@ -81,11 +84,13 @@ public class ProposalsController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(request.Comment))
             return BadRequest(new { message = "A comment is required when rejecting a proposal." });
+       
         try
         {
             var proposal = await _service.RejectAsync(id, UserId(), request.Comment, ct);
             return Ok(proposal);
         }
+
         catch (ArgumentException ex) { return NotFound(new { message = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
     }
@@ -96,16 +101,19 @@ public class ProposalsController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(request.Comment))
             return BadRequest(new { message = "A comment is required when requesting a revision." });
+        
         try
         {
             var proposal = await _service.RequestRevisionAsync(id, UserId(), request.Comment, ct);
             return Ok(proposal);
         }
+
         catch (ArgumentException ex) { return NotFound(new { message = ex.Message }); }
         catch (InvalidOperationException ex) { return Conflict(new { message = ex.Message }); }
     }
 
     private Guid UserId() =>
+        
         Guid.TryParse(
             User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"),
             out var id)

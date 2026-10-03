@@ -8,10 +8,12 @@ from app.workflow.proposal_workflow import run_guardrail_workflow
 from app.agents.proposal_validator import DeterministicProposalValidator
 
 class TestProposalWorkflow(unittest.TestCase):
+
     def test_unknown_compliance_is_not_reported_as_safe(self):
         result = run_guardrail_workflow({"recommended_kw": 5, "panel_count": 12,
             "inverter_size_kw": 5, "estimated_cost_lkr": 1710000,
             "grid_compliance_status": "UNKNOWN", "risk_level": "UNKNOWN"})
+        
         self.assertNotEqual(result.safety_status, "SAFE")
         self.assertTrue(result.requires_approval)
         self.assertFalse(any("is acceptable" in text for text in result.recommendations))
@@ -21,6 +23,7 @@ class TestProposalWorkflow(unittest.TestCase):
 
     def test_high_capacity_requires_approval(self):
         """Proposals with recommended kW > 10.0 kW automatically require human approval."""
+        
         payload = {
             "recommended_kw": 12.5,
             "panel_count": 30,
@@ -39,6 +42,7 @@ class TestProposalWorkflow(unittest.TestCase):
 
     def test_non_compliant_grid_requires_approval(self):
         """Proposals with NON_COMPLIANT grid status require senior engineer review."""
+        
         payload = {
             "recommended_kw": 6.0,
             "panel_count": 15,
@@ -57,6 +61,7 @@ class TestProposalWorkflow(unittest.TestCase):
 
     def test_low_risk_small_capacity_safe(self):
         """Proposals with kW <= 10.0 and COMPLIANT status are marked SAFE."""
+        
         payload = {
             "recommended_kw": 5.0,
             "panel_count": 12,
@@ -74,6 +79,7 @@ class TestProposalWorkflow(unittest.TestCase):
 
     def test_validator_overrides_ai_bypass_attempt(self):
         """If AI mistakenly evaluates requires_approval=False for a 15kW system, deterministic validator forces requires_approval=True."""
+        
         validated = self.validator.validate(
             recommended_kw=15.0,
             panel_count=36,

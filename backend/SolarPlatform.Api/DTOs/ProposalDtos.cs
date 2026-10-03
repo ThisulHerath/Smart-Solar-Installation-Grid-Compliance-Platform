@@ -6,6 +6,8 @@ namespace SolarPlatform.Api.DTOs;
 
 public record ApprovalAuditLogDto(
     Guid Id,
+
+    // String form of ApprovalDecision (Approved / Rejected / RevisionRequested).
     string Decision,
     string? Comment,
     Guid UserId,
@@ -16,6 +18,8 @@ public record ApprovalAuditLogDto(
 public record ProposalLifecycleAuditEventDto(
     Guid Id,
     string Event,
+
+    // Optional free-text context for this event, e.g. the comment that accompanied a revision request.
     string? Details,
     string? WorkflowId,
     DateTime Timestamp
@@ -28,10 +32,14 @@ public record EngineeringProposalSummaryDto(
     decimal RecommendedKw,
     int PanelCount,
     decimal InverterSizeKw,
+
+    // Preliminary estimate only; see EquipmentQuote for the live-priced figure once pricing has run.
     decimal EstimatedCostLkr,
     string GridComplianceStatus,
     string RiskLevel,
     string SafetyStatus,
+
+    // String form of ProposalStatus.
     string ProposalStatus,
     bool RequiresApproval,
     DateTime CreatedAt,
@@ -47,10 +55,14 @@ public record EngineeringProposalDto(
     decimal RecommendedKw,
     int PanelCount,
     decimal InverterSizeKw,
+
+    // Preliminary estimate only; see EquipmentQuote for the live-priced figure once pricing has run.
     decimal EstimatedCostLkr,
     string GridComplianceStatus,
     string RiskLevel,
     string SafetyStatus,
+
+     // String form of ProposalStatus.
     string ProposalStatus,
     bool RequiresApproval,
     string? RecommendationSummary,
@@ -88,6 +100,7 @@ public record ReviseProposalRequestDto(
 
 // ─── Validation Result ────────────────────────────────────────────────────────
 
+/// A DTO representing the result of proposal validation.
 public record ProposalValidationResultDto(
     [property: JsonPropertyName("valid")] bool Valid,
     [property: JsonPropertyName("requiresApproval")] bool RequiresApproval,

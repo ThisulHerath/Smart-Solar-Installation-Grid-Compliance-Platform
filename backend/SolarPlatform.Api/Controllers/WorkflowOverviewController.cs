@@ -19,6 +19,7 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         var staff = User.IsInRole(RoleConstants.Administrator) || User.IsInRole(RoleConstants.SeniorEngineer);
         var survey = await db.SolarSurveys.AsNoTracking().Include(x => x.Workflows).ThenInclude(x => x.ExecutionLogs)
             .SingleOrDefaultAsync(x => x.Id == id && (staff || x.Customer.UserId == actor), ct);
+        
         if (survey == null) return NotFound();
         var sizing = survey.Workflows.OrderByDescending(x => x.CreatedAt).FirstOrDefault();
         var compliance = await db.ComplianceAssessments.AsNoTracking().Where(x => x.SiteInspection.FieldJob.SolarSurveyId == id).OrderByDescending(x => x.CreatedAt).FirstOrDefaultAsync(ct);
@@ -26,18 +27,22 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
         var quotes = proposal == null ? new List<EquipmentQuote>() : await db.Set<EquipmentQuote>().AsNoTracking().Where(x => x.EngineeringProposalId == proposal.Id).OrderByDescending(x => x.CreatedAt).ToListAsync(ct);
         var activeQuote = quotes.FirstOrDefault(x => x.Status == "RESERVED") ?? quotes.FirstOrDefault();
         var completed = new List<string>();
+        
         if (sizing?.Status == WorkflowStatus.Completed && sizing.ExecutionLogs.Any(x => x.AgentName == "SolarSizingAgent" && x.Status == "completed")) completed.Add("SolarSizingAgent");
         if (compliance != null &&
             !string.IsNullOrWhiteSpace(compliance.WorkflowId) &&
             !compliance.WorkflowId.StartsWith("local-comp-", StringComparison.OrdinalIgnoreCase)) completed.Add("GridComplianceAgent");
+        
         if (HasCompletedAgentTrace(proposal?.GuardrailResultJson, "SafetyGuardrailAgent")) completed.Add("SafetyGuardrailAgent");
         if (proposal?.ProposalStatus == ProposalStatus.Approved) completed.Add("HumanApproval");
         if (activeQuote?.Status is "VALIDATED" or "RESERVED" or "RELEASED") completed.Add("EquipmentPricingAgent");
         if (activeQuote?.Status == "RESERVED") completed.Add("InventoryReservation");
+        
         return Ok(new {
             workflowId = sizing?.WorkflowId ?? survey.Id.ToString(), objective = sizing?.Objective ?? "Assess rooftop solar suitability and prepare an approved equipment plan",
             plan = ReadJson(sizing?.PlanJson), completedSteps = completed,
             currentStep = sizing?.CurrentStep,
+
             structuredPlan = ReadProperty(sizing?.StateJson, "structured_plan"),
             status = activeQuote?.Status == "RESERVED" ? "COMPLETE" : proposal?.ProposalStatus.ToString() ?? survey.SurveyStatus.ToString(),
             approvalStatus = proposal?.ProposalStatus.ToString() ?? "NOT_REQUESTED",
@@ -46,6 +51,7 @@ public class WorkflowOverviewController(AppDbContext db) : ControllerBase
             compliance = compliance == null ? null : new { compliance.ComplianceStatus, compliance.RiskLevel, compliance.ValidationStatus, compliance.ComplianceNotes },
             safety = ReadJson(proposal?.GuardrailResultJson), safetyValidation = ReadJson(proposal?.ValidationResultJson),
             equipment = quotes.Select(x => new { x.Id, x.Status, x.Error, x.CreatedAt, x.ExpiresAt, result = ReadJson(x.ResultJson) }),
+           
             errors = new[] { sizing?.ErrorMessage, activeQuote?.Error }.Where(x => !string.IsNullOrWhiteSpace(x)),
             executionLogs = sizing?.ExecutionLogs.OrderBy(x => x.StartedAt).Select(x => new { x.AgentName, x.StepName, x.Status, x.StartedAt, x.CompletedAt, x.DurationMs, x.OutputSummary, x.ErrorMessage, x.RetryCount }),
             approvalHistory = proposal?.AuditLogs.OrderBy(x => x.Timestamp).Select(x => new { x.Decision, x.Comment, x.Timestamp, x.UserId }),

@@ -43,11 +43,14 @@ public class EngineeringProposal
     /// <summary>True when deterministic rules require approval (kW > 10 or non-compliant).</summary>
     public bool RequiresApproval { get; set; }
 
+    /// <summary>UTC timestamp the proposal was first created.</summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // ── Navigation Properties ──────────────────────────────────────────────────
     public SolarSurvey SolarSurvey { get; set; } = null!;
     public ICollection<ApprovalAuditLog> AuditLogs { get; set; } = new List<ApprovalAuditLog>();
+
+    /// <summary>Ordered lifecycle events (see ProposalLifecycleEvent) used to reconstruct the proposal's full timeline, e.g. for GET /api/workflows/surveys/{id}.</summary>
     public ICollection<ProposalLifecycleAuditEvent> LifecycleEvents { get; set; } = new List<ProposalLifecycleAuditEvent>();
 }

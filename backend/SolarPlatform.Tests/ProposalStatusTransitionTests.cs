@@ -7,6 +7,7 @@ namespace SolarPlatform.Tests;
 public class ProposalStatusTransitionTests
 {
     [Theory]
+
     [InlineData(ProposalStatus.Draft, ProposalStatus.Processing)]
     [InlineData(ProposalStatus.Processing, ProposalStatus.PendingApproval)]
     [InlineData(ProposalStatus.Processing, ProposalStatus.Failed)]
@@ -22,6 +23,7 @@ public class ProposalStatusTransitionTests
     }
 
     [Theory]
+    
     [InlineData(ProposalStatus.Draft, ProposalStatus.Approved)]
     [InlineData(ProposalStatus.Draft, ProposalStatus.Rejected)]
     [InlineData(ProposalStatus.Draft, ProposalStatus.PendingApproval)]

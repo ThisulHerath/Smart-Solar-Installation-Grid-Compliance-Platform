@@ -115,6 +115,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ]),
               ),
+              
               const SizedBox(height: 14),
               Row(children: [
                 Expanded(
@@ -135,6 +136,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ]),
+
               const SizedBox(height: 22),
               const Text('Personal information',
                   style: TextStyle(
@@ -144,6 +146,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 4),
               const Text('Your account and contact details',
                   style: TextStyle(color: _profileMuted, fontSize: 10)),
+
               const SizedBox(height: 12),
               _ProfileCard(
                 child: Column(children: [
@@ -174,6 +177,7 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const AccountScreen())),
               ),
+
               const SizedBox(height: 10),
               _ProfileAction(
                 icon: Icons.support_agent_rounded,
@@ -183,10 +187,12 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const ChatInboxScreen())),
               ),
+
               const SizedBox(height: 20),
               _ProfileCard(
                 child: RecordReference(label: 'User reference', value: user.id),
               ),
+
               const SizedBox(height: 18),
               OutlinedButton.icon(
                 onPressed: () => _confirmSignOut(context, auth),
