@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smart_solar_mobile/features/assessment/models/solar_survey.dart';
@@ -325,6 +326,14 @@ class _HomeownerProjectsState extends State<_HomeownerProjects> {
           ),
         ],
       ] else ...[
+        _DashboardInsights(
+          projects: _projects,
+          totalProjects: _projects.length,
+          processingProjects: processing,
+          readyProjects: ready,
+          onCreateSurvey: _openSurveys,
+          onViewProjects: widget.onViewProjects,
+        ),
         const SizedBox(height: 22),
         const Text('Quick actions',
             style: TextStyle(
@@ -349,6 +358,438 @@ class _HomeownerProjectsState extends State<_HomeownerProjects> {
       ],
     ]);
   }
+}
+
+class _DashboardInsights extends StatelessWidget {
+  final List<SolarSurvey> projects;
+  final int totalProjects;
+  final int processingProjects;
+  final int readyProjects;
+  final VoidCallback onCreateSurvey;
+  final VoidCallback onViewProjects;
+
+  const _DashboardInsights({
+    required this.projects,
+    required this.totalProjects,
+    required this.processingProjects,
+    required this.readyProjects,
+    required this.onCreateSurvey,
+    required this.onViewProjects,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasActiveProjects = processingProjects > 0 || readyProjects > 0;
+    final title = totalProjects == 0
+        ? 'Start your first assessment'
+        : readyProjects > 0
+            ? '$readyProjects project${readyProjects == 1 ? '' : 's'} ready for review'
+            : processingProjects > 0
+                ? 'Your solar analysis is in progress'
+                : 'Create your next solar project';
+    final description = totalProjects == 0
+        ? 'Add your electricity usage, roof area and address to receive a personalised solar recommendation.'
+        : readyProjects > 0
+            ? 'Review your recommendation and continue to the engineering proposal.'
+            : processingProjects > 0
+                ? 'Your assessment is being reviewed. Follow its live status from My Projects.'
+                : 'Assess another property whenever you are ready.';
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const SizedBox(height: 20),
+      _Glass(
+        padding: const EdgeInsets.all(18),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                      colors: [SolarColors.surfaceSoft, Color(0xFFE4F3D9)]),
+                  borderRadius: BorderRadius.circular(14)),
+              child: Icon(
+                  readyProjects > 0
+                      ? Icons.task_alt_rounded
+                      : processingProjects > 0
+                          ? Icons.auto_awesome_rounded
+                          : Icons.wb_sunny_outlined,
+                  color: _gold,
+                  size: 23),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text('YOUR NEXT STEP',
+                  style: TextStyle(
+                      color: _muted,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.1)),
+            ),
+          ]),
+          const SizedBox(height: 14),
+          Text(title,
+              style: const TextStyle(
+                  color: _text, fontSize: 17, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 6),
+          Text(description,
+              style: const TextStyle(color: _muted, fontSize: 11, height: 1.5)),
+          const SizedBox(height: 15),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: hasActiveProjects ? onViewProjects : onCreateSurvey,
+              icon: Icon(
+                  hasActiveProjects
+                      ? Icons.folder_open_outlined
+                      : Icons.add_rounded,
+                  size: 18),
+              label: Text(
+                  hasActiveProjects ? 'Open my projects' : 'Create new survey'),
+              style: FilledButton.styleFrom(
+                  backgroundColor: SolarColors.primary,
+                  foregroundColor: Colors.white),
+            ),
+          ),
+        ]),
+      ),
+      const SizedBox(height: 14),
+      _ProjectProgressChart(
+          total: totalProjects,
+          processing: processingProjects,
+          ready: readyProjects),
+      const SizedBox(height: 14),
+      _EnergyUsageChart(projects: projects),
+      const SizedBox(height: 14),
+      const _Glass(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('Your solar journey',
+              style: TextStyle(
+                  color: _text, fontSize: 15, fontWeight: FontWeight.w800)),
+          SizedBox(height: 5),
+          Text('A clear view of what happens next',
+              style: TextStyle(color: _muted, fontSize: 10)),
+          SizedBox(height: 17),
+          _JourneyStep(
+              number: '1',
+              title: 'Submit survey',
+              subtitle: 'Tell us about your property and energy needs.'),
+          _JourneyLine(),
+          _JourneyStep(
+              number: '2',
+              title: 'Review recommendation',
+              subtitle: 'See the suggested system size and panel count.'),
+          _JourneyLine(),
+          _JourneyStep(
+              number: '3',
+              title: 'Continue to proposal',
+              subtitle: 'Follow engineering review and project approval.'),
+        ]),
+      ),
+    ]);
+  }
+}
+
+class _ProjectProgressChart extends StatelessWidget {
+  final int total;
+  final int processing;
+  final int ready;
+  const _ProjectProgressChart(
+      {required this.total, required this.processing, required this.ready});
+
+  @override
+  Widget build(BuildContext context) {
+    final other = math.max(0, total - processing - ready);
+    return _Glass(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Row(children: [
+          Expanded(
+              child: Text('Project progress',
+                  style: TextStyle(
+                      color: _text,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800))),
+          Icon(Icons.donut_large_rounded, color: _cyan, size: 19),
+        ]),
+        const SizedBox(height: 4),
+        const Text('Status of your submitted solar surveys',
+            style: TextStyle(color: _muted, fontSize: 10)),
+        const SizedBox(height: 18),
+        LayoutBuilder(builder: (context, constraints) {
+          final compact = constraints.maxWidth < 300;
+          final chart = SizedBox(
+            width: 116,
+            height: 116,
+            child: CustomPaint(
+              painter: _ProjectDonutPainter(
+                  total: total, processing: processing, ready: ready),
+              child: Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Text('$total',
+                      style: const TextStyle(
+                          color: _text,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w800)),
+                  const Text('PROJECTS',
+                      style: TextStyle(
+                          color: _muted,
+                          fontSize: 7,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: .8)),
+                ]),
+              ),
+            ),
+          );
+          final legend = Column(children: [
+            _ChartLegend(color: _cyan, label: 'Ready', value: ready.toString()),
+            const SizedBox(height: 11),
+            _ChartLegend(
+                color: SolarColors.warning,
+                label: 'In review',
+                value: processing.toString()),
+            const SizedBox(height: 11),
+            _ChartLegend(color: _line, label: 'Other', value: other.toString()),
+          ]);
+          if (compact) {
+            return Column(children: [
+              chart,
+              const SizedBox(height: 18),
+              legend,
+            ]);
+          }
+          return Row(children: [
+            chart,
+            const SizedBox(width: 22),
+            Expanded(child: legend),
+          ]);
+        }),
+      ]),
+    );
+  }
+}
+
+class _ChartLegend extends StatelessWidget {
+  final Color color;
+  final String label;
+  final String value;
+  const _ChartLegend(
+      {required this.color, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Container(
+            width: 9,
+            height: 9,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8),
+        Expanded(
+            child: Text(label,
+                style: const TextStyle(color: _muted, fontSize: 10))),
+        Text(value,
+            style: const TextStyle(
+                color: _text, fontSize: 11, fontWeight: FontWeight.w800)),
+      ]);
+}
+
+class _ProjectDonutPainter extends CustomPainter {
+  final int total;
+  final int processing;
+  final int ready;
+  const _ProjectDonutPainter(
+      {required this.total, required this.processing, required this.ready});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final base = Paint()
+      ..color = _line
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 12;
+    canvas.drawArc(rect.deflate(8), -.5 * math.pi, 2 * math.pi, false, base);
+    if (total <= 0) return;
+    const gap = .07;
+    var start = -.5 * math.pi;
+    void drawSection(int value, Color color) {
+      if (value <= 0) return;
+      final sweep = (2 * math.pi * value / total) - gap;
+      canvas.drawArc(
+          rect.deflate(8),
+          start,
+          math.max(.02, sweep).toDouble(),
+          false,
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 12
+            ..strokeCap = StrokeCap.round);
+      start += 2 * math.pi * value / total;
+    }
+
+    drawSection(ready, _cyan);
+    drawSection(processing, SolarColors.warning);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProjectDonutPainter oldDelegate) =>
+      oldDelegate.total != total ||
+      oldDelegate.processing != processing ||
+      oldDelegate.ready != ready;
+}
+
+class _EnergyUsageChart extends StatelessWidget {
+  final List<SolarSurvey> projects;
+  const _EnergyUsageChart({required this.projects});
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = projects.take(5).toList();
+    final values = visible.map((project) => project.monthlyKwh).toList();
+    final average =
+        values.isEmpty ? 0.0 : values.reduce((a, b) => a + b) / values.length;
+    return _Glass(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Energy profile',
+                  style: TextStyle(
+                      color: _text, fontSize: 15, fontWeight: FontWeight.w800)),
+              SizedBox(height: 4),
+              Text('Monthly usage across recent projects',
+                  style: TextStyle(color: _muted, fontSize: 10)),
+            ]),
+          ),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Text(average == 0 ? '—' : average.toStringAsFixed(0),
+                style: const TextStyle(
+                    color: _text, fontSize: 18, fontWeight: FontWeight.w800)),
+            const Text('AVG kWh',
+                style: TextStyle(
+                    color: _muted, fontSize: 7, fontWeight: FontWeight.w700)),
+          ]),
+        ]),
+        const SizedBox(height: 18),
+        if (values.isEmpty)
+          Container(
+            height: 105,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                color: _bg, borderRadius: BorderRadius.circular(13)),
+            child: const Text('Create a survey to see your energy chart',
+                style: TextStyle(color: _muted, fontSize: 10)),
+          )
+        else ...[
+          SizedBox(
+            height: 105,
+            width: double.infinity,
+            child: CustomPaint(painter: _UsageBarPainter(values)),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(values.length, (index) {
+              final projectName = visible[index].projectName.trim();
+              return Flexible(
+                child: Text(
+                    projectName.isEmpty ? 'Project ${index + 1}' : projectName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: _muted, fontSize: 8)),
+              );
+            }),
+          ),
+        ],
+      ]),
+    );
+  }
+}
+
+class _UsageBarPainter extends CustomPainter {
+  final List<double> values;
+  const _UsageBarPainter(this.values);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final grid = Paint()
+      ..color = _line
+      ..strokeWidth = 1;
+    for (var i = 0; i < 3; i++) {
+      final y = size.height * i / 2;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    }
+    final maxValue = values.fold<double>(1, math.max);
+    final slot = size.width / values.length;
+    final width = math.min(28.0, slot * .46).toDouble();
+    for (var i = 0; i < values.length; i++) {
+      final height =
+          math.max(8.0, size.height * values[i] / maxValue).toDouble();
+      final left = slot * i + (slot - width) / 2;
+      final rect = RRect.fromRectAndRadius(
+          Rect.fromLTWH(left, size.height - height, width, height),
+          const Radius.circular(7));
+      canvas.drawRRect(
+          rect,
+          Paint()
+            ..shader = const LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [_cyan, _gold]).createShader(rect.outerRect));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _UsageBarPainter oldDelegate) {
+    if (oldDelegate.values.length != values.length) return true;
+    for (var i = 0; i < values.length; i++) {
+      if (oldDelegate.values[i] != values[i]) return true;
+    }
+    return false;
+  }
+}
+
+class _JourneyStep extends StatelessWidget {
+  final String number;
+  final String title;
+  final String subtitle;
+  const _JourneyStep(
+      {required this.number, required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        CircleAvatar(
+          radius: 15,
+          backgroundColor: SolarColors.primary,
+          child: Text(number,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800)),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title,
+                style: const TextStyle(
+                    color: _text, fontSize: 12, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 2),
+            Text(subtitle, style: const TextStyle(color: _muted, fontSize: 10)),
+          ]),
+        ),
+      ]);
+}
+
+class _JourneyLine extends StatelessWidget {
+  const _JourneyLine();
+  @override
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.only(left: 14),
+        child: SizedBox(
+          height: 15,
+          child: VerticalDivider(color: _line, width: 1, thickness: 1),
+        ),
+      );
 }
 
 class _FeaturedProject extends StatelessWidget {
