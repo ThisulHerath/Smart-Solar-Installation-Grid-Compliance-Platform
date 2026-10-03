@@ -35,14 +35,18 @@ class _LocationPickerState extends State<LocationPicker> {
   final _mapController = MapController();
   bool _expanded = false;
   bool _searching = false;
+  bool _resolvingAddress = false;
+  int _reverseRequestId = 0;
   String? _message;
   List<Map<String, dynamic>> _results = [];
 
   void _select(PropertyLocation location, {String? address}) {
+    _reverseRequestId++;
     if (address != null) widget.addressController.text = address;
     widget.onChanged(location);
     setState(() {
       _expanded = true;
+      _resolvingAddress = false;
       _results = [];
       _message =
           'Location selected. Tap another point if adjustment is required.';
@@ -50,6 +54,43 @@ class _LocationPickerState extends State<LocationPicker> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _mapController.move(LatLng(location.latitude, location.longitude), 16);
     });
+  }
+
+  Future<void> _selectAndResolveAddress(PropertyLocation location,
+      {required bool currentLocation}) async {
+    final requestId = ++_reverseRequestId;
+    widget.onChanged(location);
+    setState(() {
+      _expanded = true;
+      _resolvingAddress = true;
+      _results = [];
+      _message = 'Location selected. Finding its street address…';
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mapController.move(LatLng(location.latitude, location.longitude), 16);
+    });
+
+    try {
+      final result =
+          await _api.reverseLocation(location.latitude, location.longitude);
+      if (!mounted || requestId != _reverseRequestId) return;
+      widget.addressController.text = result['displayName']?.toString() ?? '';
+      setState(() {
+        _message = currentLocation
+            ? 'Current location and property address added. Confirm the rooftop pin.'
+            : 'Map location and property address added. Tap again if adjustment is required.';
+      });
+    } catch (error) {
+      if (!mounted || requestId != _reverseRequestId) return;
+      widget.addressController.text =
+          'Pinned location (${location.latitude.toStringAsFixed(6)}, ${location.longitude.toStringAsFixed(6)})';
+      setState(() => _message =
+          'The street address could not be loaded. Coordinates were added to the address field and can be edited.');
+    } finally {
+      if (mounted && requestId == _reverseRequestId) {
+        setState(() => _resolvingAddress = false);
+      }
+    }
   }
 
   Future<void> _findAddress() async {
@@ -103,11 +144,9 @@ class _LocationPickerState extends State<LocationPicker> {
       final position = await Geolocator.getCurrentPosition(
           locationSettings:
               const LocationSettings(accuracy: LocationAccuracy.high));
-      _select(PropertyLocation(position.latitude, position.longitude));
-      if (mounted) {
-        setState(() =>
-            _message = 'Current location selected. Confirm the rooftop pin.');
-      }
+      await _selectAndResolveAddress(
+          PropertyLocation(position.latitude, position.longitude),
+          currentLocation: true);
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -117,6 +156,15 @@ class _LocationPickerState extends State<LocationPicker> {
         });
       }
     }
+  }
+
+  void _clearLocation() {
+    _reverseRequestId++;
+    widget.onChanged(null);
+    setState(() {
+      _resolvingAddress = false;
+      _message = 'Map location cleared. You can keep or edit the address.';
+    });
   }
 
   @override
@@ -138,8 +186,10 @@ class _LocationPickerState extends State<LocationPicker> {
               onPressed: widget.disabled || _searching ? null : _findAddress),
           _LocationAction(
               icon: Icons.my_location_rounded,
-              label: 'Use my location',
-              onPressed: widget.disabled ? null : _useCurrentLocation),
+              label: _resolvingAddress ? 'Adding address…' : 'Use my location',
+              onPressed: widget.disabled || _resolvingAddress
+                  ? null
+                  : _useCurrentLocation),
           _LocationAction(
               icon: Icons.map_outlined,
               label: _expanded ? 'Hide map' : 'Choose on map',
@@ -191,8 +241,7 @@ class _LocationPickerState extends State<LocationPicker> {
                   constraints:
                       const BoxConstraints(minWidth: 48, minHeight: 48),
                   tooltip: 'Clear location',
-                  onPressed:
-                      widget.disabled ? null : () => widget.onChanged(null),
+                  onPressed: widget.disabled ? null : _clearLocation,
                   icon: const Icon(Icons.close_rounded, size: 18)),
             ]),
           ),
@@ -210,8 +259,9 @@ class _LocationPickerState extends State<LocationPicker> {
                       ? const LatLng(7.8731, 80.7718)
                       : LatLng(selected.latitude, selected.longitude),
                   initialZoom: selected == null ? 8 : 16,
-                  onTap: (_, point) => _select(
-                      PropertyLocation(point.latitude, point.longitude)),
+                  onTap: (_, point) => _selectAndResolveAddress(
+                      PropertyLocation(point.latitude, point.longitude),
+                      currentLocation: false),
                 ),
                 children: [
                   TileLayer(

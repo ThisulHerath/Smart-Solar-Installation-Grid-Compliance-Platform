@@ -81,6 +81,16 @@ class ApiService {
         .toList();
   }
 
+  Future<Map<String, dynamic>> reverseLocation(
+      double latitude, double longitude) async {
+    final query = Uri(queryParameters: {
+      'latitude': latitude.toString(),
+      'longitude': longitude.toString(),
+    }).query;
+    return Map<String, dynamic>.from(
+        await get('/api/locations/reverse?$query') as Map);
+  }
+
   Future<List<ChatConversation>> getChatConversations() async {
     final response = List<dynamic>.from(await get('/api/chat/conversations'));
     return response

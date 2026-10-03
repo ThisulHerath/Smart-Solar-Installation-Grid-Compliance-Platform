@@ -8,6 +8,7 @@ namespace SolarPlatform.Api.Integrations;
 public interface IGeocodingService
 {
     Task<IReadOnlyList<LocationSearchResultDto>> SearchAsync(string query, CancellationToken cancellationToken);
+    Task<LocationSearchResultDto?> ReverseAsync(decimal latitude, decimal longitude, CancellationToken cancellationToken);
 }
 
 public sealed class NominatimGeocodingService : IGeocodingService
@@ -63,6 +64,52 @@ public sealed class NominatimGeocodingService : IGeocodingService
         {
             _logger.LogWarning(ex, "Address lookup failed for a Sri Lankan property query.");
             throw new InvalidOperationException("Address search is temporarily unavailable. You can still choose the location directly on the map.");
+        }
+        finally
+        {
+            RequestGate.Release();
+        }
+    }
+
+    public async Task<LocationSearchResultDto?> ReverseAsync(
+        decimal latitude,
+        decimal longitude,
+        CancellationToken cancellationToken)
+    {
+        var latitudeText = latitude.ToString("0.######", CultureInfo.InvariantCulture);
+        var longitudeText = longitude.ToString("0.######", CultureInfo.InvariantCulture);
+        var cacheKey = $"reverse-geocode:{latitudeText}:{longitudeText}";
+        if (_cache.TryGetValue(cacheKey, out LocationSearchResultDto? cached))
+        {
+            return cached;
+        }
+
+        await RequestGate.WaitAsync(cancellationToken);
+        try
+        {
+            var wait = TimeSpan.FromSeconds(1) - (DateTime.UtcNow - _lastRequestUtc);
+            if (wait > TimeSpan.Zero) await Task.Delay(wait, cancellationToken);
+
+            var path = $"reverse?format=jsonv2&lat={latitudeText}&lon={longitudeText}&zoom=18&addressdetails=1";
+            var response = await _httpClient.GetAsync(path, cancellationToken);
+            _lastRequestUtc = DateTime.UtcNow;
+            response.EnsureSuccessStatusCode();
+            var row = await response.Content.ReadFromJsonAsync<NominatimResult>(cancellationToken: cancellationToken);
+            var displayName = row?.DisplayName?.Trim();
+            var result = string.IsNullOrWhiteSpace(displayName)
+                ? null
+                : new LocationSearchResultDto(displayName, latitude, longitude);
+
+            if (result != null)
+            {
+                _cache.Set(cacheKey, result, TimeSpan.FromHours(12));
+            }
+            return result;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "Reverse address lookup failed for coordinates {Latitude}, {Longitude}.", latitude, longitude);
+            throw new InvalidOperationException("The address for this map point is temporarily unavailable. The selected coordinates are still saved.");
         }
         finally
         {

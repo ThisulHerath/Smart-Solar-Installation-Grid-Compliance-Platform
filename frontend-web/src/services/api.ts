@@ -172,6 +172,19 @@ class ApiService {
     return res.json();
   }
 
+  async reverseLocation(latitude: number, longitude: number, signal?: AbortSignal): Promise<LocationSearchResult> {
+    const query = new URLSearchParams({ latitude: String(latitude), longitude: String(longitude) });
+    const res = await fetch(`${API_BASE_URL}/api/locations/reverse?${query}`, {
+      headers: this.getHeaders(),
+      signal,
+    });
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}));
+      throw new Error(error.message || 'Unable to find the address for that map point.');
+    }
+    return res.json();
+  }
+
   async getTechnicians(): Promise<{ id: string; fullName: string; email: string }[]> {
     const res = await fetch(`${API_BASE_URL}/api/field-jobs/technicians`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Unable to load technicians. Please try again.');

@@ -55,4 +55,33 @@ public class LocationsControllerTests
         var unavailable = Assert.IsType<ObjectResult>(result);
         Assert.Equal(StatusCodes.Status503ServiceUnavailable, unavailable.StatusCode);
     }
+
+    [Fact]
+    public async Task Reverse_ReturnsAddressForSelectedCoordinates()
+    {
+        var service = new Mock<IGeocodingService>();
+        var expected = new LocationSearchResultDto("45 Galle Road, Colombo, Sri Lanka", 6.9271m, 79.8612m);
+        service.Setup(x => x.ReverseAsync(6.9271m, 79.8612m, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expected);
+        var controller = new LocationsController(service.Object);
+
+        var result = await controller.Reverse(6.9271m, 79.8612m, CancellationToken.None);
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        Assert.Same(expected, ok.Value);
+    }
+
+    [Theory]
+    [InlineData(91, 79)]
+    [InlineData(7, 181)]
+    public async Task Reverse_RejectsInvalidCoordinates(decimal latitude, decimal longitude)
+    {
+        var service = new Mock<IGeocodingService>();
+        var controller = new LocationsController(service.Object);
+
+        var result = await controller.Reverse(latitude, longitude, CancellationToken.None);
+
+        Assert.IsType<BadRequestObjectResult>(result);
+        service.VerifyNoOtherCalls();
+    }
 }
