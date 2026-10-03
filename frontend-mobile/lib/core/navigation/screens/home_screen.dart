@@ -810,126 +810,243 @@ class _FeaturedProject extends StatelessWidget {
       'APPROVED' || 'COMPLETED' => 3,
       _ => null,
     };
+    final statusColor = project == null
+        ? SolarColors.limeDark
+        : _projectStatusColor(project.surveyStatus);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [SolarColors.primary, SolarColors.heroEnd]),
-      ),
+          color: SolarColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: SolarColors.border),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x12173E44), blurRadius: 22, offset: Offset(0, 9))
+          ]),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Row(children: [
-          Icon(Icons.solar_power_rounded,
-              color: SolarColors.heroAccent, size: 24),
-          SizedBox(width: 10),
-          Expanded(
-              child: Text('YOUR SOLAR PROJECT',
+        Row(children: [
+          Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                  color: SolarColors.surfaceSoft,
+                  borderRadius: BorderRadius.circular(14)),
+              child: const Icon(Icons.solar_power_rounded,
+                  color: SolarColors.limeDark, size: 24)),
+          const SizedBox(width: 12),
+          const Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text('Featured project',
+                    style: TextStyle(
+                        color: _text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800)),
+                SizedBox(height: 2),
+                Text('Your latest solar assessment',
+                    style: TextStyle(color: _muted, fontSize: 10))
+              ])),
+          Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+              decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: .11),
+                  borderRadius: BorderRadius.circular(99)),
+              child: Text(
+                  project == null
+                      ? 'Not started'
+                      : _friendlyProjectStatus(project.surveyStatus),
                   style: TextStyle(
-                      color: SolarColors.heroText,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1)))
+                      color: statusColor,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800)))
         ]),
         const SizedBox(height: 18),
         Text(
             project == null
                 ? 'Start your solar journey'
-                : project.propertyAddress.isEmpty
-                    ? 'Your current solar project'
-                    : project.propertyAddress,
-            maxLines: 3,
+                : project.projectName.trim().isEmpty
+                    ? 'Your solar project'
+                    : project.projectName,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+                color: _text,
+                fontSize: 20,
                 height: 1.2,
                 fontWeight: FontWeight.w800)),
-        const SizedBox(height: 10),
-        Text(
-            project == null
-                ? 'Tell us about your property and electricity usage to receive a personalised solar recommendation.'
-                : _friendlyProjectStatus(project.surveyStatus),
-            style: const TextStyle(
-                color: SolarColors.heroText, fontSize: 14, height: 1.5)),
-        if (project != null) ...[
-          const SizedBox(height: 12),
-          Text(
-              '${project.monthlyKwh.toStringAsFixed(0)} kWh / month${project.recommendedKw == null ? '' : ' ? ${project.recommendedKw!.toStringAsFixed(1)} kW recommended'}',
-              style:
-                  const TextStyle(color: SolarColors.heroText, fontSize: 13)),
+        if (project?.propertyAddress.isNotEmpty == true) ...[
+          const SizedBox(height: 7),
+          Row(children: [
+            const Icon(Icons.location_on_outlined, size: 15, color: _muted),
+            const SizedBox(width: 5),
+            Expanded(
+                child: Text(project!.propertyAddress,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: _muted, fontSize: 11)))
+          ]),
+        ],
+        if (project == null) ...[
+          const SizedBox(height: 9),
+          const Text(
+              'Add your property and energy usage to receive a personalised recommendation.',
+              style: TextStyle(color: _muted, fontSize: 12, height: 1.5)),
+        ] else ...[
+          const SizedBox(height: 16),
+          Row(children: [
+            Expanded(
+                child: _FeaturedMetric(
+                    icon: Icons.bolt_rounded,
+                    value: '${project.monthlyKwh.toStringAsFixed(0)} kWh',
+                    label: 'Monthly usage')),
+            const SizedBox(width: 10),
+            Expanded(
+                child: _FeaturedMetric(
+                    icon: Icons.solar_power_outlined,
+                    value: project.recommendedKw == null
+                        ? 'Pending'
+                        : '${project.recommendedKw!.toStringAsFixed(1)} kW',
+                    label: 'Recommended')),
+          ]),
           if (stage != null) ...[
-            const SizedBox(height: 20),
-            Semantics(
-                label:
-                    'Project progress: ${_friendlyProjectStatus(project.surveyStatus)}',
-                child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (var i = 0; i < 4; i++)
-                        Expanded(
-                            child: Padding(
-                                padding: EdgeInsets.only(right: i == 3 ? 0 : 8),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                          height: 4,
-                                          decoration: BoxDecoration(
-                                              color: i <= stage
-                                                  ? SolarColors.heroAccent
-                                                  : Colors.white24,
-                                              borderRadius:
-                                                  BorderRadius.circular(4))),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                          [
-                                            'Submitted',
-                                            'In review',
-                                            'Proposal',
-                                            'Approved'
-                                          ][i],
-                                          style: TextStyle(
-                                              color: i <= stage
-                                                  ? Colors.white
-                                                  : SolarColors.heroText,
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600)),
-                                    ]))),
-                    ])),
+            const SizedBox(height: 17),
+            _ProjectStageIndicator(stage: stage),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Text(
               status == 'FAILED'
-                  ? 'Your assessment needs attention. Open surveys to review it.'
+                  ? 'This assessment needs attention. Open it to review the details.'
                   : proposalReady
-                      ? 'Your recommendation is available. Open your proposal to see the details.'
-                      : 'Your assessment is being reviewed. Open surveys to check its status.',
-              style: const TextStyle(
-                  color: SolarColors.heroText, fontSize: 13, height: 1.5)),
+                      ? 'Your recommendation is ready to review.'
+                      : 'Your assessment is moving through the review process.',
+              style: const TextStyle(color: _muted, fontSize: 11, height: 1.5)),
         ],
-        const SizedBox(height: 20),
-        FilledButton.icon(
-            onPressed: onOpen,
-            icon: Icon(
-                project == null
-                    ? Icons.add_rounded
-                    : Icons.arrow_forward_rounded,
-                size: 18),
-            label: Text(project == null
-                ? 'Start your first survey'
-                : proposalReady
-                    ? 'View proposal'
-                    : 'View survey status'),
-            style: FilledButton.styleFrom(
-                backgroundColor: SolarColors.heroAccent,
-                foregroundColor: SolarColors.primary,
-                textStyle: const TextStyle(fontWeight: FontWeight.w800))),
+        const SizedBox(height: 17),
+        SizedBox(
+          height: 48,
+          child: FilledButton.icon(
+              onPressed: onOpen,
+              icon: Icon(
+                  project == null
+                      ? Icons.add_rounded
+                      : Icons.arrow_forward_rounded,
+                  size: 18),
+              label: Text(project == null
+                  ? 'Start your first survey'
+                  : proposalReady
+                      ? 'View proposal'
+                      : 'View survey status'),
+              style: FilledButton.styleFrom(
+                  backgroundColor: SolarColors.primary,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontWeight: FontWeight.w800))),
+        ),
       ]),
     );
   }
+}
+
+class _FeaturedMetric extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+  const _FeaturedMetric(
+      {required this.icon, required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        decoration: BoxDecoration(
+            color: SolarColors.background,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: SolarColors.border)),
+        child: Row(children: [
+          Icon(icon, size: 18, color: SolarColors.limeDark),
+          const SizedBox(width: 8),
+          Expanded(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                Text(value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: _text,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800)),
+                const SizedBox(height: 2),
+                Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: _muted, fontSize: 8))
+              ]))
+        ]),
+      );
+}
+
+class _ProjectStageIndicator extends StatelessWidget {
+  final int stage;
+  const _ProjectStageIndicator({required this.stage});
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        label: 'Project progress, step ${stage + 1} of 4',
+        child: Column(children: [
+          Row(children: [
+            for (var i = 0; i < 4; i++) ...[
+              Container(
+                  width: 18,
+                  height: 18,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      color: i <= stage
+                          ? SolarColors.primary
+                          : SolarColors.surface,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: i <= stage
+                              ? SolarColors.primary
+                              : SolarColors.border)),
+                  child: i < stage
+                      ? const Icon(Icons.check_rounded,
+                          size: 11, color: Colors.white)
+                      : i == stage
+                          ? Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                  color: Colors.white, shape: BoxShape.circle))
+                          : null),
+              if (i < 3)
+                Expanded(
+                    child: Container(
+                        height: 2,
+                        color: i < stage
+                            ? SolarColors.primary
+                            : SolarColors.border)),
+            ]
+          ]),
+          const SizedBox(height: 7),
+          const Row(children: [
+            Expanded(
+                child: Text('Submit',
+                    style: TextStyle(color: _muted, fontSize: 8))),
+            Expanded(
+                child: Text('Review',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: _muted, fontSize: 8))),
+            Expanded(
+                child: Text('Proposal',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: _muted, fontSize: 8))),
+            Expanded(
+                child: Text('Approve',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(color: _muted, fontSize: 8))),
+          ])
+        ]),
+      );
 }
 
 class _ProjectMetric extends StatelessWidget {

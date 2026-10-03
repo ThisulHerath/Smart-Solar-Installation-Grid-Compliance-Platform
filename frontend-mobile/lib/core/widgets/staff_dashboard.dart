@@ -72,6 +72,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
   }
 
   String _count(String key) => (_report?[key] as num?)?.toString() ?? '—';
+  int _number(String key) => (_report?[key] as num?)?.toInt() ?? 0;
   int _jobCount(List<String> statuses) => _jobs
       .where((job) => statuses.contains(
           (job['status'] as String? ?? '').replaceAll('_', '').toUpperCase()))
@@ -224,6 +225,8 @@ class _StaffDashboardState extends State<StaffDashboard> {
                   .toList());
         }),
         const SizedBox(height: 18),
+        _roleActivityChart(),
+        const SizedBox(height: 14),
         if (_technician) _jobProgress() else _approvalProgress(),
       ],
       const SizedBox(height: 18),
@@ -308,6 +311,51 @@ class _StaffDashboardState extends State<StaffDashboard> {
             : '$approved approved · $pending awaiting approval');
   }
 
+  Widget _roleActivityChart() {
+    if (_technician) {
+      return _RoleActivityChart(
+          title: 'Field workload',
+          subtitle: 'Live distribution of your assigned visits',
+          icon: Icons.query_stats_rounded,
+          items: [
+            _ActivityDatum('To visit', _jobCount(['ASSIGNED']),
+                SolarColors.warning, 'jobs'),
+            _ActivityDatum('In progress', _jobCount(['INPROGRESS']),
+                SolarColors.info, 'jobs'),
+            _ActivityDatum('Complete', _jobCount(['COMPLIANCECOMPLETE']),
+                SolarColors.success, 'jobs'),
+          ]);
+    }
+    if (_inventory) {
+      return _RoleActivityChart(
+          title: 'Stock & project signals',
+          subtitle: 'Items needing attention against current project demand',
+          icon: Icons.bar_chart_rounded,
+          items: [
+            _ActivityDatum('Low stock', _number('lowStockItems'),
+                SolarColors.warning, 'items'),
+            _ActivityDatum('Solar surveys', _number('surveyCount'),
+                SolarColors.info, 'projects'),
+            _ActivityDatum('Approved plans', _number('approvedProposals'),
+                SolarColors.success, 'plans'),
+          ]);
+    }
+    return _RoleActivityChart(
+        title: _admin ? 'Platform activity' : 'Engineering pipeline',
+        subtitle: _admin
+            ? 'Surveys and proposals moving through the platform'
+            : 'Assessments progressing toward engineering approval',
+        icon: Icons.stacked_bar_chart_rounded,
+        items: [
+          _ActivityDatum('Solar surveys', _number('surveyCount'),
+              SolarColors.primary, 'surveys'),
+          _ActivityDatum('Awaiting approval', _number('pendingApprovals'),
+              SolarColors.warning, 'proposals'),
+          _ActivityDatum('Approved', _number('approvedProposals'),
+              SolarColors.success, 'proposals'),
+        ]);
+  }
+
   Widget _progressCard(String title, int complete, int total, String caption) =>
       Card(
           child: Padding(
@@ -334,4 +382,106 @@ class _StaffDashboardState extends State<StaffDashboard> {
                             fontSize: 12,
                             height: 1.5)),
                   ])));
+}
+
+class _ActivityDatum {
+  final String label;
+  final int value;
+  final Color color;
+  final String unit;
+  const _ActivityDatum(this.label, this.value, this.color, this.unit);
+}
+
+class _RoleActivityChart extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final List<_ActivityDatum> items;
+  const _RoleActivityChart(
+      {required this.title,
+      required this.subtitle,
+      required this.icon,
+      required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    final maxValue = items.fold<int>(
+        1, (largest, item) => item.value > largest ? item.value : largest);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                    color: SolarColors.surfaceSoft,
+                    borderRadius: BorderRadius.circular(12)),
+                child: Icon(icon, color: SolarColors.primary, size: 21)),
+            const SizedBox(width: 12),
+            Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 3),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          color: SolarColors.muted, fontSize: 10, height: 1.35))
+                ]))
+          ]),
+          const SizedBox(height: 20),
+          for (var index = 0; index < items.length; index++) ...[
+            _ActivityBar(item: items[index], maxValue: maxValue),
+            if (index != items.length - 1) const SizedBox(height: 15),
+          ]
+        ]),
+      ),
+    );
+  }
+}
+
+class _ActivityBar extends StatelessWidget {
+  final _ActivityDatum item;
+  final int maxValue;
+  const _ActivityBar({required this.item, required this.maxValue});
+
+  @override
+  Widget build(BuildContext context) {
+    final fraction = maxValue == 0 ? 0.0 : item.value / maxValue;
+    return Column(children: [
+      Row(children: [
+        Expanded(
+            child: Text(item.label,
+                style: const TextStyle(
+                    color: SolarColors.text,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700))),
+        Text('${item.value} ${item.unit}',
+            style: TextStyle(
+                color: item.color, fontSize: 10, fontWeight: FontWeight.w800))
+      ]),
+      const SizedBox(height: 7),
+      LayoutBuilder(
+          builder: (context, constraints) => Stack(children: [
+                Container(
+                    width: constraints.maxWidth,
+                    height: 9,
+                    decoration: BoxDecoration(
+                        color: SolarColors.surfaceSoft,
+                        borderRadius: BorderRadius.circular(99))),
+                AnimatedContainer(
+                    duration: const Duration(milliseconds: 450),
+                    curve: Curves.easeOutCubic,
+                    width: constraints.maxWidth * fraction,
+                    height: 9,
+                    decoration: BoxDecoration(
+                        color: item.color,
+                        borderRadius: BorderRadius.circular(99)))
+              ]))
+    ]);
+  }
 }
