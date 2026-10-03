@@ -30,7 +30,7 @@ export function AuthField({ label, hint, matchValue, icon, ...props }: Props) {
   const messageId = `${props.id}-message`;
   return <div className={`account-form-field ${invalid ? 'field-invalid' : ''}`}>
     <label htmlFor={props.id}>{label}</label>
-    <div className="auth-input-wrap">
+    <div className={`auth-input-wrap ${password && icon ? 'has-leading-icon' : ''}`}>
       <input {...props} ref={input} className={`input-field ${password ? 'password-input' : ''}`} type={password && visible ? 'text' : props.type}
         aria-invalid={invalid} aria-describedby={invalid || hint || matching ? messageId : undefined}
         onInvalid={event => { event.preventDefault(); setTouched(true); }}

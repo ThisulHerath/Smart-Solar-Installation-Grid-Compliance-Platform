@@ -18,6 +18,14 @@
 .auth-shell .auth-form-content .input-field { min-height: 49px; padding: 10px 14px; border: 1px solid #cfddd0 !important; border-radius: 7px !important; background: #fff; color: #304143; font-size: 14px; }
 .auth-shell .auth-form-content .auth-input-wrap .input-field:not(.password-input) { padding-right: 42px; }
 .auth-shell .auth-field-icon { right: 13px; color: #68a53d; }
+.auth-shell .auth-input-wrap.has-leading-icon .auth-field-icon {
+  right: auto;
+  left: 14px;
+}
+.auth-shell .auth-form-content .auth-input-wrap.has-leading-icon .password-input {
+  padding-right: 54px;
+  padding-left: 44px;
+}
 .auth-shell .auth-form-content .input-field:focus,
 .auth-shell .auth-form-content .input-field:focus-visible { border-color: #72b83e !important; box-shadow: 0 0 0 3px #72b83e20 !important; }
 .auth-shell .login-options { margin-top: 1px; }
