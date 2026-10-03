@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Crosshair, LocateFixed, MapPin, Search, Trash2 } from 'lucide-react';
 import { LatLngExpression } from 'leaflet';
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
@@ -48,7 +48,11 @@ export function LocationPicker({ address, location, disabled, onAddressChange, o
   const [expanded, setExpanded] = useState(false);
   const [results, setResults] = useState<LocationSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [resolvingAddress, setResolvingAddress] = useState(false);
   const [message, setMessage] = useState('');
+  const reverseRequest = useRef<AbortController>();
+
+  useEffect(() => () => reverseRequest.current?.abort(), []);
 
   const chooseResult = (result: LocationSearchResult) => {
     onAddressChange(result.displayName);
@@ -77,6 +81,35 @@ export function LocationPicker({ address, location, disabled, onAddressChange, o
     }
   };
 
+  const selectPinnedLocation = async (selected: SelectedLocation, source: 'current' | 'map') => {
+    reverseRequest.current?.abort();
+    const controller = new AbortController();
+    reverseRequest.current = controller;
+    onLocationChange(selected);
+    setExpanded(true);
+    setResolvingAddress(true);
+    setMessage('Location selected. Finding its street address…');
+
+    try {
+      const result = await api.reverseLocation(selected.latitude, selected.longitude, controller.signal);
+      onAddressChange(result.displayName);
+      setMessage(source === 'current'
+        ? 'Current location and property address added. Confirm that the marker is on your rooftop.'
+        : 'Map location and property address added. Drag the marker if adjustment is required.');
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      onAddressChange(`Pinned location (${selected.latitude.toFixed(6)}, ${selected.longitude.toFixed(6)})`);
+      setMessage(error instanceof Error
+        ? `${error.message} Coordinates were added to the address field and can be edited.`
+        : 'Coordinates were added to the address field and can be edited.');
+    } finally {
+      if (reverseRequest.current === controller) {
+        reverseRequest.current = undefined;
+        setResolvingAddress(false);
+      }
+    }
+  };
+
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
       setMessage('This browser does not provide location access. Choose the location on the map.');
@@ -86,9 +119,10 @@ export function LocationPicker({ address, location, disabled, onAddressChange, o
     setMessage('Requesting your current location…');
     navigator.geolocation.getCurrentPosition(
       position => {
-        onLocationChange({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        setExpanded(true);
-        setMessage('Current location selected. Confirm that the marker is on your property.');
+        void selectPinnedLocation(
+          { latitude: position.coords.latitude, longitude: position.coords.longitude },
+          'current'
+        );
       },
       () => {
         setExpanded(true);
@@ -102,7 +136,7 @@ export function LocationPicker({ address, location, disabled, onAddressChange, o
     <section className="location-picker" aria-label="Property map location">
       <div className="location-picker__actions">
         <button type="button" onClick={() => void findAddress()} disabled={disabled || searching}><Search size={17} />{searching ? 'Finding…' : 'Find address on map'}</button>
-        <button type="button" onClick={useCurrentLocation} disabled={disabled}><LocateFixed size={17} />Use my current location</button>
+        <button type="button" onClick={useCurrentLocation} disabled={disabled || resolvingAddress}><LocateFixed size={17} />{resolvingAddress ? 'Adding address…' : 'Use my current location'}</button>
         <button type="button" onClick={() => setExpanded(value => !value)} disabled={disabled}><MapPin size={17} />{expanded ? 'Hide map' : 'Choose on map'}</button>
       </div>
 
@@ -117,7 +151,7 @@ export function LocationPicker({ address, location, disabled, onAddressChange, o
       {expanded && <div className="location-picker__map">
         <MapContainer center={location ? [location.latitude, location.longitude] : sriLankaCenter} zoom={location ? 16 : 8} scrollWheelZoom>
           <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <MapController location={location} onChange={onLocationChange} />
+          <MapController location={location} onChange={value => void selectPinnedLocation(value, 'map')} />
         </MapContainer>
         <p>Tap the map or drag the marker to the exact rooftop location.</p>
       </div>}
