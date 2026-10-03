@@ -91,8 +91,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       }
     } catch (error) {
       if (mounted) {
-        setState(() =>
-            _error = error.toString().replaceFirst('Exception: ', ''));
+        setState(
+            () => _error = error.toString().replaceFirst('Exception: ', ''));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -114,16 +114,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (mounted) setState(() => _complete = true);
     } catch (error) {
       if (mounted) {
-        setState(() =>
-            _error = error.toString().replaceFirst('Exception: ', ''));
+        setState(
+            () => _error = error.toString().replaceFirst('Exception: ', ''));
       }
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  InputDecoration _decoration(String hint, IconData icon,
-          {Widget? suffix}) =>
+  InputDecoration _decoration(String hint, IconData icon, {Widget? suffix}) =>
       InputDecoration(
         hintText: hint,
         prefixIcon: Icon(icon, color: SolarColors.primary, size: 20),
@@ -226,7 +225,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Widget _resetForm() => Form(
         key: _form,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           const Text('Email address',
               style: TextStyle(fontWeight: FontWeight.w700)),
           const SizedBox(height: 7),
@@ -247,8 +247,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               obscureText: _hidePassword,
               maxLength: 64,
               autofillHints: const [AutofillHints.newPassword],
-              decoration: _decoration('Create a new password',
-                  Icons.lock_outline_rounded,
+              decoration: _decoration(
+                  'Create a new password', Icons.lock_outline_rounded,
                   suffix: IconButton(
                       tooltip: _hidePassword
                           ? 'Show new password'
@@ -272,8 +272,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               onFieldSubmitted: (_) {
                 if (!_busy) _requestCode();
               },
-              decoration: _decoration('Re-enter your new password',
-                  Icons.lock_reset_rounded,
+              decoration: _decoration(
+                  'Re-enter your new password', Icons.lock_reset_rounded,
                   suffix: IconButton(
                       tooltip: _hideConfirm
                           ? 'Show confirmed password'
@@ -317,8 +317,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Text(_busy ? 'Verifying…' : 'Reset password')),
           const SizedBox(height: 8),
           TextButton(
-              onPressed:
-                  _busy || _resendSeconds > 0 ? null : _requestCode,
+              onPressed: _busy || _resendSeconds > 0 ? null : _requestCode,
               child: Text(_resendSeconds > 0
                   ? 'Resend code in ${_resendSeconds}s'
                   : 'Send a new code')),
