@@ -126,44 +126,53 @@ export function TechnicianJobsPage() {
               : '';
             return (
               <article key={job.id}>
-                <span className="technician-job-status">{job.status.replace(/_/g, ' ')}</span>
+                <span className="technician-job-status">
+                  {job.status.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2')}
+                </span>
                 <h2>{job.projectName || job.customerName}</h2>
                 {job.projectName && <p>{job.customerName}</p>}
-                <p><MapPin size={15} />{job.propertyAddress}</p>
-                <span className="technician-job-location-state">
-                  <CheckCircle2 size={14} />
-                  {job.latitude != null && job.longitude != null
-                    ? 'Homeowner map location confirmed'
-                    : 'Directions use the property address'}
-                </span>
-                <p>
-                  <CalendarDays size={15} />
-                  {job.scheduledAt
-                    ? new Date(job.scheduledAt).toLocaleDateString('en-LK', { dateStyle: 'medium' })
-                    : 'Schedule pending'}
-                </p>
-                <strong>{job.priority} priority</strong>
-                {technicianLocation ? (
-                  <a
-                    aria-label={`Navigate from my location to ${job.customerName}'s home`}
-                    className="technician-job-directions"
-                    href={directionsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Navigation size={16} />2. Navigate to customer home
-                  </a>
-                ) : (
-                  <button
-                    className="technician-job-directions technician-job-directions--disabled"
-                    type="button"
-                    disabled
-                    title="Get your current location first"
-                  >
-                    <Navigation size={16} />2. Navigate to customer home
-                  </button>
-                )}
-                <span className="technician-job-note">Assigned field visit <ArrowRight size={15} /></span>
+                <div className="technician-job-details">
+                  <p className="technician-job-address" title={job.propertyAddress}>
+                    <MapPin size={15} />
+                    <span>{job.propertyAddress}</span>
+                  </p>
+                  <span className="technician-job-location-state">
+                    <CheckCircle2 size={14} />
+                    <span>{job.latitude != null && job.longitude != null
+                      ? 'Homeowner map location confirmed'
+                      : 'Directions use the property address'}</span>
+                  </span>
+                  <p className="technician-job-date">
+                    <CalendarDays size={15} />
+                    <span>{job.scheduledAt
+                      ? new Date(job.scheduledAt).toLocaleDateString('en-LK', { dateStyle: 'medium' })
+                      : 'Schedule pending'}</span>
+                  </p>
+                </div>
+                <div className="technician-job-actions">
+                  <strong>{job.priority} priority</strong>
+                  {technicianLocation ? (
+                    <a
+                      aria-label={`Navigate from my location to ${job.customerName}'s home`}
+                      className="technician-job-directions"
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Navigation size={16} />2. Navigate to customer home
+                    </a>
+                  ) : (
+                    <button
+                      className="technician-job-directions technician-job-directions--disabled"
+                      type="button"
+                      disabled
+                      title="Get your current location first"
+                    >
+                      <Navigation size={16} />2. Navigate to customer home
+                    </button>
+                  )}
+                  <span className="technician-job-note">Assigned field visit <ArrowRight size={15} /></span>
+                </div>
               </article>
             );
           })}
