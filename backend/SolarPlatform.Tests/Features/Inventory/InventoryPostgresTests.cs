@@ -122,7 +122,7 @@ public class InventoryPostgresTests
         EmailVerificationService Service(AppDbContext db) => new(db, new PasswordHasher(), new JwtTokenService(config), mailbox, config, TimeProvider.System);
         EmailChallengeResponse challenge;
         await using (var db = new AppDbContext(options)) challenge = await Service(db).RequestRegistrationAsync(new RegisterRequestDto {
-            Email = "postgres-otp@example.invalid", FullName = "Concurrency test", Password = "A secure test passphrase" });
+            Email = "postgres-otp@example.invalid", FullName = "Concurrency test", Password = "A secure test passphrase!123" });
         var code = mailbox.Code;
         async Task<bool> Confirm()
         {
