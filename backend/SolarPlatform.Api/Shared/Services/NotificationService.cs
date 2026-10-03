@@ -13,6 +13,8 @@ public interface INotificationService
     Task<int> GetUnreadCountAsync(Guid userId);
     Task<bool> MarkReadAsync(Guid userId, Guid notificationId);
     Task<int> MarkAllReadAsync(Guid userId);
+    Task<bool> DeleteAsync(Guid userId, Guid notificationId);
+    Task<int> DeleteReadAsync(Guid userId);
 }
 
 public class NotificationService : INotificationService
@@ -64,6 +66,27 @@ public class NotificationService : INotificationService
         var now = DateTime.UtcNow;
         foreach (var item in items) { item.IsRead = true; item.ReadAt = now; }
         if (items.Count > 0) await _db.SaveChangesAsync();
+        return items.Count;
+    }
+
+    public async Task<bool> DeleteAsync(Guid userId, Guid notificationId)
+    {
+        var item = await _db.UserNotifications
+            .FirstOrDefaultAsync(value => value.Id == notificationId && value.UserId == userId);
+        if (item == null) return false;
+        _db.UserNotifications.Remove(item);
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<int> DeleteReadAsync(Guid userId)
+    {
+        var items = await _db.UserNotifications
+            .Where(item => item.UserId == userId && item.IsRead)
+            .ToListAsync();
+        if (items.Count == 0) return 0;
+        _db.UserNotifications.RemoveRange(items);
+        await _db.SaveChangesAsync();
         return items.Count;
     }
 

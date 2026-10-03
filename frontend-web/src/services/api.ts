@@ -79,6 +79,17 @@ class ApiService {
     if (!res.ok) throw new Error('Unable to update notifications.');
   }
 
+  async deleteNotification(id: string): Promise<void> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/${id}`, { method: 'DELETE', headers: this.getHeaders() });
+    if (!res.ok && res.status !== 204) throw new Error('Unable to delete notification.');
+  }
+
+  async deleteReadNotifications(): Promise<number> {
+    const res = await fetch(`${API_BASE_URL}/api/notifications/read`, { method: 'DELETE', headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Unable to clear read notifications.');
+    return (await res.json()).count ?? 0;
+  }
+
   async uploadProfileImage(file: File): Promise<{ profileImageUrl: string }> {
     const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
     const body = new FormData();

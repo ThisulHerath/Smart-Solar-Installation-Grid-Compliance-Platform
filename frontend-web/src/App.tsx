@@ -28,6 +28,12 @@ const AccountPage = lazy(() =>
   }))
 );
 
+const NotificationsPage = lazy(() =>
+  import('./pages/NotificationsPage').then((module) => ({
+    default: module.NotificationsPage,
+  }))
+);
+
 const OperationsDashboard = lazy(() =>
   import('./pages/OperationsDashboard').then((module) => ({
     default: module.OperationsDashboard,
@@ -165,6 +171,11 @@ export const App: React.FC = () => {
                   <Route
                     path="/account"
                     element={<AccountPage />}
+                  />
+
+                  <Route
+                    path="/notifications"
+                    element={<NotificationsPage />}
                   />
 
                   <Route element={<ProtectedRoute allowedRoles={['FIELD_TECHNICIAN']} />}>

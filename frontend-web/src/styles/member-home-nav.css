@@ -19,8 +19,9 @@
 .member-home-account .member-home-logout svg { color: #d4ef83; }
 .member-home-account .member-home-logout:hover { background: #06475a; }
 .notification-center { position: relative; }
-.member-home-account .notification-bell { position: relative; display: grid; width: 43px; height: 43px; place-items: center; padding: 0; border: 1px solid #d5e3df; border-radius: 50%; background: #fff; color: #466268; box-shadow: none; cursor: pointer; }
+.member-home-account .notification-bell { position: relative; display: grid; width: 43px; height: 43px; place-items: center; padding: 0; border: 1px solid #d5e3df; border-radius: 50%; background: #fff; color: #466268; box-shadow: none; cursor: pointer; text-decoration: none; }
 .member-home-account .notification-bell:hover { border-color: #79b85a; background: #f4faef; color: #579d32; }
+.member-home-account .notification-bell.is-active { border-color: #69b63b; background: #edf7e7; color: #4f932c; box-shadow: 0 0 0 3px #69b63b1f; }
 .notification-bell > span { position: absolute; top: -5px; right: -5px; display: grid; min-width: 19px; height: 19px; place-items: center; padding: 0 4px; border: 2px solid #f6f7f5; border-radius: 999px; background: #d44c51; color: #fff; font-size: 9px; font-weight: 850; }
 .notification-panel { position: absolute; z-index: 120; top: calc(100% + 14px); right: -70px; width: min(390px, calc(100vw - 28px)); overflow: hidden; border: 1px solid #dce7df; border-radius: 13px; background: #fff; box-shadow: 0 22px 55px #173e4830; }
 .notification-panel > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid #e6ece7; background: #f8fbf6; }

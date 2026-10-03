@@ -984,6 +984,14 @@
   border: 1px solid #c2e8e0;
 }
 
+.account-eyebrow-badge .eyebrow {
+  margin: 0;
+  color: inherit;
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: inherit;
+}
+
 .workspace-shell .account-page .account-header h1 {
   color: #173940;
   font-size: 32px;

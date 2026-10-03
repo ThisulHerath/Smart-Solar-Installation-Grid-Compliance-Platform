@@ -18,8 +18,11 @@ export const Navbar = () => {
   const initials = user?.fullName.split(' ').filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || '';
   const userRole = user?.roles[0]?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, letter => letter.toUpperCase()) || 'Member';
   const profileRoute = location.pathname === '/profile' || location.pathname === '/account';
+  const notificationRoute = location.pathname === '/notifications';
   const activeNav = profileRoute
     ? null
+    : notificationRoute
+      ? null
     : location.pathname !== '/'
       ? 'projects'
       : location.hash === '#services'

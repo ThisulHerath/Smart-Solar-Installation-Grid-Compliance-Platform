@@ -19,7 +19,8 @@ export const Layout: React.FC = () => {
         : null;
   const profileRoute =
     location.pathname === '/profile' ||
-    location.pathname === '/account';
+    location.pathname === '/account' ||
+    location.pathname === '/notifications';
 
   return (
     <div className={`workspace-shell${administrator || staffRole ? ' admin-layout' : ''}${staffRole && !administrator ? ' staff-layout' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>

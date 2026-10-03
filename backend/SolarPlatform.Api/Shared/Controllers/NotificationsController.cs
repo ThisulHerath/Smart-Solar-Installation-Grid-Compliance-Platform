@@ -28,6 +28,14 @@ public class NotificationsController : ControllerBase
     public async Task<ActionResult<NotificationCountDto>> MarkAllRead() =>
         Ok(new NotificationCountDto(await _notifications.MarkAllReadAsync(UserId())));
 
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id) =>
+        await _notifications.DeleteAsync(UserId(), id) ? NoContent() : NotFound();
+
+    [HttpDelete("read")]
+    public async Task<ActionResult<NotificationCountDto>> DeleteRead() =>
+        Ok(new NotificationCountDto(await _notifications.DeleteReadAsync(UserId())));
+
     private Guid UserId() => Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub"), out var id)
         ? id : throw new UnauthorizedAccessException("Invalid token user identity.");
 }
