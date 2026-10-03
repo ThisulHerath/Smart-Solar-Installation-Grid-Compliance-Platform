@@ -142,6 +142,19 @@ class ApiService {
     await post('/api/notifications/read-all', {});
   }
 
+  Future<Map<String, dynamic>> requestPasswordReset(
+          String email, String newPassword) async =>
+      Map<String, dynamic>.from(await post(
+          '/api/auth/password/reset/request-otp',
+          {'email': email, 'newPassword': newPassword},
+          requiresAuth: false));
+
+  Future<Map<String, dynamic>> confirmPasswordReset(
+          String challengeId, String code) async =>
+      Map<String, dynamic>.from(await post('/api/auth/password/reset/confirm',
+          {'challengeId': challengeId, 'code': code},
+          requiresAuth: false));
+
   Future<Map<String, dynamic>> createSurvey(
       {required String projectName,
       required double monthlyKwh,

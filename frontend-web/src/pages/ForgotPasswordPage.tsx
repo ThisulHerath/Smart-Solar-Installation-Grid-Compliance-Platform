@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { AuthField, AuthForm } from '../components/AuthField';
@@ -104,7 +104,6 @@ export function ForgotPasswordPage() {
             type="password"
             autoComplete="new-password"
             placeholder="Create a new password"
-            icon={<KeyRound size={17} />}
             hint="12-64 characters. Try a memorable passphrase."
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}

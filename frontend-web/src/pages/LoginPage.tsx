@@ -15,7 +15,6 @@ import { api } from '../services/api';
 export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -63,7 +62,7 @@ export function LoginPage() {
               password
             );
 
-            login(result.token, result.user, rememberMe);
+            login(result.token, result.user);
 
             navigate('/dashboard', {
               replace: true,
@@ -108,17 +107,6 @@ export function LoginPage() {
         />
 
         <div className="login-options">
-          <label className="remember-me">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              required
-              aria-required="true"
-              onChange={(event) => setRememberMe(event.target.checked)}
-              disabled={busy}
-            />
-            <span>Remember me</span>
-          </label>
           <button
             className="forgot-password"
             type="button"
@@ -131,7 +119,7 @@ export function LoginPage() {
 
         <button
           className="btn btn-primary"
-          disabled={busy || !rememberMe}
+          disabled={busy}
         >
           {busy ? 'Signing in…' : 'Sign in'}
         </button>

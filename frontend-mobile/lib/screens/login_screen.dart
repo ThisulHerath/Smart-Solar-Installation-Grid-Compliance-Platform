@@ -6,6 +6,7 @@ import '../utils/validators.dart';
 import '../widgets/solar_field.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 const _orange = SolarColors.lime;
 const _ink = SolarColors.text;
@@ -164,7 +165,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Align(
                                           alignment: Alignment.centerRight,
                                           child: TextButton(
-                                            onPressed: () {},
+                                            onPressed: () => Navigator.of(
+                                                    context)
+                                                .push(MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        const ForgotPasswordScreen())),
                                             style: TextButton.styleFrom(
                                                 foregroundColor: _muted,
                                                 textStyle: const TextStyle(
