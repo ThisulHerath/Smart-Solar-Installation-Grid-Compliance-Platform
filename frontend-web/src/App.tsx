@@ -12,6 +12,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { StaffOnboardingPage } from './pages/StaffOnboardingPage';
 
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 
@@ -131,6 +132,7 @@ export const App: React.FC = () => {
 
               {/* Protected Routes Layout */}
               <Route element={<ProtectedRoute />}>
+                <Route path="/staff-onboarding" element={<StaffOnboardingPage />} />
                 <Route element={<Layout />}>
                   <Route
                     element={

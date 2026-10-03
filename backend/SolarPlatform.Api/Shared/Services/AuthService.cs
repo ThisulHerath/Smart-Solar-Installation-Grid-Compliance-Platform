@@ -93,6 +93,8 @@ public class AuthService : IAuthService
                 PhoneNumber = user.PhoneNumber,
                 ProfileImageUrl = user.ProfileImageUrl,
                 Roles = roles,
+                EmailVerified = user.EmailVerifiedAt != null,
+                MustChangePassword = user.MustChangePassword,
                 CreatedAt = user.CreatedAt
             }
         };
@@ -105,7 +107,7 @@ public class AuthService : IAuthService
         var user = await _dbContext.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail && u.DeletedAt == null);
 
         if (user == null || !_passwordHasher.VerifyPassword(request.Password, user.PasswordHash))
         {
@@ -136,6 +138,8 @@ public class AuthService : IAuthService
                 PhoneNumber = user.PhoneNumber,
                 ProfileImageUrl = user.ProfileImageUrl,
                 Roles = roles,
+                EmailVerified = user.EmailVerifiedAt != null,
+                MustChangePassword = user.MustChangePassword,
                 CreatedAt = user.CreatedAt
             }
         };
@@ -146,7 +150,7 @@ public class AuthService : IAuthService
         var user = await _dbContext.Users
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive);
+            .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive && u.DeletedAt == null);
 
         if (user == null)
             return null;
@@ -159,6 +163,8 @@ public class AuthService : IAuthService
             PhoneNumber = user.PhoneNumber,
             ProfileImageUrl = user.ProfileImageUrl,
             Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+            EmailVerified = user.EmailVerifiedAt != null,
+            MustChangePassword = user.MustChangePassword,
             CreatedAt = user.CreatedAt
         };
     }

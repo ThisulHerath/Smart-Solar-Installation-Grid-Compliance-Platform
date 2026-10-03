@@ -11,7 +11,8 @@ namespace SolarPlatform.Api.Services;
 public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, IJwtTokenService tokens,
     IOtpEmailSender sender, IConfiguration config, TimeProvider clock)
 {
-    public const string Registration = "registration", PasswordChange = "password change", PasswordReset = "password reset", Deletion = "account deletion";
+    public const string Registration = "registration", PasswordChange = "password change", PasswordReset = "password reset",
+        Deletion = "account deletion", StaffOnboarding = "staff account setup";
     private DateTime Now => clock.GetUtcNow().UtcDateTime;
 
     public async Task<EmailChallengeResponse> RequestRegistrationAsync(RegisterRequestDto request)
@@ -33,6 +34,38 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
         if (purpose == PasswordChange) ValidatePassword(newPassword ?? "");
         return await IssueAsync(new EmailChallenge { Email = user.Email, Purpose = purpose, UserId = user.Id,
             UserVersion = user.SecurityVersion, PasswordHash = purpose == PasswordChange ? hasher.HashPassword(newPassword!) : null });
+    }
+
+    public async Task<EmailChallengeResponse> RequestStaffOnboardingAsync(Guid userId, string newPassword)
+    {
+        PasswordPolicy.Validate(newPassword);
+        var user = await ActiveUserAsync(userId);
+        if (!user.MustChangePassword)
+            throw new InvalidOperationException("This account has already completed its first sign-in setup.");
+        return await IssueAsync(new EmailChallenge
+        {
+            Email = user.Email,
+            Purpose = StaffOnboarding,
+            UserId = user.Id,
+            UserVersion = user.SecurityVersion,
+            PasswordHash = hasher.HashPassword(newPassword)
+        });
+    }
+
+    public async Task ConfirmStaffOnboardingAsync(Guid userId, VerifyEmailCodeDto request)
+    {
+        var challenge = await VerifyAsync(request, StaffOnboarding, userId);
+        var user = await ActiveUserAsync(userId);
+        if (!user.MustChangePassword || challenge.UserVersion != user.SecurityVersion)
+            throw new InvalidOperationException("This code is no longer valid. Request a new code.");
+        user.PasswordHash = challenge.PasswordHash!;
+        user.MustChangePassword = false;
+        user.EmailVerifiedAt = Now;
+        user.SecurityVersion++;
+        user.UpdatedAt = Now;
+        var pending = await db.EmailChallenges.Where(c => c.Email == challenge.Email && c.ConsumedAt == null).ToListAsync();
+        foreach (var item in pending) Consume(item);
+        await SaveConfirmationAsync();
     }
 
     public async Task<EmailChallengeResponse?> RequestPasswordResetAsync(ForgotPasswordRequestDto request)
@@ -98,7 +131,8 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
         await SaveConfirmationAsync();
         var (token, expiry) = tokens.GenerateToken(user, [role.Name]);
         return new AuthResponseDto { Token = token, ExpiresIn = expiry, User = new UserDto { Id = user.Id, Email = user.Email,
-            FullName = user.FullName, PhoneNumber = user.PhoneNumber, ProfileImageUrl = user.ProfileImageUrl, Roles = [role.Name], CreatedAt = user.CreatedAt } };
+            FullName = user.FullName, PhoneNumber = user.PhoneNumber, ProfileImageUrl = user.ProfileImageUrl, Roles = [role.Name],
+            EmailVerified = true, MustChangePassword = false, CreatedAt = user.CreatedAt } };
     }
 
     public async Task ConfirmAccountActionAsync(Guid userId, string purpose, VerifyEmailCodeDto request)
@@ -160,12 +194,8 @@ public class EmailVerificationService(AppDbContext db, IPasswordHasher hasher, I
             ?? Environment.GetEnvironmentVariable("JWT_KEY") ?? config["Jwt:Key"] ?? throw new InvalidOperationException("OTP signing key is missing.");
         return Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes($"{challenge.Id}|{challenge.Email}|{challenge.Purpose}|{code}")));
     }
-    private static void ValidatePassword(string password)
-    {
-        if (password.Length < 12 || password.Length > 64 || Encoding.UTF8.GetByteCount(password) > 72 || string.IsNullOrWhiteSpace(password))
-            throw new ArgumentException("Use a password of 12–64 characters (at most 72 UTF-8 bytes).");
-    }
-    private async Task<User> ActiveUserAsync(Guid id) => await db.Users.SingleOrDefaultAsync(u => u.Id == id && u.IsActive)
+    private static void ValidatePassword(string password) => PasswordPolicy.Validate(password);
+    private async Task<User> ActiveUserAsync(Guid id) => await db.Users.SingleOrDefaultAsync(u => u.Id == id && u.IsActive && u.DeletedAt == null)
         ?? throw new UnauthorizedAccessException("Please sign in again.");
     private static void ClearPayload(EmailChallenge challenge) { challenge.PasswordHash = null; challenge.FullName = null; challenge.PhoneNumber = null; challenge.Revision = Guid.NewGuid(); }
     private void Consume(EmailChallenge challenge) { challenge.ConsumedAt = Now; challenge.CodeHash = ""; ClearPayload(challenge); }

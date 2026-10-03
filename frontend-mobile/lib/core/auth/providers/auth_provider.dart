@@ -23,6 +23,13 @@ class AuthProvider with ChangeNotifier {
   AuthStatus get status => _status;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _status == AuthStatus.authenticated;
+  bool get requiresStaffOnboarding => _user?.mustChangePassword ?? false;
+
+  Future<Map<String, dynamic>> requestStaffOnboarding(String newPassword) =>
+      _authService.requestStaffOnboarding(newPassword);
+
+  Future<void> confirmStaffOnboarding(String challengeId, String code) =>
+      _authService.confirmStaffOnboarding(challengeId, code);
 
   Future<void> initializeAuth() async {
     try {

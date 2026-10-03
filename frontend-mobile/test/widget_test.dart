@@ -10,6 +10,8 @@ void main() {
         'email': 'admin@smartsolar.local',
         'fullName': 'System Administrator',
         'roles': ['ADMINISTRATOR'],
+        'emailVerified': false,
+        'mustChangePassword': true,
         'createdAt': '2026-01-01T00:00:00Z',
       };
 
@@ -19,6 +21,8 @@ void main() {
       expect(user.email, 'admin@smartsolar.local');
       expect(user.fullName, 'System Administrator');
       expect(user.roles, contains('ADMINISTRATOR'));
+      expect(user.emailVerified, isFalse);
+      expect(user.mustChangePassword, isTrue);
     });
 
     test('AuthResponse fromJson correctly deserializes payload', () {

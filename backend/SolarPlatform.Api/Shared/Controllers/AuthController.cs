@@ -57,6 +57,17 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password changed. Please sign in with your new password." });
     }
 
+    [Authorize, HttpPost("staff-onboarding/request-otp")]
+    public async Task<IActionResult> RequestStaffOnboarding(ChangePasswordRequestDto request) =>
+        Ok(await _verification.RequestStaffOnboardingAsync(CurrentUserId, request.NewPassword));
+
+    [Authorize, HttpPost("staff-onboarding/confirm")]
+    public async Task<IActionResult> ConfirmStaffOnboarding(VerifyEmailCodeDto request)
+    {
+        await _verification.ConfirmStaffOnboardingAsync(CurrentUserId, request);
+        return Ok(new { message = "Account secured. Sign in with your new password." });
+    }
+
     [HttpPost("password/reset/request-otp")]
     public async Task<IActionResult> RequestPasswordReset(ForgotPasswordRequestDto request)
     {

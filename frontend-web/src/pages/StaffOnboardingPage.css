@@ -1,0 +1,13 @@
+.staff-onboarding-heading { display: flex; align-items: center; gap: 12px; }
+.staff-onboarding-heading > span { display: grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; border-radius: 12px; background: #eaf6e4; color: #5ca337; }
+.staff-onboarding-heading h2 { margin: 2px 0 0; }
+.staff-onboarding-heading .eyebrow { margin: 0; }
+.staff-onboarding-email { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2px 9px; padding: 13px 14px; border: 1px solid #cfe1c8; border-radius: 10px; background: #f5faf2; color: #617673; font-size: 12px; }
+.staff-onboarding-email svg { grid-row: 1 / span 2; color: #559b35; }
+.staff-onboarding-email strong { color: #304746; overflow-wrap: anywhere; }
+.staff-password-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; margin: -2px 0 4px; padding: 0; list-style: none; }
+.staff-password-checks li { display: flex; align-items: center; gap: 6px; color: #82918f; font-size: 11px; }
+.staff-password-checks li span { display: grid; width: 17px; height: 17px; place-items: center; border-radius: 50%; background: #eef2ed; font-size: 10px; }
+.staff-password-checks li.complete { color: #4f8e32; font-weight: 700; }
+.staff-password-checks li.complete span { background: #e5f4dd; }
+@media (max-width: 520px) { .staff-password-checks { grid-template-columns: 1fr; } }

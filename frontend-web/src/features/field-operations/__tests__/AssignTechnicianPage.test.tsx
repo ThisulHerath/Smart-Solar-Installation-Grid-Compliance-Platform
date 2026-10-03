@@ -24,8 +24,10 @@ describe('AssignTechnicianPage', () => {
     render(<MemoryRouter><AssignTechnicianPage /></MemoryRouter>);
     expect(screen.getByRole('heading', { level: 1, name: 'Assign a technician' })).toBeInTheDocument();
 
-    fireEvent.change(await screen.findByLabelText('Customer survey'), { target: { value: 'survey-1' } });
-    fireEvent.change(screen.getByLabelText(/Field technician/), { target: { value: 'tech-1' } });
+    fireEvent.click(await screen.findByLabelText('Customer survey'));
+    fireEvent.click(screen.getByRole('option', { name: /45 Park Road/i }));
+    fireEvent.click(screen.getByLabelText('Field technician'));
+    fireEvent.click(screen.getByRole('option', { name: /Lead Field Technician/i }));
     fireEvent.click(screen.getByRole('button', { name: 'Assign site visit' }));
 
     await waitFor(() => expect(screen.getByText('Lead Field Technician is assigned')).toBeInTheDocument());

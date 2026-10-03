@@ -43,5 +43,7 @@ public class UserDto
     public string? PhoneNumber { get; set; }
     public string? ProfileImageUrl { get; set; }
     public List<string> Roles { get; set; } = new();
+    public bool EmailVerified { get; set; }
+    public bool MustChangePassword { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -55,6 +55,7 @@ public class AppDbContext : DbContext
             entity.Property(u => u.FullName).IsRequired().HasMaxLength(255);
             entity.Property(u => u.PhoneNumber).HasMaxLength(50);
             entity.Property(u => u.ProfileImageUrl).HasMaxLength(1000);
+            entity.HasIndex(u => u.DeletedAt);
             entity.Property(u => u.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(u => u.UpdatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });

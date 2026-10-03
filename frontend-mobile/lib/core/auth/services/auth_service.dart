@@ -38,6 +38,21 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>> requestStaffOnboarding(
+      String newPassword) async {
+    return Map<String, dynamic>.from(await _apiService.post(
+      '/api/auth/staff-onboarding/request-otp',
+      {'newPassword': newPassword},
+    ));
+  }
+
+  Future<void> confirmStaffOnboarding(String challengeId, String code) async {
+    await _apiService.post('/api/auth/staff-onboarding/confirm', {
+      'challengeId': challengeId,
+      'code': code,
+    });
+  }
+
   Future<void> logout() async {
     await _storageService.clearToken();
   }

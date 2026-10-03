@@ -378,7 +378,7 @@
 .assignment-success .assignment-success__location { display: flex; align-items: center; gap: 7px; margin-top: 7px; }
 .assignment-success .assignment-success__location { color: #4f7b45; font-size: 12px; font-weight: 750; }
 .assignment-page > .glass-panel { max-width: 980px; }
-.assignment-form-card { overflow: hidden; padding: 0 !important; }
+.assignment-form-card { overflow: visible; padding: 0 !important; }
 .assignment-form-card__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px; border-bottom: 1px solid #e1ebdd; background: linear-gradient(120deg, #fff, #f7fbf4); }
 .assignment-form-card__heading h2 { margin: 3px 0 6px; color: #304143; font-size: 23px; }
 .assignment-form-card__heading p:last-child { margin: 0; color: var(--text-secondary); font-size: 13px; }
@@ -393,6 +393,95 @@
 .assignment-form label > span { color: #b9474c; }
 .assignment-form .input-field { width: 100%; min-height: 48px; padding: 0 14px; border: 1px solid #cbdccb !important; border-radius: 8px !important; font-size: 13px; }
 .assignment-form .input-field[aria-invalid="true"] { border-color: #c55357 !important; box-shadow: 0 0 0 3px rgba(197, 83, 87, .1) !important; }
+.assignment-field-label { display: block !important; margin-bottom: 7px; color: #49615f; font-size: 12px; font-weight: 800; }
+.assignment-field-label > span,
+.assignment-priority legend > span { color: #b9474c; }
+.assignment-choice,
+.assignment-date { position: relative; min-width: 0; }
+.assignment-choice--open,
+.assignment-date:has(.assignment-date__popover) { z-index: 20; }
+.assignment-choice__trigger,
+.assignment-date__trigger { display: flex; width: 100%; min-height: 58px; box-sizing: border-box; align-items: center; gap: 12px; padding: 9px 14px; border: 1px solid #c8d9c7; border-radius: 10px; background: #fff; color: #304143; font: inherit; text-align: left; cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+.assignment-choice__trigger:hover,
+.assignment-date__trigger:hover { border-color: #7eb265; background: #fbfdf9; }
+.assignment-choice__trigger:focus-visible,
+.assignment-date__trigger:focus-visible { border-color: #65a645; outline: 0; box-shadow: 0 0 0 4px rgba(101, 166, 69, .14); }
+.assignment-choice__trigger[aria-invalid="true"],
+.assignment-date__trigger[aria-invalid="true"] { border-color: #c55357; box-shadow: 0 0 0 3px rgba(197, 83, 87, .1); }
+.assignment-choice__trigger:disabled,
+.assignment-date__trigger:disabled { background: #f2f5f1; color: #8a9997; cursor: not-allowed; }
+.assignment-choice__trigger-copy { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.assignment-choice__trigger-copy strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.assignment-choice__trigger-copy small { overflow: hidden; color: #718582; font-size: 10px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
+.assignment-choice__placeholder { color: #748683; font-weight: 600; }
+.assignment-choice__badge { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; background: #eef7e9; color: #4f8c35 !important; font-size: 9px; font-weight: 850; }
+.assignment-choice__trigger > svg:last-child,
+.assignment-date__trigger > svg:last-child { flex: 0 0 auto; color: #58716d; transition: transform .18s ease; }
+.assignment-choice--open .assignment-choice__trigger > svg:last-child,
+.assignment-date:has(.assignment-date__popover) .assignment-date__trigger > svg:last-child { transform: rotate(180deg); }
+.assignment-choice__popover,
+.assignment-date__popover { position: absolute; z-index: 30; top: calc(100% + 8px); right: 0; left: 0; overflow: hidden; border: 1px solid #c6d9c3; border-radius: 12px; background: #fff; box-shadow: 0 18px 46px rgba(24, 61, 55, .18); }
+.assignment-choice__search { display: flex; min-height: 46px; align-items: center; gap: 9px; margin: 10px; padding: 0 11px; border: 1px solid #cbdccb; border-radius: 8px; background: #f9fbf8; color: #66807b; }
+.assignment-choice__search:focus-within { border-color: #69a94b; box-shadow: 0 0 0 3px rgba(105, 169, 75, .12); }
+.assignment-choice__search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #304143; font: inherit; font-size: 12px; }
+.assignment-choice__search button { display: grid; width: 28px; height: 28px; flex: 0 0 28px; place-items: center; border: 0; border-radius: 6px; background: transparent; color: #5f7471; cursor: pointer; }
+.assignment-choice__search button:hover { background: #eaf3e7; }
+.assignment-choice__list { max-height: 300px; overflow-y: auto; overscroll-behavior: contain; padding: 2px 8px 8px; scrollbar-color: #a8bca4 transparent; scrollbar-width: thin; }
+.assignment-choice__option { display: grid; width: 100%; min-height: 55px; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: #33494b; font: inherit; text-align: left; cursor: pointer; }
+.assignment-choice__option:hover,
+.assignment-choice__option--active { background: #f0f7ec; }
+.assignment-choice__option[aria-selected="true"] { background: #e8f4e2; }
+.assignment-choice__option-marker { display: grid; width: 20px; height: 20px; place-items: center; border-radius: 50%; color: #579d35; }
+.assignment-choice__option > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
+.assignment-choice__option strong,
+.assignment-choice__option small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.assignment-choice__option strong { font-size: 12px; }
+.assignment-choice__option small { color: #728582; font-size: 10px; }
+.assignment-choice__option em { padding: 5px 7px; border-radius: 999px; background: #f1f5ef; color: #5d736e; font-size: 8px; font-style: normal; font-weight: 800; white-space: nowrap; }
+.assignment-choice__empty { padding: 25px 18px; color: #758784; font-size: 12px; text-align: center; }
+.assignment-choice__popover footer { padding: 8px 12px; border-top: 1px solid #e3ebe0; background: #f8faf7; color: #82918f; font-size: 9px; text-align: right; }
+.assignment-inline-error { margin: 7px 0 0; color: #ad3f45; font-size: 11px; font-weight: 700; }
+.survey-picker__selection { margin-top: 14px; }
+.assignment-form-grid--aligned { align-items: start; }
+.assignment-priority { min-width: 0; margin: 0; padding: 0; border: 0; }
+.assignment-priority legend { margin-bottom: 7px; color: #49615f; font-size: 12px; font-weight: 800; }
+.assignment-priority__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.assignment-priority__option { display: flex !important; min-height: 48px; box-sizing: border-box; grid-template-columns: none !important; align-items: center; gap: 9px !important; padding: 8px 10px; border: 1px solid #d3ded0; border-radius: 9px; background: #fff; cursor: pointer; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+.assignment-priority__option:hover { border-color: #8fb781; background: #fafcf9; }
+.assignment-priority__option input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.assignment-priority__option > span { display: grid; min-width: 0; flex: 1; gap: 1px; color: inherit !important; }
+.assignment-priority__option strong { color: #405654; font-size: 11px; }
+.assignment-priority__option small { color: #80908e; font-size: 9px; font-weight: 550; }
+.assignment-priority__option > svg { opacity: 0; color: #579f34; }
+.assignment-priority__option--selected { border-color: #78ad5f; background: #eff8e9; box-shadow: 0 0 0 2px rgba(111, 169, 83, .1); }
+.assignment-priority__option--selected > svg { opacity: 1; }
+.assignment-priority__option--high.assignment-priority__option--selected { border-color: #d7a33d; background: #fff8e8; }
+.assignment-priority__option--urgent.assignment-priority__option--selected { border-color: #d46a6e; background: #fff1f0; }
+.assignment-date__trigger > svg:first-child { flex: 0 0 auto; color: #5ca039; }
+.assignment-date__trigger > span { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.assignment-date__trigger small { color: #7b8e8a; font-size: 9px; font-weight: 750; text-transform: uppercase; }
+.assignment-date__trigger strong { font-size: 13px; }
+.assignment-date__popover { width: min(330px, calc(100vw - 40px)); padding: 12px; }
+.assignment-date__quick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
+.assignment-date__quick button { min-height: 34px; border: 1px solid #d1dfcd; border-radius: 7px; background: #f6faf3; color: #4f7c40; font-size: 10px; font-weight: 800; cursor: pointer; }
+.assignment-date__quick button:hover { border-color: #76aa5d; background: #eaf5e4; }
+.assignment-date__month { display: grid; grid-template-columns: 36px 1fr 36px; align-items: center; gap: 8px; margin-bottom: 8px; }
+.assignment-date__month strong { color: #344a48; font-size: 12px; text-align: center; }
+.assignment-date__month button { display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 7px; background: transparent; color: #536c68; cursor: pointer; }
+.assignment-date__month button:hover { background: #edf5e9; }
+.assignment-date__weekdays,
+.assignment-date__days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.assignment-date__weekdays span { padding: 5px 0; color: #859592; font-size: 9px; font-weight: 800; text-align: center; }
+.assignment-date__days button,
+.assignment-date__days > span { min-height: 34px; }
+.assignment-date__days button { border: 0; border-radius: 7px; background: transparent; color: #3e5653; font: inherit; font-size: 11px; cursor: pointer; }
+.assignment-date__days button:hover { background: #edf6e8; }
+.assignment-date__days button[aria-pressed="true"] { background: #61aa3c; color: #fff; font-weight: 850; }
+.assignment-date__days button:disabled { color: #c0cac7; cursor: not-allowed; }
+.assignment-schedule-help-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.assignment-schedule-help-row p { display: inline-flex; align-items: center; gap: 6px; }
+.assignment-clear-schedule { display: inline-flex; min-height: 36px; align-items: center; gap: 5px; padding: 0 9px; border: 0; border-radius: 7px; background: transparent; color: #58716d; font-size: 10px; font-weight: 750; cursor: pointer; }
+.assignment-clear-schedule:hover { background: #eef5eb; color: #3d6f32; }
 .survey-picker { display: grid; gap: 14px; }
 .survey-picker__search-field { display: flex; min-height: 48px; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid #cbdccb; border-radius: 8px; background: #fff; color: #68807d !important; transition: border-color .2s ease, box-shadow .2s ease; }
 .survey-picker__search-field:focus-within { border-color: #70ad52; box-shadow: 0 0 0 3px rgba(106, 177, 67, .12); }
@@ -457,6 +546,10 @@
   .survey-picker__selection { grid-template-columns: auto minmax(0, 1fr); }
   .survey-picker__selection dl { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-top: 4px; }
   .assignment-form-grid { grid-template-columns: 1fr; }
+  .assignment-choice__popover { position: absolute; max-width: calc(100vw - 68px); }
+  .assignment-choice__list { max-height: 250px; }
+  .assignment-date__popover { right: auto; }
+  .assignment-schedule-help-row { align-items: flex-start; flex-direction: column; }
   .assignment-preview { margin-inline: 20px; }
   .assignment-form-actions { padding-inline: 20px; }
   .assignment-form-actions .btn { width: 100%; }
@@ -466,6 +559,11 @@
 }
 
 @media (max-width: 520px) {
+  .assignment-priority__grid { grid-template-columns: 1fr; }
+  .assignment-choice__badge { display: none; }
+  .assignment-choice__option { grid-template-columns: 20px minmax(0, 1fr); }
+  .assignment-choice__option em { display: none; }
+  .assignment-date__popover { width: calc(100vw - 68px); }
   .survey-picker__selection { align-items: start; }
   .survey-picker__selection dl { grid-template-columns: 1fr 1fr; }
   .survey-picker__selection dl > div:last-child { grid-column: 1 / -1; }

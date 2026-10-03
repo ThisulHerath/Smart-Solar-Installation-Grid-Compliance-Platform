@@ -10,6 +10,8 @@ public class ManagedUserDto
     public string? PhoneNumber { get; set; }
     public List<string> Roles { get; set; } = new();
     public bool IsActive { get; set; }
+    public bool EmailVerified { get; set; }
+    public bool MustChangePassword { get; set; }
     public DateTime CreatedAt { get; set; }
 }
 
@@ -21,7 +23,7 @@ public class CreateManagedUserDto
     [Required, EmailAddress, StringLength(255)]
     public string Email { get; set; } = string.Empty;
 
-    [Required, MinLength(8)]
+    [Required, StringLength(64, MinimumLength = 12)]
     public string Password { get; set; } = string.Empty;
 
     [StringLength(50)]

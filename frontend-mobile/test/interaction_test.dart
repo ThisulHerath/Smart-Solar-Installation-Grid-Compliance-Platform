@@ -17,6 +17,8 @@ void main() {
     expect(Validators.code('12345x'), isNotNull);
     expect(Validators.code('123456'), isNull);
     expect(Validators.password('short'), isNotNull);
+    expect(Validators.password('alllowercase123!'), isNotNull);
+    expect(Validators.password('Strong password!123'), isNull);
     expect(Validators.confirm('different', 'password'), isNotNull);
     expect(
         solarDecimalFormatter

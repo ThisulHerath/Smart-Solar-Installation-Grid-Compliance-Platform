@@ -26,7 +26,7 @@ async function post<T>(
   body: unknown,
   authenticated = false
 ): Promise<T> {
-  const token = localStorage.getItem('smartsolar_token');
+  const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
 
   const response = await fetch(
     `${
@@ -52,6 +52,7 @@ async function post<T>(
   if (!response.ok) {
     if (response.status === 401 && authenticated) {
       localStorage.removeItem('smartsolar_token');
+      sessionStorage.removeItem('smartsolar_token');
       window.location.assign('/login');
     }
 
@@ -118,4 +119,10 @@ export const accountApi = {
       },
       true
     ),
+
+  requestStaffOnboarding: (newPassword: string) =>
+    post<Challenge>('staff-onboarding/request-otp', { newPassword }, true),
+
+  confirmStaffOnboarding: (challengeId: string, code: string) =>
+    post<{ message: string }>('staff-onboarding/confirm', { challengeId, code }, true),
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_solar_mobile/core/auth/providers/auth_provider.dart';
 import 'package:smart_solar_mobile/core/navigation/screens/home_screen.dart';
 import 'package:smart_solar_mobile/core/navigation/screens/welcome_screen.dart';
+import 'package:smart_solar_mobile/core/navigation/screens/staff_onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -27,7 +28,10 @@ class _SplashScreenState extends State<SplashScreen> {
     if (mounted) {
       if (auth.isAuthenticated) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(
+              builder: (_) => auth.requiresStaffOnboarding
+                  ? const StaffOnboardingScreen()
+                  : const HomeScreen()),
         );
       } else {
         Navigator.of(context).pushReplacement(

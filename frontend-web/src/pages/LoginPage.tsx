@@ -64,7 +64,7 @@ export function LoginPage() {
 
             login(result.token, result.user);
 
-            navigate('/dashboard', {
+            navigate(result.user.mustChangePassword ? '/staff-onboarding' : '/dashboard', {
               replace: true,
             });
           } catch (err) {

@@ -11,6 +11,9 @@ public class User
     public bool IsActive { get; set; } = true;
     public int SecurityVersion { get; set; }
     public DateTime? EmailVerifiedAt { get; set; }
+    public bool MustChangePassword { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public Guid? DeletedByUserId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

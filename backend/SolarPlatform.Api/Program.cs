@@ -77,9 +77,20 @@ builder.Services.AddAuthentication(options =>
             var id = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier);
             var version = context.Principal?.FindFirstValue("sv");
             var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
-            if (!Guid.TryParse(id, out var userId) || !int.TryParse(version, out var securityVersion) ||
-                !await db.Users.AsNoTracking().AnyAsync(u => u.Id == userId && u.IsActive && u.SecurityVersion == securityVersion))
+            var validIdentity = Guid.TryParse(id, out var userId);
+            if (!int.TryParse(version, out var securityVersion)) validIdentity = false;
+            var userState = validIdentity
+                ? await db.Users.AsNoTracking().Where(u => u.Id == userId)
+                    .Select(u => new { u.IsActive, u.SecurityVersion, u.MustChangePassword, u.DeletedAt }).SingleOrDefaultAsync()
+                : null;
+            if (userState == null || !userState.IsActive || userState.DeletedAt != null || userState.SecurityVersion != securityVersion)
                 context.Fail("This session has ended. Please sign in again.");
+            else if (userState.MustChangePassword)
+            {
+                var path = context.HttpContext.Request.Path;
+                var onboardingRequest = path.StartsWithSegments("/api/auth/staff-onboarding") || path.Equals("/api/auth/me");
+                if (!onboardingRequest) context.Fail("Complete first sign-in security setup before using the workspace.");
+            }
         }
     };
     options.TokenValidationParameters = new TokenValidationParameters

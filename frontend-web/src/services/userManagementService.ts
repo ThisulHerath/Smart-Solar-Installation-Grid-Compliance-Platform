@@ -9,6 +9,8 @@ export interface ManagedUser {
   phoneNumber?: string;
   roles: string[];
   isActive: boolean;
+  emailVerified: boolean;
+  mustChangePassword: boolean;
   createdAt: string;
 }
 
@@ -47,4 +49,15 @@ export const userManagementService = {
   create: (input: CreateManagedUserInput) => request<ManagedUser>('', 'POST', input),
   updateStatus: (id: string, isActive: boolean) =>
     request<ManagedUser>(`/${id}/status`, 'PUT', { isActive }),
+  delete: async (id: string) => {
+    const token = localStorage.getItem('smartsolar_token') ?? sessionStorage.getItem('smartsolar_token');
+    const response = await fetch(`${API_BASE_URL}/api/admin/users/${id}`, {
+      method: 'DELETE',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `Request failed (${response.status}).`);
+    }
+  },
 };

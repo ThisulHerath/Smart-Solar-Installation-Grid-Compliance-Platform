@@ -9,11 +9,20 @@ class Validators {
       RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value?.trim() ?? '')
           ? null
           : 'Enter a valid email, such as you@example.com.';
-  static String? password(String? value) => (value?.length ?? 0) < 12 ||
-          (value?.length ?? 0) > 64 ||
-          utf8.encode(value ?? '').length > 72
-      ? 'Use 12–64 characters (at most 72 bytes).'
-      : null;
+  static String? password(String? value) {
+    final password = value ?? '';
+    if (password.length < 12 ||
+        password.length > 64 ||
+        utf8.encode(password).length > 72 ||
+        !RegExp(r'[A-Z]').hasMatch(password) ||
+        !RegExp(r'[a-z]').hasMatch(password) ||
+        !RegExp(r'\d').hasMatch(password) ||
+        !RegExp(r'[^A-Za-z0-9]').hasMatch(password)) {
+      return 'Use 12–64 characters with uppercase, lowercase, number and symbol.';
+    }
+    return null;
+  }
+
   static String? code(String? value) => RegExp(r'^\d{6}$').hasMatch(value ?? '')
       ? null
       : 'Enter the six-digit verification code.';

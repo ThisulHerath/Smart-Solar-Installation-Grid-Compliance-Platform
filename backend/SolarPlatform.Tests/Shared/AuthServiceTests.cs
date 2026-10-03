@@ -131,4 +131,53 @@ public class AuthServiceTests
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _authService.LoginAsync(loginRequest));
     }
+
+    [Fact]
+    public async Task LoginAsync_StaffAccount_ReturnsFirstLoginSecurityState()
+    {
+        var user = new User
+        {
+            Email = "new.staff@smartsolar.local",
+            FullName = "New Staff Member",
+            PasswordHash = _passwordHasher.HashPassword("TemporaryPass!123"),
+            MustChangePassword = true,
+            EmailVerifiedAt = null
+        };
+        var role = new Role { Name = RoleConstants.FieldTechnician, Description = "Field technician" };
+        _dbContext.Roles.Add(role);
+        user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id });
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _authService.LoginAsync(new LoginRequestDto
+        {
+            Email = user.Email,
+            Password = "TemporaryPass!123"
+        });
+
+        Assert.True(result.User.MustChangePassword);
+        Assert.False(result.User.EmailVerified);
+    }
+
+    [Fact]
+    public async Task LoginAsync_SoftDeletedUser_IsRejected()
+    {
+        var user = new User
+        {
+            Email = "deleted.staff@smartsolar.local",
+            FullName = "Deleted Staff Member",
+            PasswordHash = _passwordHasher.HashPassword("TemporaryPass!123"),
+            IsActive = false,
+            DeletedAt = DateTime.UtcNow
+        };
+        _dbContext.Users.Add(user);
+        await _dbContext.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            _authService.LoginAsync(new LoginRequestDto
+            {
+                Email = user.Email,
+                Password = "TemporaryPass!123"
+            }));
+    }
 }

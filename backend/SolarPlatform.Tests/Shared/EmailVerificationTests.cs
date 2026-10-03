@@ -140,6 +140,56 @@ public class EmailVerificationTests
     }
 
     [Fact]
+    public async Task StaffFirstLogin_IsRestrictedUntilPasswordAndEmailAreVerified()
+    {
+        using var f = new Factory();
+        using var c = f.CreateClient();
+        const string email = "technician.onboarding@example.invalid";
+        const string temporaryPassword = "Temporary staff!123";
+        const string permanentPassword = "Permanent staff!456";
+
+        using (var scope = f.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            var role = await db.Roles.SingleAsync(item => item.Name == RoleConstants.FieldTechnician);
+            var user = new User
+            {
+                Email = email,
+                FullName = "Field Technician",
+                PasswordHash = hasher.HashPassword(temporaryPassword),
+                MustChangePassword = true,
+                EmailVerifiedAt = null
+            };
+            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = role.Id });
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+        }
+
+        var login = await c.PostAsJsonAsync("/api/auth/login", new { email, password = temporaryPassword });
+        login.EnsureSuccessStatusCode();
+        var auth = (await login.Content.ReadFromJsonAsync<AuthResponseDto>())!;
+        Assert.True(auth.User.MustChangePassword);
+        Assert.False(auth.User.EmailVerified);
+        c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.Token);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await c.GetAsync("/api/technician/jobs")).StatusCode);
+        var request = await c.PostAsJsonAsync("/api/auth/staff-onboarding/request-otp", new { newPassword = permanentPassword });
+        request.EnsureSuccessStatusCode();
+        var challenge = (await request.Content.ReadFromJsonAsync<EmailChallengeResponse>())!;
+        var confirmation = await c.PostAsJsonAsync("/api/auth/staff-onboarding/confirm", new { challengeId = challenge.ChallengeId, code = f.Mail.Code });
+        confirmation.EnsureSuccessStatusCode();
+
+        Assert.Equal(HttpStatusCode.Unauthorized, (await c.GetAsync("/api/auth/me")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await c.PostAsJsonAsync("/api/auth/login", new { email, password = temporaryPassword })).StatusCode);
+        var securedLogin = await c.PostAsJsonAsync("/api/auth/login", new { email, password = permanentPassword });
+        securedLogin.EnsureSuccessStatusCode();
+        var secured = (await securedLogin.Content.ReadFromJsonAsync<AuthResponseDto>())!;
+        Assert.False(secured.User.MustChangePassword);
+        Assert.True(secured.User.EmailVerified);
+    }
+
+    [Fact]
     public async Task DeletionIsBoundToOwnerAndPreservesAuditLinkedRecords()
     {
         using var f = new Factory(); using var c = f.CreateClient(); var auth = await f.Register(c); f.Clock.Time = f.Clock.Time.AddSeconds(61);

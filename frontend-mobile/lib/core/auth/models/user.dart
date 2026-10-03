@@ -4,6 +4,8 @@ class User {
   final String fullName;
   final String? phoneNumber;
   final List<String> roles;
+  final bool emailVerified;
+  final bool mustChangePassword;
   final DateTime createdAt;
 
   User({
@@ -12,6 +14,8 @@ class User {
     required this.fullName,
     this.phoneNumber,
     required this.roles,
+    this.emailVerified = false,
+    this.mustChangePassword = false,
     required this.createdAt,
   });
 
@@ -25,6 +29,8 @@ class User {
               ?.map((r) => r.toString())
               .toList() ??
           [],
+      emailVerified: json['emailVerified'] as bool? ?? false,
+      mustChangePassword: json['mustChangePassword'] as bool? ?? false,
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
@@ -38,6 +44,8 @@ class User {
       'fullName': fullName,
       'phoneNumber': phoneNumber,
       'roles': roles,
+      'emailVerified': emailVerified,
+      'mustChangePassword': mustChangePassword,
       'createdAt': createdAt.toIso8601String(),
     };
   }

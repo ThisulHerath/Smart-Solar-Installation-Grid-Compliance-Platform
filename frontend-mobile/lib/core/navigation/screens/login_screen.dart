@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:smart_solar_mobile/core/auth/providers/auth_provider.dart';
 import 'package:smart_solar_mobile/core/navigation/screens/forgot_password_screen.dart';
 import 'package:smart_solar_mobile/core/navigation/screens/home_screen.dart';
+import 'package:smart_solar_mobile/core/navigation/screens/staff_onboarding_screen.dart';
 import 'package:smart_solar_mobile/core/navigation/screens/register_screen.dart';
 import 'package:smart_solar_mobile/core/theme/solar_theme.dart';
 import 'package:smart_solar_mobile/core/utils/validators.dart';
@@ -31,8 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await auth.login(
         _emailController.text.trim(), _passwordController.text);
     if (success && mounted) {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (_) => auth.requiresStaffOnboarding
+              ? const StaffOnboardingScreen()
+              : const HomeScreen()));
     }
   }
 

@@ -5,6 +5,8 @@ export interface User {
   phoneNumber?: string;
   profileImageUrl?: string;
   roles: string[];
+  emailVerified?: boolean;
+  mustChangePassword?: boolean;
   createdAt: string;
 }
 
