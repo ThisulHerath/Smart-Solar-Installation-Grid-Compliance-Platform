@@ -217,14 +217,8 @@ class _ProposalScreenState extends State<ProposalScreen> {
                     ]),
               ),
               const SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: MediaQuery.sizeOf(context).width < 520 ? 2 : 4,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.22,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
+              _ProjectSpecsPanel(
+                specs: [
                   _ProjectSpec(
                       icon: Icons.bolt_rounded,
                       label: 'CAPACITY',
@@ -325,31 +319,96 @@ class _ProjectSpec extends StatelessWidget {
       required this.color});
 
   @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        child: Row(children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: SolarColors.muted,
+                        fontSize: 7,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: .7)),
+                const SizedBox(height: 4),
+                Text(value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                        color: SolarColors.text,
+                        fontSize: 14,
+                        height: 1,
+                        fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ]),
+      );
+}
+
+class _ProjectSpecsPanel extends StatelessWidget {
+  final List<_ProjectSpec> specs;
+  const _ProjectSpecsPanel({required this.specs});
+
+  @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(13),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: SolarColors.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(color: SolarColors.border),
+          boxShadow: const [
+            BoxShadow(
+                color: Color(0x0D173E44), blurRadius: 16, offset: Offset(0, 6)),
+          ],
         ),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(icon, color: color, size: 20),
-          const Spacer(),
-          Text(label,
-              style: const TextStyle(
-                  color: SolarColors.muted,
-                  fontSize: 7,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: .8)),
-          const SizedBox(height: 3),
-          Text(value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                  color: SolarColors.text,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800)),
-        ]),
+        child: LayoutBuilder(builder: (context, constraints) {
+          if (constraints.maxWidth >= 520) {
+            return Row(children: [
+              for (var index = 0; index < specs.length; index++) ...[
+                Expanded(child: specs[index]),
+                if (index < specs.length - 1)
+                  const SizedBox(
+                      height: 48,
+                      child:
+                          VerticalDivider(width: 1, color: SolarColors.border)),
+              ],
+            ]);
+          }
+
+          return Column(mainAxisSize: MainAxisSize.min, children: [
+            Row(children: [
+              Expanded(child: specs[0]),
+              const SizedBox(
+                  height: 48,
+                  child: VerticalDivider(width: 1, color: SolarColors.border)),
+              Expanded(child: specs[1]),
+            ]),
+            const Divider(height: 1, color: SolarColors.border),
+            Row(children: [
+              Expanded(child: specs[2]),
+              const SizedBox(
+                  height: 48,
+                  child: VerticalDivider(width: 1, color: SolarColors.border)),
+              Expanded(child: specs[3]),
+            ]),
+          ]);
+        }),
       );
 }
 
