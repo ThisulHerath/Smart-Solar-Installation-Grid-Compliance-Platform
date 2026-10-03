@@ -504,24 +504,24 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       elevation: 3,
       shadowColor: const Color(0x22173E44),
       child: SafeArea(
-        top: false,
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-          child: LayoutBuilder(builder: (context, constraints) {
-            final compact = constraints.maxWidth < 360;
-            final saveButton = OutlinedButton.icon(
-              onPressed: _saving ? null : _handleSaveInspection,
-              style: OutlinedButton.styleFrom(
+      top: false,
+      bottom: false,
+      child: Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      child: LayoutBuilder(builder: (context, constraints) {
+      final compact = constraints.maxWidth < 360;
+      final saveButton = OutlinedButton.icon(
+          onPressed: _saving ? null : _handleSaveInspection,
+           style: OutlinedButton.styleFrom(
                 backgroundColor: SolarColors.surfaceSoft,
                 foregroundColor: SolarColors.primary,
                 disabledBackgroundColor: const Color(0xFFE4E9E2),
                 disabledForegroundColor: SolarColors.muted,
                 side: const BorderSide(color: SolarColors.border),
                 minimumSize: const Size.fromHeight(48),
-              ),
-              icon: const Icon(Icons.save_outlined, size: 19),
-              label: const Text('Save Draft',
+            ),
+           icon: const Icon(Icons.save_outlined, size: 19),
+           label: const Text('Save Draft',
                   style: TextStyle(fontWeight: FontWeight.w700)),
             );
             final submitButton = FilledButton.icon(
@@ -834,6 +834,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                     : 'Confirm physical presence at survey site using device GPS coordinates.',
                                 style: const TextStyle(
                                     fontSize: 12, color: SolarColors.muted)),
+                            
                             if (_gpsCheckInError != null) ...[
                               const SizedBox(height: 10),
                               Container(
@@ -846,6 +847,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                       color: SolarColors.error
                                           .withValues(alpha: 0.3)),
                                 ),
+                                
                                 child: Row(children: [
                                   const Icon(Icons.error_outline,
                                       size: 17, color: SolarColors.error),
@@ -858,9 +860,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                 ]),
                               ),
                             ],
+                            
                             if (!_gpsCheckInRecorded) ...[
                               const SizedBox(height: 12),
-                              ElevatedButton.icon(
+                               ElevatedButton.icon(
                                 onPressed: _saving ? null : _handleGpsCheckIn,
                                 icon: const Icon(Icons.location_on, size: 16),
                                 label: const Text('Record GPS Check-in'),
@@ -1091,6 +1094,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           ],
                         ),
                       ),
+                      
                       const SizedBox(height: 16),
 
                       // Step 4: Photo Capture & Previews
@@ -1327,6 +1331,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                               ),
                                             ],
                                           )
+                                    
                                         : InkWell(
                                             onTap: _saving
                                                 ? null
@@ -1363,6 +1368,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                           ],
                         ),
                       ),
+                      
                       const SizedBox(height: 20),
 
                       // Compliance Assessment View
@@ -1403,6 +1409,7 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                                       color: SolarColors.warning,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold)),
+                              
                               if (job.compliance!.complianceNotes != null) ...[
                                 const SizedBox(height: 6),
                                 Text(job.compliance!.complianceNotes!,
