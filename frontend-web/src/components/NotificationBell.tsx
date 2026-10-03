@@ -8,7 +8,13 @@ export function NotificationBell() {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    const loadCount = () => api.getNotificationUnreadCount().then(setUnread).catch(() => undefined);
+    const loadCount = async () => {
+      try {
+        setUnread(await api.getNotificationUnreadCount());
+      } catch {
+        // Keep navigation usable when the API is briefly unavailable.
+      }
+    };
     void loadCount();
     const timer = window.setInterval(loadCount, 15000);
     return () => window.clearInterval(timer);

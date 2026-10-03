@@ -32,6 +32,21 @@
 .notifications-empty { display: grid; min-height: 260px; place-items: center; align-content: center; gap: 9px; padding: 30px; border: 1px dashed #cadad2; border-radius: 15px; background: #fbfdfb; color: #82918f; text-align: center; }
 .notifications-empty strong { color: #40575a; font-size: 16px; }
 .notifications-empty span { max-width: 380px; font-size: 12px; line-height: 1.5; }
+.notification-modal-backdrop { position: fixed; z-index: 160; inset: 0; display: grid; place-items: center; padding: 20px; background: #102f355c; backdrop-filter: blur(4px); }
+.notification-modal { position: relative; display: grid; width: min(100%, 500px); justify-items: center; padding: 34px 34px 28px; border: 1px solid #d8e7df; border-radius: 20px; background: #fff; box-shadow: 0 28px 80px #0d30384a; text-align: center; }
+.notification-modal__close { position: absolute; top: 14px; right: 14px; display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: 9px; background: #f3f6f3; color: #617676; cursor: pointer; }
+.notification-modal__close:hover { background: #e9f3e5; color: #4d912d; }
+.notification-modal__icon { display: grid; width: 62px; height: 62px; margin-bottom: 16px; place-items: center; border-radius: 18px; background: #e8f5e2; color: #559833; }
+.notification-modal > p { margin: 0 0 7px; color: #5c9e37; font-size: 9px; font-weight: 850; letter-spacing: .16em; }
+.notification-modal h2 { margin: 0; color: #293f43; font-size: 22px; line-height: 1.25; }
+.notification-modal__message { width: 100%; margin: 17px 0 12px; padding: 17px; border: 1px solid #e3ebe4; border-radius: 12px; background: #f8faf7; color: #52676a; font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
+.notification-modal time { color: #8a9998; font-size: 10px; }
+.notification-modal__actions { display: flex; width: 100%; gap: 10px; margin-top: 24px; }
+.notification-modal__actions button { display: inline-flex; flex: 1; min-height: 44px; align-items: center; justify-content: center; gap: 7px; padding: 10px 14px; border-radius: 9px; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.notification-modal__primary { border: 1px solid #0a5569; background: #0a5569; color: #fff; }
+.notification-modal__primary:hover { background: #074859; }
+.notification-modal__delete { border: 1px solid #eccacc; background: #fff; color: #b5484e; }
+.notification-modal__delete:hover { background: #fff1f1; }
 .is-spinning { animation: notification-spin .9s linear infinite; }
 @keyframes notification-spin { to { transform: rotate(360deg); } }
 @media (max-width: 650px) {
@@ -43,4 +58,6 @@
   .notification-actions button { flex: 1; justify-content: center; }
   .notification-card__main { padding: 15px 12px; }
   .notification-card__delete { margin-right: 8px; }
+  .notification-modal { padding: 30px 20px 22px; }
+  .notification-modal__actions { flex-direction: column; }
 }

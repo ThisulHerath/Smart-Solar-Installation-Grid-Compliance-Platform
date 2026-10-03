@@ -1,10 +1,12 @@
 import {
+  ArrowUpRight,
   Bell,
   CheckCheck,
   ClipboardList,
   HardHat,
   RefreshCw,
   Trash2,
+  X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +36,7 @@ export function NotificationsPage() {
   const [filter, setFilter] = useState<Filter>('all');
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<AppNotification | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -43,26 +46,34 @@ export function NotificationsPage() {
     [filter, items],
   );
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     setError('');
     try {
-      setItems(await api.getNotifications(100));
+      const notifications = await api.getNotifications(100);
+      setItems([...notifications].sort(
+        (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+      ));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load notifications.');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    const timer = window.setInterval(() => void load(false), 15000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const openItem = async (item: AppNotification) => {
     if (!item.isRead) {
       await api.markNotificationRead(item.id);
       setItems(values => values.map(value => value.id === item.id ? { ...value, isRead: true } : value));
+      item = { ...item, isRead: true };
     }
-    if (item.actionUrl) navigate(item.actionUrl);
+    setSelected(item);
   };
 
   const deleteItem = async (item: AppNotification) => {
@@ -71,6 +82,7 @@ export function NotificationsPage() {
     try {
       await api.deleteNotification(item.id);
       setItems(values => values.filter(value => value.id !== item.id));
+      if (selected?.id === item.id) setSelected(null);
       setNotice('Notification deleted.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete notification.');
@@ -161,6 +173,37 @@ export function NotificationsPage() {
           </article>
         ))}
       </section>
+
+      {selected && (
+        <div className="notification-modal-backdrop" role="presentation" onMouseDown={() => setSelected(null)}>
+          <section
+            className="notification-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="notification-detail-title"
+            onMouseDown={event => event.stopPropagation()}
+          >
+            <button type="button" className="notification-modal__close" aria-label="Close notification" onClick={() => setSelected(null)}>
+              <X size={19} />
+            </button>
+            <span className="notification-modal__icon"><NotificationIcon type={selected.type} /></span>
+            <p>NOTIFICATION</p>
+            <h2 id="notification-detail-title">{selected.title}</h2>
+            <div className="notification-modal__message">{selected.message}</div>
+            <time dateTime={selected.createdAt}>{new Date(selected.createdAt).toLocaleString()}</time>
+            <div className="notification-modal__actions">
+              {selected.actionUrl && (
+                <button type="button" className="notification-modal__primary" onClick={() => navigate(selected.actionUrl!)}>
+                  View related item <ArrowUpRight size={17} />
+                </button>
+              )}
+              <button type="button" className="notification-modal__delete" onClick={() => void deleteItem(selected)} disabled={busyId === selected.id}>
+                <Trash2 size={16} /> Delete notification
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
