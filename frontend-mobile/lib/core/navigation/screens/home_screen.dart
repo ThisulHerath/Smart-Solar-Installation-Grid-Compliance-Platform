@@ -1432,37 +1432,48 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Expanded(
         child: Material(
-          color: selected ? SolarColors.surfaceSoft : Colors.transparent,
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(12),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Badge(
-                    isLabelVisible: badgeCount > 0,
-                    label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
-                    backgroundColor: SolarColors.error,
-                    child: solarHome
-                        ? SolarHomeIcon(selected: selected)
-                        : Icon(icon,
+            child: SizedBox(
+              height: 58,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: 54,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: selected
+                              ? SolarColors.surfaceSoft
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Badge(
+                          isLabelVisible: badgeCount > 0,
+                          label: Text(badgeCount > 99 ? '99+' : '$badgeCount'),
+                          backgroundColor: SolarColors.error,
+                          child: solarHome
+                              ? SolarHomeIcon(selected: selected)
+                              : Icon(icon,
+                                  color:
+                                      selected ? SolarColors.primary : _muted,
+                                  size: 22)),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
                             color: selected ? SolarColors.primary : _muted,
-                            size: 21),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                          color: selected ? SolarColors.primary : _muted,
-                          fontSize: 11,
-                          fontWeight:
-                              selected ? FontWeight.w700 : FontWeight.w500))
-                ]),
-              ),
+                            fontSize: 10,
+                            height: 1,
+                            fontWeight:
+                                selected ? FontWeight.w700 : FontWeight.w500))
+                  ]),
             ),
           ),
         ),

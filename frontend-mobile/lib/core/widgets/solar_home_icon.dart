@@ -8,15 +8,9 @@ class SolarHomeIcon extends StatelessWidget {
   const SolarHomeIcon({super.key, this.selected = false});
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: 36,
-        height: 36,
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: SolarColors.surface,
-          shape: BoxShape.circle,
-          border: Border.all(color: SolarColors.border),
-        ),
+  Widget build(BuildContext context) => SizedBox(
+        width: 22,
+        height: 22,
         child: CustomPaint(
           painter: _SolarHomePainter(
             selected ? SolarColors.limeDark : SolarColors.muted,
