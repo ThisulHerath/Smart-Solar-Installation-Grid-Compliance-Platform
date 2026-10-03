@@ -51,4 +51,26 @@ void main() {
       isTrue,
     );
   });
+
+  testWidgets('forgot password link opens the reset password flow',
+      (tester) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: const MaterialApp(home: LoginScreen()),
+      ),
+    );
+
+    await tester.tap(find.text('Forgot Your Password?'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reset password'), findsOneWidget);
+    expect(find.text('Recover your account'), findsOneWidget);
+    expect(find.text('Send verification code'), findsOneWidget);
+    expect(find.byTooltip('Show new password'), findsOneWidget);
+    expect(find.byTooltip('Show confirmed password'), findsOneWidget);
+  });
 }
