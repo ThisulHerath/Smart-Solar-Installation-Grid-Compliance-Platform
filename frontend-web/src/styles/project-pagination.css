@@ -1,9 +1,8 @@
 .project-list { display: grid; gap: 18px; min-width: 0; }
 .project-list__cards { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-.workspace-dashboard .project-list .project-survey-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(180px, auto) 34px; align-items: center; gap: 6px 24px; min-width: 0; min-height: 112px; padding: 20px 18px; border: 1px solid #dce5e3; border-radius: 16px; background: #fff; box-shadow: 0 7px 20px rgba(18, 57, 65, 0.06); transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+.workspace-dashboard .project-list .project-survey-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 24px; min-width: 0; min-height: 112px; padding: 20px 18px; border: 1px solid #dce5e3; border-radius: 16px; background: #fff; box-shadow: 0 7px 20px rgba(18, 57, 65, 0.06); transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
 .workspace-dashboard .project-list .project-survey-card:hover { border-color: #b8d9d3; box-shadow: 0 11px 26px rgba(18, 57, 65, 0.1); transform: translateY(-1px); }
 .workspace-dashboard .project-list .project-survey-card::after { display: none; }
-.workspace-dashboard .project-list .project-survey-card > .badge { grid-column: 2; grid-row: 1; justify-self: end; max-width: 100%; min-height: 24px; box-sizing: border-box; white-space: normal; letter-spacing: 0; }
 .workspace-dashboard .project-list .project-survey-card h3 { grid-column: 1; grid-row: 1; margin: 0 !important; font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
 .workspace-dashboard .project-list .project-survey-card > p { grid-column: 1; margin: 0; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
 .workspace-dashboard .project-list .project-survey-card > p:has(a) { grid-column: 2; justify-self: end; margin: 0; font-size: 13px; }
@@ -11,18 +10,27 @@
 .workspace-dashboard .project-list .project-survey-card > .btn { grid-column: 2; grid-row: 2; justify-self: end; margin: 0; min-height: 32px; max-width: 100%; padding: 6px 12px; border: 1px solid #cddedc !important; background: #f4f8f7 !important; color: #0b596b; border-radius: 6px; font-size: 12px; white-space: normal; }
 .workspace-dashboard .project-list .project-survey-card > .btn:hover:not(:disabled) { background: #e8f1ef !important; }
 .workspace-dashboard .project-list .project-survey-card > .account-error { grid-column: 1; grid-row: 3; margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; color: #a5554d; font-size: 12px; }
-.project-list .project-survey-card > .project-delete { position: static; grid-column: 3; grid-row: 1 / span 2; z-index: 2; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #8b7775; cursor: pointer; }
+.project-survey-card__controls { position: relative; z-index: 2; grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 10px; }
+.project-survey-card__controls--draft { grid-row: 1 / span 3; }
+.project-survey-card__controls .badge { flex: 0 0 auto; min-height: 28px; box-sizing: border-box; white-space: nowrap; letter-spacing: .03em; }
+.project-survey-card__button-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.project-card-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; padding: 7px 12px; border: 1px solid #cddedc; border-radius: 8px; background: #fff; color: #0b596b; font: inherit; font-size: 12px; font-weight: 750; cursor: pointer; transition: background 150ms ease, border-color 150ms ease, transform 150ms ease; }
+.project-card-action:hover:not(:disabled) { border-color: #8dbeb4; background: #eff7f5; transform: translateY(-1px); }
+.project-card-action--submit { border-color: #0b6377; background: #0b6377; color: #fff; }
+.project-card-action--submit:hover:not(:disabled) { border-color: #084e5e; background: #084e5e; }
+.project-card-action:disabled { opacity: .55; cursor: default; }
+.project-survey-card__controls .project-delete { flex: 0 0 auto; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid #efd4d0; border-radius: 9px; background: #fff7f6; color: #b0524b; cursor: pointer; transition: background 150ms ease, border-color 150ms ease, transform 150ms ease; }
 @media (max-width: 700px) {
-  .workspace-dashboard .project-list .project-survey-card { grid-template-columns: minmax(0, 1fr) 34px; gap: 8px 12px; padding: 16px 12px; }
-  .workspace-dashboard .project-list .project-survey-card > .badge { grid-column: 1; grid-row: 1; justify-self: start; }
+  .workspace-dashboard .project-list .project-survey-card { grid-template-columns: minmax(0, 1fr); gap: 8px 12px; padding: 16px 12px; }
+  .project-survey-card__controls { grid-column: 1; grid-row: 1; align-items: flex-start; }
+  .project-survey-card__button-row { justify-content: flex-start; flex-wrap: wrap; }
   .workspace-dashboard .project-list .project-survey-card h3 { grid-row: 2; }
   .workspace-dashboard .project-list .project-survey-card > p,
   .workspace-dashboard .project-list .project-survey-card > p:has(a),
   .workspace-dashboard .project-list .project-survey-card > .account-error,
   .workspace-dashboard .project-list .project-survey-card > .btn { grid-column: 1; grid-row: auto; justify-self: start; }
-  .project-list .project-survey-card > .project-delete { grid-column: 2; grid-row: 1; }
 }
-.project-delete:hover:not(:disabled) { background: #fff0ef !important; }
+.project-delete:hover:not(:disabled) { border-color: #dcaaa5 !important; background: #ffecea !important; transform: translateY(-1px); }
 .project-delete:disabled { opacity: .4; cursor: default; }
 .project-delete:focus-visible { outline: 2px solid #b33838; outline-offset: 2px; }
 .workspace-dashboard .project-list .project-survey-card > .btn { color: #0b596b !important; }

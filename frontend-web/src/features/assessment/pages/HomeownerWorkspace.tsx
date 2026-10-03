@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import { Trash2, ChevronLeft, ChevronRight, Search, ClipboardCheck, MapPinned, ShieldCheck } from 'lucide-react';
+import { Trash2, ChevronLeft, ChevronRight, Search, ClipboardCheck, MapPinned, ShieldCheck, Pencil } from 'lucide-react';
 
 import { ValidatedForm } from '../../../components/ValidatedForm';
 import { DestructiveConfirmDialog } from '../../../components/DestructiveConfirmDialog';
@@ -76,12 +76,48 @@ export function HomeownerWorkspace() {
   const visibleSurveys = filteredSurveys.slice(pageStart, pageStart + 5);
 
   const [showForm, setShowForm] = useState(false);
+  const [editingSurvey, setEditingSurvey] = useState<Survey | null>(null);
   const [projectName, setProjectName] = useState('');
   const [address, setAddress] = useState('');
   const [kwh, setKwh] = useState('');
   const [area, setArea] = useState('');
   const [grid, setGrid] = useState('SinglePhase');
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation>();
+
+  const resetForm = () => {
+    setEditingSurvey(null);
+    setProjectName('');
+    setAddress('');
+    setKwh('');
+    setArea('');
+    setGrid('SinglePhase');
+    setSelectedLocation(undefined);
+  };
+
+  const openNewSurvey = () => {
+    resetForm();
+    setShowForm(true);
+  };
+
+  const openEditSurvey = (survey: Survey) => {
+    setEditingSurvey(survey);
+    setProjectName(survey.projectName);
+    setAddress(survey.propertyAddress);
+    setKwh(String(survey.monthlyKwh));
+    setArea(String(survey.roofAreaSqm));
+    setGrid(survey.gridType);
+    setSelectedLocation(
+      survey.latitude != null && survey.longitude != null
+        ? { latitude: survey.latitude, longitude: survey.longitude }
+        : undefined
+    );
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    resetForm();
+  };
 
   const [
     proposals,
@@ -196,7 +232,7 @@ export function HomeownerWorkspace() {
 
         <button
           className="btn btn-primary"
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => showForm ? closeForm() : openNewSurvey()}
           disabled={busy}
         >
           {showForm
@@ -221,7 +257,7 @@ export function HomeownerWorkspace() {
               e.preventDefault();
 
               void act(async () => {
-                await request('surveys', {
+                await request(editingSurvey ? `surveys/${editingSurvey.id}` : 'surveys', {
                   projectName,
                   monthlyKwh: Number(kwh),
                   roofAreaSqm: Number(area),
@@ -230,14 +266,9 @@ export function HomeownerWorkspace() {
                   latitude: selectedLocation?.latitude,
                   longitude: selectedLocation?.longitude,
                   roofOrientation: 'Unknown',
-                });
+                }, editingSurvey ? 'PUT' : 'POST');
 
-                setShowForm(false);
-                setProjectName('');
-                setAddress('');
-                setKwh('');
-                setArea('');
-                setSelectedLocation(undefined);
+                closeForm();
               });
             }}
           >
@@ -245,12 +276,12 @@ export function HomeownerWorkspace() {
               type="button"
               className="assessment-modal-close"
               aria-label="Close assessment form"
-              onClick={() => setShowForm(false)}
+              onClick={closeForm}
             >
               ×
             </button>
 
-            <h3 id="assessment-modal-title">Tell us about your home</h3>
+            <h3 id="assessment-modal-title">{editingSurvey ? 'Edit assessment draft' : 'Tell us about your home'}</h3>
 
             <label htmlFor="project-name">
               Project name
@@ -357,7 +388,7 @@ export function HomeownerWorkspace() {
               className="btn btn-primary"
               disabled={busy}
             >
-              {busy ? 'Saving…' : 'Save assessment draft'}
+              {busy ? 'Saving…' : editingSurvey ? 'Save changes' : 'Save assessment draft'}
             </button>
           </ValidatedForm>
         </div>
@@ -393,16 +424,34 @@ export function HomeownerWorkspace() {
             className="project-survey-card"
             key={survey.id}
           >
-            <button type="button" className="project-delete" title="Delete project" aria-label={`Delete project ${survey.projectName || survey.propertyAddress}`} disabled={busy || survey.surveyStatus === 'Processing'} onClick={() => {
-              setDeleteError('');
-              setDeleteTarget(survey);
-            }}><Trash2 size={17} /></button>
-            <span className={`badge ${survey.surveyStatus === 'Failed' ? 'badge-danger' : 'badge-emerald'}`}>
-              {survey.surveyStatus.replace(
-                /([a-z])([A-Z])/g,
-                '$1 $2'
-              )}
-            </span>
+            <div className={`project-survey-card__controls ${survey.surveyStatus === 'Draft' ? 'project-survey-card__controls--draft' : ''}`}>
+              <span className={`badge ${survey.surveyStatus === 'Failed' ? 'badge-danger' : 'badge-emerald'}`}>
+                {survey.surveyStatus.replace(/([a-z])([A-Z])/g, '$1 $2')}
+              </span>
+              <div className="project-survey-card__button-row">
+                {survey.surveyStatus === 'Draft' && (
+                  <>
+                  <button type="button" className="project-card-action" onClick={() => openEditSurvey(survey)} disabled={busy}>
+                    <Pencil size={16} /> Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="project-card-action project-card-action--submit"
+                    disabled={busy}
+                    onClick={() => void act(async () => {
+                      await request(`surveys/${survey.id}/submit`, {});
+                    })}
+                  >
+                    {busy ? 'Processing…' : 'Submit for analysis'}
+                  </button>
+                  </>
+                )}
+                <button type="button" className="project-delete" title="Delete project" aria-label={`Delete project ${survey.projectName || survey.propertyAddress}`} disabled={busy || survey.surveyStatus === 'Processing'} onClick={() => {
+                  setDeleteError('');
+                  setDeleteTarget(survey);
+                }}><Trash2 size={17} /></button>
+              </div>
+            </div>
 
             <h3 style={{ marginTop: 16 }}>
               {survey.projectName || survey.propertyAddress}
@@ -417,25 +466,6 @@ export function HomeownerWorkspace() {
                 ? 'Three phase'
                 : 'Single phase'}
             </p>
-
-            {survey.surveyStatus === 'Draft' && (
-              <button
-                className="btn btn-primary"
-                disabled={busy}
-                onClick={() =>
-                  void act(async () => {
-                    await request(
-                      `surveys/${survey.id}/submit`,
-                      {}
-                    );
-                  })
-                }
-              >
-                {busy
-                  ? 'Processing…'
-                  : 'Submit for solar analysis'}
-              </button>
-            )}
 
             {survey.surveyStatus === 'Failed' && (
               <>
