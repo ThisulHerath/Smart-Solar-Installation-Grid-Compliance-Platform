@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:smart_solar_mobile/providers/auth_provider.dart';
-import 'package:smart_solar_mobile/screens/welcome_screen.dart';
+import 'package:smart_solar_mobile/core/auth/providers/auth_provider.dart';
+import 'package:smart_solar_mobile/core/navigation/screens/welcome_screen.dart';
 
 void main() {
   for (final size in [const Size(320, 640), const Size(390, 844)]) {

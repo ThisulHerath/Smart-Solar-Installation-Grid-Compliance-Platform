@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:smart_solar_mobile/models/field_job.dart';
-import 'package:smart_solar_mobile/models/user.dart';
+import 'package:smart_solar_mobile/features/field_operations/models/field_job.dart';
+import 'package:smart_solar_mobile/core/auth/models/user.dart';
 
 void main() {
   group('FieldJob & Compliance Model Tests', () {

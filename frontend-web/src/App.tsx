@@ -35,55 +35,55 @@ const OperationsDashboard = lazy(() =>
 );
 
 const SurveysPage = lazy(() =>
-  import('./pages/SurveysPage').then((module) => ({
+  import('./features/assessment/pages/SurveysPage').then((module) => ({
     default: module.SurveysPage,
   }))
 );
 
 const FieldJobsPage = lazy(() =>
-  import('./pages/FieldJobsPage').then((module) => ({
+  import('./features/field-operations/pages/FieldJobsPage').then((module) => ({
     default: module.FieldJobsPage,
   }))
 );
 
 const FieldJobDetailPage = lazy(() =>
-  import('./pages/FieldJobDetailPage').then((module) => ({
+  import('./features/field-operations/pages/FieldJobDetailPage').then((module) => ({
     default: module.FieldJobDetailPage,
   }))
 );
 
 const AssignTechnicianPage = lazy(() =>
-  import('./pages/AssignTechnicianPage').then((module) => ({
+  import('./features/field-operations/pages/AssignTechnicianPage').then((module) => ({
     default: module.AssignTechnicianPage,
   }))
 );
 
 const CustomerLocationsPage = lazy(() =>
-  import('./pages/CustomerLocationsPage').then((module) => ({
+  import('./features/field-operations/pages/CustomerLocationsPage').then((module) => ({
     default: module.CustomerLocationsPage,
   }))
 );
 
 const ProposalsPage = lazy(() =>
-  import('./pages/ProposalsPage').then((module) => ({
+  import('./features/engineering/pages/ProposalsPage').then((module) => ({
     default: module.ProposalsPage,
   }))
 );
 
 const PendingApprovalsPage = lazy(() =>
-  import('./pages/PendingApprovalsPage').then((module) => ({
+  import('./features/engineering/pages/PendingApprovalsPage').then((module) => ({
     default: module.PendingApprovalsPage,
   }))
 );
 
 const ProposalDetailPage = lazy(() =>
-  import('./pages/ProposalDetailPage').then((module) => ({
+  import('./features/engineering/pages/ProposalDetailPage').then((module) => ({
     default: module.ProposalDetailPage,
   }))
 );
 
 const InventoryPage = lazy(() =>
-  import('./pages/InventoryPage').then((module) => ({
+  import('./features/inventory/pages/InventoryPage').then((module) => ({
     default: module.InventoryPage,
   }))
 );
@@ -95,7 +95,7 @@ const UserManagementPage = lazy(() =>
 );
 
 const TechnicianJobsPage = lazy(() =>
-  import('./pages/TechnicianJobsPage').then((module) => ({ default: module.TechnicianJobsPage }))
+  import('./features/field-operations/pages/TechnicianJobsPage').then((module) => ({ default: module.TechnicianJobsPage }))
 );
 
 export const App: React.FC = () => {
