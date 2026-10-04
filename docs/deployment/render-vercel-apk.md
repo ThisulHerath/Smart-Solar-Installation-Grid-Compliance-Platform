@@ -36,11 +36,11 @@ provider secrets.
 5. Wait for both services to become healthy. Verify:
    `https://<render-api-host>/api/health`.
 
-The Blueprint creates the AI component as a private Render service and shares
-one generated `AGENTIC_AI_INTERNAL_KEY` with the API. Private services require a
-paid Render compute plan. For a temporary student demonstration on free web
-services, change the AI entry and its `fromService.type` from `pserv` to `web`,
-set its plan to `free`, and keep the generated internal key enabled.
+The Blueprint creates both the API and AI component as Free web services and
+shares one generated `AGENTIC_AI_INTERNAL_KEY` between them. The AI service has
+a public URL because Render's Free plan does not support private services, but
+all workflow endpoints remain protected by the internal key. Only its health
+endpoint is intentionally public.
 
 ## 3. Deploy the web app on Vercel
 

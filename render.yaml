@@ -1,11 +1,12 @@
 services:
-  - type: pserv
+  - type: web
     name: smart-solar-agentic-ai
     runtime: docker
-    plan: 0.5c-512mb
+    plan: free
     region: singapore
     dockerContext: ./agentic-ai
     dockerfilePath: ./agentic-ai/Dockerfile
+    healthCheckPath: /health
     envVars:
       - fromGroup: smart-solar-internal
 
@@ -31,9 +32,9 @@ services:
         value: smart-solar
       - key: AGENTIC_AI_BASE_URL
         fromService:
-          type: pserv
+          type: web
           name: smart-solar-agentic-ai
-          property: hostport
+          envVarKey: RENDER_EXTERNAL_URL
       - key: DATABASE_CONNECTION_STRING
         sync: false
       - key: JWT_KEY
