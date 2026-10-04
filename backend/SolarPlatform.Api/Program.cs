@@ -131,9 +131,9 @@ var storageProvider = (Environment.GetEnvironmentVariable("FILE_STORAGE_PROVIDER
 
 if (storageProvider == "cloudinary")
 {
-    var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
-    var apiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY");
-    var apiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET");
+    var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME")?.Trim();
+    var apiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")?.Trim();
+    var apiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")?.Trim();
     if (string.IsNullOrWhiteSpace(cloudName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiSecret))
         throw new InvalidOperationException("Cloudinary storage requires CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET.");
 

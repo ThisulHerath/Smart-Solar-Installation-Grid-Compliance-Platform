@@ -27,12 +27,11 @@ provider secrets.
      can be used until Vercel assigns the real one.
    - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
      `CLOUDINARY_API_SECRET`: production Cloudinary credentials.
-4. For registration, password reset and account security emails, add one of
-   these sets to the `smart-solar-api` environment:
-   - SMTP: `EMAIL_PROVIDER=smtp`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`,
-     `SMTP_PASSWORD`, and optionally `SMTP_FROM_EMAIL`.
-   - Brevo SMTP: `EMAIL_PROVIDER=brevo`, `BREVO_SMTP_LOGIN`,
-     `BREVO_SMTP_KEY`, and `BREVO_FROM_EMAIL`.
+4. For registration, password reset and account security emails on Render Free,
+   configure the HTTPS provider: `EMAIL_PROVIDER=brevo-api`, `BREVO_API_KEY`,
+   and a Brevo-verified `BREVO_FROM_EMAIL`. Render Free blocks outbound SMTP
+   ports, so the `smtp` and `brevo` SMTP modes are intended for local or paid
+   hosting environments where those ports are available.
 5. Wait for both services to become healthy. Verify:
    `https://<render-api-host>/api/health`.
 

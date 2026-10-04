@@ -51,6 +51,12 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+      - key: EMAIL_PROVIDER
+        value: brevo-api
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_FROM_EMAIL
+        sync: false
 
 envVarGroups:
   - name: smart-solar-internal
