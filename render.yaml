@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smart-solar-agentic-ai
+    name: smart-solar-vn-ai17-2026-agent
     runtime: docker
     plan: free
     region: singapore
@@ -11,7 +11,7 @@ services:
       - fromGroup: smart-solar-internal
 
   - type: web
-    name: smart-solar-api
+    name: smart-solar-vn-ai17-2026-api
     runtime: docker
     plan: free
     region: singapore
@@ -33,7 +33,7 @@ services:
       - key: AGENTIC_AI_BASE_URL
         fromService:
           type: web
-          name: smart-solar-agentic-ai
+          name: smart-solar-vn-ai17-2026-agent
           envVarKey: RENDER_EXTERNAL_URL
       - key: DATABASE_CONNECTION_STRING
         sync: false
