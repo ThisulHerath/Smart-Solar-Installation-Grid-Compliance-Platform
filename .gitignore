@@ -8,8 +8,11 @@
 # .NET / C#
 bin/
 obj/
+.test-output/
+test-output-delete/
 .cloudinary-build/
 .cloudinary-test/
+**/wwwroot/uploads/
 *.user
 *.userosscache
 *.suo
@@ -44,12 +47,16 @@ htmlcov/
 
 # Dart / Flutter
 .dart_tool/
+.dart-local/
 .packages
 build/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
+android/key.properties
+*.jks
+*.keystore
 
 # IDE & OS
 .DS_Store

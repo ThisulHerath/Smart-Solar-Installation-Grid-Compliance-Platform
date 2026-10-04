@@ -33,3 +33,7 @@ jobs:
       - name: Build production bundle
         working-directory: frontend-web
         run: npm run build
+
+      - name: Run frontend tests
+        working-directory: frontend-web
+        run: npm test -- --pool=threads --maxWorkers=1

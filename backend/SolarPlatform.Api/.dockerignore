@@ -1,0 +1,7 @@
+bin/
+obj/
+TestResults/
+wwwroot/uploads/
+*.user
+*.suo
+.env

@@ -16,4 +16,4 @@ RUN dotnet publish "SolarPlatform.Api.csproj" -c Release -o /app/publish /p:UseA
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SolarPlatform.Api.dll"]
+ENTRYPOINT ["sh", "-c", "ASPNETCORE_URLS=http://0.0.0.0:${PORT:-5000} exec dotnet SolarPlatform.Api.dll"]

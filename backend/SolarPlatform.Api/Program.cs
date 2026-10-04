@@ -170,6 +170,11 @@ builder.Services.AddHttpClient<IGeocodingService, NominatimGeocodingService>(cli
 var agenticAiBaseUrl = Environment.GetEnvironmentVariable("AGENTIC_AI_BASE_URL")
     ?? builder.Configuration["AgenticAi:BaseUrl"]
     ?? "http://localhost:8000";
+if (!Uri.TryCreate(agenticAiBaseUrl, UriKind.Absolute, out _))
+{
+    // Render's `hostport` service reference intentionally has no URI scheme.
+    agenticAiBaseUrl = $"http://{agenticAiBaseUrl}";
+}
 builder.Services.AddHttpClient<IEquipmentPricingClient, EquipmentPricingClient>(client =>
 {
     client.BaseAddress = new Uri(agenticAiBaseUrl);
@@ -241,13 +246,20 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed In-Memory Database if in fallback mode
+// Initialize local fallback storage, or explicitly apply hosted database migrations.
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     if (context.Database.IsInMemory())
     {
         context.Database.EnsureCreated();
+    }
+    else if (string.Equals(
+        Environment.GetEnvironmentVariable("APPLY_DATABASE_MIGRATIONS"),
+        "true",
+        StringComparison.OrdinalIgnoreCase))
+    {
+        context.Database.Migrate();
     }
 }
 
