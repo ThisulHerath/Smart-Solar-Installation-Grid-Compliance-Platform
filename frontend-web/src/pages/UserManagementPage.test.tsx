@@ -52,7 +52,10 @@ describe('UserManagementPage', () => {
 
     fireEvent.change(screen.getByLabelText(/Full name/), { target: { value: 'Kasun Silva' } });
     fireEvent.change(screen.getByLabelText(/Email address/), { target: { value: 'KASUN@SMARTSOLAR.LK' } });
-    fireEvent.change(screen.getByLabelText(/Phone number/), { target: { value: '+94 77 555 1234' } });
+    const phoneInput = screen.getByLabelText(/Phone number/);
+    fireEvent.change(phoneInput, { target: { value: '12345678901234567890' } });
+    expect(phoneInput).toHaveValue('123456789012345');
+    fireEvent.change(phoneInput, { target: { value: '+94 77 555 1234' } });
     fireEvent.change(screen.getByPlaceholderText('Create or generate a secure password'), { target: { value: 'TemporaryPass!123' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create staff account' }));
 

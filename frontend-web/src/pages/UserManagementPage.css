@@ -19,9 +19,9 @@
 .user-create-intro > button { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid #d5e1d2; border-radius: 9px; background: #fff; color: #607673; cursor: pointer; }
 .user-create-intro > button:hover { background: #eef6ea; color: #416a37; }
 .user-create-form { display: grid; }
-.user-form-section { min-width: 0; margin: 0; padding: 22px 26px; border: 0; border-bottom: 1px solid #e5ede2; }
-.user-form-section legend { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; color: #344b4c; font-size: 14px; font-weight: 850; }
-.user-form-section legend > span { display: grid; width: 27px; height: 27px; place-items: center; border-radius: 8px; background: #eaf5e4; color: #559b34; font-size: 11px; }
+.user-form-section { min-width: 0; margin: 0; padding: 28px 26px; border: 0; border-bottom: 1px solid #e5ede2; }
+.user-form-section-title { display: flex; align-items: center; gap: 9px; margin: 0 0 22px; color: #344b4c; font-size: 14px; font-weight: 850; }
+.user-form-section-title > span { display: grid; width: 27px; height: 27px; flex: 0 0 auto; place-items: center; border-radius: 8px; background: #eaf5e4; color: #559b34; font-size: 11px; }
 .user-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 18px; }
 .user-create-form label { display: grid; gap: 7px; color: #526a67; font-size: 11px; font-weight: 800; }
 .user-create-form label > span { color: #b7474c; }
@@ -31,7 +31,7 @@
 .user-create-form input:focus { border-color: #6ba64e; box-shadow: 0 0 0 4px rgba(107, 166, 78, .12); }
 .user-create-form input[aria-invalid="true"] { border-color: #c65357; box-shadow: 0 0 0 3px rgba(198, 83, 87, .1); }
 .user-field-error { display: flex; gap: 5px; color: #ab4146; font-size: 10px; font-weight: 700; line-height: 1.4; }
-.user-form-help { margin: -8px 0 13px; color: #788a88; font-size: 11px; }
+.user-form-help { margin: 0 0 16px; color: #788a88; font-size: 11px; }
 .user-role-picker { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .user-role-picker label { display: grid; min-height: 96px; box-sizing: border-box; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 9px; padding: 13px; border: 1px solid #d2dfcf; border-radius: 10px; background: #fff; cursor: pointer; transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease; }
 .user-role-picker label:hover { border-color: #8eb77c; background: #fafdf8; transform: translateY(-1px); }
@@ -41,7 +41,7 @@
 .user-role-picker label > span { display: grid; min-width: 0; gap: 4px; color: inherit; }
 .user-role-picker strong { color: #3d5352; font-size: 12px; }
 .user-role-picker small { color: #7a8c89; font-size: 9px; font-weight: 550; line-height: 1.4; }
-.user-password-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -8px 0 13px; }
+.user-password-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 0 0 16px; }
 .user-password-heading p { max-width: 610px; margin: 0; color: #778987; font-size: 11px; line-height: 1.5; }
 .user-password-heading button { display: inline-flex; min-height: 38px; align-items: center; gap: 6px; padding: 0 11px; border: 1px solid #bfd5b6; border-radius: 8px; background: #f4faef; color: #4e8438; font-size: 10px; font-weight: 800; cursor: pointer; white-space: nowrap; }
 .user-password-field { max-width: 650px; }
