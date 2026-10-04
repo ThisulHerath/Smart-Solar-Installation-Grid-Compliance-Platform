@@ -1,0 +1,60 @@
+name: Android Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Restore dependencies
+        working-directory: frontend-mobile
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: frontend-mobile
+        run: flutter analyze
+
+      - name: Test
+        working-directory: frontend-mobile
+        run: flutter test
+
+      - name: Build production APK
+        working-directory: frontend-mobile
+        run: >-
+          flutter build apk --release
+          --dart-define=API_BASE_URL=https://smart-solar-vn-ai17-2026-api.onrender.com
+
+      - name: Prepare release asset
+        run: cp frontend-mobile/build/app/outputs/flutter-apk/app-release.apk smart-solar-android.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smart-solar-android-${{ github.ref_name }}
+          path: smart-solar-android.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: smart-solar-android.apk
+          generate_release_notes: true
+          body: |
+            Smart Solar Android evaluation build.
+
+            This APK connects to the production Render API. It is intended for direct installation and testing. A private upload keystore is still required before Play Store distribution.
