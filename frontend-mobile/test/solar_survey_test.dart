@@ -2,12 +2,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_solar_mobile/features/assessment/models/solar_survey.dart';
 import 'package:smart_solar_mobile/core/auth/models/user.dart';
 import 'package:smart_solar_mobile/core/auth/models/auth_response.dart';
+import 'package:smart_solar_mobile/core/utils/validators.dart';
 
 void main() {
   group('SolarSurvey Model & Result Parsing Tests', () {
     test('SolarSurvey parses basic survey data and status', () {
       final json = {
         'id': 'survey-123',
+        'projectName': 'Park Road Home Solar',
         'customerName': 'Sample Homeowner',
         'monthlyKwh': 1200.0,
         'roofAreaSqm': 80.0,
@@ -22,6 +24,7 @@ void main() {
       final survey = SolarSurvey.fromJson(json);
 
       expect(survey.id, 'survey-123');
+      expect(survey.projectName, 'Park Road Home Solar');
       expect(survey.monthlyKwh, 1200.0);
       expect(survey.roofAreaSqm, 80.0);
       expect(survey.gridType, 'SinglePhase');
@@ -120,6 +123,15 @@ void main() {
   });
 
   group('Survey Form Validation Logic', () {
+    test('Project name requires 3 to 120 non-whitespace characters', () {
+      expect(Validators.projectName(null), 'Please enter a project name.');
+      expect(Validators.projectName('  '), 'Please enter a project name.');
+      expect(Validators.projectName('AB'), 'Use at least 3 characters.');
+      expect(Validators.projectName('A' * 121),
+          'Use no more than 120 characters.');
+      expect(Validators.projectName('  Perera Home Solar  '), isNull);
+    });
+
     test(
         'Validates positive monthly usage, roof area, and non-empty property address',
         () {

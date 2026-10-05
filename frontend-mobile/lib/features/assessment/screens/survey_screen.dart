@@ -338,6 +338,19 @@ class _SurveyScreenState extends State<SurveyScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            _fieldLabel('Project name',
+                                'A memorable name your project team can recognize'),
+                            SolarField(
+                              controller: _projectNameController,
+                              validator: Validators.projectName,
+                              maxLength: 120,
+                              enabled: !_loading,
+                              style: const TextStyle(color: SolarColors.text),
+                              decoration: _fieldDecoration(
+                                  hint: 'e.g. Perera Home Solar',
+                                  icon: Icons.solar_power_outlined),
+                            ),
+                            const SizedBox(height: 5),
                             _fieldLabel('Monthly electricity use',
                                 'Check a recent electricity bill'),
                             SolarField(

@@ -5,6 +5,15 @@ class Validators {
       value == null || value.trim().isEmpty
           ? 'Please complete this field.'
           : null;
+
+  static String? projectName(String? value) {
+    final name = value?.trim() ?? '';
+    if (name.isEmpty) return 'Please enter a project name.';
+    if (name.length < 3) return 'Use at least 3 characters.';
+    if (name.length > 120) return 'Use no more than 120 characters.';
+    return null;
+  }
+
   static String? email(String? value) =>
       RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value?.trim() ?? '')
           ? null
