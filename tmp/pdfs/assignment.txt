@@ -1,0 +1,736 @@
+--- PAGE 1 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+INTEGRATED FULL-STACK AND AGENTIC AI
+APPLICATION DEVELOPMENT
+ASSIGNMENT 1 • GROUP ASSIGNMENT SPECIFICATION
+Programme BSc (Hons) in Information Technology, specializing in SE/AI
+Academic Level Year 3, Semester 1
+Assignment Type Group Full-Stack and Agentic AI Application Development Project
+25% of the final module mark (marked out of 100 and scaled). Together with
+Weighting the Mini Hackathon (15%), this forms the 40% Assignments component of
+SE3090.
+Normally 4 students; variations require written approval from the lecturer-in-
+Group Size
+charge.
+Duration 9 weeks (31 July – 30 September 2026)
+Mandatory Technologies ASP.NET Core Web API, PostgreSQL, React, Flutter and Agentic AI
+Level 4 — Full AI. Development AI use is allowed with disclosure. No external
+AI Use Level AI tools may be used during the final demonstration or viva; the submitted
+application’s Agentic AI subsystem must be run. See Section 18.
+One final evaluation: demonstration + viva, 100 marks (30 group / 70
+Evaluation
+individual)
+Friday, 31 July 2026 — published through the official Learning Management
+Release Date
+System (Course Web)
+Wednesday, 30 September 2026 at 11:50 PM — one submission by the
+Due Date
+nominated group leader through Course Web
+Important: Students must read the complete specification before selecting a domain or beginning
+implementation. Working software, traceable individual contribution, tests, documentation, deployment
+evidence and viva understanding are all required.
+Assignment 1 Specification 2026 | Page 1 of 17
+
+--- PAGE 2 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+1. A ssignment Overview
+Each group must design, implement, integrate, test and deploy one coherent software system that combines a web
+application, mobile application, RESTful backend, relational database and a meaningful Agentic AI workflow. The
+system must solve a credible real-world problem and demonstrate how modern software engineering frameworks
+work together.
+Integrated-system rule: The React and Flutter applications must use the same ASP.NET Core Web API,
+PostgreSQL database, user identity, permissions and business rules. Disconnected prototypes will not satisfy
+the assignment.
+1.1 Assignment Objectives
+• Apply ASP.NET Core, PostgreSQL, React and Flutter to a realistic full-stack problem.
+• Design secure REST APIs, relational data models, web interfaces and mobile workflows.
+• Implement a controlled Agentic AI workflow that plans, delegates, uses tools, validates results and requests
+human approval when required.
+• Use Git, GitHub, automated testing, code review, CI/CD, documentation and deployment as part of
+professional software development.
+• Justify framework and architecture decisions in writing through an Architecture Decision Record (ADR).
+• Demonstrate individual technical ownership and the ability to explain, modify and debug submitted work.
+1.2 Learning Outcome Alignment
+This assignment assesses all four learning outcomes of SE3090, as stated in the approved module outline:
+Learning
+Official Module Outline Wording
+Outcome
+Evaluate different types of software engineering frameworks used in web, mobile, cloud, and AI-
+LO1
+assisted software development.
+Apply suitable frameworks and tools to build web, mobile, and full-stack software applications
+LO2
+efficiently and effectively.
+Use best practices for integrating frameworks, managing collaborative development, applying
+LO3
+CI/CD, ensuring code quality, and deploying software solutions.
+Select appropriate frameworks, tools, and agentic AI-assisted approaches to meet specific
+LO4
+project and industry requirements.
+2. Required Technology Stack
+Area Requirement
+Backend C# and ASP.NET Core Web API. This is the mandatory public backend.
+Assignment 1 Specification 2026 | Page 2 of 17
+
+--- PAGE 3 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+Area Requirement
+Data Access Entity Framework Core with the PostgreSQL provider.
+Database PostgreSQL.
+React using functional components, hooks, routing and a justified state-management
+Web Application
+approach.
+Mobile Application Flutter and Dart using a justified state-management approach.
+Any suitable and justified framework, such as LangGraph (the stack used in labs),
+Agentic AI Microsoft Agent Framework, LlamaIndex agents, Google ADK, or a custom
+orchestration approach.
+Git and GitHub from the beginning of the project, including a GitHub Actions CI
+Version Control
+workflow (see Section 13).
+Suitable tools for backend, React, Flutter, integration, performance and Agentic AI
+Testing
+evaluation.
+Mandatory backend rule: React and Flutter must communicate only with the ASP.NET Core Web API. Where a
+Python Agentic AI service is used, it must operate as an internal service called by ASP.NET Core and must not
+be called directly by either client application.
+3. Group Structure and Individual Contribution
+The standard group size is four students. Each student must take primary ownership of one business component,
+so a four-student group must implement four primary components. If the lecturer-in-charge approves a different
+group size, the number of primary components must equal the number of students (for example, five students =
+five components). The lecturer-in-charge will confirm any proportional changes to the Agentic AI contributions and
+overall functional scope in writing.
+Primary
+Student Required Individual Evidence
+Component
+Backend, database, React, Flutter, tests, Git evidence, documentation
+Student 1 Component A
+and a distinct Agentic AI contribution.
+Backend, database, React, Flutter, tests, Git evidence, documentation
+Student 2 Component B
+and a distinct Agentic AI contribution.
+Backend, database, React, Flutter, tests, Git evidence, documentation
+Student 3 Component C
+and a distinct Agentic AI contribution.
+Backend, database, React, Flutter, tests, Git evidence, documentation
+Student 4 Component D
+and a distinct Agentic AI contribution.
+• There must be no project-manager-only, testing-only or documentation-only roles.
+Assignment 1 Specification 2026 | Page 3 of 17
+
+--- PAGE 4 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+• Every student must contribute technically across the required stack and must have an identifiable Agentic AI
+contribution.
+• Individual marks may be adjusted using Git history, pull requests, issue ownership, test evidence, code
+ownership, and responses to embedded viva and technical questions.
+• Code or features that a student cannot explain, modify or debug may receive reduced or zero individual marks.
+4. Domain and Functional Scope
+Each group must select a unique real-world domain. Suggested domains include healthcare appointments, event
+management, travel planning, inventory, vehicle services, education, property rental, food delivery, recruitment,
+agriculture, tourism, help-desk systems and community services.
+4.1 Minimum Domain Complexity
+• At least three user roles with different responsibilities and permissions.
+• For the standard four-student group, include at least four major business components with relational data and
+business-specific operations. An approved group-size variation must follow the one-component-per-student
+rule in Section 3.
+• CRUD operations plus status workflows, search, filtering, sorting, pagination and reporting or analytics.
+• Meaningful and different purposes for the React and Flutter applications.
+• At least one third-party service integration.
+• At least one complete cross-platform workflow involving React, Flutter, ASP.NET Core, PostgreSQL and Agentic
+AI.
+5. Part 1 – Secure ASP.NET Core RESTful API Backend
+The ASP.NET Core backend is the authoritative application layer for public REST APIs, authentication, authorization,
+validation, business rules, persistence, Agentic AI workflow initiation, approval and audit logging.
+Area Minimum Requirement
+Controllers, DTOs, service/application layer, suitable data-access abstraction and
+Architecture
+dependency injection.
+Correct routes, HTTP methods, status codes, request/response models and
+REST API
+asynchronous operations.
+JWT authentication, role-based authorization, protected endpoints, password hashing
+Security
+and secure configuration.
+Data Operations CRUD, search, filtering, sorting, pagination, history and business-specific operations.
+Server-side validation, global error handling, structured logging, CORS and
+Quality
+Swagger/OpenAPI.
+Endpoints for starting workflows, reviewing status, human approval and viewing
+Agent Integration
+execution summaries.
+Assignment 1 Specification 2026 | Page 4 of 17
+
+--- PAGE 5 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+Individual component minimum: Each student-owned component must include at least four meaningful API
+endpoints and at least one business-specific operation beyond basic CRUD.
+6. Part 2 – PostgreSQL Database
+• Design a normalized relational database with an ER diagram and clear relational schema.
+• Use primary keys, foreign keys, appropriate relationships, constraints, indexes and suitable PostgreSQL data
+types.
+• Use Entity Framework Core migrations and suitable seed data.
+• Apply transactions where required and maintain audit fields such as CreatedAt and UpdatedAt.
+• Persist only the Agentic AI workflow state and execution summaries required by the design; do not store
+hidden reasoning, passwords, tokens or unnecessary sensitive data.
+7. Part 3 – React Web Application
+The React application should primarily support administrative, staff, dashboard, reporting, business-data
+management, Agentic AI monitoring and approval functions.
+• Functional components, React Hooks, React Router and reusable component design.
+• A suitable state-management approach such as Context API, Redux Toolkit, Zustand or another justified option.
+• Complete ASP.NET Core API integration with protected routes and role-based navigation.
+• CRUD interfaces, validation, search, filters, sorting, pagination and dashboard views.
+• Responsive and accessible UI with loading, empty, success and error states.
+• Agent workflow monitoring, execution summaries and approve/reject/revise controls where relevant.
+8. Part 4 – Flutter Mobile Application
+The Flutter application should primarily support user-facing or operational workflows. It must be a genuine mobile
+application that consumes the shared ASP.NET Core API.
+• Reusable widgets, navigation/routing and a suitable state-management approach.
+• Registration, login, logout, secure token storage and protected screens.
+• Forms, validation, search, filtering, main business transactions, status tracking and history.
+• Responsive layouts with loading, empty and error states.
+• Agentic task submission, recommendation display and workflow status where suitable.
+• At least one meaningful device feature, such as camera/image picker, GPS/map, QR scanning, file upload,
+notifications or date/time selection.
+9. Part 5 – Agentic AI Subsystem
+The Agentic AI feature must solve a meaningful, domain-relevant, multi-step problem. It must not be limited to a
+generic chatbot, FAQ interface, single-prompt workflow or simple text generator.
+Minimum acceptance rule: The group must demonstrate at least one complete assessed workflow that satisfies
+every step in the “Minimum assessed workflow” row below.
+Assignment 1 Specification 2026 | Page 5 of 17
+
+--- PAGE 6 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+9.1 M inimum Agentic AI Requirements
+Requirement Expected Behaviour
+At least one assessed workflow must receive a domain objective; create a structured
+multi-step plan; delegate steps to distinct agent roles; call allow-listed tools using
+Minimum assessed validated inputs and structured outputs; persist workflow state; apply deterministic
+workflow checks such as schema or business-rule validation; pause a defined high-impact
+action for approval by an authorized user; and produce either an auditable result or
+a safe, clearly recorded failure.
+An agent counts as distinct only when it has an identifiable responsibility, a defined
+What counts as a input and output contract, controlled tool permissions and visible participation in the
+distinct agent? workflow. Renaming the same prompt or copying identical behaviour does not count
+as a separate agent.
+For the standard group, implement at least four distinct agents with clearly different
+responsibilities, such as planning or coordination, domain analysis, action or tool use,
+Specialized agents
+and validation or safety. Any approved adjustment must be confirmed in writing by
+the lecturer-in-charge.
+The system analyses a user objective, creates a structured multi-step plan and
+Planning and delegation
+delegates each step to an appropriate agent.
+Agents may use only allow-listed tools. Validate every tool input, return structured
+Controlled tools
+outputs, handle errors and apply least-privilege access.
+Persist the workflow ID, objective, plan, completed steps, tool results, validation
+Shared state
+results, errors, approval status and final outcome in structured, durable storage.
+Apply deterministic validation, such as schema checks and business rules, before
+Validation accepting outputs or allowing high-impact actions. Unsupported or unsafe actions
+must be rejected or returned for revision.
+At least one clearly defined high-impact action must pause until an authorized user
+Human approval
+approves, rejects or requests revision.
+Store or display auditable execution summaries, tool calls, timings, validation results,
+Observability
+errors, retries, approval decisions and the final result or safe-failure outcome.
+Apply role-based access, prompt and tool-input validation, output validation, secret
+Security
+protection, timeouts, retry limits and safe failure behaviour.
+Implementation flexibility: Students may use any suitable Agentic AI framework, model and orchestration
+method. The selected approach must meet the minimum acceptance scenario, be justified in the ADR, run
+reliably during evaluation, be secured and be integrated through ASP.NET Core.
+Assignment 1 Specification 2026 | Page 6 of 17
+
+--- PAGE 7 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+10. Required Integrated Architecture
+Figure 1. Reference integration architecture. Groups must adapt and justify the architecture for their selected domain.
+Figure 2. Required cross-platform workflow pattern.
+End-to-end evidence: At least one demonstrated workflow must begin in one client, pass through ASP.NET
+Core, PostgreSQL and Agentic AI, require review or approval in the other client, and return an updated status
+to the initiating user.
+Assignment 1 Specification 2026 | Page 7 of 17
+
+--- PAGE 8 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+11. Third-Party Integration
+Each system must integrate at least one meaningful third-party API or service, such as maps, weather, currency,
+email/SMS, payment sandbox, calendar, cloud storage, QR service or notifications.
+• Explain the business purpose and user benefit.
+• Route external-service access through the ASP.NET Core backend where appropriate.
+• Protect credentials and environment variables.
+• Handle timeouts, invalid responses, service failures and rate limits.
+• Validate and minimize any personal or sensitive data shared with the service.
+12. Testing Requirements
+Area Required Evidence
+Unit, service-layer, validation, authentication/authorization, controller and API
+Backend
+integration tests.
+Database PostgreSQL integration tests, constraints, migrations and transaction behaviour.
+React Component, form-validation, protected-route, API-integration and error-state tests.
+Flutter Unit, widget, form-validation, navigation and API-integration tests.
+End to End At least one complete Flutter/React – ASP.NET Core – PostgreSQL – Agentic AI workflow.
+Concurrent requests, response time, success/failure rate, database response and Agentic
+Performance
+AI latency.
+Evidence that at least one complete minimum acceptance workflow passes a suitable
+golden case, including correct planning and delegation, agent and tool selection,
+Agent Evaluation
+structured outputs, deterministic validation, business-rule compliance, approval
+enforcement, prompt-injection resistance, failure recovery and safe failure.
+Agent evaluation rule: LLM-as-a-judge may be used as supporting evidence, but it must not be the only
+evaluation method. Use rule-based assertions, schema validation, golden cases, deterministic validators and
+human review where appropriate.
+13. Git, CI/CD and Collaborative Development
+• Create the GitHub repository at the beginning of the project.
+• Use meaningful commits, feature branches, issues, pull requests, reviews and a project board.
+• Configure at least one GitHub Actions CI workflow that restores, builds and runs the automated backend tests
+on every push and pull request to the main branch. Additional pipelines (frontend build, lint, Flutter analyze,
+deployment) are encouraged.
+• Maintain clear evidence of task allocation, merge management and conflict resolution.
+• Each student must show regular technical contribution across the project lifecycle.
+• Artificial commit activity, final-day bulk uploads or unexplained copied code will not be accepted as evidence
+of contribution.
+Assignment 1 Specification 2026 | Page 8 of 17
+
+--- PAGE 9 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+14. Deployment and Documentation
+Component Deployment Requirement
+ASP.NET Core API Deploy to a suitable cloud platform and provide a working health URL and Swagger URL.
+PostgreSQL Deploy securely with migrations, restricted credentials and initialization instructions.
+React Deploy and provide a working live URL configured to use the deployed API.
+Flutter Submit complete source code and a runnable Android APK or approved equivalent.
+Deploy or run locally as appropriate; provide complete setup, model/framework
+Agentic AI
+requirements and startup order.
+Service cost and availability: You must be able to complete this assignment using institution-provided or no-cost
+services. Paid subscriptions are not required. Keep clear local setup instructions. If a required external service has
+a confirmed outage near submission or evaluation, inform that to evaluator and provide evidence of the outage.
+When you doing the evolution.
+14.1 README and Technical Documentation
+• Project overview, business problem, user roles, features and technology justification.
+• System architecture, Agentic AI architecture, database design and repository structure.
+• Installation, environment variables, database setup and startup instructions for all components.
+• API documentation, test instructions, deployment instructions, live URLs and test accounts.
+• Individual contributions, challenges, security considerations and AI usage declaration.
+14.2 Architecture Decision Record (ADR)
+As introduced in Lecture 01, each group must submit an Architecture Decision Record — a short document (one
+page per decision) capturing the context, options considered, decision and consequences for the group’s key
+technical choices. The ADR is the primary written evidence for LO4 and will be referenced during the viva.
+At minimum, record decisions for: the state-management approach in React and in Flutter, the Agentic AI
+framework and orchestration method, the database schema strategy for agent workflow state, and the cloud
+deployment platform. Three to six decisions is a typical, healthy range.
+Assignment 1 Specification 2026 | Page 9 of 17
+
+--- PAGE 10 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+15. Submission Guidelines
+Submission Item What You Must Submit
+Group leader and Group leader must make the only group submission through Course Web by 11:50
+deadline PM on Wednesday, 30 September 2026.
+One consolidated Combine all written work into one clearly organized PDF. Do not upload the group
+report (PDF) and individual written reports as separate files.
+Include the project overview and scope; requirements and user roles; full-stack and
+Agentic AI architecture; database and ER diagram; API, React and Flutter design;
+Group Report section technical report; software testing report; Agentic AI evaluation report; performance
+report; deployment report; ADRs; security considerations; diagrams; references; and
+the consolidated group AI usage declaration.
+Include one clearly labelled section for each student containing the contribution
+Individual Report statement; owned component and technical work; key commit, pull-request and test
+sections evidence; challenges and learning; individual AI usage log; approximately one-page
+AI reflection; and signed declaration.
+Include the repository URL, React URL, ASP.NET Core API or health URL, Swagger URL,
+Repository and
+PostgreSQL deployment evidence, Agentic AI setup or access information, required
+deployed system
+environment-variable names and startup instructions.
+Submit a runnable Android APK, or another format approved in writing, together
+Flutter APK
+with installation instructions.
+Provide a working demonstration-video (10 min) link. Sharing must be set so that
+Demonstration video
+anyone with the link can view it without requesting access.
+Keep the repository, demonstration video and all deployed services accessible to
+Required access period evaluators until at least Wednesday, 21 October 2026 (three weeks after the
+submission deadline).
+Before submitting: The group leader must open every submitted link in a private or incognito browser and confirm
+that evaluators can access it. Only one submission is required per group.
+Within the single consolidated report, the following section lengths are suggested for guidance only: technical report 10–
+15 pages; testing report 6–10 pages; Agentic AI evaluation report 5–8 pages; performance report 3–5 pages; deployment
+report 3–5 pages; and ADRs 3–6 pages. These are not graded limits; the quality and relevance of the evidence matter
+more than page count.
+Naming convention: Use SE3090_GroupNumber for all submitted items. (e.g. SE3090_G07)
+Assignment 1 Specification 2026 | Page 10 of 17
+
+--- PAGE 11 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+16. Final Evaluation – Complete Integrated System
+Total: 100 marks | Group contribution: 30 marks | Individual contribution: 70 marks. The mark out of 100 is
+scaled to 25% of the final module mark.
+The assignment will be assessed through one final evaluation only. The group must deliver a 10-minute
+demonstration of the complete integrated system, followed by a 20-minute viva and technical question session.
+Every student must be present and may be asked to explain, modify, test or debug their individual contribution.
+Contribution Criterion Marks
+Group Component Design and Business Logic 10
+Group Integrated Architecture, Agent Orchestration and State Management 10
+Group Documentation and Deployment 10
+Individual ASP.NET Core RESTful API Development 10
+Individual PostgreSQL Integration and Data Modelling 10
+Individual React Web Application 10
+Individual Flutter Mobile Application 10
+Individual Individual Agentic AI Contribution 12
+Individual API Integration, Security and Cross-Platform Functionality 10
+Individual Testing, CI and Git Workflow 8
+AI use during the evaluation: During the final demonstration and viva, students may not use external AI assistants,
+chatbots, IDE copilots or agentic coding tools to answer questions, generate explanations or modify the submitted
+work. The Agentic AI subsystem implemented as part of the submitted application must be executed during the
+demonstration.
+Assignment 1 Specification 2026 | Page 11 of 17
+
+--- PAGE 12 ---
+SLIIT • Faculty of Computing • Department of Software Engineering
+16.1 Marking Rubric – Final Evaluation
+Complete Integrated Full-Stack and Agentic AI System | Total: 100 Marks
+Group Contribution (30 Marks)
+Criterion Excellent Good Satisfactory Poor Very Poor
+All major components are clearly Core components and main
+Some components or business Components are poorly
+defined and fully functional. Business Main components and business business rules function, and a
+rules are implemented, but structured, mostly incomplete
+Component Design and rules are correctly implemented rules work with only minor basic end-to-end workflow is
+workflows are fragmented, or fail to implement the stated
+Business Logic (10) through suitable services and support functional or architectural demonstrated; some secondary
+unreliable or substantially business requirements. — 2
+a complete end-to-end workflow. — issues. — 8 marks rules, edge cases or integration
+incomplete. — 4 marks marks
+10 marks remain incomplete. — 6 marks
+Complete full-stack integration and
+one complete minimum Agentic AI The integrated workflow meets No complete assessed
+The core integrated workflow Only a partial integrated
+acceptance workflow are the minimum acceptance workflow is demonstrated;
+works and most acceptance workflow works; several
+Integrated Architecture, demonstrated. Distinct agents, scenario, with only minor issues agents are not distinct, state,
+elements are present, but one or mandatory acceptance
+Agent Orchestration and persisted state, allow-listed tools, in orchestration, state, logging, tools, validation or approval
+more elements are only partly elements are missing,
+State Management (10) deterministic validation, auditable tool controls, validation, are absent, or the feature is
+effective or supported by limited unreliable or weakly
+logs, safe failure and authorized approval or recovery. — 8 only a chatbot or disconnected
+evidence. — 6 marks integrated. — 4 marks
+human approval all work correctly. — marks prototype. — 2 marks
+10 marks
+The consolidated report is complete,
+The main Group Report and The consolidated report,
+well organized and contains all Group The consolidated report is
+The consolidated report, access Individual Report sections and required group or individual
+Report and Individual Report limited or poorly organized,
+information and deployment core deployment instructions are sections, or access details are
+Documentation and sections, ADRs, AI usage documents, and deployment or evaluator
+are mostly complete, with only provided, but several evidence missing, and major
+Deployment (10) evidence and working links. Required access is only partly working
+minor missing evidence, link or items, links, AI documents or components cannot be
+systems are deployed, the APK works, or difficult to reproduce. — 4
+setup issues. — 8 marks setup details are incomplete. — 6 deployed or executed. — 2
+evaluator access is clear and setup is marks
+marks marks
+fully reproducible. — 10 marks
+Individual Contribution (70 Marks)
+Criterion Excellent Good Satisfactory Poor Very Poor
+API component is complete and Core CRUD and API operations Only limited API functionality
+Main API functionality works
+follows REST conventions with DTOs, work, but notable gaps remain. works; major areas are The API contribution is missing
+with minor REST, validation,
+ASP.NET Core RESTful API validation, security, async operations, The student answers routine incomplete or unreliable. The or non-functional, or the
+security or architecture issues.
+Development (10) suitable architecture, exception questions or makes a simple student struggles to answer student cannot explain or
+The student answers most
+handling and correct status codes. change but has technical gaps. — questions or modify and modify it. — 2 marks
+related questions and can
+The student accurately answers 6 marks debug the work. — 4 marks
+SE3090 – Software Engineering Frameworks | Assignment 1 Specification 2026 | Page 12 of 17
+
+--- PAGE 13 ---
+SLIIT • Faculty of Computing • Department of Software Engineering
+Criterion Excellent Good Satisfactory Poor Very Poor
+related viva questions and can explain a suitable change. — 8
+explain, test, modify or debug the marks
+contribution. — 10 marks
+The contribution demonstrates
+suitable entities, relationships, The database is functional and Basic database integration
+Database integration is
+constraints, normalization, suitably modelled, with minor works, but notable gaps remain. The database contribution is
+limited, incomplete or
+migrations, indexing and data design or integration issues. The student answers routine missing or non-functional, or
+PostgreSQL Integration and inconsistent. The student
+integrity. The student accurately The student answers most questions but has difficulty the student cannot explain the
+Data Modelling (10) provides weak answers and
+answers related viva questions and questions and can explain or explaining some relationships, schema and integration. — 2
+struggles to modify or debug
+can explain, trace, modify or debug make a suitable database constraints or migrations. — 6 marks
+it. — 4 marks
+the database contribution. — 10 change. — 8 marks marks
+marks
+Uses reusable components, routing,
+suitable state management, Main React functionality works
+Core React screens and API
+protected routes, validation, with minor issues in structure, Limited React functionality is
+operations work, but notable The React contribution is
+responsive UI, loading and error state, UI, validation or error demonstrated. The student
+gaps remain. The student missing or non-functional, or
+React Web Application (10) states, and complete API integration. handling. The student answers struggles to answer questions
+answers routine questions or the student cannot explain or
+The student accurately answers most questions and can or modify and debug the
+completes a simple change with modify it. — 2 marks
+related viva questions and can complete and explain a suitable application. — 4 marks
+some difficulty. — 6 marks
+explain, modify or debug the React change. — 8 marks
+contribution. — 10 marks
+Contains reusable widgets, routing,
+state management, secure API Main Flutter functionality Core Flutter screens and API
+integration, validation, responsive works with minor issues in communication work, but Limited Flutter functionality is
+The Flutter contribution is
+screens, loading and error states, and architecture, state, UI or API notable gaps remain. The demonstrated. The student
+Flutter Mobile Application missing or non-functional, or
+a meaningful device feature. The handling. The student answers student answers routine struggles to answer questions
+(10) the student cannot explain or
+student accurately answers related most questions and can questions or completes a simple or modify and debug the
+modify it. — 2 marks
+viva questions and can explain, complete and explain a suitable change with some difficulty. — 6 application. — 4 marks
+modify or debug the Flutter change. — 8 marks marks
+contribution. — 10 marks
+A distinct, domain-relevant Agentic AI The distinct Agentic AI
+A basic but identifiable Agentic AI
+contribution is functional and contribution is functional and
+contribution participates in the A limited Agentic AI prototype
+integrated, with an identifiable relevant, with only minor issues The contribution is missing,
+workflow, but its contract, is shown, but its responsibility
+responsibility, defined input and in its contract, permissions, non-functional, disconnected
+Individual Agentic AI controls, tests or integration are or participation is unclear. The
+output contract, controlled tool validation, security, testing, or duplicates another agent,
+Contribution (12) incomplete. The student answers student struggles to explain
+permissions, validation, error observability or integration. and the student cannot
+routine questions but the agent's behaviour, tools,
+handling, security, documentation The student answers most explain or modify it. — 2 marks
+demonstrates notable gaps. — 7 state or controls. — 5 marks
+and tests. The student accurately questions and can explain a
+marks
+explains the agent, tools, state, suitable change. — 10 marks
+SE3090 – Software Engineering Frameworks | Assignment 1 Specification 2026 | Page 13 of 17
+
+--- PAGE 14 ---
+SLIIT • Faculty of Computing • Department of Software Engineering
+Criterion Excellent Good Satisfactory Poor Very Poor
+validation and approval flow and can
+modify or debug the contribution. —
+12 marks
+React and Flutter use the same API.
+Authentication, authorization, token Most integration and security The shared API and core cross-
+handling, validation, shared data, functions work with minor platform workflow function, but Only limited integration is Integration is absent or non-
+API Integration, Security Agentic AI approvals and security inconsistencies or incomplete notable gaps remain. The demonstrated. The student functional, or the student
+and Cross-Platform controls work correctly. The student edge cases. The student student answers routine provides weak answers and cannot explain the shared
+Functionality (10) accurately answers related viva answers most questions and questions but has difficulty struggles to trace or debug the workflow and security
+questions and can trace, modify or can explain the main cross- explaining some security or workflow. — 4 marks controls. — 2 marks
+debug the complete workflow. — 10 platform workflow. — 8 marks integration decisions. — 6 marks
+marks
+Comprehensive tests cover the
+required layers and Agentic AI. CI Some relevant tests and basic Git
+Suitable testing, CI and Git Few meaningful tests are
+passes, and Git history shows regular and CI evidence are provided. Almost no meaningful testing,
+practices are demonstrated provided, CI is absent or
+reviewed contributions with clear The student answers routine CI or Git evidence is provided,
+Testing, CI and Git with only minor missing unreliable, and Git evidence is
+ownership. The student accurately questions but demonstrates and the student cannot
+Workflow (8) evidence. The student answers weak. The student struggles
+answers related viva questions, limited understanding of explain the available evidence.
+most related questions to answer related questions.
+explains the tests, CI workflow and coverage or workflow decisions. — 1 mark
+correctly. — 6 marks — 2 marks
+Git evidence, and can diagnose a — 4 marks
+relevant failure. — 8 marks
+Final Evaluation Total = 30 Group + 70 Individual = 100 Marks → scaled to 25% of the module mark.
+Rubric application and viva note: The five listed performance levels represent performance-band anchors, and evaluators may award intermediate marks. To receive full marks for an individual
+criterion, the student must demonstrate the required work, correctly answer the related viva questions and, where requested, explain, test, modify or debug the work. If the student cannot
+demonstrate understanding or ownership, the criterion mark will be reduced; where no relevant evidence is provided, zero marks may be awarded.
+SE3090 – Software Engineering Frameworks | Assignment 1 Specification 2026 | Page 14 of 17
+
+--- PAGE 15 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks
+ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+17. Demonstration and Viva Requirements
+17.1 Demonstration Checklist
+• ☐ Login using different roles and demonstrate protected operations.
+• ☐ Demonstrate CRUD and a business-specific workflow and show PostgreSQL data changes and Swagger
+documentation.
+• ☐ Demonstrate React and Flutter using the same ASP.NET Core API.
+• ☐ Run the application’s Agentic AI subsystem and demonstrate the complete minimum acceptance
+workflow: domain objective, structured plan, distinct agent roles, allow-listed tool use, persisted state,
+deterministic validation, authorized approval, and an auditable result or safe failure.
+• ☐ Demonstrate human approval and execution-history summaries.
+• ☐ Show error handling, tests, the passing CI workflow, deployed applications and GitHub contribution history.
+17.2 Viva Scope
+• Explain a controller, service, DTO, database relationship, constraint, migration or index.
+• Explain authentication, authorization, state management, secure storage and API integration.
+• Explain an agent role, tool, orchestration decision, shared state, validation, security control and human
+approval.
+• Explain a test, Git contribution, CI workflow step, deployment decision, third-party integration or a decision
+recorded in the ADR.
+• Modify a small feature, validation rule or business rule, or debug a failed workflow.
+18. Usage of AI
+This assessment is designed using the CLEAR Framework and the AI Assessment Scale (Perkins, Furze, Roe &
+MacVaugh, 2024). The permitted level of AI use, the tasks it applies to, the disclosure required and the marks
+awarded for process are set out below.
+AI Use Level — Level 4 (Full AI): AI tools may be used extensively during the permitted development tasks in
+Section 18.1 when all use is disclosed, verified and understood. During the final demonstration and viva, no
+external AI assistant, chatbot, IDE copilot or agentic coding tool may be used to answer questions, generate
+explanations or modify the submitted work (Level 1 — No AI).
+18.1 Where AI Tools May Be Used
+AI tools — chat assistants, IDE copilots and agentic coding tools — may be used for the tasks below. In every case
+the group remains fully responsible for the correctness, security, originality and understanding of what is submitted.
+Task / Section Permitted use of AI tools
+Domain & requirements Brainstorm domains, roles, features and user stories; research the domain.
+(Section 4) The final scope must be your own and defensible at the viva.
+Architecture & ADR (Sections Explore options, compare frameworks, draft the ADR. The decision taken and
+10, 14.2) its justification must be the group’s own reasoning.
+Assignment 1 Specification 2026 | Page 15 of 17
+
+--- PAGE 16 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks
+ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+Task / Section Permitted use of AI tools
+Generate, refactor and debug ASP.NET Core code; design schema,
+Backend & database (Sections 5,
+migrations, seed data, indexes and the ER diagram. All owner-reviewed and
+6)
+tested.
+Scaffold components and widgets, state management, routing, validation,
+React & Flutter (Sections 7, 8)
+styling, secure storage and device features.
+Agent design, prompt engineering, tool definitions, orchestration, validation
+Agentic AI subsystem (Section 9) and safety controls. Prompt engineering and human-in-the-loop validation
+are examinable at the viva.
+Generate and run tests and test data; write CI workflows; configure and
+Testing, CI/CD & deployment
+troubleshoot deployment. Tests must be executed and understood, not only
+(Sections 12–14)
+generated.
+Reports, README & diagrams Draft, structure and proofread. All facts, figures, screenshots, test results and
+(Sections 14.1, 15) evaluation findings must be your own.
+18.2 Where AI Tools May Not Be Used
+• Final demonstration and viva. This evaluation is conducted under Level 1 (No AI). You may not use external AI
+assistants or agentic coding tools to answer questions, generate explanations or modify the submitted work.
+• Work you cannot explain. Any code, test, diagram or documentation you cannot explain, test or modify may
+receive reduced or zero individual marks (Section 3).
+• Fabricated evidence. Back-filled commit history, invented AI-log entries, or test/evaluation results that were
+not actually produced.
+• Confidential data and others’ work. Never share credentials, API keys, private or institutional data with an AI
+tool, or commit them to GitHub. Presenting another party’s work as your own remains plagiarism, and the
+individual reflection must be your own writing.
+18.3 Disclosure, Process Marks and Reflection
+Disclosure. Each student must keep an individual AI usage log showing the date, tool and model, task or
+section, what the tool produced, what was changed or rejected, and how the result was verified. Include this
+log in that student’s Individual Report section of the consolidated report. Include one consolidated group AI
+usage declaration in the Group Report section, confirming that all AI use has been disclosed and that every
+member can explain, test and modify the work submitted under their name.
+Process marks. As AI use is permitted at Level 4, 30 marks assess the development process: 15 marks for technical
+understanding and ownership assessed through the viva and embedded across the individual criteria, 5 core marks
+for Testing, CI and Git Workflow, and 10 marks for Documentation and Deployment. These marks are assessed
+through the rubric in Section 16.1. This meets the CLEAR minimum of thirty percent process marks for a Level 4
+assessment.
+Reflection (marked). Each student must include an approximately one-page individual reflection in their
+Individual Report section of the consolidated report. It is marked under Documentation and Deployment and
+may be discussed during the viva. Address the following:
+Assignment 1 Specification 2026 | Page 16 of 17
+
+--- PAGE 17 ---
+BSc (Hons) in Information Technology – Specializing in Software Engineering
+BSc (Hons) in Information Technology – Specializing in Artificial Intelligence.
+SE3090 – Software Engineering Frameworks
+ASSIGNMENT 1
+Year 3 | Semester 1 | 2026
+• Which AI tools, if any, were used, and at which stages?
+• What did the AI tools do well, and what did they get wrong?
+• What did you change, add or reject from the AI output, and why?
+• What did you learn about your own skills and understanding?
+The AI rules above were agreed with the SE3090 cohort and are published on Course Web (SE3090 → Assignments →
+Assignment 1). A reflection that is AI-generated, or that does not match the student’s Git history and AI usage log, will
+not receive credit.
+19. Academic Integrity
+AI use that complies with Section 18 is permitted and expected. The following requirements apply to all submitted
+work, whether or not AI tools were used.
+• Do not submit code or features that you cannot explain, test or modify.
+• Acknowledge external libraries, APIs, tutorials, sample code and AI assistance.
+• Maintain the AI usage log and submit the AI usage declaration.
+• Do not expose credentials, private data or protected institutional information.
+• Copying another group’s code, agent design or reports, or submitting commissioned work, is a serious
+academic offence.
+• Plagiarism in any form is not permitted, and standard SLIIT academic-integrity and plagiarism procedures apply
+to all submitted work.
+20. Final Student Checklist
+☐ Required number of primary business components
+☐ ASP.NET Core API and PostgreSQL working
+completed (one per student)
+☐ JWT authentication and role-based authorization ☐ React and Flutter applications working through the
+completed shared API
+☐ At least four specialized agents with controlled tools ☐ Validation, observability and human approval
+and structured state implemented
+☐ Traditional testing, Agentic AI evaluation and
+☐ Meaningful third-party integration completed
+performance testing completed
+☐ GitHub Actions CI workflow building and running ☐ ADR completed with justified framework and
+tests. architecture decisions
+☐ One consolidated report containing the Group
+☐ React, ASP.NET Core and PostgreSQL deployed;
+Report, all Individual Reports, diagrams and required
+Flutter APK generated
+links completed
+☐ AI usage declared and no secrets committed to
+☐ Git contribution visible for every member
+GitHub
+☐ Contribution statements, AI logs, group declaration
+☐ Demonstration and viva prepared with no external
+and individual reflections included in the consolidated
+AI use
+report
+Assignment 1 Specification 2026 | Page 17 of 17
