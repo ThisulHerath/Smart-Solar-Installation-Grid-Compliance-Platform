@@ -32,6 +32,10 @@ class SafetyGuardrailAgent:
     def __init__(self, name: str = "SafetyGuardrailAgent"):
         self.name = name
 
+    @staticmethod
+    def _normalize_status(value: str | None) -> str:
+        return (value or "").strip().upper()
+
     def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Backward compatibility for generic state execution in test_workflow.py."""
         val = dict(state.get("validation_results", {}))
@@ -81,6 +85,10 @@ class SafetyGuardrailAgent:
 
         now = datetime.now(timezone.utc).isoformat()
 
+        compliance_status = self._normalize_status(data.grid_compliance_status)
+        risk_level = self._normalize_status(data.risk_level)
+        safety_notes = (data.safety_notes or "").strip()
+
         # ── Check 1: System Size (kW threshold) ───────────────────────────────
         if data.recommended_kw > HIGH_IMPACT_KW_THRESHOLD:
             requires_approval = True
@@ -106,12 +114,12 @@ class SafetyGuardrailAgent:
         })
 
         # ── Check 2: Grid Compliance Status ───────────────────────────────────
-        compliance_upper = data.grid_compliance_status.upper()
-        if compliance_upper not in {"COMPLIANT", *NON_COMPLIANT_STATUSES}:
+        allowed_statuses = {"COMPLIANT"} | NON_COMPLIANT_STATUSES
+        if compliance_status not in allowed_statuses:
             requires_approval = True
             issues.append("A confirmed grid compliance result is missing. Safety cannot be confirmed.")
             recommendations.append("Complete site compliance assessment and generate an updated proposal before approval.")
-        elif compliance_upper in NON_COMPLIANT_STATUSES:
+        elif compliance_status in NON_COMPLIANT_STATUSES:
             requires_approval = True
             issues.append(
                 f"Grid compliance status '{data.grid_compliance_status}' indicates non-conformance "
@@ -129,14 +137,13 @@ class SafetyGuardrailAgent:
         logs.append({
             "agent_name": self.name,
             "step_name": "compliance_status_check",
-            "status": "requires_approval" if compliance_upper in NON_COMPLIANT_STATUSES else "passed",
+            "status": "requires_approval" if compliance_status in NON_COMPLIANT_STATUSES else "passed",
             "started_at": now, "completed_at": now,
             "output_summary": f"Compliance: {data.grid_compliance_status}"
         })
 
         # ── Check 3: Risk Level ───────────────────────────────────────────────
-        risk_upper = data.risk_level.upper()
-        if risk_upper in HIGH_RISK_LEVELS:
+        if risk_level in HIGH_RISK_LEVELS:
             requires_approval = True
             issues.append(
                 f"Risk level '{data.risk_level}' is elevated. "
@@ -150,15 +157,15 @@ class SafetyGuardrailAgent:
         logs.append({
             "agent_name": self.name,
             "step_name": "risk_level_check",
-            "status": "requires_approval" if risk_upper in HIGH_RISK_LEVELS else "passed",
+            "status": "requires_approval" if risk_level in HIGH_RISK_LEVELS else "passed",
             "started_at": now, "completed_at": now,
             "output_summary": f"Risk: {data.risk_level}"
         })
 
         # ── Check 4: Safety Notes from Site Inspection ────────────────────────
         danger_keywords = ["unsafe", "danger", "hazard", "exposed wire", "structural", "risk"]
-        if data.safety_notes:
-            notes_lower = data.safety_notes.lower()
+        if safety_notes:
+            notes_lower = safety_notes.lower()
             flagged = [kw for kw in danger_keywords if kw in notes_lower]
             if flagged:
                 requires_approval = True
@@ -180,7 +187,7 @@ class SafetyGuardrailAgent:
         })
 
         # ── Check 5: Three-Phase Large System ────────────────────────────────
-        grid_type_lower = data.grid_type.lower()
+        grid_type_lower = (data.grid_type or "").lower()
         is_three_phase = "three" in grid_type_lower or "3phase" in grid_type_lower
         if is_three_phase and data.recommended_kw > 5.0:
             recommendations.append(
@@ -191,20 +198,17 @@ class SafetyGuardrailAgent:
         # ── Determine Safety Status ───────────────────────────────────────────
         if not issues:
             safety_status = "SAFE"
-            risk_level = "LOW"
-        elif len(issues) == 1 and data.recommended_kw <= HIGH_IMPACT_KW_THRESHOLD:
-            safety_status = "REQUIRES_APPROVAL"
-            risk_level = "MEDIUM"
+            final_risk_level = "LOW"
         else:
             safety_status = "REQUIRES_APPROVAL"
-            risk_level = data.risk_level if data.risk_level.upper() in HIGH_RISK_LEVELS else "MEDIUM"
+            final_risk_level = risk_level if risk_level in HIGH_RISK_LEVELS else "MEDIUM"
 
         # Build summary
         if issues:
             summary = (
                 f"Safety evaluation identified {len(issues)} concern(s) requiring attention. "
                 f"System: {data.recommended_kw:.2f}kW, {data.panel_count} panels. "
-                f"Grid: {data.grid_compliance_status}. Risk: {risk_level}."
+                f"Grid: {data.grid_compliance_status}. Risk: {final_risk_level}."
             )
         else:
             summary = (
@@ -222,8 +226,8 @@ class SafetyGuardrailAgent:
 
         return GuardrailResult(
             safety_status=safety_status,
-            risk_level=risk_level,
-            requires_approval=requires_approval,
+            risk_level=final_risk_level,
+            requires_approval=requires_approval or bool(issues),
             issues=issues,
             recommendations=recommendations,
             recommendation_summary=summary,

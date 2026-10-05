@@ -86,5 +86,23 @@ class TestProposalWorkflow(unittest.TestCase):
         self.assertTrue(validated["requires_approval"])
         self.assertTrue(len(validated["override_reason"]) > 0)
 
+    def test_statuses_are_normalized_and_whitespace_tolerated(self):
+        """Whitespace and case variants should not bypass the guardrail checks."""
+        payload = {
+            "recommended_kw": 4.5,
+            "panel_count": 11,
+            "inverter_size_kw": 4.5,
+            "grid_compliance_status": " compliant ",
+            "compliance_notes": "all checks passed",
+            "risk_level": " critical ",
+            "estimated_cost_lkr": 540000.0
+        }
+
+        res = run_guardrail_workflow(payload)
+
+        self.assertTrue(res.requires_approval)
+        self.assertEqual(res.safety_status, "REQUIRES_APPROVAL")
+        self.assertTrue(any("critical" in issue.lower() for issue in res.issues))
+
 if __name__ == '__main__':
     unittest.main()
