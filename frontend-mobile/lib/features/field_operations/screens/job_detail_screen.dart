@@ -362,7 +362,10 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       }
       setState(
           () => _successMessage = 'Photo ($photoType) uploaded successfully.');
-      await _loadJobDetails();
+      // Keep the in-progress form values intact. Reloading the job here would
+      // restore the last server-side draft and clear measurements that the
+      // technician has typed but has not saved yet. The uploaded photo is
+      // already reflected locally through `_photoBytes` and `_photoUrls`.
     } catch (e) {
       setState(() => _error =
           'Photo upload failed: ${e.toString().replaceAll('Exception: ', '')}');
