@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,7 @@ import { WorkspaceFooter } from './WorkspaceFooter';
 export const Layout: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const administrator = user?.roles.includes('ADMINISTRATOR');
   const staffRole = user?.roles.includes('SENIOR_ENGINEER')
     ? 'SENIOR_ENGINEER'
@@ -22,12 +23,39 @@ export const Layout: React.FC = () => {
     location.pathname === '/account' ||
     location.pathname === '/notifications';
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [sidebarOpen]);
+
   return (
     <div className={`workspace-shell${administrator || staffRole ? ' admin-layout' : ''}${staffRole && !administrator ? ' staff-layout' : ''}`} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Navbar />
+      <Navbar
+        hasWorkspaceSidebar={Boolean(administrator || staffRole)}
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((open) => !open)}
+      />
       {administrator || staffRole ? (
         <div className={`admin-route-shell${profileRoute ? ' profile-route' : ''}`}>
-          {administrator ? <AdminSidebar /> : <RoleSidebar role={staffRole!} />}
+          {administrator
+            ? <AdminSidebar open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
+            : <RoleSidebar role={staffRole!} open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />}
+          {sidebarOpen && (
+            <button
+              className="staff-sidebar-backdrop"
+              type="button"
+              aria-label="Close workspace menu"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
           <main className="admin-route-content"><Outlet /></main>
         </div>
       ) : (

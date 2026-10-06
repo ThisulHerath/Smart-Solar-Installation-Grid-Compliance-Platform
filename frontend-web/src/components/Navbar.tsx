@@ -7,7 +7,13 @@ import { NotificationBell } from './NotificationBell';
 import '../styles/navigation.css';
 import '../styles/member-home-nav.css';
 
-export const Navbar = () => {
+type NavbarProps = {
+  hasWorkspaceSidebar?: boolean;
+  sidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+};
+
+export const Navbar = ({ hasWorkspaceSidebar = false, sidebarOpen = false, onToggleSidebar }: NavbarProps) => {
   const { user: authUser, logout, profilePhoto } = useAuth();
   const user = authUser as NonNullable<typeof authUser>;
   const location = useLocation();
@@ -39,6 +45,18 @@ export const Navbar = () => {
   return (
     <>
       <header className="member-home-nav">
+        {hasWorkspaceSidebar && (
+          <button
+            className="staff-sidebar-toggle"
+            type="button"
+            aria-label={sidebarOpen ? 'Close workspace menu' : 'Open workspace menu'}
+            aria-expanded={sidebarOpen}
+            aria-controls="workspace-sidebar"
+            onClick={onToggleSidebar}
+          >
+            {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        )}
         <Link className="member-home-brand" to="/" aria-label="Smart Solar home">
           <Sun size={24} />
             <span>smart</span>

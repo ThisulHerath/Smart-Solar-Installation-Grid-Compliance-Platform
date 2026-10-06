@@ -39,12 +39,12 @@ const roleSettings: Record<StaffRole, { label: string; className: string; links:
   },
 };
 
-export function RoleSidebar({ role }: { role: StaffRole }) {
+export function RoleSidebar({ role, open = false, onNavigate }: { role: StaffRole; open?: boolean; onNavigate?: () => void }) {
   const settings = roleSettings[role];
 
   return (
-    <aside className={`admin-sidebar role-sidebar ${settings.className}`} aria-label={`${settings.label} navigation`}>
-      <Link className="admin-sidebar-brand" to="/dashboard">
+    <aside id="workspace-sidebar" className={`admin-sidebar role-sidebar ${settings.className}${open ? ' is-open' : ''}`} aria-label={`${settings.label} navigation`}>
+      <Link className="admin-sidebar-brand" to="/dashboard" onClick={onNavigate}>
         <Sun size={27} />
         <span>smart <b>solar</b></span>
       </Link>
@@ -55,7 +55,7 @@ export function RoleSidebar({ role }: { role: StaffRole }) {
             const [pathname, hash] = to.split('#');
             const active = window.location.pathname === pathname && (hash ? window.location.hash === `#${hash}` : !window.location.hash);
             return (
-              <Link key={to} to={to} className={`admin-sidebar-link${active ? ' active' : ''}`}>
+              <Link key={to} to={to} className={`admin-sidebar-link${active ? ' active' : ''}`} onClick={onNavigate}>
                 <Icon size={20} />
                 <span>{label}</span>
               </Link>
@@ -63,7 +63,7 @@ export function RoleSidebar({ role }: { role: StaffRole }) {
           }
 
           return (
-            <NavLink key={to} to={to} end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals' || to === '/inventory'} className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}>
+            <NavLink key={to} to={to} end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals' || to === '/inventory'} className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`} onClick={onNavigate}>
               <Icon size={20} />
               <span>{label}</span>
             </NavLink>

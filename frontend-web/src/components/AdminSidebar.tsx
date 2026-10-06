@@ -2,7 +2,7 @@ import { Box, ClipboardList, FileCheck2, FileText, HardHat, LayoutDashboard, Map
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export function AdminSidebar() {
+export function AdminSidebar({ open = false, onNavigate }: { open?: boolean; onNavigate?: () => void }) {
   const { user } = useAuth();
 
   if (!user) return null;
@@ -20,8 +20,8 @@ export function AdminSidebar() {
   ];
 
   return (
-    <aside className="admin-sidebar" aria-label="Administrator navigation">
-      <Link className="admin-sidebar-brand" to="/dashboard">
+    <aside id="workspace-sidebar" className={`admin-sidebar${open ? ' is-open' : ''}`} aria-label="Administrator navigation">
+      <Link className="admin-sidebar-brand" to="/dashboard" onClick={onNavigate}>
         <Sun size={27} />
         <span>smart <b>solar</b></span>
       </Link>
@@ -33,6 +33,7 @@ export function AdminSidebar() {
             to={to}
             end={to === '/dashboard' || to === '/field-jobs' || to === '/proposals'}
             className={({ isActive }) => `admin-sidebar-link${isActive ? ' active' : ''}`}
+            onClick={onNavigate}
           >
             <Icon size={20} />
             <span>{label}</span>
