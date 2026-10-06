@@ -14,6 +14,7 @@ const roleSettings: Record<StaffRole, { label: string; className: string; links:
       { to: '/field-jobs', label: 'Field jobs', icon: HardHat },
       { to: '/proposals', label: 'Proposals', icon: FileText },
       { to: '/proposals/pending', label: 'Approvals', icon: FileCheck2 },
+      { to: '/inventory', label: 'Inventory', icon: Boxes },
       { to: '/customer-locations', label: 'Customer locations', icon: MapPinned },
     ],
   },
