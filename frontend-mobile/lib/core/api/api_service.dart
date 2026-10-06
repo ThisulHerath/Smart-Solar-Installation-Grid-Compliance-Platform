@@ -304,7 +304,17 @@ class ApiService {
       try {
         final errorData = jsonDecode(response.body);
         if (errorData is Map && errorData.containsKey('message')) {
-          errorMessage = errorData['message'];
+          errorMessage = errorData['message'].toString();
+        } else if (errorData is Map && errorData['errors'] is Map) {
+          final validationErrors = errorData['errors'] as Map;
+          final messages = validationErrors.values
+              .expand((value) => value is List ? value : [value])
+              .map((value) => value.toString())
+              .where((value) => value.trim().isNotEmpty)
+              .toList();
+          if (messages.isNotEmpty) errorMessage = messages.join(' ');
+        } else if (errorData is Map && errorData.containsKey('title')) {
+          errorMessage = errorData['title'].toString();
         }
       } catch (_) {}
       throw Exception(errorMessage);
