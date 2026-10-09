@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Boxes, ClipboardCheck, PackageCheck, Truck } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 import { useInventoryCatalog } from '../hooks/useInventoryCatalog';
 import { SearchBox } from '../../../components/SearchBox';
@@ -55,6 +56,7 @@ const money = (value: number) =>
 
 export function InventoryPage() {
   const { user } = useAuth();
+  const location = useLocation();
 
   const canWrite = user?.roles.some((role) =>
     ['ADMINISTRATOR', 'INVENTORY_OFFICER'].includes(role)
@@ -116,40 +118,37 @@ export function InventoryPage() {
     total,
     loading,
     error: catalogError,
-  } = useInventoryCatalog(query, revision);
+  } = useInventoryCatalog(query, revision, Boolean(canWrite));
 
   useEffect(() => {
     let frame = 0;
-    const scrollToSection = () => {
-      if (!window.location.hash) return;
-      frame = window.requestAnimationFrame(() => {
-        document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    };
-
-    window.addEventListener('hashchange', scrollToSection);
-    scrollToSection();
+    frame = window.requestAnimationFrame(() => {
+      const targetId = location.hash.slice(1) || (canWrite ? 'overview' : 'requests');
+      document.getElementById(targetId)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    });
     return () => {
-      window.removeEventListener('hashchange', scrollToSection);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [location.hash, canWrite]);
 
   useEffect(() => {
     setWorkspaceLoading(true);
-    Promise.all([
-      request<Supplier[]>('/suppliers'),
-      request<typeof proposals>('/proposals'),
-      request<typeof reservations>('/reservations'),
-    ])
-      .then(([s, p, r]) => {
-        setSuppliers(s);
-        setProposals(p);
-        setReservations(r);
-      })
+    const workspaceRequest = canWrite
+      ? Promise.all([
+          request<Supplier[]>('/suppliers'),
+          request<typeof proposals>('/proposals'),
+          request<typeof reservations>('/reservations'),
+        ]).then(([s, p, r]) => {
+          setSuppliers(s);
+          setProposals(p);
+          setReservations(r);
+        })
+      : request<typeof proposals>('/proposals').then(setProposals);
+
+    workspaceRequest
       .catch((e) => setError(e.message))
       .finally(() => setWorkspaceLoading(false));
-  }, [revision]);
+  }, [revision, canWrite]);
 
   useEffect(() => {
     let cancelled = false;
@@ -229,7 +228,7 @@ export function InventoryPage() {
     <main className="inventory-page operations-page">
       {/* Header */}
 
-      <header className="inventory-heading">
+      {canWrite && <header className="inventory-heading">
         <div>
           <p className="eyebrow">
             EQUIPMENT & PROCUREMENT
@@ -266,7 +265,7 @@ export function InventoryPage() {
             </button>
           </div>
         )}
-      </header>
+      </header>}
 
       {/* Notifications */}
 
@@ -288,7 +287,7 @@ export function InventoryPage() {
         </p>
       )}
 
-      <section id="overview" className="inventory-overview" aria-labelledby="inventory-overview-title">
+      {canWrite && <section id="overview" className="inventory-overview" aria-labelledby="inventory-overview-title">
         <div className="inventory-overview-heading">
           <div>
             <p className="eyebrow">WORK QUEUE</p>
@@ -328,11 +327,11 @@ export function InventoryPage() {
             <p>{workspaceLoading ? 'Loading suppliers…' : 'Maintain supplier records'}</p>
           </a>
         </div>
-      </section>
+      </section>}
 
       {/* Equipment Catalog */}
 
-      <section id="catalog" className="inventory-panel inventory-anchor-section">
+      {canWrite && <section id="catalog" className="inventory-panel inventory-anchor-section">
         <div className="inventory-section-heading">
           <div>
             <h2>Equipment catalog</h2>
@@ -571,7 +570,7 @@ export function InventoryPage() {
             Next
           </button>
         </div>
-      </section>
+      </section>}
 
       {/* Equipment Dialog */}
 
@@ -1068,7 +1067,7 @@ export function InventoryPage() {
 
       {/* Reservations */}
 
-      <section id="reservations" className="inventory-panel inventory-reservations-panel inventory-anchor-section">
+      {canWrite && <section id="reservations" className="inventory-panel inventory-reservations-panel inventory-anchor-section">
         <div className="inventory-section-heading">
           <div>
             <p className="eyebrow">ALLOCATED EQUIPMENT</p>
@@ -1109,9 +1108,9 @@ export function InventoryPage() {
             </table>
           </div>
         )}
-      </section>
+      </section>}
 
-      <DestructiveConfirmDialog
+      {canWrite && <DestructiveConfirmDialog
         open={Boolean(deactivateTarget)}
         title="Deactivate equipment?"
         subject={deactivateTarget ? `${deactivateTarget.name} · ${deactivateTarget.sku}` : undefined}
@@ -1123,7 +1122,7 @@ export function InventoryPage() {
         onConfirm={() => void deactivateItem()}
       >
         <p>This removes the item from active inventory choices. Existing reservation and pricing records remain available.</p>
-      </DestructiveConfirmDialog>
+      </DestructiveConfirmDialog>}
     </main>
   );
 };
