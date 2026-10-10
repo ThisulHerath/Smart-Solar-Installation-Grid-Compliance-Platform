@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { InventoryPage } from '../pages/InventoryPage';
 import { inventoryRequest } from '../services/inventoryService';
 import { useAuth } from '../../../context/AuthContext';
@@ -8,6 +9,7 @@ vi.mock('../services/inventoryService', () => ({ inventoryRequest: vi.fn() }));
 vi.mock('../../../context/AuthContext', () => ({ useAuth: vi.fn() }));
 const request = vi.mocked(inventoryRequest);
 const panel = { id: 'panel', name: 'Solar panel', sku: 'P-500', capacityWatts: 500, quantityInStock: 15, reservedQuantity: 10, availableQuantity: 5, reorderLevel: 5, unitPriceUsd: 450, active: true, lowStock: true, category: 'PANEL' };
+const renderInventory = () => render(<MemoryRouter><InventoryPage /></MemoryRouter>);
 
 describe('Inventory workflows', () => {
   beforeEach(() => {
@@ -18,7 +20,7 @@ describe('Inventory workflows', () => {
   it('debounces query changes and aborts the previous request', async () => {
     vi.useFakeTimers();
     try {
-      render(<InventoryPage />);
+      renderInventory();
       await act(async () => { await vi.advanceTimersByTimeAsync(250); });
       const initial = request.mock.calls.find(call => call[0].startsWith('?'))!;
       const signal = initial[3]!;
@@ -35,24 +37,30 @@ describe('Inventory workflows', () => {
     } finally { vi.useRealTimers(); }
   });
   it('renders availability and low stock', async () => {
-    render(<InventoryPage />);
+    renderInventory();
     expect(await screen.findByText('Solar panel')).toBeInTheDocument();
     expect(screen.getByText('Low stock')).toBeInTheDocument();
     expect(screen.getByText('Reorder at 5')).toBeInTheDocument();
   });
   it('hides mutation controls from engineers', async () => {
     vi.mocked(useAuth).mockReturnValue({ user: { roles: ['SENIOR_ENGINEER'] } } as ReturnType<typeof useAuth>);
-    render(<InventoryPage />); await screen.findByText('Solar panel');
+    renderInventory();
+    await screen.findByRole('heading', { name: 'Engineer equipment requests' });
+    expect(screen.queryByRole('heading', { name: 'Equipment catalog' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Reservations' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Add equipment' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Deactivate' })).not.toBeInTheDocument();
+    await waitFor(() => expect(request).toHaveBeenCalledWith('/proposals'));
+    expect(request.mock.calls.some(([path]) => path.startsWith('?'))).toBe(false);
+    expect(request.mock.calls.some(([path]) => path === '/suppliers' || path === '/reservations')).toBe(false);
   });
   it('shows service errors', async () => {
     request.mockRejectedValue(new Error('Inventory unavailable'));
-    render(<InventoryPage />);
+    renderInventory();
     expect(await screen.findByRole('alert')).toHaveTextContent('Inventory unavailable');
   });
   it('submits a new item without trusted client reservation fields', async () => {
-    render(<InventoryPage />); await screen.findByText('Solar panel');
+    renderInventory(); await screen.findByText('Solar panel');
     fireEvent.click(screen.getByRole('button', { name: 'Add equipment' }));
     expect(screen.getByRole('dialog', { name: 'Add equipment' })).toBeInTheDocument();
     expect(screen.getByLabelText('SKU')).toHaveFocus();
@@ -62,7 +70,7 @@ describe('Inventory workflows', () => {
     await waitFor(() => expect(request).toHaveBeenCalledWith('', 'POST', expect.objectContaining({ sku: 'P-NEW', name: 'New panel' })));
   });
   it('keeps save errors inside the dialog and restores focus when cancelled', async () => {
-    render(<InventoryPage />); await screen.findByText('Solar panel');
+    renderInventory(); await screen.findByText('Solar panel');
     const trigger = screen.getByRole('button', { name: 'Add equipment' });
     trigger.focus(); fireEvent.click(trigger);
     request.mockRejectedValue(new Error('SKU already exists'));
@@ -77,7 +85,7 @@ describe('Inventory workflows', () => {
   });
   it('displays a failed quote and offers no reservation', async () => {
     request.mockImplementation(async path => path.startsWith('?') ? { items: [], total: 0 } : path === '/proposals' ? [{ id: 'approved', solarSurveyId: 'survey', projectName: 'Colombo Home Solar', fullName: 'Sample Homeowner', propertyAddress: 'Colombo', recommendedKw: 5, inventoryRequestStatus: 'REQUESTED', inventoryRequestedAt: new Date().toISOString() }] : path.includes('/equipment') ? [{ id: 'q', status: 'FAILED', error: 'Exchange service unavailable', createdAt: new Date().toISOString() }] : []);
-    render(<InventoryPage />);
+    renderInventory();
     await screen.findByRole('option', { name: 'Colombo Home Solar · Sample Homeowner · 5 kW · approved' });
     fireEvent.change(screen.getByLabelText('Approved proposal'), { target: { value: 'approved' } });
     expect(await screen.findByText('Exchange service unavailable')).toBeInTheDocument();
@@ -88,7 +96,7 @@ describe('Inventory workflows', () => {
     vi.mocked(useAuth).mockReturnValue({ user: { roles: ['SENIOR_ENGINEER'] } } as ReturnType<typeof useAuth>);
     const proposal = { id: 'proposal-12345678', solarSurveyId: 'survey', projectName: 'Malabe Family Solar', fullName: 'Nimali Perera', propertyAddress: 'Malabe rooftop', recommendedKw: 5, inventoryRequestStatus: 'NOT_REQUESTED', inventoryRequestedAt: null };
     request.mockImplementation(async path => path.startsWith('?') ? { items: [], total: 0 } : path === '/proposals' ? [proposal] : []);
-    render(<InventoryPage />);
+    renderInventory();
     await screen.findByRole('option', { name: 'Malabe Family Solar · Nimali Perera · 5 kW · proposal' });
     fireEvent.change(screen.getByLabelText('Approved proposal'), { target: { value: proposal.id } });
     expect(screen.getByLabelText('Selected customer and proposal')).toHaveTextContent('Nimali Perera');

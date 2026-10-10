@@ -2,9 +2,14 @@ import { useEffect, useState } from 'react';
 import { InventoryItem, inventoryRequest } from '../services/inventoryService';
 
 /** Server state and cancellation belong here; the page only renders and edits filters. */
-export function useInventoryCatalog(query: string, revision: number) {
+export function useInventoryCatalog(query: string, revision: number, enabled = true) {
   const [state, setState] = useState({ items: [] as InventoryItem[], total: 0, loading: true, error: '' });
   useEffect(() => {
+    if (!enabled) {
+      setState({ items: [], total: 0, loading: false, error: '' });
+      return;
+    }
+
     const controller = new AbortController();
     setState(previous => ({ ...previous, loading: true, error: '' }));
     const timer = window.setTimeout(() => {
@@ -13,6 +18,6 @@ export function useInventoryCatalog(query: string, revision: number) {
         .catch(error => { if (!controller.signal.aborted) setState(previous => ({ ...previous, loading: false, error: error instanceof Error ? error.message : 'Unable to load equipment.' })); });
     }, 250);
     return () => { window.clearTimeout(timer); controller.abort(); };
-  }, [query, revision]);
+  }, [query, revision, enabled]);
   return state;
 }
