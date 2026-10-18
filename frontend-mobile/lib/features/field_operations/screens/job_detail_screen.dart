@@ -604,6 +604,288 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
     );
   }
 
+  BoxDecoration _sectionDecoration({Color? accent}) {
+    return BoxDecoration(
+      color: SolarColors.surface,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(
+        color: accent?.withValues(alpha: 0.30) ?? SolarColors.border,
+      ),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x0D173E44),
+          blurRadius: 18,
+          offset: Offset(0, 7),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVisitSummary(FieldJob job) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [SolarColors.primary, SolarColors.heroEnd],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x29173E44),
+            blurRadius: 22,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -28,
+            top: -34,
+            child: Container(
+              width: 130,
+              height: 130,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.07),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(Icons.home_work_outlined,
+                          color: SolarColors.heroAccent, size: 25),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            job.projectName,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 19,
+                              fontWeight: FontWeight.w800,
+                              height: 1.15,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            job.customerName,
+                            style: const TextStyle(
+                              color: SolarColors.heroText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.20)),
+                      ),
+                      child: Text(
+                        job.status,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined,
+                        color: SolarColors.heroAccent, size: 18),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        job.propertyAddress,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            color: SolarColors.heroText,
+                            fontSize: 12,
+                            height: 1.35),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _buildSummaryChip(Icons.bolt_outlined,
+                        '${job.monthlyKwh.toStringAsFixed(0)} kWh / month'),
+                    _buildSummaryChip(
+                        Icons.flag_outlined, '${job.priority} priority'),
+                    if (job.customerPhone.isNotEmpty)
+                      _buildSummaryChip(
+                          Icons.phone_outlined, job.customerPhone),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.11),
+        borderRadius: BorderRadius.circular(9),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: SolarColors.heroAccent),
+          const SizedBox(width: 6),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkflowProgress(FieldJob job) {
+    final status = job.status.toLowerCase();
+    final submitted = status == 'submitted' ||
+        status == 'complianceprocessing' ||
+        status == 'compliancecomplete';
+    final inspectionStarted = _roofAreaController.text.trim().isNotEmpty ||
+        _mainBreakerController.text.trim().isNotEmpty ||
+        _voltageController.text.trim().isNotEmpty ||
+        job.photos.isNotEmpty;
+    final completed = <bool>[
+      _navigationOrigin != null,
+      _gpsCheckInRecorded,
+      inspectionStarted || submitted,
+      submitted,
+    ];
+    final labels = ['Route', 'Check-in', 'Inspect', 'Submit'];
+    final icons = [
+      Icons.route_outlined,
+      Icons.location_on_outlined,
+      Icons.fact_check_outlined,
+      Icons.verified_outlined,
+    ];
+    final firstPending = completed.indexWhere((value) => !value);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+      decoration: _sectionDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Visit progress',
+              style: TextStyle(
+                  color: SolarColors.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800)),
+          const SizedBox(height: 13),
+          Row(
+            children: List.generate(labels.length, (index) {
+              final isComplete = completed[index];
+              final isCurrent = index == firstPending;
+              final color = isComplete
+                  ? SolarColors.success
+                  : isCurrent
+                      ? SolarColors.primary
+                      : SolarColors.muted;
+              return Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: isComplete
+                                  ? SolarColors.successSoft
+                                  : isCurrent
+                                      ? SolarColors.surfaceSoft
+                                      : SolarColors.background,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: color,
+                                  width: isCurrent || isComplete ? 1.5 : 1),
+                            ),
+                            child: Icon(
+                              isComplete ? Icons.check_rounded : icons[index],
+                              size: 17,
+                              color: color,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(labels[index],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                  color: color,
+                                  fontSize: 10,
+                                  fontWeight: isCurrent || isComplete
+                                      ? FontWeight.w700
+                                      : FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                    if (index < labels.length - 1)
+                      Container(
+                        width: 8,
+                        height: 2,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        color: completed[index]
+                            ? SolarColors.success.withValues(alpha: 0.55)
+                            : SolarColors.border,
+                      ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -632,12 +914,29 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
       backgroundColor: SolarColors.background,
       appBar: AppBar(
         backgroundColor: SolarColors.surface,
-        title: Text(
-          job.propertyAddress,
-          style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: SolarColors.text),
+        titleSpacing: 2,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              job.projectName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  color: SolarColors.text),
+            ),
+            Text(
+              job.customerName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                  color: SolarColors.muted),
+            ),
+          ],
         ),
       ),
       body: Column(
@@ -653,55 +952,28 @@ class _JobDetailScreenState extends State<JobDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Status & Customer Card
+                      _buildVisitSummary(job),
+                      const SizedBox(height: 12),
+                      _buildWorkflowProgress(job),
+                      const SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: SolarColors.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: SolarColors.border),
-                        ),
+                        padding: const EdgeInsets.all(14),
+                        decoration: _sectionDecoration(),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                    child: Text(job.customerName,
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: SolarColors.text))),
-                                StatusBadge(label: job.status),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
                             RecordReference(
                                 label: 'Job reference', value: job.id),
                             RecordReference(
                                 label: 'Survey reference',
                                 value: job.solarSurveyId),
-                            Text('Phone: ${job.customerPhone}',
-                                style: const TextStyle(
-                                    color: SolarColors.muted, fontSize: 13)),
-                            Text(
-                                'Monthly electricity use: ${job.monthlyKwh} kWh',
-                                style: const TextStyle(
-                                    color: SolarColors.warning,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: SolarColors.surface,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: SolarColors.border),
-                        ),
+                        decoration:
+                            _sectionDecoration(accent: SolarColors.info),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
