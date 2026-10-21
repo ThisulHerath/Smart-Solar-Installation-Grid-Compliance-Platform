@@ -47,6 +47,7 @@ ThemeData buildSolarTheme() {
         style: IconButton.styleFrom(minimumSize: const Size(48, 48))),
     colorScheme: scheme,
     scaffoldBackgroundColor: SolarColors.background,
+    splashFactory: InkSparkle.splashFactory,
     appBarTheme: const AppBarTheme(
         backgroundColor: SolarColors.surface,
         foregroundColor: SolarColors.text,
@@ -55,11 +56,11 @@ ThemeData buildSolarTheme() {
         scrolledUnderElevation: 1),
     cardTheme: CardThemeData(
         color: SolarColors.surface,
-        elevation: 1,
-        shadowColor: const Color(0x14173E44),
+        elevation: 2,
+        shadowColor: const Color(0x1A173E44),
         margin: const EdgeInsets.symmetric(vertical: 8),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             side: const BorderSide(color: SolarColors.border))),
     inputDecorationTheme: InputDecorationTheme(
         errorMaxLines: 3,
@@ -71,13 +72,13 @@ ThemeData buildSolarTheme() {
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: SolarColors.border)),
         enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: const BorderSide(color: SolarColors.border)),
         focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide:
                 const BorderSide(color: SolarColors.primary, width: 1.5))),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -87,7 +88,7 @@ ThemeData buildSolarTheme() {
             foregroundColor: SolarColors.onPrimary,
             elevation: 0,
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16))),
     filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
@@ -95,7 +96,7 @@ ThemeData buildSolarTheme() {
             backgroundColor: SolarColors.lime,
             foregroundColor: SolarColors.onPrimary,
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16))),
     outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
@@ -103,7 +104,7 @@ ThemeData buildSolarTheme() {
             foregroundColor: SolarColors.primary,
             side: const BorderSide(color: SolarColors.border),
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14))),
     textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(

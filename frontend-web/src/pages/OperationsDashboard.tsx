@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { HomeownerWorkspace } from '../features/assessment/pages/HomeownerWorkspace';
 import { StaffDashboard } from '../components/StaffDashboard';
 import { CustomerLocationMap } from '../features/field-operations/components/CustomerLocationMap';
+import { SolarWorkspaceGraphic } from '../components/SolarWorkspaceGraphic';
 
 type Report = {
   surveyCount: number;
@@ -58,9 +59,12 @@ export function OperationsDashboard() {
     return (
       <section className="admin-dashboard-content">
           <section className="admin-welcome-card">
-            <p>SMART SOLAR · SRI LANKA</p>
-            <h1>Welcome, System Administrator Dashboard</h1>
-            <span>Coordinate rooftop solar surveys, field inspections, engineering review, and equipment preparation.</span>
+            <div className="admin-welcome-card__content">
+              <p>SMART SOLAR · SRI LANKA</p>
+              <h1>Welcome, System Administrator Dashboard</h1>
+              <span>Coordinate rooftop solar surveys, field inspections, engineering review, and equipment preparation.</span>
+            </div>
+            <SolarWorkspaceGraphic />
           </section>
 
           {error && <p role="alert">{error}</p>}

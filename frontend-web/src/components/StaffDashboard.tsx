@@ -1,6 +1,7 @@
 import { ArrowRight, Box, ClipboardList, FileCheck2, HardHat, PackageCheck, UserRoundPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { User } from '../types/auth';
+import { SolarWorkspaceGraphic } from './SolarWorkspaceGraphic';
 
 type Report = { surveyCount: number; pendingApprovals: number; approvedProposals: number; lowStockItems: number; reservedEquipmentValueLkr: number };
 
@@ -13,9 +14,12 @@ export function StaffDashboard({ user, report, error }: { user: User; report: Re
       : { eyebrow: 'FIELD WORKSPACE', title: 'Every site visit, ready for action.', copy: 'Keep your assigned inspections, site evidence, and compliance steps organized in one place.', metrics: [['Site work', 'My assignments'], ['Evidence', 'Photo-ready'], ['Compliance', 'Track status']], actions: [{ to: '/technician-jobs', title: 'My assignments', copy: 'Open the jobs assigned to you today.', icon: HardHat }, { to: '/profile', title: 'My profile', copy: 'Review your contact details and access.', icon: ClipboardList }] };
 
   return <main className={`staff-dashboard staff-dashboard--${role.toLowerCase().replace(/_/g, '-')}`}>
-    <section className="staff-dashboard-hero"><p>{settings.eyebrow}</p><h1>Welcome back, {user.fullName}</h1><h2>{settings.title}</h2><span>{settings.copy}</span></section>
+    <section className="staff-dashboard-hero">
+      <div className="staff-dashboard-hero__content"><p>{settings.eyebrow}</p><h1>Welcome back, {user.fullName}</h1><h2>{settings.title}</h2><span>{settings.copy}</span></div>
+      <SolarWorkspaceGraphic />
+    </section>
     {error && <p className="staff-dashboard-error" role="alert">{error}</p>}
-    {settings.metrics.length > 0 && <section className="staff-dashboard-metrics">{settings.metrics.map(([label, value]) => <article key={label}><span>{label}</span><strong>{value}</strong></article>)}</section>}
+    {settings.metrics.length > 0 && <section className="staff-dashboard-metrics">{settings.metrics.map(([label, value], index) => <article key={label} data-metric={index + 1}><span>{label}</span><strong>{value}</strong></article>)}</section>}
     <section className="staff-dashboard-tools"><header><div><p>ROLE TOOLS</p><h2>Keep work moving</h2></div><span>Focused actions for your role</span></header><div>{settings.actions.map(({ to, title, copy, icon: Icon }) => <Link key={title} to={to}><span><Icon size={22} /></span><h3>{title}</h3><p>{copy}</p><b>Open <ArrowRight size={15} /></b></Link>)}</div></section>
   </main>;
 }

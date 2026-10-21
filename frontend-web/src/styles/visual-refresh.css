@@ -1,0 +1,230 @@
+/* Shared visual polish for authenticated web workspaces. */
+.workspace-shell {
+  --workspace-ink: #293e40;
+  --workspace-green: #68b63b;
+  --workspace-teal: #0a596a;
+  background:
+    radial-gradient(circle at 91% 4%, rgba(178, 221, 135, .2), transparent 20rem),
+    linear-gradient(145deg, #f9fbf7 0%, #f3f8f5 52%, #edf6f2 100%) !important;
+}
+
+.admin-route-content {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 92% 3%, rgba(177, 220, 135, .18), transparent 20rem),
+    linear-gradient(145deg, #f9fbf7, #f2f8f5 62%, #eef6f2) !important;
+}
+
+.admin-route-content::before {
+  position: absolute;
+  z-index: -1;
+  top: 68px;
+  right: -110px;
+  width: 300px;
+  height: 300px;
+  border: 42px solid rgba(105, 182, 59, .055);
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.admin-route-content :is(.glass-panel, .inventory-panel, .staff-survey-list, .staff-survey-detail-card, .staff-survey-workflow-card) {
+  border-radius: 16px !important;
+  box-shadow: 0 14px 34px rgba(25, 69, 61, .075) !important;
+}
+
+.admin-route-content .operations-page :is(.page-header, .inventory-heading),
+.admin-route-content .field-jobs-page > .glass-panel:first-child,
+.admin-route-content .staff-surveys-header,
+.assignment-page__header,
+.technician-jobs-heading {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px !important;
+  background: linear-gradient(120deg, #fff 0%, #fbfdf9 68%, #eff8e9 100%) !important;
+  box-shadow: 0 14px 34px rgba(25, 69, 61, .075) !important;
+}
+
+.admin-route-content .operations-page :is(.page-header, .inventory-heading)::after,
+.admin-route-content .field-jobs-page > .glass-panel:first-child::after,
+.admin-route-content .staff-surveys-header::after,
+.assignment-page__header::after,
+.technician-jobs-heading::after {
+  position: absolute;
+  top: -66px;
+  right: 5%;
+  width: 142px;
+  height: 142px;
+  border: 22px solid rgba(105, 182, 59, .08);
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.staff-dashboard { gap: 24px !important; }
+
+.staff-dashboard-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 36%);
+  align-items: center;
+  min-height: 246px;
+  padding: 42px 44px !important;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 78% 18%, rgba(199, 235, 142, .14), transparent 13rem),
+    linear-gradient(125deg, #075066 0%, #126773 50%, #377d61 100%) !important;
+  box-shadow: 0 22px 48px rgba(12, 70, 75, .2) !important;
+}
+
+.admin-welcome-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 32%);
+  align-items: center;
+  min-height: 210px;
+  padding: 34px 40px !important;
+  overflow: hidden;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 80% 12%, rgba(199, 235, 142, .13), transparent 12rem),
+    linear-gradient(125deg, #075066 0%, #126773 50%, #377d61 100%) !important;
+  box-shadow: 0 20px 44px rgba(12, 70, 75, .18) !important;
+}
+
+.admin-welcome-card::before {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: .2;
+  content: '';
+  pointer-events: none;
+}
+
+.admin-welcome-card__content { position: relative; z-index: 2; }
+.admin-welcome-card__content h1 { max-width: 720px; font-size: clamp(29px, 3vw, 42px); line-height: 1.1; }
+.admin-welcome-card__content > span { display: block; max-width: 680px; line-height: 1.6; }
+
+.admin-metrics-grid { gap: 14px !important; margin-top: 22px !important; }
+.admin-metric-card {
+  position: relative;
+  min-height: 112px;
+  padding: 20px !important;
+  overflow: hidden;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, #fff, #fbfdf9) !important;
+  box-shadow: 0 13px 30px rgba(25, 69, 61, .07) !important;
+}
+.admin-metric-card::after {
+  position: absolute;
+  right: -22px;
+  bottom: -28px;
+  width: 86px;
+  height: 86px;
+  border: 16px solid rgba(104, 182, 59, .07);
+  border-radius: 50%;
+  content: '';
+}
+.admin-metric-card strong { position: relative; z-index: 1; font-size: 30px !important; }
+.admin-equipment-card { border-radius: 16px !important; box-shadow: 0 14px 34px rgba(25, 69, 61, .075) !important; }
+
+.staff-dashboard-hero::before {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+  opacity: .22;
+  content: '';
+  pointer-events: none;
+}
+
+.staff-dashboard-hero__content { position: relative; z-index: 2; max-width: 680px; }
+.staff-dashboard-hero__content h1 { margin-bottom: 18px; font-size: clamp(30px, 3.2vw, 44px); line-height: 1.08; }
+.staff-dashboard-hero__content h2 { font-size: 19px; }
+.staff-dashboard-hero__content > span { display: block; max-width: 630px; color: #d8eae6 !important; line-height: 1.65; }
+
+.solar-workspace-graphic {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: min(100%, 360px);
+  justify-self: end;
+  filter: drop-shadow(0 17px 24px rgba(1, 34, 43, .22));
+}
+
+.solar-workspace-graphic__sun { transform-origin: 278px 48px; animation: solar-graphic-spin 24s linear infinite; }
+@keyframes solar-graphic-spin { to { rotate: 360deg; } }
+
+.staff-dashboard-metrics { gap: 16px !important; }
+.staff-dashboard-metrics article {
+  position: relative;
+  min-height: 124px !important;
+  padding: 22px !important;
+  overflow: hidden;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, #fff, #fbfdf9) !important;
+  box-shadow: 0 13px 30px rgba(25, 69, 61, .07) !important;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.staff-dashboard-metrics article::after {
+  position: absolute;
+  right: -12px;
+  bottom: -24px;
+  color: rgba(104, 182, 59, .075);
+  content: attr(data-metric);
+  font-size: 88px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.staff-dashboard-metrics article:hover {
+  border-color: #bcdca9 !important;
+  box-shadow: 0 18px 34px rgba(25, 69, 61, .11) !important;
+  transform: translateY(-3px);
+}
+
+.staff-dashboard-metrics strong { position: relative; z-index: 1; font-size: 29px !important; }
+
+.staff-dashboard-tools {
+  border-radius: 18px !important;
+  box-shadow: 0 14px 34px rgba(25, 69, 61, .075) !important;
+}
+
+.staff-dashboard-tools header { padding: 25px 28px !important; background: linear-gradient(120deg, #fff, #f7fbf4); }
+.staff-dashboard-tools > div { gap: 14px !important; padding: 18px !important; }
+.staff-dashboard-tools a { min-height: 112px !important; padding: 19px !important; border-radius: 13px !important; }
+.staff-dashboard-tools a > span { width: 44px !important; height: 44px !important; border-radius: 13px !important; }
+
+.admin-route-content :is(.btn, button, a) { -webkit-tap-highlight-color: transparent; }
+.admin-route-content .btn { border-radius: 10px !important; }
+
+@media (max-width: 800px) {
+  .staff-dashboard-hero { grid-template-columns: 1fr; min-height: 0; padding: 32px 27px !important; }
+  .solar-workspace-graphic { position: absolute; right: -52px; bottom: -35px; width: 250px; opacity: .22; }
+  .staff-dashboard-hero__content { padding-right: 18%; }
+  .staff-dashboard-metrics { grid-template-columns: 1fr !important; }
+  .admin-route-content::before { display: none; }
+  .admin-welcome-card { grid-template-columns: 1fr; min-height: 0; padding: 30px 26px !important; }
+  .admin-welcome-card .solar-workspace-graphic { position: absolute; right: -48px; bottom: -40px; width: 240px; opacity: .17; }
+  .admin-welcome-card__content { padding-right: 12%; }
+}
+
+@media (max-width: 520px) {
+  .staff-dashboard-hero { border-radius: 18px !important; }
+  .staff-dashboard-hero__content { padding-right: 0; }
+  .staff-dashboard-hero__content h1 { font-size: 29px; }
+  .solar-workspace-graphic { opacity: .13; }
+  .admin-welcome-card__content { padding-right: 0; }
+  .staff-dashboard-tools header { align-items: flex-start; flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solar-workspace-graphic__sun { animation: none; }
+  .staff-dashboard-metrics article { transition: none; }
+}

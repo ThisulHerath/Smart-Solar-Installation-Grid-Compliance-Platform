@@ -91,61 +91,75 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Scaffold(
         backgroundColor: _bg,
-        body: SafeArea(
-          child: CustomScrollView(slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
-              sliver: SliverList.list(children: [
-                _Header(
-                  name: user.fullName,
-                  unreadMessages: _unreadMessages,
-                  onNotifications: _openMessages,
-                  onProfile: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ProfileScreen())),
-                ),
-                const SizedBox(height: 24),
-                if (homeowner)
-                  _HomeownerProjects(
-                    showProjectList: _selectedTab == 1,
-                    onViewProjects: () => setState(() => _selectedTab = 1),
-                  )
-                else
-                  StaffDashboard(roles: user.roles, name: user.fullName),
-                if (!homeowner) const SizedBox(height: 22),
-                if (!homeowner)
-                  const Text('Quick actions',
-                      style: TextStyle(
-                          color: _text,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700)),
-                if (!homeowner) const SizedBox(height: 12),
-                if (fieldStaff)
-                  _ActionTile(
-                    icon: Icons.engineering_rounded,
-                    title: 'Site jobs & inspections',
-                    subtitle: 'View assigned field work',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const TechnicianJobsScreen())),
-                  ),
-                if (locationStaff)
-                  _ActionTile(
-                    icon: Icons.map_rounded,
-                    title: 'Customer location map',
-                    subtitle: 'View confirmed solar installation sites',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const CustomerLocationsScreen())),
-                  ),
-                if (!homeowner)
-                  _ActionTile(
-                    icon: Icons.person_outline_rounded,
-                    title: 'Profile & security',
-                    subtitle: 'Manage your account information',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => const ProfileScreen())),
-                  ),
-              ]),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFFBFCF9),
+                SolarColors.background,
+                Color(0xFFF0F7F2)
+              ],
             ),
-          ]),
+          ),
+          child: SafeArea(
+            child: CustomScrollView(slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
+                sliver: SliverList.list(children: [
+                  _Header(
+                    name: user.fullName,
+                    unreadMessages: _unreadMessages,
+                    onNotifications: _openMessages,
+                    onProfile: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (_) => const ProfileScreen())),
+                  ),
+                  const SizedBox(height: 24),
+                  if (homeowner)
+                    _HomeownerProjects(
+                      showProjectList: _selectedTab == 1,
+                      onViewProjects: () => setState(() => _selectedTab = 1),
+                    )
+                  else
+                    StaffDashboard(roles: user.roles, name: user.fullName),
+                  if (!homeowner) const SizedBox(height: 22),
+                  if (!homeowner)
+                    const Text('Quick actions',
+                        style: TextStyle(
+                            color: _text,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700)),
+                  if (!homeowner) const SizedBox(height: 12),
+                  if (fieldStaff)
+                    _ActionTile(
+                      icon: Icons.engineering_rounded,
+                      title: 'Site jobs & inspections',
+                      subtitle: 'View assigned field work',
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const TechnicianJobsScreen())),
+                    ),
+                  if (locationStaff)
+                    _ActionTile(
+                      icon: Icons.map_rounded,
+                      title: 'Customer location map',
+                      subtitle: 'View confirmed solar installation sites',
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const CustomerLocationsScreen())),
+                    ),
+                  if (!homeowner)
+                    _ActionTile(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Profile & security',
+                      subtitle: 'Manage your account information',
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const ProfileScreen())),
+                    ),
+                ]),
+              ),
+            ]),
+          ),
         ),
         bottomNavigationBar: _BottomNav(
           homeowner: homeowner,
