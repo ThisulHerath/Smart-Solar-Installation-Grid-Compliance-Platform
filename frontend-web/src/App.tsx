@@ -6,6 +6,7 @@ import { PageErrorBoundary } from './components/PageErrorBoundary';
 import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { FestiveSolarOverlay } from './components/FestiveSolarOverlay';
 
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -109,6 +110,7 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <FestiveSolarOverlay />
         <PageErrorBoundary>
           <Suspense
             fallback={

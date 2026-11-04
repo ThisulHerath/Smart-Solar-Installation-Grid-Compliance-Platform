@@ -1,0 +1,243 @@
+/* Decorative Christmas layer shared by public and authenticated React pages. */
+.festive-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 76;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.festive-snow { position: absolute; inset: -16vh 0 0; overflow: hidden; }
+.festive-snowflake {
+  --snow-left: 50%;
+  --snow-size: 8px;
+  --snow-delay: 0s;
+  --snow-duration: 16s;
+  --snow-drift: 20px;
+  --snow-opacity: .65;
+  position: absolute;
+  top: -22px;
+  left: var(--snow-left);
+  width: var(--snow-size);
+  height: var(--snow-size);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(221, 244, 249, .72);
+  opacity: var(--snow-opacity);
+  animation: festive-snowfall var(--snow-duration) linear var(--snow-delay) infinite;
+  will-change: transform;
+}
+
+.festive-snowflake--1 { border-radius: 2px; transform: rotate(45deg); }
+.festive-snowflake--2 {
+  background: transparent;
+  box-shadow: none;
+}
+.festive-snowflake--2::before,
+.festive-snowflake--2::after {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, .9);
+  content: '';
+}
+.festive-snowflake--2::after { transform: rotate(90deg); }
+
+@keyframes festive-snowfall {
+  0% { transform: translate3d(0, -8vh, 0) rotate(0deg); }
+  50% { transform: translate3d(var(--snow-drift), 53vh, 0) rotate(180deg); }
+  100% { transform: translate3d(0, 118vh, 0) rotate(360deg); }
+}
+
+.festive-lights {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  display: flex;
+  width: min(760px, 68vw);
+  height: 34px;
+  align-items: flex-start;
+  justify-content: space-around;
+  border-top: 2px solid rgba(28, 91, 67, .48);
+  border-radius: 50%;
+  transform: translateX(-50%);
+}
+
+.festive-light {
+  position: relative;
+  width: 7px;
+  height: 11px;
+  margin-top: -1px;
+  border-radius: 3px 3px 7px 7px;
+  background: #e5494f;
+  box-shadow: 0 0 9px #e5494f;
+  animation: festive-twinkle 2.4s ease-in-out infinite alternate;
+}
+.festive-light::before {
+  position: absolute;
+  top: -4px;
+  left: 2px;
+  width: 3px;
+  height: 5px;
+  border-radius: 2px;
+  background: #315b50;
+  content: '';
+}
+.festive-light--1 { background: #f2c75b; box-shadow: 0 0 9px #f2c75b; animation-delay: -.8s; }
+.festive-light--2 { background: #74bd47; box-shadow: 0 0 9px #74bd47; animation-delay: -1.6s; }
+.festive-light--3 { background: #76cbd3; box-shadow: 0 0 9px #76cbd3; animation-delay: -2.2s; }
+@keyframes festive-twinkle { from { opacity: .48; } to { opacity: 1; } }
+
+.festive-ornament {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 76px;
+  background: linear-gradient(#5a8476, #bad8c8);
+  transform-origin: top;
+  animation: festive-sway 5s ease-in-out infinite alternate;
+}
+.festive-ornament::after {
+  position: absolute;
+  bottom: -25px;
+  left: -12px;
+  width: 26px;
+  height: 26px;
+  border: 2px solid rgba(255,255,255,.72);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ee5b5f, #a8202a);
+  box-shadow: inset 5px 4px 8px rgba(255,255,255,.25), 0 8px 18px rgba(80,20,25,.2);
+  content: '';
+}
+.festive-ornament i {
+  position: absolute;
+  bottom: -3px;
+  left: -5px;
+  width: 12px;
+  height: 7px;
+  border-radius: 4px 4px 0 0;
+  background: #e2bf61;
+}
+.festive-ornament--left { left: clamp(18px, 4vw, 68px); }
+.festive-ornament--right { right: clamp(18px, 4vw, 68px); height: 104px; animation-delay: -2.4s; }
+.festive-ornament--right::after { background: linear-gradient(145deg, #87c858, #3c853f); }
+@keyframes festive-sway { from { rotate: -3deg; } to { rotate: 3deg; } }
+
+.festive-solar-float {
+  position: absolute;
+  right: clamp(10px, 2.2vw, 34px);
+  bottom: clamp(8px, 2vw, 24px);
+  display: grid;
+  width: min(330px, 25vw);
+  justify-items: end;
+  filter: drop-shadow(0 15px 22px rgba(16, 61, 68, .12));
+  animation: festive-float 5.5s ease-in-out infinite alternate;
+}
+.festive-solar-scene { display: block; width: 100%; height: auto; }
+.festive-solar-scene__tree { transform-origin: 282px 177px; animation: festive-tree-breathe 3.4s ease-in-out infinite alternate; }
+.festive-solar-scene__sparkles { animation: festive-sparkle 1.9s ease-in-out infinite alternate; }
+.festive-solar-float__label {
+  display: grid;
+  max-width: 230px;
+  gap: 2px;
+  margin: -25px 17px 0 0;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.8);
+  border-radius: 12px;
+  background: rgba(250, 253, 249, .91);
+  box-shadow: 0 9px 23px rgba(20, 67, 67, .13);
+  color: #2f5753;
+  text-align: left;
+  backdrop-filter: blur(8px);
+}
+.festive-solar-float__label b { font-size: 10px; letter-spacing: .035em; }
+.festive-solar-float__label small { color: #6f847d; font-size: 8px; }
+@keyframes festive-float { from { translate: 0 0; } to { translate: 0 -8px; } }
+@keyframes festive-tree-breathe { from { scale: .99; } to { scale: 1.025; } }
+@keyframes festive-sparkle { from { opacity: .3; } to { opacity: 1; } }
+
+/* Snow settles on the most visible solar-themed surfaces. */
+.eco-landing .hero-photo::before,
+.staff-dashboard-hero::after,
+.admin-welcome-card::after {
+  position: absolute;
+  z-index: 4;
+  top: -5px;
+  right: 6%;
+  left: 6%;
+  height: 14px;
+  border-radius: 50% 50% 38% 42%;
+  background: linear-gradient(#fff, #e6f2f4);
+  box-shadow: 0 3px 7px rgba(37, 86, 92, .08);
+  content: '';
+  pointer-events: none;
+}
+
+.eco-brand,
+.member-home-brand,
+.admin-sidebar-brand,
+.auth-home-brand { position: relative; }
+.eco-brand::after,
+.member-home-brand::after,
+.admin-sidebar-brand::after,
+.auth-home-brand::after {
+  position: absolute;
+  top: -13px;
+  left: 10px;
+  width: 22px;
+  height: 15px;
+  border-radius: 18px 18px 4px 4px;
+  background: #d83c43;
+  box-shadow: inset -5px -2px 0 rgba(117, 17, 24, .18);
+  content: '';
+  rotate: -16deg;
+  transform-origin: bottom right;
+}
+.eco-brand::before,
+.member-home-brand::before,
+.admin-sidebar-brand::before,
+.auth-home-brand::before {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 7px;
+  width: 27px;
+  height: 5px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 17px -14px 0 -1px #fff;
+  content: '';
+}
+
+@media (max-width: 900px) {
+  .festive-lights { width: 72vw; opacity: .82; }
+  .festive-solar-float { width: 205px; right: -34px; opacity: .78; }
+  .festive-solar-float__label { display: none; }
+  .festive-ornament--right { display: none; }
+  .festive-snowflake:nth-child(3n) { display: none; }
+}
+
+@media (max-width: 600px) {
+  .festive-overlay { z-index: 69; }
+  .festive-lights { width: 62vw; height: 25px; }
+  .festive-light:nth-child(even) { display: none; }
+  .festive-ornament { height: 53px; scale: .78; }
+  .festive-solar-float { right: -64px; bottom: -28px; width: 190px; opacity: .5; }
+  .festive-snowflake:nth-child(2n) { display: none; }
+  .eco-landing .hero-photo::before,
+  .staff-dashboard-hero::after,
+  .admin-welcome-card::after { height: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .festive-snowflake,
+  .festive-light,
+  .festive-ornament,
+  .festive-solar-float,
+  .festive-solar-scene__tree,
+  .festive-solar-scene__sparkles { animation: none !important; }
+  .festive-snowflake { display: none; }
+}
