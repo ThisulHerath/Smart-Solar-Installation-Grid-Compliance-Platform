@@ -1,0 +1,228 @@
+/* Shared responsive and interaction polish. Imported last so every workspace behaves consistently. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 124px;
+}
+
+body { overflow-x: hidden; }
+img, svg { max-width: 100%; }
+
+:where(a, button, input, select, textarea, [role='button'], [role='tab'], [role='option']) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, [role='button'], [role='tab'], [role='option']) {
+  touch-action: manipulation;
+}
+
+:where(
+  .btn,
+  button:not(:disabled),
+  a,
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  .filter-chip,
+  .admin-sidebar-link,
+  .account-nav-tab
+) {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(.2, .75, .25, 1);
+}
+
+:where(.btn, button, a, [role='button'], [role='tab']):focus-visible {
+  outline: 3px solid rgba(105, 182, 59, .38);
+  outline-offset: 3px;
+}
+
+:where(.btn, button, [role='button'], [role='tab']):active:not(:disabled) {
+  transform: translateY(1px) scale(.985);
+  transition-duration: 70ms;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :where(.btn, .filter-chip, .account-nav-tab):hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  :where(.admin-sidebar-link, .member-home-nav nav a, .eco-nav nav a):hover {
+    transform: translateX(2px);
+  }
+}
+
+/* Route, dialog and menu entrances are short enough to feel responsive. */
+body.route-is-entering :is(
+  .route-motion-frame > *,
+  .eco-landing > main,
+  .auth-shell > .auth-form-panel
+) {
+  animation: route-content-enter 300ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+:is(
+  .solar-search-menu,
+  .notification-panel,
+  .assignment-choice__popover,
+  .assignment-date__popover
+) {
+  transform-origin: top center;
+  animation: floating-panel-enter 180ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+:is(
+  .modal-overlay,
+  .logout-modal-overlay,
+  .assessment-modal-overlay,
+  .notification-modal-backdrop,
+  .inventory-dialog-backdrop,
+  .inspection-photo-modal
+) {
+  animation: modal-backdrop-enter 180ms ease-out both;
+}
+
+:is(
+  .modal,
+  .logout-modal-card,
+  .assessment-modal-card,
+  .notification-modal,
+  .inventory-dialog,
+  .inspection-photo-modal__content
+) {
+  animation: modal-card-enter 220ms cubic-bezier(.2, .8, .25, 1) both;
+}
+
+.route-anchor-highlight {
+  animation: route-anchor-pulse 850ms ease-out;
+  scroll-margin-top: 124px;
+}
+
+@keyframes route-content-enter {
+  from { opacity: .25; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floating-panel-enter {
+  from { opacity: 0; transform: translateY(-6px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes modal-backdrop-enter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-card-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes route-anchor-pulse {
+  0%, 100% { box-shadow: inherit; }
+  35% { box-shadow: 0 0 0 5px rgba(105, 182, 59, .16), 0 18px 38px rgba(21, 77, 69, .1); }
+}
+
+/* Fluid containers and safe horizontal scrolling for data-heavy screens. */
+:is(.route-motion-frame, .operations-page, .page-container, .account-page, .profile-page) {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:is(.data-table-wrapper, .inventory-table, .user-directory-table) {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+:is(.data-table-wrapper, .inventory-table, .user-directory-table) table {
+  width: 100%;
+}
+
+:is(.input-field, .form-textarea, input, select, textarea) {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1024px) {
+  html { scroll-padding-top: 94px; }
+  .route-anchor-highlight { scroll-margin-top: 94px; }
+
+  .page-container { width: 100%; padding-inline: clamp(18px, 3vw, 28px); }
+  .page-header { gap: 16px; }
+  .admin-route-content .operations-page { width: 100%; }
+
+  .festive-solar-float {
+    width: clamp(170px, 23vw, 230px);
+    right: -24px;
+  }
+}
+
+@media (max-width: 760px) {
+  html { scroll-padding-top: 82px; }
+  .route-anchor-highlight { scroll-margin-top: 82px; }
+
+  .route-motion-frame { width: 100%; min-width: 0; }
+  .page-container { padding: 20px 14px 42px; }
+  .page-title { font-size: clamp(24px, 7vw, 30px); line-height: 1.15; }
+
+  :is(.page-header, .inventory-heading, .field-job-overview-header) {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  :is(.page-header, .inventory-heading) :is(.btn, button) { max-width: 100%; }
+
+  :is(.filter-bar, .inventory-header-actions, .modal__actions, .logout-modal-actions) {
+    flex-wrap: wrap;
+  }
+
+  :is(.modal-overlay, .logout-modal-overlay, .assessment-modal-overlay, .notification-modal-backdrop, .inventory-dialog-backdrop) {
+    align-items: flex-end;
+    padding: 12px;
+  }
+
+  :is(.modal, .logout-modal-card, .assessment-modal-card, .notification-modal, .inventory-dialog) {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    border-radius: 18px 18px 12px 12px !important;
+  }
+
+  .assignment-choice__popover {
+    width: min(100%, calc(100vw - 48px));
+    max-width: none;
+  }
+
+  .festive-lights { width: 78vw; }
+  .festive-solar-float {
+    right: -42px;
+    bottom: -18px;
+    width: min(180px, 46vw);
+  }
+}
+
+@media (max-width: 520px) {
+  .member-home-nav { padding-inline: 12px !important; }
+  .member-home-account { gap: 7px !important; }
+  .member-home-account .member-home-logout { min-width: 40px; min-height: 40px; padding: 9px !important; }
+  .member-home-account .member-home-logout { font-size: 0; gap: 0; }
+  .member-home-account .member-home-logout svg { width: 18px; height: 18px; }
+
+  :is(.btn, button, [role='button'], [role='tab']) { min-height: 42px; }
+  :is(.modal__actions, .logout-modal-actions, .notification-modal__actions) { flex-direction: column; }
+  :is(.modal__actions, .logout-modal-actions, .notification-modal__actions) > * { width: 100%; }
+
+  .festive-ornament { display: none; }
+  .festive-lights { width: 74vw; opacity: .72; }
+  .festive-solar-float { right: -58px; width: 155px; opacity: .42; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

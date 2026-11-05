@@ -56,10 +56,10 @@ export const Layout: React.FC = () => {
               onClick={() => setSidebarOpen(false)}
             />
           )}
-          <main className="admin-route-content"><Outlet /></main>
+          <main className="admin-route-content route-motion-frame"><Outlet /></main>
         </div>
       ) : (
-        <main style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
+        <main className="route-motion-frame" style={{ flex: 1, maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '32px 24px' }}>
           <Outlet />
         </main>
       )}

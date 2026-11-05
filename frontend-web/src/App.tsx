@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { FestiveSolarOverlay } from './components/FestiveSolarOverlay';
+import { NavigationEffects } from './components/NavigationEffects';
 
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -110,6 +111,7 @@ export const App: React.FC = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <NavigationEffects />
         <FestiveSolarOverlay />
         <PageErrorBoundary>
           <Suspense

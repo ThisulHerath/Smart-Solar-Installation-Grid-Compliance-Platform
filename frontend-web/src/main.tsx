@@ -11,6 +11,7 @@ import './styles/workspace-home-polish.css';
 import './styles/operations-polish.css';
 import './styles/visual-refresh.css';
 import './styles/festive.css';
+import './styles/responsive-motion.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
